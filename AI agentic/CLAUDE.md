@@ -28,24 +28,28 @@ AI agentic/
 ├── TECH-STACK-DECISIONS.md   # architecture decision record
 ├── doc/
 │   └── feature.md            # full feature spec (source of truth for scope)
-├── backend/                  # FastAPI app (to be created)
+├── backend/                  # FastAPI app ✅ scaffolded
 │   ├── app/
-│   │   ├── main.py           # FastAPI entrypoint, routers, SSE
-│   │   ├── agent/            # agent loop, tool dispatch, planner
-│   │   ├── tools/            # weather, geocode/distance, landmarks
-│   │   ├── schemas/          # Pydantic models (Itinerary, DayPlan, ...)
-│   │   ├── llm/              # provider client + streaming wrapper
-│   │   ├── core/             # config, logging, correlation IDs, retries
-│   │   └── data/             # curated landmark seed dataset
+│   │   ├── main.py           # FastAPI entrypoint, CORS, router mount ✅
+│   │   ├── core/config.py    # env-driven settings ✅
+│   │   ├── db/database.py    # SQLAlchemy engine, session, Base ✅
+│   │   ├── models/           # ORM tables ✅
+│   │   ├── schemas/          # Pydantic models ✅
+│   │   ├── routes/           # health.py, landmarks.py, api.py ✅
+│   │   ├── agent/            # agent loop, tool dispatch, planner (todo)
+│   │   ├── tools/            # weather, geocode/distance, landmarks (todo)
+│   │   ├── llm/              # provider client + streaming wrapper (todo)
+│   │   └── data/             # curated landmark seed dataset (todo)
 │   ├── tests/                # unit, contract, agent-loop, failure-injection
-│   ├── pyproject.toml
-│   └── .env.example
-└── frontend/                 # React app (to be created)
+│   ├── requirements.txt      # ✅ (pyproject.toml if the project outgrows it)
+│   └── .env.example          # ✅
+└── frontend/                 # React + Vite (JavaScript) ✅ scaffolded
     ├── src/
-    │   ├── components/       # PromptComposer, StreamPanel, ItineraryView
-    │   ├── hooks/            # useSSEStream, useItinerary
-    │   ├── api/              # client for /api/trip/*
-    │   └── App.jsx
+    │   ├── components/       # Home.jsx ✅; PromptComposer, ItineraryView (todo)
+    │   ├── hooks/            # useBackendStatus.js ✅; useSSEStream (todo)
+    │   ├── api/client.js     # fetch wrapper for the API ✅
+    │   ├── App.jsx           # ✅
+    │   └── main.jsx          # ✅
     ├── package.json
     └── .env.example
 ```
@@ -82,19 +86,39 @@ AI agentic/
 
 ---
 
-## 5. Commands (fill in once scaffolding exists)
+## 5. Commands
 
-```bash
-# Backend (from backend/)
-uvicorn app.main:app --reload        # run API
+> Full step-by-step run instructions (prerequisites, verification, troubleshooting): **[RUN.md](RUN.md)**
+
+```powershell
+# Backend (from backend/) — first time
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+copy .env.example .env               # then edit if your Postgres differs
+
+uvicorn app.main:app --reload        # run API on http://localhost:8000
 pytest                               # run tests
 
 # Frontend (from frontend/)
-npm run dev                          # run React dev server
-npm test                             # run frontend tests
+npm install                          # first time
+npm run dev                          # http://localhost:5173
+npm run build                        # production build
 ```
 
-> These are placeholders until the scaffold is created — update with the real commands.
+### Database
+
+Local PostgreSQL 16 on **port 5433**, database **`holidaylandmark`**, user `postgres` / `root`
+— the same server as `PycharmProjects/fastApiProject`. That database already holds an
+unrelated CMS schema, so our tables are prefixed (`agent_landmarks`) to avoid collisions.
+Override with `DATABASE_URL` in `backend/.env`.
+
+```powershell
+# Inspect it directly
+& "C:\Program Files\PostgreSQL\16\bin\psql.exe" -U postgres -h localhost -p 5433 -d holidaylandmark
+```
+
+Health endpoints: `GET /` (home), `GET /api/health`, `GET /api/health/db` (live DB round-trip).
 
 ---
 

@@ -62,11 +62,24 @@ Format: each decision has **Context → Decision → Rationale → Alternatives 
 - **Rationale:** Deterministic, citable, offline-safe; avoids hallucinated landmarks. Can grow into RAG later (master-prompt Week 5/6).
 - **Consequences:** Coverage limited to curated cities initially; expansion is a data task, not a code change.
 
-## ADR-009 — Persistence: SQLite → Postgres ✅ (staged)
-- **Context:** Save/share itineraries (feature.md F12); future accounts (F15).
-- **Decision:** SQLite for MVP; migrate to PostgreSQL for production. Access via SQLAlchemy (async) so the migration is low-friction.
-- **Rationale:** SQLite = zero-ops local dev; Postgres = production concurrency + `pgvector` path for future RAG.
-- **Consequences:** Avoid SQLite-only SQL features; keep migrations from day one.
+## ADR-009 — Persistence: PostgreSQL from day one ✅ (supersedes the staged SQLite plan)
+- **Context:** Save/share itineraries (feature.md F12); future accounts (F15). The original plan
+  was SQLite for MVP → Postgres later.
+- **Decision (revised 2026-08-07):** Use local **PostgreSQL 16** directly — `localhost:5433`,
+  database `holidaylandmark`, reusing the connection already configured for
+  `PycharmProjects/fastApiProject`. Access via **SQLAlchemy 2.x ORM (sync)** with `psycopg2-binary`.
+- **Rationale:** The developer already runs this Postgres instance, so "zero-ops SQLite" bought
+  nothing and the eventual migration cost was real. Sync SQLAlchemy is chosen over async because
+  DB access here is short, indexed lookups — the async story matters for *external HTTP* calls
+  (`httpx.AsyncClient`, ADR-007/011), not for these queries. FastAPI runs sync dependencies in a
+  threadpool, so the event loop is not blocked.
+- **Consequences:**
+  - `pgvector` is available immediately for the future RAG path.
+  - The `holidaylandmark` database already contains an unrelated CMS schema, so our tables carry an
+    `agent_` prefix (`agent_landmarks`) to avoid collisions.
+  - Schema is created with `Base.metadata.create_all` for now; **add Alembic before the first
+    schema change that must survive existing data.**
+  - If a workload ever justifies async DB I/O, the migration path is `asyncpg` + `AsyncSession`.
 
 ## ADR-010 — Observability & cost: correlation IDs + token/cost tracking ✅
 - **Context:** Agentic systems need tracing and cost control (feature.md §6, F11).
@@ -105,7 +118,7 @@ Format: each decision has **Context → Decision → Rationale → Alternatives 
 | 006 | Anthropic Claude LLM + tiering | 🔶 |
 | 007 | Weather + geocode tools | 🔶 |
 | 008 | Curated landmark dataset | ✅ |
-| 009 | SQLite → Postgres | ✅ |
+| 009 | PostgreSQL from day one (was SQLite → Postgres) | ✅ |
 | 010 | Correlation IDs + cost tracking | ✅ |
 | 011 | Timeouts/retries/circuit breaker | ✅ |
 | 012 | Security + prompt-injection defense | ✅ |
