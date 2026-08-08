@@ -1,6 +1,7 @@
 """FastAPI entrypoint for the HolidayLandmarks backend."""
 
 import logging
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -16,7 +17,20 @@ from app import models  # noqa: F401
 
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title=APP_NAME, version=APP_VERSION)
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    """Create tables if they are missing. A dead DB must not kill the app —
+    /api/health/db reports the failure instead."""
+    try:
+        Base.metadata.create_all(bind=engine)
+        logger.info("Database schema ready")
+    except SQLAlchemyError as exc:
+        logger.error("Database unavailable at startup: %s", type(exc).__name__)
+    yield
+
+
+app = FastAPI(title=APP_NAME, version=APP_VERSION, lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -25,17 +39,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-@app.on_event("startup")
-def on_startup() -> None:
-    """Create tables if they are missing. A dead DB must not kill the app —
-    /api/health/db reports the failure instead."""
-    try:
-        Base.metadata.create_all(bind=engine)
-        logger.info("Database schema ready")
-    except SQLAlchemyError as exc:
-        logger.error("Database unavailable at startup: %s", type(exc).__name__)
 
 
 app.include_router(api_router)
