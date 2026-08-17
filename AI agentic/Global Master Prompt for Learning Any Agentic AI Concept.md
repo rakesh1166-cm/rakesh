@@ -483,24 +483,25 @@ What I learned
 
 ---
 
-# 16. Architecture Diagram
+# 16. Architecture Diagrams
 
-Provide one clear ASCII architecture for the concept suitable for study notes or a future infographic.
+Provide **three** ASCII diagrams, not one. A single diagram always hides either the internals or the
+context. Each is flow-oriented, boxed, and labelled on every arrow.
 
-Make it flow-oriented with labels.
+## 16.1 Diagram A — End-to-End Pipeline (what flows through it)
 
-Example:
+Input → output, left-to-right or top-to-bottom, with the data shape named at each hop.
 
 ```text
 ┌───────────────┐
-│     Input     │
+│     Input     │  ← what the user/system actually sends
 └───────┬───────┘
-        │
+        │ (name the data at this point)
         ↓
 ┌───────────────┐
 │ Processing    │
 └───────┬───────┘
-        │
+        │ (name the intermediate result)
         ↓
 ┌───────────────────┐
 │ [CURRENT CONCEPT] │
@@ -512,7 +513,46 @@ Example:
 └───────────────┘
 ```
 
-Also provide a **one-sentence image-generation idea** explaining how this could be turned into a colorful architecture infographic.
+## 16.2 Diagram B — Internal Anatomy (what it is made of)
+
+Open the `[CURRENT CONCEPT]` box from Diagram A and show its internal components, including any
+loop or repeat step. If the concept repeats until a stop condition, **draw the loop arrow** and label
+what ends it.
+
+```text
+        ┌──────────────── [CURRENT CONCEPT] ────────────────┐
+        │  component 1  →  component 2  →  component 3      │
+        │        ↑                              │           │
+        │        └──── repeat until <condition> ┘           │
+        └───────────────────────────────────────────────────┘
+```
+
+## 16.3 Diagram C — Ecosystem Hierarchy (where it sits)
+
+Show containment — what this concept is **inside of** — so I never confuse a part with the whole:
+
+```text
+[CURRENT CONCEPT] ⊂ … ⊂ LLM ⊂ LLM Application ⊂ AI Agent ⊂ Agentic AI System
+```
+
+Then say in one line: **what each outer layer adds that the inner one cannot do.**
+
+## 16.4 Image-Generation Prompt
+
+Finally, give me a **ready-to-paste prompt block** for an image model, so this can become a colourful
+infographic for my blog or study notes. It must specify:
+
+```text
+Style:      flat vector infographic, clean, presentation-ready
+Layout:     left-to-right (or top-to-bottom) flow, numbered stages
+Boxes:      <list the exact box labels from Diagram A>
+Arrows:     <what each arrow is labelled with>
+Colour:     one colour per stage type (input / processing / core concept / output),
+            legible in both light and dark backgrounds
+Text:       short labels only — no paragraphs inside the image
+Callouts:   <the 1–2 facts that must survive even if the reader only looks at the picture>
+Avoid:      dense math, unreadable small text, decorative robots/brains
+```
 
 ---
 
@@ -566,17 +606,128 @@ whichever are relevant to the current concept.
 
 ---
 
-# 19. Interview-Level Understanding
+# 19. Important Terminology
 
-Give me 8–10 questions I should be able to answer after learning this concept.
+Build a glossary of every term used while teaching **[CONCEPT NAME]** — including terms I am likely
+to have nodded along to without actually knowing.
 
-Start from basic and move toward application-level questions.
+## 19.1 Term table
 
-Do not make them research-level questions.
+| Term | Simple meaning (one line) | Technically | Where I meet it in practice | Commonly confused with |
+|---|---|---|---|---|
+
+Rules:
+
+- **Simple English first, technical English second** — the second column must be readable by someone
+  who has never opened an ML paper.
+- Include the boring ones. `logit`, `vocab`, `context window`, `dimension`, `state`, `schema`,
+  `latency` — unexplained small words are where confusion actually lives.
+- If a term has a *different* meaning in normal software engineering than in AI, say so explicitly.
+  (`memory`, `state`, `context`, `agent`, `tool`, `function` are all overloaded.)
+
+## 19.2 Contrast pairs — `X vs Y`
+
+The most valuable terminology is always a **pair**. For each pair relevant to this concept:
+
+```text
+X = ...
+Y = ...
+
+The difference in one sentence: ...
+Concrete example where they differ: ...
+What breaks if I confuse them: ...
+```
+
+Cover whichever apply, and add any others the concept needs:
+
+```text
+token             vs  word
+token representation vs contextual representation
+embedding         vs  token
+prompt            vs  context
+context           vs  memory  vs  state
+model             vs  architecture
+Transformer       vs  LLM     vs  AI Agent
+retrieval         vs  generation
+workflow          vs  agent
+tool              vs  MCP
+parameter         vs  hyperparameter
+```
+
+## 19.3 Terms I should be able to *use*, not just recognise
+
+List the 5–8 terms I must be able to say out loud in a design discussion without hedging. For each,
+give one sentence that uses it correctly in a real engineering sentence — not a definition.
 
 ---
 
-# 20. Readiness Checklist
+# 20. Interview Questions
+
+Two levels, in the style of a real interview loop. Do **not** make these research-level.
+
+## 20.1 Subjective / explain-it questions (10–15)
+
+Order them from basic → application-level. Rate each with a difficulty marker:
+
+```text
+⭐          basic recall
+⭐⭐        understanding
+⭐⭐⭐      can explain to someone else
+⭐⭐⭐⭐    can apply it in a design decision
+⭐⭐⭐⭐⭐  can defend the trade-off under pressure
+```
+
+Format each one as:
+
+```text
+Q<n>. <question>                                        <difficulty stars>
+
+Model answer (3–5 lines, in my own-words register — not a textbook paragraph):
+...
+
+The follow-up they will actually ask next:
+...
+
+Red flag answer (what a weak candidate says, and why it is wrong):
+...
+```
+
+Make sure the set covers, at minimum:
+
+- what the concept **is**, in one sentence,
+- **why it exists** / what existed before it and why that failed,
+- its **internal flow**, end to end,
+- its **components** and what each one contributes,
+- how it **differs** from the concepts it is most confused with,
+- how it **relates** to LLM → AI Agent → Agentic AI,
+- one question of the form: *"Does understanding this mean an Agentic AI engineer must implement it
+  from scratch?"* — the scope-discipline question,
+- one **debugging** question: given a symptom, which stage of the flow is the suspect?
+
+## 20.2 Objective / multiple-choice questions (5–8)
+
+```text
+Q<n>. <question>                                        <difficulty stars>
+  A) ...
+  B) ...
+  C) ...
+  D) ...
+
+Answer: <letter>
+Why the others are wrong: <one line each — this is the actual teaching>
+```
+
+Design at least one distractor per question to be the **common misconception** from §18, so getting
+it wrong is diagnostic rather than random.
+
+## 20.3 The one question that decides the interview
+
+Name the single question that, if I answer it well, proves I actually understand
+**[CONCEPT NAME]** — and give the answer I should be able to deliver in under 60 seconds.
+
+---
+
+# 21. Readiness Checklist
 
 Before allowing me to move to the next concept, create this checklist:
 
@@ -586,10 +737,13 @@ I understand why it exists.
 I understand its basic internal flow.
 I understand its important components.
 I can distinguish it from related concepts.
+I can use its terminology correctly without hedging.
 I completed the practical experiments.
 I understand at least one failure case.
 I can explain where it fits in an LLM application.
 I can explain where it fits in an AI Agent.
+I can answer the §20.3 decisive interview question in under 60 seconds.
+I can redraw the architecture diagram from memory.
 I know what advanced topics I am intentionally postponing.
 ```
 
@@ -601,7 +755,7 @@ Otherwise tell me which section I should revise.
 
 ---
 
-# 21. Final One-Page Revision Notes
+# 22. Final One-Page Revision Notes
 
 Finish with a compact revision section containing only:
 
@@ -618,6 +772,12 @@ Finish with a compact revision section containing only:
 ### Agentic AI Relationship
 
 ### Most Important Difference
+
+### Key Terminology (5 terms max, one line each)
+
+### The Diagram (redraw Diagram A from §16.1 — small)
+
+### Top 3 Interview Questions
 
 ### What Not to Learn Yet
 
@@ -636,6 +796,10 @@ Use **simple English first, technical English second**.
 Assume I am an experienced software developer learning AI/Agentic AI, not an ML researcher.
 
 Use diagrams, tables, comparisons, examples, and flows heavily.
+
+**Sections 12, 16, 19 and 20 are mandatory** — what I should *not* learn, the architecture diagrams,
+the terminology, and the interview questions. A lesson without them is incomplete, even if every
+other section is excellent: they are what turn reading into recall.
 
 Whenever you introduce a technical term, immediately explain it in simple words.
 
