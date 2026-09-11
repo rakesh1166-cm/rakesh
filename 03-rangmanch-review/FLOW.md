@@ -9,6 +9,7 @@ One page. Read this before an interview instead of re-reading every file.
 Theatre reviews for plays: create one, list them with filter + pagination, read one, patch it,
 delete it, and ask the database for a play's average rating.
 Real persistence — **PostgreSQL 16 on localhost:5433**, database `rangmanch_db`.
+Plus a **React frontend** (`frontend/`) whose only job is to make those six endpoints visible.
 
 ## What's new since `02-pincode-lookup`
 
@@ -21,6 +22,8 @@ That project was a dict in memory. This one adds the four things a database forc
 | Startup work that must finish before request #1 | `main.py` — `lifespan` |
 | Routes split out of `main.py` | `routes/reviews.py` — `APIRouter` |
 
+# Part 1 — the API (Python)
+
 ## The four files
 
 | File | Job | The concept it exists to show |
@@ -31,6 +34,10 @@ That project was a dict in memory. This one adds the four things a database forc
 | `main.py` | app, lifespan, router include | wiring only — no business logic |
 
 That split *is* the lesson: **connection, shape, routing, and wiring are four different jobs.**
+
+`frontend/` is a fifth job — *consumption* — and it stays a separate process, a separate language,
+and a separate deploy. It talks to these four files through HTTP and nothing else. See
+**Part 2** below.
 
 ---
 
@@ -277,7 +284,156 @@ This project cannot have it. That's the tradeoff, demonstrated twice.
 
 ---
 
-## If someone asks "what did you learn building this?"
+# Part 2 — the React frontend (`frontend/`)
+
+A Vite + React app on **localhost:5173** that calls the API on **127.0.0.1:8001**. Two processes,
+two languages, one contract: HTTP.
+
+Its purpose is pedagogical: **every screen is one endpoint**, each is labelled with its verb and
+path, and a request log records the method, URL, body and response of every call. The UI is a
+window onto the API, not a thing in itself.
+
+## The shape of it
+
+```
+main.jsx  →  App.jsx            state + which screen is showing
+                 ├── Sidebar.jsx        the menu: one entry per endpoint
+                 ├── CreateForm.jsx     POST
+                 ├── BrowseView.jsx     GET list  →  ReviewCard.jsx  PATCH / DELETE
+                 ├── FindOne.jsx        GET one
+                 ├── AverageView.jsx    GET average
+                 └── RequestLog.jsx     what actually went over the wire
+                 ↑
+             api.js               the ONLY file that knows the API exists
+```
+
+**Concept: one module owns the network.** No component calls `fetch`. They receive functions as
+props and call them. That single choke point is what makes it possible to log every request, to
+change the base URL from an env var, or to add an auth header later — in one place, once.
+
+This is the same instinct as `get_session` on the backend: the thing every caller needs, defined
+once, injected rather than reached for.
+
+| Menu item | Calls | Backend handler |
+|---|---|---|
+| New review | `POST /review/` | `create_review` |
+| Browse reviews | `GET /review/?play_name&skip&limit` | `list_reviews` |
+| Find by ID | `GET /review/{id}` | `get_review` |
+| Average rating | `GET /review/average/{play_name}` | `get_average_rating` |
+| Edit & delete | `PATCH` / `DELETE /review/{id}` | `update_review` / `delete_review` |
+
+## Flow 7 — a click becomes a row
+
+```
+form state → handleCreate → createReview() → OPTIONS preflight → POST /review/
+  → Pydantic ReviewCreate → INSERT → ReviewRead JSON
+  → await listReviews() → setReviews → re-render
+```
+
+1. **Two requests leave the browser, not one.** Because the request carries
+   `Content-Type: application/json`, it is not a "simple" request, so the browser first sends an
+   `OPTIONS` preflight asking permission. Only if that is answered does the `POST` go. Both appear
+   in the request log — the first thing most people have never seen.
+2. `rating: Number(form.rating)` — HTML inputs hand you **strings**. Send `"5"` where the model
+   says `int` and you get a 422. **The wire is untyped; both ends must agree, and only the server
+   enforces it.**
+3. After the write, the code calls `listReviews()` again rather than pushing the new row into local
+   state. **Concept: the server is the source of truth.** The response already contained the new
+   row, so re-reading is one extra request — paid deliberately, so the screen can never drift from
+   the database.
+
+## Flow 8 — PATCH, built from a diff
+
+`ReviewCard` keeps the original row and the edited values side by side, and builds the body from
+the difference:
+
+```js
+const changed = {}
+if (rating !== review.rating) changed.rating = Number(rating)
+if (comment !== review.comment) changed.comment = comment
+```
+
+Change only the rating and the body is `{"rating": 2}` — the comment is **absent**, not `null`.
+
+That is the client half of `exclude_unset=True` from **Flow 5**. Both halves are the same idea
+seen from two sides: *the client sends only what changed; the server writes only what arrived.*
+Break either half and an untouched comment gets nulled.
+
+The edit panel prints the body live as you type, so the delta shrinking and growing is visible.
+
+## Flow 9 — CORS, a browser rule wearing a server costume
+
+The backend gained exactly one block for the frontend:
+
+```python
+app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173", ...])
+```
+
+**Concept: CORS protects the browser, not the server.** curl, Postman and Swagger `/docs` never
+needed this and never will — none of them is a page from another origin. The middleware does not
+guard the API; it *permits* one specific origin's JavaScript to read replies it was always able to
+send.
+
+Two responses have to be right, and the log shows both: the `OPTIONS` preflight must return
+`access-control-allow-origin` and `-allow-headers`, and so must the real `POST`.
+
+> **The opacity trap.** When CORS blocks a reply, JavaScript receives a bare `TypeError: Failed to
+> fetch` — **byte-for-byte the same error as "nothing is listening on that port."** The server
+> answered, the browser read it, and then refused to hand it over. The status code is unreachable
+> from JS by design. This is why `api.js` reports *both* causes instead of asserting one:
+>
+> > The browser could not read a response from `http://127.0.0.1:8001`. Either nothing is
+> > listening there, or a different app answered without CORS for this origin.
+>
+> An error message that guesses wrong costs more time than one that admits the ambiguity.
+
+## The failure that cost the most time: ports
+
+The symptom was "create doesn't save." The cause had nothing to do with the code:
+
+- `02-pincode-lookup` was already serving **port 8000**.
+- **Three** copies of this project's `uvicorn` were running, all on the default 8000. Every one
+  died on bind with `WinError 10048` — visible only in a terminal nobody was reading.
+- The browser's POST therefore reached the **pincode app**, which has no `/review/` route and no
+  CORS entry for `:5173`. So the reply was a 404 the browser refused to reveal → the opacity trap
+  above → "cannot reach the API."
+
+Three lessons, all cheap once learned:
+
+| Lesson | Why it bites |
+|---|---|
+| Two servers cannot share a port | The second dies silently unless you read its output |
+| `--reload` spawns a child that outlives the parent | Kill the parent, the port stays held |
+| A frontend cannot diagnose this | It sees one opaque error for every possible cause |
+
+The fix was configuration, not code: `VITE_API_BASE` in `frontend/.env` pins the API's origin, so
+moving the backend to another port is a one-line change and a restart — **Vite reads `.env` only
+at startup.** The sidebar now shows a live red/green dot for reachability, which is the cheapest
+possible version of the diagnosis.
+
+> **Check the port before reading the code.** Almost every "the server isn't working" that turns
+> out not to be code is this.
+
+## What this frontend deliberately does *not* do
+
+Each omission is a decision, and each has a reason worth being able to state:
+
+| Not done | Why |
+|---|---|
+| Client-side validation beyond the 1–5 stars | The server is the authority. Duplicating rules creates two truths that drift. |
+| Optimistic updates | Re-reading after a write is slower and always correct. Optimism is an optimisation; earn it later. |
+| Redux / Zustand / React Query | Six endpoints and one list. `useState` is enough; reach for a library when the pain is real. |
+| Auth, tokens, refresh | The API has none. A frontend cannot add security the server doesn't enforce. |
+| `PUT` anywhere | The API exposes `PATCH`. The client follows the contract; it does not invent one. |
+
+**Concept: the API defines what is possible, and the UI can only express it.** `ReviewUpate`
+allows `rating` and `comment`, so no amount of frontend code can rename a play. That rule was
+written once, in `models.py`, and the frontend inherited it for free — which is the whole argument
+for **Flow 2's** four-model split, seen from the other side of the wire.
+
+---
+
+# If someone asks "what did you learn building this?"
 
 > Separating the shape the database stores from the shapes the API accepts and returns. One
 > `Review` table model, plus `ReviewCreate` / `ReviewRead` / `ReviewUpate` — so a client can't set
@@ -286,7 +442,17 @@ This project cannot have it. That's the tradeoff, demonstrated twice.
 > connection string changed, which showed me what an ORM does buy you — and `avg()` coming back as
 > `Decimal` instead of `float`, plus having to `CREATE DATABASE` by hand, showed me what it
 > doesn't.
+>
+> Then I put a React frontend on it, which taught me the contract from the other side. The PATCH
+> screen builds its body from only the fields that changed — which is the client half of
+> `exclude_unset=True`; both halves have to be right or an untouched comment gets nulled. And CORS
+> finally made sense as a *browser* rule rather than a server one: curl never needed it, only a
+> page from another origin did. The bug that cost me the most time wasn't code at all — three
+> copies of uvicorn were fighting over one port, and the browser reports "blocked by CORS" and
+> "nothing is listening" as the exact same `TypeError`, so the frontend physically cannot tell you
+> which it is.
 
 Follow-ups worth rehearsing: why `refresh()` after `commit()`; what `exclude_unset=True` prevents;
-why `get_session` is a generator dependency instead of a global session; and why `ge=1, le=5` on
-the table model doesn't actually stop anything.
+why `get_session` is a generator dependency instead of a global session; why `ge=1, le=5` on the
+table model doesn't actually stop anything; why a JSON `POST` sends two requests instead of one;
+and why the frontend re-reads the list after a write instead of trusting its own state.
