@@ -41,6 +41,8 @@ def get_average_rating(play_name: str, session: Session = Depends(get_session)):
     ).first()
 
     avg_rating, total_reviews = result
+    #result = (4.25, 4)==>avg_rating, total_reviews = result ===>
+    #short version of avg_rating = result[0],total_reviews = result[1]  is  avg_rating, total_reviews = result
 
     if total_reviews == 0:
         raise HTTPException(status_code=404, detail=f"No review found for {play_name}")
@@ -69,6 +71,7 @@ def update_review(review_id: int, update: ReviewUpate, session: Session = Depend
         raise HTTPException(status_code=404, detail="NO review")
     
     update_data = update.model_dump(exclude_unset=True)
+    #update=update: ReviewUpate in function parameter is defined as
     for key, value in update_data.items():
         setattr(review, key, value)
 

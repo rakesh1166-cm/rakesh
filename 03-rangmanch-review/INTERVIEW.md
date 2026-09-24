@@ -1,5 +1,5 @@
 # INTERVIEW — questions this project actually prepares you for
-
+# must read query.md 
 Twenty-six questions: the ones asked in almost every FastAPI/Python backend interview, answered
 with this codebase as the evidence. Depth on any of them is in [FLOW.md](FLOW.md).
 
@@ -442,6 +442,16 @@ refresh() reads the saved row again from the database and updates db_review with
 add()     → Prepare the record for insertion
 commit()  → Permanently save it in the database
 refresh() → Get the latest saved values from the database
+5. why  session.exec is used after prepared query
+Execute query and fetch results
+query = select(Review)
+query = query.offset(skip).limit(limit)  # Prepare query
+reviews = session.exec(query).all()      # Execute query and fetch results
+select(Review)              → Select review records
+offset(skip)                → Skip some records
+limit(limit)                → Restrict the number of records
+session.exec(query)         → Execute the query in the database
+.all()                      → Return every matching record as a list
 6. how One database session used for one HTTP request
 One database session should normally be used for one HTTP request.
 If three users send requests at the same time, each request receives its own session:
@@ -519,4 +529,89 @@ def get_profile():
     return user
 14. how to deserialization
 python_data = json.loads(json_data)
+15. what is tuple unpacking or sequence unpacking.
+result = (4.5, 20)
+avg_rating, total_reviews = result
+===Equivalent long version:=====
+avg_rating = result[0]
+total_reviews = result[1]
+
+user = ("Ashwani", "ashwani@example.com")
+name, email = user
+name = user[0]
+email = user[1]
+
+review = (101, 5, "Excellent")
+review_id, rating, comment = review
+16. difference between put and patch
+PUT   → replace the whole review of incoming request
+PATCH → update only the provided review fields of incoming request
+17. why use model_dump
+model_dump() converts a Pydantic/SQLModel object into a normal Python dictionary 
+17. in model_dump why ** is used
+** dictionary unpacking== The ** operator passes every dictionary item as a named argument:
+18. why use exclude_unset=True
+exclude_unset=True excludes fields not sent by the client. It does not exclude explicitly sent null values.
+19. what does create_engine in databse.py
+create_engine creates the main connection interface between your Python application and PostgreSQl
+engine does not represent a single database connection. It manages database configuration and a pool of reusable connections.
+20. What is a connection pool?
+A connection pool is a collection of reusable database connections.Opening a new database connection requires work:
+Contact the database server.
+Perform authentication.
+Establish a network connection.
+Prepare the connection.
+Execute queries.
+Close the connection.
+21. difference between create_engine() and  Session(engine)
+create_engine() establishes and manages how the application communicates with the database, while Session(engine) uses that engine to execute queries and manage transactions.
+22. difference between create_engine() and  Session(engine) ,queries and database
+Think of the database as a bank:
+Engine: bank’s connection and transport system
+Session: your individual transaction window
+Queries: deposits, withdrawals and balance checks
+Database: bank records
+23. difference between yield,return and print
+print() displays a value on the screen.we can continue later
+return sends a value back and ends the function.we cannot continue
+yield produces a value and pauses the function so it can continue later.
+24. why use yield in database.py
+yield session is used to give the database session to a FastAPI endpoint temporarily and then allow cleanup after the request finishes.
+
+yield is used because FastAPI needs to:
+
+Receive the database session.
+Use it while processing the request.
+Return to the dependency afterward.
+Close the session safely.
+
+Give this session to the endpoint now, pause the dependency, and return here after the request finishes so the session can be closed.
+=========ANALOGY===============
+get_session() = hotel receptionist
+Session(engine) = room key
+FastAPI endpoint = hotel guest
+yield session = receptionist gives the key temporarily
+Request finished = guest checks out
+session.close() = key is returned and access is closed
+
+25. why contextlib is used h
+contextlib is used here to manage the complete FastAPI application lifecycle:
+contextlib is a built-in Python module. The @asynccontextmanager decorator converts an asynchronous generator function containing yield into an async context manager that FastAPI can use for application startup and shutdown
+
+Real-life analogy: Opening and closing a shop
+Imagine FastAPI is a shop.
+
+Shop process	==FastAPI lifespan
+Owner opens the shop	===Application startup
+Switches on lights	====Startup code
+Prepares the counters	===create_tables()
+Opens the doors	yield
+Customers enter and shop	===API handles requests
+Owner closes the doors	===Application shutdown
+Switches off lights	====Cleanup code after yield
+
+26. Why CORS is required
+A browser may block the React application from calling FastAPI unless the backend explicitly allows the React origin
+27. What does allow_origins define?
+Frontend origins permitted to access the API
 

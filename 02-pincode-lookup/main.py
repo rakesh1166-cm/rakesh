@@ -11,7 +11,6 @@ app = FastAPI(
     title="Pincode lookup API",
     description="Auto fill city and state from Indian Pincode during checkout"
 )
-
 # register your custom exception handler
 app.add_exception_handler(PinCodeNotFoundError, pincode_not_found_handler)
 app.add_exception_handler(InvalidPinCodeError, pincode_not_found_handler)
