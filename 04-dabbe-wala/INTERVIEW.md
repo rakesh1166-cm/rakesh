@@ -437,3 +437,8 @@ manager.
 - **409** = the request conflicts with the resource's current state.
 - **React `key`** change = remount = fresh local state.
 - **Port in use / stale code** → find the process that owns the port.
+=====================================================================
+1. how to get start of day.
+ start = datetime.combine(created_date, datetime.min.time()).astimezone()
+2. how to get end of day
+end = datetime.combine(created_date, datetime.max.time()).astimezone()

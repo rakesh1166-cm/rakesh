@@ -23,10 +23,21 @@ One page to read before working on this project or talking about it in an interv
 
 ## 1. Project overview
 
-### The app in one line
+### What this project is for
 
-Tracks tiffin deliveries from kitchen to office desk through four statuses:
-`preparing → picked_up → in_transit → delivered`.
+**A delivery tracker that follows each home-cooked lunch tiffin from the kitchen to the office desk
+through four statuses: `preparing → picked_up → in_transit → delivered`.**
+
+Every day, Mumbai's dabbawalas collect lunch boxes from homes, carry them by train across the city
+and hand them over at office desks. Each tiffin passes through several hands on the way, so the
+question "where is my tiffin right now?" is the whole job. This app answers it. A kitchen or
+customer books an order, and the dabbawala moves it forward one status at a time. Every change is
+recorded in a history table, so you can see when the tiffin was picked up and when it arrived. A
+dispatcher gets a daily summary of how many orders are at each stage. Behind it is a FastAPI
+backend that stores orders in PostgreSQL, with a React UI on top. It is the fourth project in this
+FastAPI series. It builds on the review project's CRUD pattern and adds what a real workflow needs:
+an enum for the statuses, an audit log linked to each order by a foreign key, date-based filtering,
+aggregate stats and timezone-aware timestamps.
 
 ### Problem it solves
 
@@ -63,7 +74,37 @@ Tracks tiffin deliveries from kitchen to office desk through four statuses:
 | Cache / queue | [FILL: none / Redis / RabbitMQ] | [FILL] |
 | Hosting | [FILL: local / Docker / cloud] | [FILL] |
 
-### System diagram
+### System diagram — simple view
+
+The four boxes to remember: the delivery staff call the FastAPI server, the server sends each
+request to the orders router or the stats router, and both read and write PostgreSQL. Every order
+moves through the same four statuses.
+
+```mermaid
+flowchart LR
+    staff(["Client<br/>delivery staff"])
+
+    subgraph server["FastAPI server :8002"]
+        orders_router["Orders router<br/>/orders"]
+        stats_router["Stats router<br/>/stats"]
+    end
+
+    db[("PostgreSQL<br/>dabbawala_db")]
+
+    staff -- "HTTP + JSON" --> orders_router
+    staff -- "HTTP + JSON" --> stats_router
+    orders_router -- "create · read · PATCH status · delete" --> db
+    stats_router -- "count per status" --> db
+
+    subgraph status["Order status (moves one step at a time)"]
+        direction LR
+        preparing["preparing"] --> picked_up["picked_up"] --> in_transit["in_transit"] --> delivered["delivered"]
+    end
+
+    db -. "stored in order.status" .-> status
+```
+
+### System diagram — full detail
 
 Who uses it, what they click, and where each click ends up. There's no login yet, so all three
 roles use the same UI.
