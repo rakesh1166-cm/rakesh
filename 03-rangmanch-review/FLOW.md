@@ -1,5 +1,9 @@
 # FLOW — what this project is actually teaching
 
+**Rangmanch Reviews is a FastAPI + PostgreSQL + React app for posting and browsing audience reviews of theatre plays in Pune.**
+
+This project is a small, full-stack theatre review system built as a learning exercise. The backend is a FastAPI service (`main.py`, `routes/reviews.py`) that uses SQLModel to store reviews in a PostgreSQL database (`rangmanch_db`). Each review holds a play name, reviewer name, a 1–5 rating, a comment and a timestamp. The API exposes six endpoints under `/review`: create a review, list reviews with an optional play-name filter and pagination, fetch one review, partially update its rating or comment, delete it, and get a play's average rating and review count, which the database calculates. A separate React (Vite) frontend in `frontend/` calls these endpoints over HTTP so you can see them working in a browser. Beyond the features, the project is meant to teach the core database patterns in FastAPI: managing the database connection and one session per request, using separate data shapes for the table, input, output and updates, creating tables at startup, and splitting routes into their own module.
+
 One page. Read this before an interview instead of re-reading every file.
 
 ---

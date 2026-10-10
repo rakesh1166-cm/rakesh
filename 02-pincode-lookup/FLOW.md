@@ -4,10 +4,17 @@ One page. Read this before an interview instead of the 283 questions in `INTERVI
 
 ---
 
-## The app in one line
+## What this project is for
 
-Given an Indian 6-digit pincode, return its city / state / district — one at a time, or up to
-20 at once. No database; `data.py` holds a dict of 15 pincodes.
+**A FastAPI service that turns an Indian 6-digit pincode into its city, district and state, so a checkout form can fill in the address for the user.**
+
+When a shopper types their PIN code at checkout, the site shouldn't make them type the city and
+state as well. This API does that lookup. `GET /pincode/{code}` returns the location for one
+pincode, and `POST /pincode/bulk` checks up to 20 at once, listing which were found and which were
+missing. There is no database: `data.py` holds a dict of 15 pincodes, so the code stays small and
+the focus stays on how a FastAPI app is structured. The real purpose is learning. The project splits
+routing, validation, error handling and data into four separate files, and shows how custom
+exceptions become clean JSON error responses with the right HTTP status codes.
 
 ## The four files
 

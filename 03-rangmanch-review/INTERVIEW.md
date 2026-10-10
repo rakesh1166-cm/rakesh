@@ -401,6 +401,7 @@ Have these ready — knowing your own code's weak points reads better than claim
 5. Normalise `play_name` into its own `Play` table with a foreign key, instead of repeating the string on every row.
 6. Fix the typo: `ReviewUpate` → `ReviewUpdate`.
 =====================================================================================
+NOTE. for models.py all question fist see C:\Users\rakes\PycharmProjects\fastapi\05-kitab-exchange\INTERVIEW.md
 1. what is api roter
 APIRouter==APIRouter groups related endpoints into a separate file. It keeps main.py clean and makes large FastAPI projects easier to maintain.
 2. what is depends
@@ -614,4 +615,5 @@ Switches off lights	====Cleanup code after yield
 A browser may block the React application from calling FastAPI unless the backend explicitly allows the React origin
 27. What does allow_origins define?
 Frontend origins permitted to access the API
+
 

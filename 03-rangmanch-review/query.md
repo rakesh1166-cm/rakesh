@@ -174,6 +174,8 @@ query = select(Review).order_by(
     Review.id.asc()
 )
 reviews = session.exec(query).all()
+=============or=================
+session.exec(select(User).order_by(User.id)).all()
 ```
 
 ```sql

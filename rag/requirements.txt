@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+sqlmodel
+psycopg2-binary
+python-dotenv
+python-multipart
+openai
+pypdf
+numpy
+langchain-text-splitters

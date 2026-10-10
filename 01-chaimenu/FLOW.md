@@ -7,8 +7,22 @@ Read this instead of `INTERVIEW.md` when you just need the theory back in your h
 
 ## 1. What this project is
 
-A **read-only REST API**: 3 endpoints, 10 hardcoded items, no database, no auth, no tests.
-Small on purpose — it demonstrates the FastAPI request/response cycle and nothing else.
+**A read-only menu API for a chai shop — it serves the list of drinks and snacks over HTTP so a
+kiosk screen or a mobile app can display it.**
+
+The problem it solves is a small one, deliberately. A Chai Point outlet needs its menu in more than
+one place at once: the screen above the counter, the customer's phone, maybe a tablet the staff
+carry. Hardcoding that list into each of those clients means three copies to update every time a
+price changes. So the menu lives in one place and is served over HTTP instead — every client asks
+the same API and gets the same answer. Three endpoints cover it: a welcome check at `/`, the full
+menu at `/menu` (optionally filtered by category), and one item by id at `/menu/{item_id}`. Ten
+items are hardcoded in `data.py`; there is no database, no authentication, no write operations and
+no tests, and nothing here has ever run in a real shop. That is the point — it is a **learning
+project**, stripped to the smallest thing that still exercises the complete FastAPI request cycle:
+a URL comes in, parameters are validated, a handler decides, a Pydantic model shapes the response,
+and JSON goes back out. Everything below traces that path. What the project deliberately leaves out
+— persistence, auth, writes, dependency injection — is covered by the sibling projects
+`02-pincode-lookup` and `03-rangmanch-review`.
 
 ---
 
