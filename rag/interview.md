@@ -794,4 +794,386 @@ for pair in zip(pieces, vectors):
     print(page, text, vector)
 
     1 AI is useful. [0.12, 0.45]
-    
+46. What are the different ways to create and save SQLModel objects? List the syntax with examples.
+
+    | Way | Example syntax |
+|---|---|
+| Pass fields directly | `user = User(name="Ashwani", email="ashwani@example.com")` |
+| Unpack a dictionary | `user = User(**data)` |
+| Validate a dictionary | `user = User.model_validate(data)` |
+| Validate an input model | `user = User.model_validate(user_data)` |
+| Validate and override a field | `user = User.model_validate(user_data, update={"email": user_data.email.lower()})` |
+| Unpack an input model’s data | `user = User(**user_data.model_dump())` |
+
+==another exampele====
+| Way | Example syntax |
+|---|---|
+| Pass fields directly | `user = User(name="Ashwani", email="ashwani@example.com")`<br><br>`doc = Document(filename=filename, pages=len(reader.pages), chunk_count=len(pieces))`<br><br>`chunk = Chunk(page=page, content=text, embedding=vec)` |
+| Unpack a dictionary | `user = User(**data)`<br><br>`doc = Document(**document_data)`<br><br>`chunk = Chunk(**chunk_data)` |
+| Validate a dictionary | `user = User.model_validate(data)`<br><br>`doc = Document.model_validate(document_data)`<br><br>`chunk = Chunk.model_validate(chunk_data)` |
+| Validate an input model | `user = User.model_validate(user_data)`<br><br>`doc = Document.model_validate(document_input)`<br><br>`chunk = Chunk.model_validate(chunk_input)` |
+| Validate and override a field | `user = User.model_validate(user_data, update={"email": user_data.email.lower()})`<br><br>`doc = Document.model_validate(document_data, update={"filename": filename})`<br><br>`chunk = Chunk.model_validate(chunk_data, update={"page": page})` |
+| Unpack an input model’s data | `user = User(**user_data.model_dump())`<br><br>`doc = Document(**document_input.model_dump())`<br><br>`chunk = Chunk(**chunk_input.model_dump())` |
+| Create and attach multiple related objects | `doc.chunks = [Chunk(page=page, content=text, embedding=vec) for (page, text), vec in zip(pieces, vectors)]` |
+| Attach one related object | `doc.chunks.append(chunk)` |
+| Attach multiple related objects | `doc.chunks.extend([chunk1, chunk2])` |
+
+47. When saving data or performing CRUD operations, what are the different ways to create and attach related objects to a model instance? Show the syntax with examples.
+
+doc.chunks = [
+        Chunk(page=page, content=text, embedding=vec)
+        for (page, text), vec in zip(pieces, vectors)
+]
+
+a. Assign a list — replace the current collection
+parent.children = [    Child(name="Child 1"),    Child(name="Child 2")]
+
+
+b. Use a list comprehension — create multiple objects
+parent.children = [    Child(name=name)    for name in ["Child 1", "Child 2"]]
+
+
+c. Use append() — add one object
+parent.children.append(Child(name="Child 1"))
+
+
+Or with a loop:
+for name in ["Child 1", "Child 2"]:    parent.children.append(Child(name=name))
+
+
+d. Use extend() — add multiple objects
+parent.children.extend([    Child(name="Child 1"),    Child(name="Child 2")])
+
+
+e. Assign through the child’s relationship
+child = Child(name="Child 1")child.parent = parentsession.add(child)
+
+
+f. Attach an existing database object
+child = session.get(Child, child_id)if child is not None:    parent.children.append(child)
+
+
+For methods 1–4 and 6, save using:
+
+48. How does session.add(doc) add both the parent Document and its related Chunk instances to the session through the relationship’s save-update cascade?
+
+# Create the parent
+doc = Document(filename="report.pdf", pages=2, chunk_count=2)
+
+# Create and connect the children
+doc.chunks = [
+    Chunk(page=1, content="First page text", embedding=[0.1, 0.2]),
+    Chunk(page=2, content="Second page text", embedding=[0.3, 0.4]),
+]
+
+# Add the parent; cascade also adds its connected children
+session.add(doc)
+
+# Save the parent and children to their respective tables
+session.commit()
+
+sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+
+49. How can I access incoming request data, and does the database session contain that data?
+ print("session:", session)
+=======To also see the data returned by the database, print after executing the query:============
+ rows = session.exec(stmt).all()
+print("Number of rows:", len(rows))
+for row in rows:
+    print("Row:", row)
+50. What does the -> arrow mean in a Python function definition, and how does it describe the function’s return type?
+The -> arrow specifies the expected return type of a Python function—the type of value it gives back.    
+Python does not require the arrow; use it to describe the expected output type
+| Situation | Use `->`? |
+|---|---|
+| Normal Python function | Optional |
+| Making the output type clear | Recommended |
+| Project requires type annotations | Required by project rules |
+| Framework uses return annotations for functionality | May be needed for that feature |
+
+| Function | Return annotation | Meaning |
+|---|---|---|
+| `client()` | `-> OpenAI` | Returns an `OpenAI` client object |
+| `embed()` | `-> list[list[float]]` | Returns a list of lists containing decimal numbers, such as `[[0.12, 0.45], [0.33, 0.67]]` |
+| `ingest_pdf()` | `-> Document` | Returns a `Document` object |
+| `search()` | `-> list[dict]` | Returns a list of dictionaries, such as `[{"page": 1, "content": "Hello"}]` |
+| `answer()` | `-> str` | Returns a string, such as `"The revenue increased."` |
+51. How can I define a Python function that returns a client object?
+52. How can I define a Python function that returns a list of lists containing decimal numbers?
+53. How can I define a Python function that returns a document object?
+54. How can I define a Python function that returns a list of dictionaries?
+55. How can I define a Python function that returns a string?
+
+| Question | Return annotation | Example output format |
+|---|---|---|
+| How can a function return a client object? | `-> OpenAI` for an OpenAI client | `<openai.OpenAI object at 0x...>` |
+| How can a function return a list of lists containing decimal numbers? | `-> list[list[float]]` | `[[0.12, 0.45], [0.33, 0.67]]` |
+| How can a function return a document object? | `-> Document` | `Document(filename='report.pdf', pages=2)` |
+| How can a function return a list of dictionaries? | `-> list[dict]` | `[{"page": 1, "content": "Hello"}]` |
+| How can a function return a string? | `-> str` | `"The revenue increased."` |
+=======================================QUERYPART========================
+C:\Users\rakes\PycharmProjects\fastapi\rag\app\routes\query.py
+56. What is the difference between from_documents() and from_existing_collection() in Qdrant
+
+56. How do you embed and save documents in Qdrant, connect to the saved collection, and fetch documents matching your question?
+
+| Code | Simple meaning |
+|---|---|
+| `from_documents()` | Embed and save documents |
+| `from_existing_collection()` | Connect to saved collection |
+| `similarity_search()` | Fetch documents matching your question |
+
+57. Define Embedding.
+Embedding means converting text into a list of numbers that represents its meaning. This list is called a vector.
+
+58. How do we embed chunks using OpenAI Embeddings?
+from langchain_openai import OpenAIEmbeddings
+
+# Requires OPENAI_API_KEY in your environment
+embedding_model = OpenAIEmbeddings(
+    model="text-embedding-3-small"
+)
+
+chunks = [
+    "Laravel is a PHP framework.",
+    "Flutter is used to build mobile apps."
+]
+
+vectors = embedding_model.embed_documents(chunks)
+
+print("Number of vectors:", len(vectors))
+print("Numbers in each vector:", len(vectors[0]))
+
+==========output==========
+Number of vectors: 2
+Numbers in each vector: 1536
+
+59. Why do indexing and querying both use an embedding model?
+
+| Phase | What gets converted into numbers? | Purpose |
+|---|---|---|
+| Indexing | Document chunks | Save their meaning for future searches |
+| Querying | The user’s question | Find chunks with similar meaning |
+
+Use the same embedding model and dimensions in both phases.
+
+60. Why do we need the embedding model in the indexing phase?
+To convert each chunk into a vector before saving it.
+
+"Laravel is a PHP framework."
+                ↓
+        Embedding model
+                ↓
+     Vector representing its meaning
+                ↓
+           Save in Qdrant
+ Qdrant stores the vector alongside the chunk’s text and metadata.
+
+ 61. Why do we need the embedding model in the query phase?
+
+ To convert the user’s question into a vector.
+
+ "Which framework uses PHP?"
+                ↓
+        Embedding model
+                ↓
+          Question vector
+                ↓
+    Compare with stored chunk vectors
+
+The existing chunks are not embedded again for each question. Only the new question needs embedding. Comparing separately generated question and document vectors enables semantic search.    
+
+62. How does the computer turn words into numbers?
+
+The embedding model:
+1. Splits text into small units called tokens.
+2. Processes those tokens using a trained neural network.
+3. Produces a list of decimal numbers representing the text’s meaning.
+Illustration only—these are invented numbers:
+"Build a mobile app" → [0.21, 0.85, 0.34]
+"Create a phone app" → [0.23, 0.82, 0.36]
+"Grow tomatoes"      → [0.91, 0.12, 0.07]
+63. How does the computer compare these numbers to find the right answer?
+
+Qdrant uses a mathematical similarity measure, such as cosine similarity, to rank vectors.
+Think of each vector as a direction. Vectors pointing in similar directions usually represent related meanings.
+For the question “Which framework uses PHP?”:
+
+| Stored chunk | Expected relevance |
+|---|---|
+| Laravel is a PHP framework. | Higher |
+| Flutter is used to build mobile apps. | Lower |
+
+64. How do I write or save data into Qdrant?
+Use from_documents() to embed and store your chunks automatically:
+
+from langchain_core.documents import Document
+from langchain_qdrant import QdrantVectorStore
+
+documents = [
+    Document(page_content="Laravel is a PHP framework."),
+    Document(page_content="Flutter is used to build mobile apps.")
+]
+
+vector_store = QdrantVectorStore.from_documents(
+    documents=documents,
+    embedding=embedding_model,
+    collection_name="sample_collection",
+    url="http://localhost:6333"
+)
+
+print("Documents saved!")
+
+You do not need to call embed_documents() separately here. from_documents() handles embedding and saving.
+
+65. How do I read or search data from Qdrant?
+
+vector_db = QdrantVectorStore.from_existing_collection(
+    embedding=embedding_model,
+    collection_name="sample_collection",
+    url="http://localhost:6333"
+)
+
+results = vector_db.similarity_search(
+    "Which framework uses PHP?",
+    k=1
+)
+
+for document in results:
+    print(document.page_content)
+
+    output
+Laravel is a PHP framework.
+
+66. Why do we use from_documents() only once when indexing?
+We normally use it during initial data loading, so the same chunks are not repeatedly embedded and inserted.
+It is not limited to one call forever. When new documents arrive, you can add them:
+vector_db.add_documents(new_documents)
+
+67. Why use from_existing_collection() during the query phase?
+Because the documents and vectors are already saved.
+This method creates an object connected to the existing collection without loading new documents. It does not itself fetch search results. Qdrant
+If you already have a connected vector_store object, you can search with that directly; reconnecting for every question is unnecessary.
+
+68. Why is similarity_search() used during the query phase?
+results = vector_db.similarity_search(
+    "What can I use to create phone applications?",
+    k=1
+)
+=========output==================
+Flutter is used to build mobile apps.
+
+The question says “phone applications”, while the document says “mobile apps.” Semantic similarity helps connect those meanings.
+
+| Method | Simple meaning |
+|---|---|
+| `embed_documents()` | Convert chunks into vectors |
+| `from_documents()` | Automatically embed and save documents |
+| `from_existing_collection()` | Connect to a saved collection |
+| `similarity_search()` | Embed the question and retrieve relevant documents |
+========C:\Users\rakes\PycharmProjects\fastapi\rag\routes\query.py=========
+69. How do we retrieve the relevant parts of a document based on the user’s question?
+
+We retrieve the relevant parts by comparing the user’s question with the stored document chunks
+sources = engine.search(
+    session,
+    body.question,
+    body.top_k,
+    body.document_id
+)
+
+1. Converts the question into a vector:
+   q = embed([question])[0]
+2. Measures how similar each stored chunk is to the question:
+   distance = Chunk.embedding.cosine_distance(q)
+3. Returns the closest chunks:
+   .order_by(distance).limit(top_k)
+Smaller distance means a closer match. If top_k=3, it returns up to three matching chunks.
+For example:
+- Question: “What is Laravel?”
+- Retrieved chunk: “Laravel is a PHP framework for building web applications.”
+These retrieved chunks are saved in sources and passed to the LLM to help it answer.
+
+70. Why do we calculate the distance between the question’s embedding and stored chunk embeddings?
+To find which chunks are closest in meaning to the question.
+Smaller distance = more relevant chunk.
+Example: For “What is Laravel?”, a chunk about Laravel should have a smaller distance than a chunk about cooking.
+
+q = embed([question])[0]
+distance = Chunk.embedding.cosine_distance(q)
+
+| Chunk | Example distance |
+|---|---:|
+| Laravel is a PHP framework. | 0.10 |
+| PHP is a programming language. | 0.30 |
+| Flutter builds mobile apps. | 0.70 |
+
+71. How does top_k control the returned chunks?
+
+top_k = 2
+
+stmt = (
+    select(Chunk.content)
+    .order_by(distance)  # Closest matches first
+    .limit(top_k)        # Return up to 2 chunks
+)
+
+results = session.exec(stmt).all()
+
+for content in results:
+    print(content)
+
+ =====output=========
+    Laravel is a PHP framework.
+PHP is a programming language.
+
+72. How can we retrieve data from multiple tables using a JOIN query?
+We retrieve data from multiple tables using JOIN, which connects rows through a matching column.
+stmt = (
+    select(
+        Chunk.id,
+        Chunk.page,
+        Chunk.content,
+        Document.filename
+    )
+    .join(Document, Chunk.document_id == Document.id)
+)
+
+rows = session.exec(stmt).all()
+73. Why do we pass both question and sources to the answer() function?
+question tells the model what the user wants to know.
+sources provides relevant document text to answer from.
+
+Question: What is Laravel?
+Source: Laravel is a PHP framework.
+Answer: Laravel is a PHP framework. (page 2)
+
+74. How are retrieved chunks combined into context?
+context = "\n\n".join(
+    f"[{s['filename']} · page {s['page']}]\n{s['content']}"
+    for s in sources
+)
+output
+[guide.pdf · page 2]
+Laravel is a PHP framework.
+
+[guide.pdf · page 3]
+Laravel supports database migrations.
+
+75. What is the purpose of system_prompt?
+
+It gives the model instructions:
+- Answer using only the provided context.
+- Say “I don't know” if the answer is missing.
+- Mention the page numbers used.
+These instructions guide the model, but do not guarantee it will always follow them perfectly.
+
+76. Why use separate system and user messages?
+messages=[
+    {"role": "system", "content": system_prompt},
+    {"role": "user", "content": question},
+]
+| Role | Purpose |
+|---|---|
+| `system` | Provides instructions and document context |
+| `user` | Provides the question to answer |

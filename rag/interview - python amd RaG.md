@@ -78,6 +78,30 @@ Output:
 AI is useful.
 RAG retrieves information.
 
+7. How does Python’s join() method work with a string, a list of strings, a dictionary, a list of lists, and a list of dictionaries, and why do some of these inputs cause errors?
+| Input                | Example                                       | Result                          |
+| -------------------- | --------------------------------------------- | ------------------------------- |
+| String               | `"-".join("abc")`                             | `"a-b-c"`                       |
+| List of strings      | `" ".join(["Hello", "World"])`                | `"Hello World"`                 |
+| Dictionary           | `", ".join({"name": "Ram", "city": "Delhi"})` | `"name, city"` — joins keys     |
+| List of lists        | `" ".join([["a", "b"], ["c"]])`               | ❌ Error: items are lists        |
+| List of dictionaries | `" ".join([{"name": "Ram"}])`                 | ❌ Error: items are dictionaries |
+
+===For numbers, convert them to strings:===
+", ".join(str(n) for n in [10, 20, 30])
+# "10, 20, 30"
+====For a list of lists, flatten it first:====
+groups = [["a", "b"], ["c", "d"]]
+
+" ".join(word for group in groups for word in group)
+# "a b c d"
+
+====For a list of dictionaries, select a string value:====
+users = [{"name": "Ram"}, {"name": "Shyam"}]
+
+", ".join(user["name"] for user in users)
+# "Ram, Shyam"
+
 8. .get() — Read a dictionary value with a fallback
 metadata = {"page": 2}print(metadata.get("page", 1))
 print(metadata.get("source", "Unknown"))
