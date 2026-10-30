@@ -9,6 +9,9 @@ Python, FastAPI, ML, DL, NLP, RAG, and Agentic AI.
 - `how-to-revise.md`: my revision method and daily routine
 - `revision-log.md`: quiz results and review schedule
 - `python-qa.md`: Python
+- `python-interview-qa.md`: in-depth interview answers for every Python question
+- `quiz.md`: Python self-test (questions with hidden answers), generated from `python-interview-qa.md`
+- `quiz-mcq.md`: Python topic-wise multiple-choice quiz (132 MCQs with hidden answers)
 - `fastapi-qa.md`: FastAPI
 - `ml-qa.md`: Machine Learning
 - `dl-qa.md`: Deep Learning
