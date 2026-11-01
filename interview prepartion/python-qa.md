@@ -459,39 +459,89 @@ This last approach can need **O(n²) equality comparisons**.
 ### Q: How does list slicing work, including negative indices?
 **Difficulty:** 🟢
 
-**Answer:** The syntax is `items[start:stop:step]`.
-
-| Part | Meaning |
-|---|---|
-| `start` | Index where the slice begins |
-| `stop` | Index where the slice stops (this position is excluded) |
-| `step` | How far to move between elements; can't be zero |
-
-Negative indices count from the end: `-1` is the last element and `-2` is the second-to-last.
+**Answer:** List slicing extracts selected elements from a list using:
 
 ```python
-numbers = [10, 20, 30, 40, 50]
-
-print(numbers[1:4])   # [20, 30, 40]
-print(numbers[:3])    # [10, 20, 30]
-print(numbers[2:])    # [30, 40, 50]
-print(numbers[-1])    # 50
-print(numbers[-3:])   # [30, 40, 50]
-print(numbers[:-1])   # [10, 20, 30, 40]
-print(numbers[::2])   # [10, 30, 50]
-print(numbers[::-1])  # [50, 40, 30, 20, 10]
+my_list[start:stop:step]
 ```
 
-With a negative step, the slice moves backward:
+**1. The three parts**
+
+| Part | Meaning | Default |
+|---|---|---|
+| `start` | Index where slicing begins; **included** | Beginning (for a positive step) |
+| `stop` | Boundary where slicing ends; **excluded** | End (for a positive step) |
+| `step` | Index increment and direction; can't be zero | `1` |
+
+**2. `start`: where to begin**
 
 ```python
-print(numbers[4:1:-1])  # [50, 40, 30]  (stop index 1 is excluded)
+numbers = [10, 20, 30, 40, 50, 60]
+print(numbers[2:])  # [30, 40, 50, 60]
 ```
 
-**Important distinction:** slices tolerate out-of-range boundaries, but indexing a single element doesn't.
+Start at index 2, include its element, and continue to the end.
+
+**3. `stop`: where to finish**
 
 ```python
-print(numbers[:100])   # [10, 20, 30, 40, 50]
+print(numbers[:4])  # [10, 20, 30, 40]
+```
+
+Stop before index 4, so `50` is excluded.
+
+Combine `start` and `stop`:
+
+```python
+print(numbers[1:4])  # [20, 30, 40]
+```
+
+Selected indices: 1, 2, 3.
+
+**4. `step`: how far to move each time**
+
+```python
+print(numbers[0:6:2])  # [10, 30, 50]   indices 0, 2, 4
+print(numbers[1:6:2])  # [20, 40, 60]   indices 1, 3, 5
+```
+
+| Slice | Start | Stop (excluded) | Step | Result |
+|---|---|---|---|---|
+| `[1:5:1]` | 1 | 5 | 1 | `[20, 30, 40, 50]` |
+| `[1:5:2]` | 1 | 5 | 2 | `[20, 40]` |
+| `[::3]` | Beginning | End | 3 | `[10, 40]` |
+
+The step is the index increment. A step of 2 selects an element, skips one, then selects the next.
+
+**5. Slicing with negative indices**
+
+Negative indices choose positions relative to the end (`-1` is the last element). They do **not** reverse the direction.
+
+```python
+print(numbers[-3:])    # [40, 50, 60]      the last three elements
+print(numbers[:-2])    # [10, 20, 30, 40]  everything except the last two
+print(numbers[-4:-1])  # [30, 40, 50]
+```
+
+For `[-4:-1]`, start at `30` and stop before `60`.
+
+**6. A negative step moves backward**
+
+```python
+print(numbers[::-1])  # [60, 50, 40, 30, 20, 10]
+```
+
+With a negative step, omitted boundaries default to starting at the end and continuing backward through the beginning.
+
+```python
+print(numbers[5:1:-1])    # [60, 50, 40, 30]   indices 5, 4, 3, 2 (index 1 excluded)
+print(numbers[-1:-5:-2])  # [60, 40]           positions -1, -3 (stop before -5)
+```
+
+**7. Important distinction:** slices tolerate out-of-range boundaries, but indexing a single element doesn't.
+
+```python
+print(numbers[:100])   # [10, 20, 30, 40, 50, 60]
 # print(numbers[100])  # IndexError
 ```
 

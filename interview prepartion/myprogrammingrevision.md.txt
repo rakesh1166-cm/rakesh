@@ -1,0 +1,297 @@
+What are Python's key features, and why is it popular for ML?
+1.how to  add all element of list/numpy
+2.how to find how  to count how many elemnt inside list/numpy
+3.how to find avg/min/max of all eelment of list/numpy
+4.how to find mean,median,mode,stdev of all elment of list/numpy
+5 difference b/w median and mean
+6.what is mean by stdev,percentile
+5.how to find Whether at least one item is truthy
+6. how 	to find Whether every item is truthy
+7.how to differentiate wheather it is list/numpy
+8. how to  find average squared distance from the mean. in numpy
+9. how to find a position in the data distribution in numpy
+10.find a position in the data distribution in numpy
+11. counts how often each distinct value appears. in numpy array or pandas series
+12.How do you calculate the average price for each category in a Pandas DataFrame?
+13.What is the difference between variance, percentile, value counts, and grouped mean when analyzing a Pandas DataFrame(answer-operation,purpose example in tabular)
+14.How do you filter elements from a given list based on a condition, returning the result as a Python list using different methods?
+
+================CONVERSION=============================
+1.How do you convert a list, tuple, whole string, string characters, string words, numeric string, and single character into NumPy arrays? Present your answer in a table with Input, Conversion, and Result columns.
+2.How do you convert a tuple, string into characters or words, single character, numeric string, NumPy array, dictionary keys or values, pandas Series, and single number into a Python list? Present your answer in a table with Input Format, Conversion, and Result columns.
+3.How do you convert a list, tuple, string into characters or words, whole string, NumPy array, dictionary of lists, list of dictionaries, and scalar dictionary into a pandas Series or DataFrame, as appropriate? Present your answer in a table with Input Format, Conversion, and Result / Structure columns.
+4.How do you convert a list or tuple of key-value pairs, plain list into indexed keys, two lists into keys and values, string into indexed characters, single character, NumPy array, pandas Series, DataFrame into column lists, and JSON object string into a Python dictionary? Present your answer in a table with Input Format, Conversion, and Result columns.
+5.How do you convert different data sources—including a list of dictionaries, dictionary of lists, list of lists, list of tuples, NumPy array, CSV file, Excel file, JSON file containing records, SQL query results, and API response containing records—into a pandas DataFrame? Present your answer in a table with Input Format, Conversion, and Result columns.
+6.How do you convert a pandas DataFrame into a list of dictionaries, dictionary of lists, list of lists, NumPy array, feature matrix, and target array, and then convert a numeric NumPy feature matrix into PyTorch and TensorFlow tensors? Present your answer in a table with Input Format, Conversion, and Result columns.
+
+7.How do you convert a paragraph into a list of sentences, use enumerate() to assign sentence IDs, and convert the results into a list of dictionaries, dictionary of lists, pandas DataFrame, NumPy string array, and JSON string? Present each conversion in a table with Input Format with Example, Conversion, and Result columns.
+8.How do you convert a group of strings into a list of dictionaries containing id and text, create a pandas DataFrame, remove empty and duplicate texts, and export the cleaned records as a dictionary of lists, CSV file, and JSON file? Present each conversion in a table with Input Format with Example, Conversion, and Result columns.
+9.How do you convert labeled text records, such as customer reviews with sentiment labels, into a pandas DataFrame, separate the text and target columns, transform the text into numerical TF-IDF features, and convert the labels into a NumPy array for machine learning? Present each conversion in a table with Input Format with Example, Conversion, and Result columns.
+10.How do you convert a long document into overlapping text chunks, assign each chunk an ID and source metadata, organize the chunks as a list of dictionaries, and generate numerical embeddings as a NumPy matrix for RAG retrieval? Present each conversion in a table with Input Format with Example, Conversion, and Result columns.
+11.How do you convert a batch of text strings into token IDs and attention masks, pad or truncate the sequences to a common length, and produce either PyTorch tensors or TensorFlow tensors for a deep learning model? Present each conversion in a table with Input Format with Example, Conversion, and Result columns.
+
+=============MACHINE Learning question=============================================
+1. Load and inspect data — 9 questions
+1. How do you load a CSV file into a pandas DataFrame?
+2. How do you display the first five rows of a DataFrame?
+3. How do you find the number of rows and columns in a DataFrame?
+4. How do you inspect column names, data types, and non-null counts?
+5. How do you generate descriptive statistics for numerical columns?
+6. How do you count missing values in each column?
+7. How do you count duplicate rows in a dataset?
+8. How do you count occurrences of each target class to check class balance?
+9. How do you display all column names and inspect each column’s data type?
+For each question, present the answer in a table with Task, Command, Purpose, and Output columns. Use a small example dataset.
+2. Clean and prepare data — 11 questions
+1. How do you remove duplicate rows from a DataFrame?
+2. How do you remove rows containing missing values?
+3. How do you select specific columns as the feature matrix X?
+4. How do you select a target column as y?
+5. How do you split features and targets into training and test sets?
+6. How do you fill missing numerical values using SimpleImputer?
+7. How do you standardize numerical features using StandardScaler?
+8. How do you convert categorical features into numerical columns using OneHotEncoder?
+9. How do you convert text into numerical features using TfidfVectorizer?
+10. How do you apply different preprocessing methods to different columns using ColumnTransformer?
+11. How do you combine preprocessing and a model using Pipeline?
+For each question, present the answer in a table with Task, Command, Purpose, and Output columns. Show example inputs and resulting values or shapes, and fit preprocessing only on training data.
+3. Choose and create an algorithm — 17 questions
+1. How do you import and create a linear regression model for predicting numerical values?
+2. How do you import and create a Ridge regression model with regularization?
+3. How do you import and create a Lasso regression model that can produce zero-valued coefficients?
+4. How do you import and create a logistic regression model for classification?
+5. How do you import and create a decision tree classifier?
+6. How do you import and create a decision tree regressor?
+7. How do you import and create a random forest classifier?
+8. How do you import and create a random forest regressor?
+9. How do you import and create a support vector classifier using SVC?
+10. How do you import and create a support vector regression model using SVR?
+11. How do you import and create a K-nearest neighbors classifier?
+12. How do you import and create a Multinomial Naive Bayes classifier for nonnegative text features?
+13. How do you import and create a histogram gradient boosting classifier?
+14. How do you import and create a histogram gradient boosting regressor?
+15. How do you import and create a K-means model for clustering?
+16. How do you import and create a DBSCAN model for clustering and identifying noise?
+17. How do you import and create a PCA transformer for dimensionality reduction?
+For each question, present the answer in a table with Task, Command, Purpose, and Output columns. Include the import, model creation command, example use, and the resulting model object.
+4. Train, transform, and predict — 6 questions
+1. How do you train a supervised model using fit(X_train, y_train)?
+2. How do you predict numerical values or class labels using predict(X_test)?
+3. How do you obtain class probabilities using predict_proba() for a model that supports it?
+4. How do you apply a fitted preprocessing transformation using transform()?
+5. How do you learn a transformation and apply it to training data using fit_transform()?
+6. How do you fit a clustering model and obtain cluster labels using fit_predict()?
+For each question, present the answer in a table with Task, Command, Purpose, and Output columns. Show example predictions, transformed values, or output shapes where appropriate.
+5. Evaluate the model — 11 questions
+1. How do you calculate Mean Absolute Error to evaluate a regression model?
+2. How do you calculate Mean Squared Error to evaluate a regression model?
+3. How do you calculate the R² score for regression predictions?
+4. How do you calculate classification accuracy?
+5. How do you calculate precision for binary classification?
+6. How do you calculate recall for binary classification?
+7. How do you calculate the F1 score for binary classification?
+8. How do you generate a confusion matrix?
+9. How do you generate a classification report containing precision, recall, F1, and support?
+10. How do you calculate binary ROC AUC using positive-class probabilities or decision scores?
+11. How do you calculate the silhouette score to evaluate clustering when multiple valid clusters exist?
+For each question, present the answer in a table with Task, Command, Purpose, and Output columns. Use small example arrays and explain what the resulting metric means.
+6. Validate and tune — 6 questions
+1. How do you evaluate a model pipeline using five-fold cross-validation?
+2. How do you configure GridSearchCV to compare specified hyperparameter combinations?
+3. How do you configure RandomizedSearchCV to sample hyperparameter combinations?
+4. How do you run a hyperparameter search using training data?
+5. How do you retrieve the selected fitted pipeline using best_estimator_?
+6. How do you retrieve the selected hyperparameters using best_params_?
+For each question, present the answer in a table with Task, Command, Purpose, and Output columns. Show example parameter settings and illustrative outputs, keeping the test set separate from tuning.
+7. Save, load, use, and monitor — 5 questions
+1. How do you save a complete fitted preprocessing and model pipeline using joblib.dump()?
+2. How do you load a trusted saved pipeline using joblib.load()?
+3. How do you create a DataFrame of new records and generate predictions using the loaded pipeline?
+4. How do you compare production feature distributions with training distributions to identify possible data drift?
+5. How do you evaluate production predictions against actual outcomes, when available, to detect performance changes?
+==============================Deep Learning==========================================
+
+1. Load and inspect data — 10 questions
+1. How do you load tabular data from a CSV file using pandas before preparing it for deep learning?
+2. How do you inspect dataset dimensions, column types, missing values, and duplicate records?
+3. How do you check the distribution of target classes before training a classification model?
+4. How do you convert a numerical NumPy array into a PyTorch tensor?
+5. How do you inspect a tensor’s shape, number of dimensions, data type, and device?
+6. How do you load images organized into class folders using ImageFolder?
+7. How do you load a group of text strings and their corresponding classification labels?
+8. How do you load time-series data and check its chronological ordering?
+9. How do you create a custom PyTorch dataset using Dataset, __len__(), and __getitem__()?
+10. How do you create a DataLoader and inspect one batch of inputs and labels?
+2. Clean, preprocess, and batch data — 12 questions
+1. How do you split data into training, validation, and test sets while avoiding data leakage?
+2. How do you handle missing numerical values and standardize features using training data statistics?
+3. How do you convert input features to float32 tensors and class labels to the appropriate tensor type?
+4. How do you resize images, convert them into tensors, and normalize their channels?
+5. How do you apply random image augmentation only to training images?
+6. How do you tokenize text into token IDs and attention masks using a pretrained tokenizer?
+7. How do you pad or truncate text sequences to create batches with consistent shapes?
+8. How do you encode class labels as integer indices, and when are one-hot labels needed?
+9. How do you convert chronological observations into input windows and future targets for time-series forecasting?
+10. How do you reshape image, sequence, and tabular tensors to match a model’s expected input dimensions?
+11. How do you configure batch size, shuffling, and worker processes in a DataLoader?
+12. How do you use a custom collate_fn to batch variable-length sequences?
+3. Choose and build a model architecture — 20 questions
+These include model architectures and learning approaches; they are not all separate algorithms.
+Area	Questions
+Dense networks	1. How do you build a multilayer perceptron using nn.Linear, activation functions, and nn.Sequential for tabular classification?
+2. How do you adapt a dense neural network for numerical regression?
+Convolutional networks	3. How do you build a CNN using convolution, activation, pooling, and a classification head for image classification?
+4. How do you build a one-dimensional CNN for sequence or sensor data?
+Pretrained vision models	5. How do you load a pretrained ResNet and replace its classification head?
+6. How do you adapt a pretrained EfficientNet or MobileNet to a custom image classification dataset?
+Recurrent networks	7. How do you build a basic RNN for sequence classification?
+8. How do you build an LSTM for time-series forecasting?
+9. How do you build a GRU for sequence prediction?
+10. How do you use a bidirectional LSTM for text classification?
+Attention and transformers	11. How do you apply multihead self-attention to a batch of sequence representations?
+12. How do you build a classifier using a Transformer encoder?
+13. How do you fine-tune a pretrained BERT-style model for text classification?
+14. How do you load a pretrained causal language model for next-token prediction and text generation?
+Representation learning	15. How do you build an autoencoder that reconstructs numerical input data?
+16. How do you use an autoencoder’s reconstruction error to identify potential anomalies?
+Specialized vision tasks	17. How do you build or adapt a U-Net for pixel-level image segmentation?
+18. How do you adapt a pretrained object detection model to predict bounding boxes and classes?
+Recommendation and similarity	19. How do you build a recommendation model using user and item embeddings?
+20. How do you build a Siamese network that learns similarity between pairs of inputs?
+
+
+For each question, present the answer in a table with Task, Command, Purpose, and Output columns. Show the expected input shape, essential model-building commands, and output shape.
+4. Configure training and train the model — 15 questions
+1. How do you select the CPU or an available CUDA GPU and move the model and tensors to that device?
+2. How do you choose CrossEntropyLoss for multiclass classification and prepare its logits and target labels?
+3. How do you choose BCEWithLogitsLoss for binary or multilabel classification?
+4. How do you use MSELoss or L1Loss for numerical regression?
+5. How do you configure SGD with a learning rate and momentum?
+6. How do you configure Adam or AdamW to update model parameters?
+7. How do you switch a model into training mode using model.train()?
+8. How do you run a forward pass and calculate the batch loss?
+9. How do you clear gradients, run backpropagation, and update parameters using zero_grad(), backward(), and step()?
+10. How do you write a complete training loop over multiple batches and epochs?
+11. How do you calculate and record average training loss for each epoch?
+12. How do you run validation using model.eval() and torch.no_grad()?
+13. How do you freeze a pretrained backbone and train only a replacement output head?
+14. How do you unfreeze selected layers and fine-tune a pretrained model?
+15. How do you train with automatic mixed precision using autocasting and gradient scaling where supported?
+================5. Predict and evaluate — 12 questions
+1. How do you generate predictions in evaluation mode using torch.inference_mode()?
+2. How do you convert multiclass logits into probabilities using softmax() and predicted classes using argmax()?
+3. How do you convert binary logits into probabilities using sigmoid() and apply a classification threshold?
+4. How do you calculate accuracy, precision, recall, and F1 from classification predictions?
+5. How do you generate a confusion matrix and classification report?
+6. How do you calculate ROC AUC and average precision for binary classification using prediction scores?
+7. How do you calculate MAE, MSE, and RMSE for regression predictions?
+8. How do you compare training and validation loss curves to identify possible overfitting or underfitting?
+9. How do you calculate intersection over union and Dice score for image segmentation?
+10. How do you evaluate object detection using intersection-over-union matching and mean average precision?
+11. How do you evaluate next-token prediction using masked average token loss and perplexity?
+12. How do you measure inference latency, throughput, and peak GPU memory usage?
+==================6. Tune and improve the model — 12 questions
+1. How do you compare different learning rates using validation performance?
+2. How do you compare batch sizes while tracking performance and memory usage?
+3. How do you compare network depth, hidden dimensions, and activation functions?
+4. How do you add dropout to reduce overfitting?
+5. How do you apply weight decay through an optimizer?
+6. How do you add batch normalization or layer normalization, and how do their behaviors differ?
+7. How do you adjust the learning rate during training using a scheduler?
+8. How do you implement early stopping based on validation performance?
+9. How do you save the checkpoint with the best validation score?
+10. How do you handle class imbalance using a weighted loss or weighted sampling?
+11. How do you use gradient clipping to limit large gradients during training?
+12. How do you automate hyperparameter trials using Optuna and compare their validation results?
+==========7. Save, deploy, and monitor — 10 questions
+1. How do you save a model’s learned parameters using state_dict() and torch.save()?
+2. How do you recreate the model architecture, load saved weights, and switch to evaluation mode?
+3. How do you save a training checkpoint containing model weights, optimizer state, epoch, and validation score?
+4. How do you restore a checkpoint and resume interrupted training?
+5. How do you save preprocessing settings, tokenizer files, label mappings, and model configuration alongside the weights?
+6. How do you create an inference function that preprocesses new inputs and returns predictions?
+7. How do you expose model predictions through a FastAPI endpoint with input validation?
+8. How do you export a supported model to ONNX and compare its predictions with the original model?
+9. How do you benchmark an optimized or quantized model for size, speed, and prediction quality?
+10. How do you monitor production input changes, prediction distributions, latency, failures, and performance when actual outcomes become available?
+For each question, present the answer in a table with Task, Command, Purpose, and Output columns. Use illustrative outputs for deployment and monitoring, and identify any hardware or model compatibility requirements.
+
+===========================Lifecycle summary:==============
+Data sources → load and inspect (using pandas, Dataset, and tensor properties) →
+preprocess and batch (using transforms, tokenizers, and DataLoader) →
+build architecture (using nn.Module, neural network layers, or pretrained models) →
+train (using a loss function, optimizer, backward(), and step()) → 
+validate and evaluate (using evaluation mode and metrics) → improve (using regularization, schedulers, and tuning)
+→ save and deploy (using checkpoints and inference functions) → monitor production results
+
+
+
+
+
+
+sum(passed)/sum([10, 20, 30]) /np.sum(x)
+len([10, 20, 30])
+min([10, 20, 30])/max([10, 20, 30])/avg([10, 20, 30])
+np.min(x)/np.max(x)/np.sum(x)
+statistics.mean([10, 20, 30])/	statistics.median([10, 20, 90])/statistics.mode([10, 20, 20, 30])
+np.median(x)/np.mean(x)/np.mode(x)
+mean=Average of all values median==Middle value after sorting
+statistics.stdev() measures how spread out sample values are around their mean.=example explanation needed easy to understand in simple mnanner
+any([False, True, False])	====> True
+all([True, True, False])	======> False
+using type or isinstance
+np.var(x)===need explanation with example
+np.percentile(x, 95)===need explanation with example explanation needed easy to understand in simple mnanner
+any([False, True, False])	====> True
+all([True, True, False])	======> False
+value_counts() counts how often each distinct value appears. labels = ["cat", "dog", "cat", "cat", "dog", "bird"] ==>labels = ["cat", "dog", "cat", "cat", "dog", "bird"]==>pd.Series(labels).value_counts()
+any([False, True, False])	====> True
+all([True, True, False])	======> False
+average_prices = df.groupby("category")["price"].mean() =need example explanation needed easy to understand in simple mnanner
+3 way=1list comprehension,2. a for loop with append(), 3.and filter() with a lambda function,
+=================CONVERSION ANSWERS=====================
+7th onwards answer
+7.Paragraph → sentences → records → DataFrame → other formats
+Paragraph → sentences (using split() and strip()) → records with IDs (using enumerate() and list comprehension) → DataFrame (using pd.DataFrame()) → dictionary of lists (using to_dict("list")) / NumPy array (using to_numpy()) / JSON string (using json.dumps())
+8.Group of strings → clean records → CSV / JSON
+Group of strings → records (using enumerate()) → DataFrame (using pd.DataFrame()) → trim whitespace (using str.strip()) → remove empty texts (using .ne("") and .loc[]) → remove duplicates (using drop_duplicates()) → CSV / JSON files (using to_csv() / to_json())
+9.Labeled text → DataFrame → numerical features and labels
+Labeled text records → DataFrame (using pd.DataFrame()) → separate text and labels (using df["text"] and df["label"]) → numerical text features (using TfidfVectorizer().fit_transform()) + target array (using to_numpy())
+10.Long document → overlapping chunks → metadata → embeddings
+Document → words (using split()) → overlapping chunks (using list slicing and " ".join()) → records with IDs and source metadata (using enumerate() and dictionaries) → chunk texts (using list comprehension) → NumPy embedding matrix (using model.encode(..., convert_to_numpy=True))
+11.Text batch → token IDs → attention masks → tensors
+Group of strings → token IDs (using tokenizer()) → fixed-length sequences (using padding="max_length", truncation=True, and max_length) + attention masks (generated by the tokenizer) → PyTorch / TensorFlow tensors (using return_tensors="pt" / return_tensors="tf")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+https://chatgpt.com/c/6ae43f67-5828-83e8-bbe0-58bb4a24d45c
+https://chatgpt.com/c/6ae43f67-5828-83e8-bbe0-58bb4a24d45c
+https://chatgpt.com/c/6ae6a2e2-17b0-83e8-976f-2fb6386a5b29
+
+

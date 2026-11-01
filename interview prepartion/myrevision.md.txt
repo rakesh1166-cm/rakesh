@@ -1,0 +1,66 @@
+https://github.com/rakesh1166-cm/rakesh/blob/master/interview%20prepartion/python-interview-qa.md
+1.What are Python's key features, and why is it popular for ML?
+2.How do procedural, functional, and object-oriented programming styles differ in Python, and how can you perform the same task using each style? Present your answer in a table with Programming Style, Main Idea, Common Syntax / Tools, and Example columns. Use doubling the values in a list as the common task.
+3. how python redable and concise syntax
+4. how python Integration with native code
+5.Which Python libraries and tools are commonly used for numerical computing, data preparation, visualization, classical machine learning, deep learning, experimentation, and deployment? Present your answer in a table with Task, Library / Tool, and Purpose columns.
+6. Why is NumPy often faster than Python loops for numerical calculations, and how do vectorized operations improve performance? Explain with a simple example comparing a Python loop with NumPy.
+7. How Does Dynamic Typing Work in Python?
+8.Types belong to objects, not permanently to variable names.
+9.A name can refer to different types over time.
+10.Invalid operations raise errors at runtime.
+12.Type hints are not automatic runtime validation.
+13.What is the difference between mutable and immutable objects?
+
+
+
+
+
+
+
+=================ANSWERS==================
+https://chatgpt.com/c/6ae747aa-47a8-83e8-86e0-053614c7aac9
+1.Readable, concise syntax||Dynamic typing||Multiple programming styles||Cross-platform support||Large ecosystem and community||Integration with native code
+2.Procedural==perform a task step by step	===for, while, variables, functions
+Functional===Transform data using functionsm=====map(), filter(), lambda
+Object-oriented (OOP)===Group data and behavior into objects=====class, objects, attributes, methods
+3.Readable means Python code is easy to understand. Concise means you can complete a task with fewer lines.==>
+Readable: Easy to understand using clear names and indentation; concise: uses list comprehensions and functions like sum() and len() to complete tasks in fewer lines.
+4.Python gives you easy syntax, while native code does the heavy calculations quickly.
+Python can use fast C, C++, or GPU code through libraries like NumPy and PyTorch, so you write simple Python while these libraries handle heavy calculations efficiently.
+Python integrates with native code through libraries that connect Python commands to compiled C, C++, or GPU code.
+5.Numerical computing==NumPy ||Data preparation==pandas ||Visualization	Matplotlib||Classical ML	scikit-learn||Deep learning	PyTorch, TensorFlow||Experimentation	Jupyter notebooks||Deployment	FastAPI
+6.NumPy is often faster than Python loops because it performs calculations on whole arrays using optimized compiled code, reducing Python’s per-element processing overhead. This is called vectorization: for example, array * 2 doubles every value without writing a Python loop, making large numerical calculations faster and simple
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+===============quick revision put in quiz md not mcq=============
+Where does the type belong?	To the object,    not permanently to its variable name
+Can a name refer to different types?	  Yes, through reassignment
+When does an unsupported operation fail?    	When that operation executes
+What is the difference between an object and a name?	The object has identity, type and value; the name refers to it
+Does assigning one list name to another copy the list?	No; both names refer to the same list
+Is reassignment the same as mutation?	No; reassignment changes a binding, while mutation changes an objec

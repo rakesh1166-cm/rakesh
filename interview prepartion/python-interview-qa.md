@@ -2496,6 +2496,57 @@ print(list(labels.unique()))              # ['cat', 'dog', 'bird']
 | `stop` | Index where the slice stops; this position is excluded | End (or past the beginning, when `step` is negative) |
 | `step` | How far to move between elements; cannot be zero | `1` |
 
+### Easy Explanation, Step by Step
+
+List slicing extracts selected elements from a list using `my_list[start:stop:step]`.
+
+**`start`: where to begin** (included)
+
+```python
+numbers = [10, 20, 30, 40, 50, 60]
+print(numbers[2:])  # [30, 40, 50, 60]
+```
+
+Start at index 2, include its element, and continue to the end.
+
+**`stop`: where to finish** (excluded)
+
+```python
+print(numbers[:4])   # [10, 20, 30, 40]  stop before index 4, so 50 is excluded
+print(numbers[1:4])  # [20, 30, 40]      selected indices: 1, 2, 3
+```
+
+**`step`: how far to move each time**
+
+```python
+print(numbers[0:6:2])  # [10, 30, 50]   indices 0, 2, 4
+print(numbers[1:6:2])  # [20, 40, 60]   indices 1, 3, 5
+```
+
+| Slice | Start | Stop (excluded) | Step | Result |
+| --- | --- | --- | --- | --- |
+| `[1:5:1]` | 1 | 5 | 1 | `[20, 30, 40, 50]` |
+| `[1:5:2]` | 1 | 5 | 2 | `[20, 40]` |
+| `[::3]` | Beginning | End | 3 | `[10, 40]` |
+
+The step is the index increment. A step of 2 selects an element, skips one, then selects the next.
+
+**Negative indices** choose positions relative to the end. They do **not** reverse the direction.
+
+```python
+print(numbers[-3:])    # [40, 50, 60]      the last three elements
+print(numbers[:-2])    # [10, 20, 30, 40]  everything except the last two
+print(numbers[-4:-1])  # [30, 40, 50]      start at 30, stop before 60
+```
+
+**A negative step moves backward.** Omitted boundaries then default to starting at the end and continuing backward through the beginning.
+
+```python
+print(numbers[::-1])      # [60, 50, 40, 30, 20, 10]
+print(numbers[5:1:-1])    # [60, 50, 40, 30]   indices 5, 4, 3, 2 (index 1 excluded)
+print(numbers[-1:-5:-2])  # [60, 40]           positions -1, -3 (stop before -5)
+```
+
 ## 1. `start`, `stop`, and `step`
 
 Any of the three parts can be omitted. Omitted parts use their defaults.
@@ -2558,6 +2609,41 @@ print(measurements.indices(len(row)))  # (2, 4, 1)
 
 ## 2. The Stop Index Is Excluded
 
+### Easy Explanation
+
+The stop index is excluded: Python stops **before** that position.
+
+```python
+numbers = [10, 20, 30, 40, 50]
+# Index:    0   1   2   3   4
+
+print(numbers[1:4])  # [20, 30, 40]
+```
+
+| Index | Value | Included? |
+| --- | --- | --- |
+| 1 (start) | 20 | ✅ Yes |
+| 2 | 30 | ✅ Yes |
+| 3 | 40 | ✅ Yes |
+| 4 (stop) | 50 | ❌ No |
+
+To include the element at index 4, use a stop of 5:
+
+```python
+print(numbers[1:5])  # [20, 30, 40, 50]
+```
+
+The rule also applies when slicing backward:
+
+```python
+print(numbers[4:1:-1])  # [50, 40, 30]
+# Index 1, containing 20, is excluded.
+```
+
+> **Remember:** start included, stop excluded.
+
+### Why It's Designed This Way
+
 The element at `stop` is never included. This half-open design has useful consequences:
 
 - `len(items[a:b])` equals `b - a` when `0 <= a <= b <= len(items)`.
@@ -2599,6 +2685,50 @@ print(numbers[2:2])  # []
 ```
 
 ## 3. Negative Indices and Reverse Slicing
+
+### Easy Explanation: They Are Two Different Things
+
+| Feature | Negative indices | Reverse slicing |
+|---|---|---|
+| Purpose | Identify positions relative to the end | Select elements while moving backward |
+| Example | `numbers[-2]` | `numbers[::-1]` |
+| Requires a negative step? | No | Yes |
+| Automatically reverses order? | No | Yes, for the selected elements |
+
+```python
+numbers = [10, 20, 30, 40, 50]
+# Index:    0   1   2   3   4
+# Negative: -5  -4  -3  -2  -1
+```
+
+**Negative indices only change *where* you point. The direction stays forward:**
+
+```python
+print(numbers[-2])     # 40        the second-to-last element
+print(numbers[-2:])    # [40, 50]  the last two, still in forward order
+print(numbers[-3:-1])  # [30, 40]  forward from -3, stop before -1
+```
+
+**Reverse slicing changes the *direction*. It needs a negative step, even with positive indices:**
+
+```python
+print(numbers[::-1])   # [50, 40, 30, 20, 10]  the whole list, backward
+print(numbers[3:0:-1]) # [40, 30, 20]          indices 3, 2, 1 (index 0 excluded)
+```
+
+**You can combine both:** negative indices for the positions and a negative step for the direction.
+
+```python
+print(numbers[-1:-4:-1])  # [50, 40, 30]  positions -1, -2, -3 (stop before -4)
+```
+
+**Common mistake:** expecting negative indices alone to go backward.
+
+```python
+print(numbers[-1:-4])  # []  the step is +1, so it can't move from -1 back to -4
+```
+
+> **Remember:** negative index = position from the end; negative step = move backward.
 
 ### Negative Indices Count from the End
 
