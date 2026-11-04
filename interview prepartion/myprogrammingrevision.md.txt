@@ -15,6 +15,10 @@ What are Python's key features, and why is it popular for ML?
 12.How do you calculate the average price for each category in a Pandas DataFrame?
 13.What is the difference between variance, percentile, value counts, and grouped mean when analyzing a Pandas DataFrame(answer-operation,purpose example in tabular)
 14.How do you filter elements from a given list based on a condition, returning the result as a Python list using different methods?
+15.how to get unique value  from list using set
+16.how to add single element.multiple element,remove elament,remove all element,Combine unique elements,Get common elements,	Check whether all elements exist in another setin sets
+17.How do you find common labels, labels present in the test set but missing from the training set, and all unique labels using Python set operators &, -, and |? Present your answer in a table with Task, Code, and Sorted Output columns.
+18.How do you find common labels, test labels missing from training, and all unique labels from two Python lists by converting them to sets and returning sorted lists? Present your answer in a table with Task, Code, and Result columns.
 
 ================CONVERSION=============================
 1.How do you convert a list, tuple, whole string, string characters, string words, numeric string, and single character into NumPy arrays? Present your answer in a table with Input, Conversion, and Result columns.
@@ -249,6 +253,7 @@ any([False, True, False])	====> True
 all([True, True, False])	======> False
 average_prices = df.groupby("category")["price"].mean() =need example explanation needed easy to understand in simple mnanner
 3 way=1list comprehension,2. a for loop with append(), 3.and filter() with a lambda function,
+numbers = [1, 2, 2, 3, 3, 4] ,unique_values = set(numbers)
 =================CONVERSION ANSWERS=====================
 7th onwards answer
 7.Paragraph → sentences → records → DataFrame → other formats

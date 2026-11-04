@@ -1,7 +1,7 @@
 https://github.com/rakesh1166-cm/rakesh/blob/master/interview%20prepartion/python-interview-qa.md
 1.What are Python's key features, and why is it popular for ML?
 2.How do procedural, functional, and object-oriented programming styles differ in Python, and how can you perform the same task using each style? Present your answer in a table with Programming Style, Main Idea, Common Syntax / Tools, and Example columns. Use doubling the values in a list as the common task.
-3. how python redable and concise syntax
+3.how python redable and concise syntax
 4. how python Integration with native code
 5.Which Python libraries and tools are commonly used for numerical computing, data preparation, visualization, classical machine learning, deep learning, experimentation, and deployment? Present your answer in a table with Task, Library / Tool, and Purpose columns.
 6. Why is NumPy often faster than Python loops for numerical calculations, and how do vectorized operations improve performance? Explain with a simple example comparing a Python loop with NumPy.
@@ -11,12 +11,45 @@ https://github.com/rakesh1166-cm/rakesh/blob/master/interview%20prepartion/pytho
 10.Invalid operations raise errors at runtime.
 12.Type hints are not automatic runtime validation.
 13.What is the difference between mutable and immutable objects?
-
-
-
-
-
-
+14. how  reassignment changes a binding, while mutation changes an object
+15.In-Place Modification vs Reassignment
+16.what do u mean by shared reference
+17.If a tuple is immutable, why can a list inside it still be changed?
+18. Know that dictionary keys must be hashable, and that a tuple containing a list is not hashable.
+19.What is the difference between list, tuple, set, and dict? When do you use each?
+20.Which collections are ordered sequences
+21.list membership is typically O(n), while set and dictionary membership is O(1) on average.
+22.sets need hashable elements and dictionaries need hashable keys.
+23.What is the difference between is and ==?
+24.what is difference between identity and equality
+25.How do you check whether a variable has value or it is miising or absense in Python
+26. what kind of operator is used to compare between data type numbers, strings, lists, and dictionaries
+27.What Is Variable Scope? Explain the LEGB Rule.
+28.in outer function,current fun and current module what variable is used ?
+29.Distinguish global from nonlocal.
+30.what is UnboundLocalError ?
+31.how to check datatype  of None and False and what is result
+32.how to check empty collection "", [], (), {}, set(), range(0)
+33.What is the difference between append() and extend()?
+34.if i add single object then what i use .if i use element of of object then what i use
+35.How do you convert a single character, a word into individual characters, and a string or paragraph into words in a Python list using extend() and split()
+36.How do you add a range of numbers to an  Python list using extend() and range().
+37.How do you add dictionary keys to an  Python list using extend()
+38 how append and extend modify existing or orignal list
+39.How do you remove duplicates from a list while preserving order?
+40. what do u mean by preserving order while removing duplicate
+41.is list(set(items))  Guarantee Order ?
+42.how to get unique values from a pandas Series.
+43.How do you remove duplicate words from a Python list and arrange the unique words alphabetically
+44 how to extracts selected range of elements from a list
+45 what do u mean by start,stop and step 
+46.how stop index is exluded but start index is included
+47.how to reverse print each element of given list
+48.first 3 element ,last 3 element,exclude first elemnt ,exclude last element,exclude first and last elemnt both,	Every second element,print 3rd element onwards
+49.What is the difference between sorted() and .sort()?
+50.How do you sort a list of model dictionaries by accuracy from highest to lowest and return their names as a Python list?
+51. Can step be zero?
+52.
 
 =================ANSWERS==================
 https://chatgpt.com/c/6ae747aa-47a8-83e8-86e0-053614c7aac9
@@ -31,14 +64,107 @@ Python can use fast C, C++, or GPU code through libraries like NumPy and PyTorch
 Python integrates with native code through libraries that connect Python commands to compiled C, C++, or GPU code.
 5.Numerical computing==NumPy ||Data preparation==pandas ||Visualization	Matplotlib||Classical ML	scikit-learn||Deep learning	PyTorch, TensorFlow||Experimentation	Jupyter notebooks||Deployment	FastAPI
 6.NumPy is often faster than Python loops because it performs calculations on whole arrays using optimized compiled code, reducing Python’s per-element processing overhead. This is called vectorization: for example, array * 2 doubles every value without writing a Python loop, making large numerical calculations faster and simple
+13.Mutable = change the existing object like list using append, dict, set, bytearray using append; immutable = create a new object when you need a different value like int, float, bool, str, tuple, frozenset
+14.Binding means a variable name refers to an object. For example, items = [1, 2] binds the name items to that list.
+15.Mutation: Modify an existing list using append(). “In place” means changing the same list.
+Reassignment: Assign a new value to an integer variable. This changes which object the variable refers to.
+16.Shared reference means two variables point to the same object. For example, second = first shares the list, so changing it through either variable is visible through both.
+17. A tuple’s elements cannot be replaced, but a mutable object inside it, such as a list, can still change. For example, record[0].append(3) changes the existing list without replacing it in the tuple.
+18.Dictionary keys must be hashable, meaning their hash value stays stable. A tuple containing a list cannot be a dictionary key because lists are not hashable.
+19.ordered,mutable,duplicate,unique and key value pair
+23.== checks “same contents?”; is checks “same object?”
+24.Equality (==) is like two different dogs having the same name; identity (is) means both references point to the exact same dog.
+25.Use is None
+26. == equality operator
+28.outer=enclosing varible, current fun==local variable,current module=global varible
+29.nonlocal=enclosing varible,global=current module
+30.UnboundLocalError occurs when you try to use a local variable before it has been assigned a value
+31.type(value)|print(type(value)) and result 'NoneType', 'bool',
+32.if not items/result/varible name
+33.append() adds its argument as one element at the end of a list. extend() iterates over its argument and adds each element separately.
+34.single object=append. element of object=extend
+35.items.extend("hello")  || items.extend("I love Python".split())
+36.batch_ids.extend(range(1, 4))  
+37.columns.extend({"age": 30, "income": 5000})
+39. list(dict.fromkeys(numbers)) or  list(set(numbers))
+40.Preserving order means keeping values in the order they first appeared while removing duplicates: [3, 1, 2, 3, 1] becomes [3, 1, 2].
+42.drop_duplicates()	labels.drop_duplicates().tolist() ||unique()	list(labels.unique())
+43.sorted(set(words))
+44  list slicing
+45.my_list[start:stop:step] ||numbers = [10, 20, 30, 40, 50, 60]  ==>print(numbers[0:6:2])  # [10, 30, 50]   indices 0, 2, 4
+47.Use [::-1]
+49.sorted() accepts any iterable and returns a new sorted list. list.sort() sorts an existing list in place and returns 
+mcq which is example reverse elemnt of given the list 
 
 
 
 
+===========possible mcq========================
+https://github.com/rakesh1166-cm/rakesh/blob/master/interview%20prepartion/python-interview-qa.md
+1.print(issubclass(bool, int))   # True
+print(False == 0)              # True
+print(True == 1)               # True
+print(True + True)             # 2
+print(sum([True, False, True]))  # 2
 
+2print(bool("0"))     # True
+print(bool([0]))     # True
+print(bool(-1))      # True
+print(bool(0.0))     # False
 
+3.print(None == False)  # False
+print(None == 0)      # False
+print([] == ())       # False
+print([] == False)    # False
+print(0 == 0.0)       # True
+print(False == 0)     # True
 
+4. a = int("256")
+b = int("256")
+c = int("257")
+d = int("257")
 
+print(a is b)  # True
+print(c is d)  # False
+print(c == d)  # True
+
+5.first = [1, 2]
+second = [1, 2]
+third = first
+
+print(first == second)  # True
+print(first is second)  # False
+print(first is third)   # True
+6. numbers = [1, 2]
+
+try:
+    numbers.extend(3)
+except TypeError as error:
+    print(error)  # 'int' object is not iterable
+7.Call	Result starting from [1, 2]
+append(3)	[1, 2, 3]
+append([3, 4])	[1, 2, [3, 4]]
+extend([3, 4])	[1, 2, 3, 4]
+extend((3, 4))	[1, 2, 3, 4]
+extend("ab")	[1, 2, 'a', 'b']
+extend(3)	TypeError 
+8.  numbers = [1, 2]
+result = numbers.append(3)
+print(result)   # None
+print(numbers)  # [1, 2, 3]
+features = ["age", "income"]
+features = features.extend(["score"])
+
+print(features)  # None
+9.print(numbers[-3:])    # [40, 50, 60]      the last three elements
+print(numbers[:-2])    # [10, 20, 30, 40]  everything except the last two
+print(numbers[-4:-1])  # [30, 40, 50]
+For [-4:-1], start at 30 and stop before 60.
+10.numbers[1:4]	Indices 1, 2 and 3	[20, 30, 40]
+numbers[:3]	From the beginning up to index 3	[10, 20, 30]
+numbers[2:]	From index 2 to the end	[30, 40, 50]
+numbers[::2]	Every second element	[10, 30, 50]
+numbers[1::2]	Every second element, starting at index 1	[20, 40]
 
 
 
