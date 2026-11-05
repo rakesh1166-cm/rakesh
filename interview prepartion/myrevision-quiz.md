@@ -872,11 +872,21 @@ ranked = sorted(models, key=lambda m: m["accuracy"], reverse=True)
 <details>
 <summary>Answer</summary>
 
-Sorting is smallest-first by default. `reverse=True` gives largest-first, for example the highest accuracy at the top.
+Sorting is smallest-first and A to Z by default. `reverse=True` flips it to largest-first and Z to A, for example the highest accuracy at the top.
 
 ```python
 sorted([3, 1, 2])                 # [1, 2, 3]
 sorted([3, 1, 2], reverse=True)   # [3, 2, 1]
+
+sorted(["cat", "apple", "dog"])                 # ['apple', 'cat', 'dog']
+sorted(["cat", "apple", "dog"], reverse=True)   # ['dog', 'cat', 'apple']
+```
+
+Uppercase letters sort before lowercase, so with mixed case use `key=str.lower`:
+
+```python
+sorted(["apple", "Banana", "cherry"], reverse=True)                  # ['cherry', 'apple', 'Banana']
+sorted(["apple", "Banana", "cherry"], key=str.lower, reverse=True)   # ['cherry', 'Banana', 'apple']
 ```
 
 </details>
@@ -1551,11 +1561,11 @@ Python raises a `KeyError`.
 <details>
 <summary>Answer</summary>
 
-| Method | Use when | Example |
-|---|---|---|
-| `get()` | The key is optional and a default is fine | `d.get("age", 0)` |
-| `in` | You need different logic if the key is present | `if "age" in d: ...` |
-| `try/except KeyError` | The key should exist, so missing is unusual | `try: d["age"]`<br>`except KeyError: ...` |
+| Method | Style | Use when | Example |
+|---|---|---|---|
+| `get()` | Default value: no check needed | The key is optional and a default is fine | `d.get("age", 0)` |
+| `in` | LBYL: "Look Before You Leap" (check first) | You need different logic if the key is present | `if "age" in d: ...` |
+| `try/except KeyError` | EAFP: "Easier to Ask Forgiveness than Permission" (try first, handle the error) | The key should exist, so missing is unusual | `try: d["age"]`<br>`except KeyError: ...` |
 
 `d.get("age")` returns `None` both when the key is missing and when its stored value is `None`. Use `in` to tell them apart.
 
@@ -1748,6 +1758,3087 @@ A → new list `[3, 2, 1]` · B → an iterator (wrap it in `list()`) · C → r
 
 </details>
 
+### Python, ML libraries, and programming styles (Q1–6)
+
+**M12.** Why can Python be used for heavy ML work even though pure-Python loops are slow?
+
+- A) Dynamic typing removes the need for type checks
+- B) Python compiles every loop to machine code
+- C) The heavy maths runs in compiled native or GPU code
+- D) The GIL spreads loops across all CPU cores
+
+<details>
+<summary>Answer</summary>
+
+**C) The heavy maths runs in compiled native or GPU code**. Libraries like NumPy and PyTorch do the work in C/C++ or on a GPU. (See Q1, Q4.)
+
+</details>
+
+**M13.** Which of these is NOT one of Python's key features?
+
+- A) Large ecosystem of libraries
+- B) Multiple programming styles
+- C) Cross-platform support
+- D) Every variable must declare a fixed type
+
+<details>
+<summary>Answer</summary>
+
+**D) Every variable must declare a fixed type**. Python is dynamically typed, so variables are never declared with a fixed type. (See Q1.)
+
+</details>
+
+**M14.** What does this print?
+
+```python
+print(list(map(lambda n: n * 2, [1, 2])))
+```
+
+- A) `[1, 2, 1, 2]`
+- B) `[2, 4]`
+- C) `TypeError`
+- D) `[1, 2]`
+
+<details>
+<summary>Answer</summary>
+
+**B) `[2, 4]`**. `map()` applies the lambda to each item. (See Q2.)
+
+</details>
+
+**M15.** `list(map(lambda n: n * 2, nums))` is an example of which style?
+
+- A) Declarative SQL
+- B) Object-oriented
+- C) Functional
+- D) Procedural
+
+<details>
+<summary>Answer</summary>
+
+**C) Functional**. It transforms data with functions instead of changing state step by step. (See Q2.)
+
+</details>
+
+**M16.** Which style groups data and behaviour together using classes?
+
+- A) Functional
+- B) Object-oriented
+- C) Procedural
+- D) Vectorized
+
+<details>
+<summary>Answer</summary>
+
+**B) Object-oriented**. OOP uses classes, objects, attributes, and methods. (See Q2.)
+
+</details>
+
+**M17.** Which line best shows Python being concise?
+
+- A) `count = count + 1`
+- B) `if s > 0: total = total + 1`
+- C) `avg = sum(scores) / len(scores)`
+- D) `for s in scores: total = total + s`
+
+<details>
+<summary>Answer</summary>
+
+**C) `avg = sum(scores) / len(scores)`**. Built-ins finish the whole task in one clear line. (See Q3.)
+
+</details>
+
+**M18.** Which library is the usual choice for loading and cleaning tabular data?
+
+- A) Matplotlib
+- B) PyTorch
+- C) FastAPI
+- D) pandas
+
+<details>
+<summary>Answer</summary>
+
+**D) pandas**. pandas works with DataFrames. (See Q5.)
+
+</details>
+
+**M19.** Which tool is commonly used to serve a trained model as an API?
+
+- A) Jupyter
+- B) FastAPI
+- C) NumPy
+- D) Matplotlib
+
+<details>
+<summary>Answer</summary>
+
+**B) FastAPI**. FastAPI exposes model predictions through HTTP endpoints. (See Q5.)
+
+</details>
+
+**M20.** Which library is the standard choice for classical ML like random forests?
+
+- A) Matplotlib
+- B) pandas
+- C) scikit-learn
+- D) FastAPI
+
+<details>
+<summary>Answer</summary>
+
+**C) scikit-learn**. scikit-learn covers classical ML models and pipelines. (See Q5.)
+
+</details>
+
+**M21.** Which code is vectorized?
+
+- A) `[n * 2 for n in nums]`
+- B) `list(map(lambda n: n * 2, nums))`
+- C) `for n in nums: out.append(n * 2)`
+- D) `arr * 2`
+
+<details>
+<summary>Answer</summary>
+
+**D) `arr * 2`**. The NumPy array operation runs on the whole array in compiled code. (See Q6.)
+
+</details>
+
+**M22.** What does this print?
+
+```python
+print([1, 2] * 2)
+```
+
+- A) `TypeError`
+- B) `[1, 2, 1, 2]`
+- C) `[2, 4]`
+- D) `[1, 2, 2]`
+
+<details>
+<summary>Answer</summary>
+
+**B) `[1, 2, 1, 2]`**. `*` repeats a Python list. A NumPy array would multiply each value and give `[2 4]`. (See Q6.)
+
+</details>
+
+### Dynamic typing and type hints (Q7–12)
+
+**M23.** What does this print?
+
+```python
+x = 5
+x = "hi"
+print(type(x).__name__)
+```
+
+- A) `TypeError`
+- B) `int`
+- C) `object`
+- D) `str`
+
+<details>
+<summary>Answer</summary>
+
+**D) `str`**. The name `x` now refers to a string. The type belongs to the object. (See Q7, Q8, Q9.)
+
+</details>
+
+**M24.** In Python, a type belongs to:
+
+- A) The module
+- B) The line of code
+- C) The object
+- D) The variable name
+
+<details>
+<summary>Answer</summary>
+
+**C) The object**. A name only refers to an object. (See Q8.)
+
+</details>
+
+**M25.** What does this print?
+
+```python
+def f():
+    return "1" + 1
+
+print("defined")
+```
+
+- A) `TypeError`
+- B) `11`
+- C) `defined`
+- D) `SyntaxError`
+
+<details>
+<summary>Answer</summary>
+
+**C) `defined`**. The function body never ran, so the invalid operation hasn't failed yet. (See Q10.)
+
+</details>
+
+**M26.** What does this print?
+
+```python
+print("1" + 1)
+```
+
+- A) `2`
+- B) `ValueError`
+- C) `11`
+- D) `TypeError`
+
+<details>
+<summary>Answer</summary>
+
+**D) `TypeError`**. Python won't mix `str` and `int` with `+`. (See Q10.)
+
+</details>
+
+**M27.** What does this print?
+
+```python
+def double(x: int) -> int:
+    return x * 2
+
+print(double("ab"))
+```
+
+- A) `abab`
+- B) `TypeError`
+- C) `ValueError`
+- D) `None`
+
+<details>
+<summary>Answer</summary>
+
+**A) `abab`**. Type hints aren't enforced at runtime. (See Q12.)
+
+</details>
+
+**M28.** Which tool checks type hints without running the code?
+
+- A) mypy
+- B) pytest-cov
+- C) pandas
+- D) pickle
+
+<details>
+<summary>Answer</summary>
+
+**A) mypy**. mypy is a static type checker. Pydantic validates at runtime. (See Q12.)
+
+</details>
+
+### Mutability and shared references (Q13–18)
+
+**M29.** Which group contains only immutable types?
+
+- A) `int`, `set`, `dict`
+- B) `int`, `str`, `tuple`
+- C) `list`, `dict`, `set`
+- D) `str`, `list`, `tuple`
+
+<details>
+<summary>Answer</summary>
+
+**B) `int`, `str`, `tuple`**. `list`, `dict`, and `set` are mutable. (See Q13.)
+
+</details>
+
+**M30.** What does this print?
+
+```python
+s = "hi"
+s.upper()
+print(s)
+```
+
+- A) `AttributeError`
+- B) `hi`
+- C) `None`
+- D) `HI`
+
+<details>
+<summary>Answer</summary>
+
+**B) `hi`**. Strings are immutable, and the new string `HI` was never saved. (See Q13.)
+
+</details>
+
+**M31.** What does this print?
+
+```python
+a = [1, 2]
+b = a
+b = [9]
+print(a)
+```
+
+- A) `[]`
+- B) `[9]`
+- C) `[1, 2, 9]`
+- D) `[1, 2]`
+
+<details>
+<summary>Answer</summary>
+
+**D) `[1, 2]`**. Reassigning `b` changes only the binding of `b`. (See Q14.)
+
+</details>
+
+**M32.** What does this print?
+
+```python
+a = [1, 2]
+b = a
+b.append(3)
+print(a)
+```
+
+- A) `[1, 2, 3]`
+- B) `[3]`
+- C) `[1, 2]`
+- D) `None`
+
+<details>
+<summary>Answer</summary>
+
+**A) `[1, 2, 3]`**. Both names refer to the same list. (See Q15, Q16.)
+
+</details>
+
+**M33.** What does this print?
+
+```python
+a = [1, 2]
+b = a
+b = b + [3]
+print(a)
+```
+
+- A) `[1, 2, 3]`
+- B) `[1, 2]`
+- C) `None`
+- D) `[3]`
+
+<details>
+<summary>Answer</summary>
+
+**B) `[1, 2]`**. `b + [3]` builds a new list, so `a` doesn't change. (See Q15.)
+
+</details>
+
+**M34.** What does this print?
+
+```python
+a = [1, 2]
+b = a
+b += [3]
+print(a)
+```
+
+- A) `TypeError`
+- B) `[1, 2]`
+- C) `[3]`
+- D) `[1, 2, 3]`
+
+<details>
+<summary>Answer</summary>
+
+**D) `[1, 2, 3]`**. `+=` on a list changes it in place. (See Q15.)
+
+</details>
+
+**M35.** What does this print?
+
+```python
+a = [1, 2]
+b = a.copy()
+b.append(3)
+print(a)
+```
+
+- A) `[3]`
+- B) `[1, 2]`
+- C) `None`
+- D) `[1, 2, 3]`
+
+<details>
+<summary>Answer</summary>
+
+**B) `[1, 2]`**. `copy()` makes a separate list. (See Q16.)
+
+</details>
+
+**M36.** What does this print?
+
+```python
+a = [[1], [2]]
+b = a.copy()
+b[0].append(9)
+print(a)
+```
+
+- A) `[[9], [2]]`
+- B) `[[1, 9], [2]]`
+- C) `[[1], [2]]`
+- D) `TypeError`
+
+<details>
+<summary>Answer</summary>
+
+**B) `[[1, 9], [2]]`**. `copy()` is shallow, so the inner lists are still shared. `copy.deepcopy()` copies those too. (See Q16.)
+
+</details>
+
+**M37.** What does this print?
+
+```python
+t = ([1], 2)
+t[0].append(5)
+print(t)
+```
+
+- A) `([5], 2)`
+- B) `([1], 2)`
+- C) `TypeError`
+- D) `([1, 5], 2)`
+
+<details>
+<summary>Answer</summary>
+
+**D) `([1, 5], 2)`**. The tuple still holds the same list, and that list changed itself. (See Q17.)
+
+</details>
+
+**M38.** What does this print?
+
+```python
+t = (1, 2)
+t[0] = 5
+```
+
+- A) `TypeError`
+- B) `(5, 2)`
+- C) `ValueError`
+- D) `(1, 2)`
+
+<details>
+<summary>Answer</summary>
+
+**A) `TypeError`**. A tuple's items can't be replaced. (See Q17.)
+
+</details>
+
+**M39.** Which of these can be a dictionary key?
+
+- A) `(1, (2, 3))`
+- B) `[1, 2]`
+- C) `(1, [2])`
+- D) `{1: 2}`
+
+<details>
+<summary>Answer</summary>
+
+**A) `(1, (2, 3))`**. A tuple is hashable only if everything inside it is hashable. (See Q18.)
+
+</details>
+
+**M40.** What does this print?
+
+```python
+d = {(1, [2]): "x"}
+```
+
+- A) `ValueError`
+- B) `KeyError`
+- C) `SyntaxError`
+- D) `TypeError`
+
+<details>
+<summary>Answer</summary>
+
+**D) `TypeError`**. The list inside makes the tuple unhashable. (See Q18.)
+
+</details>
+
+### list, tuple, set, and dict (Q19–22)
+
+**M41.** Which collection automatically removes duplicates?
+
+- A) `list`
+- B) `set`
+- C) `tuple`
+- D) `str`
+
+<details>
+<summary>Answer</summary>
+
+**B) `set`**. A set keeps unique values only. (See Q19.)
+
+</details>
+
+**M42.** You need a fixed record that can also be a dictionary key. Which do you choose?
+
+- A) `dict`
+- B) `list`
+- C) `set`
+- D) `tuple`
+
+<details>
+<summary>Answer</summary>
+
+**D) `tuple`**. A tuple is immutable and hashable if its items are. (See Q19.)
+
+</details>
+
+**M43.** What does this print?
+
+```python
+print(len({1, 2, 2, 3}))
+```
+
+- A) `3`
+- B) `2`
+- C) `4`
+- D) `TypeError`
+
+<details>
+<summary>Answer</summary>
+
+**A) `3`**. The duplicate `2` is removed. (See Q19.)
+
+</details>
+
+**M44.** What does this print?
+
+```python
+print(type({}).__name__, type(set()).__name__)
+```
+
+- A) `dict dict`
+- B) `set set`
+- C) `dict set`
+- D) `set dict`
+
+<details>
+<summary>Answer</summary>
+
+**C) `dict set`**. `{}` is an empty dict. Use `set()` for an empty set. (See Q19.)
+
+</details>
+
+**M45.** What does this print?
+
+```python
+print(type((1)).__name__, type((1,)).__name__)
+```
+
+- A) `tuple tuple`
+- B) `tuple int`
+- C) `int tuple`
+- D) `int int`
+
+<details>
+<summary>Answer</summary>
+
+**C) `int tuple`**. The comma makes a tuple, not the brackets. (See Q19.)
+
+</details>
+
+**M46.** Which of these does NOT support indexing like `x[0]`?
+
+- A) `list`
+- B) `tuple`
+- C) `set`
+- D) `str`
+
+<details>
+<summary>Answer</summary>
+
+**C) `set`**. Sets are unordered, so they have no positions. (See Q20.)
+
+</details>
+
+**M47.** Which group contains only ordered sequences?
+
+- A) `list`, `set`, `str`, `range`
+- B) `dict`, `list`, `set`, `tuple`
+- C) `list`, `tuple`, `str`, `range`
+- D) `set`, `dict`, `tuple`, `str`
+
+<details>
+<summary>Answer</summary>
+
+**C) `list`, `tuple`, `str`, `range`**. `dict` keeps insertion order but isn't a sequence, and `set` is unordered. (See Q20.)
+
+</details>
+
+**M48.** What is the average time for `x in some_set`?
+
+- A) O(1)
+- B) O(log n)
+- C) O(n)
+- D) O(n²)
+
+<details>
+<summary>Answer</summary>
+
+**A) O(1)**. Sets use a hash table. (See Q21.)
+
+</details>
+
+**M49.** What is the time for `x in some_list`?
+
+- A) O(log n)
+- B) O(1)
+- C) O(n²)
+- D) O(n)
+
+<details>
+<summary>Answer</summary>
+
+**D) O(n)**. A list is scanned item by item. (See Q21.)
+
+</details>
+
+**M50.** What does this print?
+
+```python
+s = {[1, 2]}
+```
+
+- A) `TypeError`
+- B) `KeyError`
+- C) `{[1, 2]}`
+- D) `{1, 2}`
+
+<details>
+<summary>Answer</summary>
+
+**A) `TypeError`**. Set elements must be hashable, and lists aren't. (See Q22.)
+
+</details>
+
+### Identity, equality, and None (Q23–26, Q31–32)
+
+**M51.** What does this print?
+
+```python
+a = [1]
+b = [1]
+print(a == b, a is b)
+```
+
+- A) `True False`
+- B) `False False`
+- C) `False True`
+- D) `True True`
+
+<details>
+<summary>Answer</summary>
+
+**A) `True False`**. Same contents, but two different objects. (See Q23, Q24.)
+
+</details>
+
+**M52.** What does this print?
+
+```python
+x = 1
+y = 1.0
+print(x == y, x is y)
+```
+
+- A) `True False`
+- B) `False False`
+- C) `True True`
+- D) `False True`
+
+<details>
+<summary>Answer</summary>
+
+**A) `True False`**. The values are equal, but one is an `int` and the other a `float`. (See Q23.)
+
+</details>
+
+**M53.** Which check compares identity?
+
+- A) `a != b`
+- B) `a = b`
+- C) `a is b`
+- D) `a == b`
+
+<details>
+<summary>Answer</summary>
+
+**C) `a is b`**. `is` asks whether both names are the same object. (See Q24.)
+
+</details>
+
+**M54.** What is the correct way to check for None?
+
+- A) `if x:`
+- B) `x = None`
+- C) `x is None`
+- D) `x == None`
+
+<details>
+<summary>Answer</summary>
+
+**C) `x is None`**. `if x:` would also treat `0` and `""` as missing. (See Q25.)
+
+</details>
+
+**M55.** How do you check whether a dict `d` has no key `"k"`?
+
+- A) `d == "k"`
+- B) `not d`
+- C) `"k" not in d`
+- D) `d is None`
+
+<details>
+<summary>Answer</summary>
+
+**C) `"k" not in d`**. `in` checks keys. (See Q25.)
+
+</details>
+
+**M56.** What does this print?
+
+```python
+print([1, 2] == [2, 1], {1, 2} == {2, 1}, {"a": 1, "b": 2} == {"b": 2, "a": 1})
+```
+
+- A) `False True True`
+- B) `False False True`
+- C) `False True False`
+- D) `True True True`
+
+<details>
+<summary>Answer</summary>
+
+**A) `False True True`**. List order matters. Set and dict order doesn't matter for `==`. (See Q26.)
+
+</details>
+
+**M57.** What does this print?
+
+```python
+print("apple" < "banana", [1, 2] < [1, 3])
+```
+
+- A) `False True`
+- B) `True False`
+- C) `TypeError`
+- D) `True True`
+
+<details>
+<summary>Answer</summary>
+
+**D) `True True`**. Strings and lists compare item by item. (See Q26.)
+
+</details>
+
+**M58.** What does this print?
+
+```python
+print({"a": 1} < {"b": 2})
+```
+
+- A) `TypeError`
+- B) `True`
+- C) `KeyError`
+- D) `False`
+
+<details>
+<summary>Answer</summary>
+
+**A) `TypeError`**. Dictionaries support `==` but not `<`. (See Q26.)
+
+</details>
+
+**M59.** What does this print?
+
+```python
+print(type(None).__name__, type(False).__name__)
+```
+
+- A) `object bool`
+- B) `NoneType bool`
+- C) `NoneType int`
+- D) `None bool`
+
+<details>
+<summary>Answer</summary>
+
+**B) `NoneType bool`**. `None` has its own type, `NoneType`. (See Q31.)
+
+</details>
+
+**M60.** What does this print?
+
+```python
+print(not "", not [], not (), not {}, not set(), not range(0))
+```
+
+- A) `True True True True True True`
+- B) `False False False False False False`
+- C) `True True True True False True`
+- D) `True True True False False True`
+
+<details>
+<summary>Answer</summary>
+
+**A) `True True True True True True`**. All empty collections are falsy. (See Q32.)
+
+</details>
+
+**M61.** What does this print?
+
+```python
+print(bool(" "), bool({0}), bool(None))
+```
+
+- A) `True True False`
+- B) `False True False`
+- C) `False False False`
+- D) `True False False`
+
+<details>
+<summary>Answer</summary>
+
+**A) `True True False`**. A space and `{0}` are not empty. `None` is falsy. (See Q32.)
+
+</details>
+
+### Scope and LEGB (Q27–30)
+
+**M62.** What is the order of Python's name lookup?
+
+- A) Local → Global → Enclosing → Built-in
+- B) Built-in → Global → Enclosing → Local
+- C) Global → Local → Enclosing → Built-in
+- D) Local → Enclosing → Global → Built-in
+
+<details>
+<summary>Answer</summary>
+
+**D) Local → Enclosing → Global → Built-in**. This is the LEGB rule. (See Q27.)
+
+</details>
+
+**M63.** What does this print?
+
+```python
+x = 1
+
+def f():
+    x = 2
+
+f()
+print(x)
+```
+
+- A) `2`
+- B) `None`
+- C) `NameError`
+- D) `1`
+
+<details>
+<summary>Answer</summary>
+
+**D) `1`**. `x = 2` creates a separate local variable. (See Q27, Q28.)
+
+</details>
+
+**M64.** What does this print?
+
+```python
+x = 1
+
+def f():
+    print(x)
+
+f()
+```
+
+- A) `NameError`
+- B) `1`
+- C) `UnboundLocalError`
+- D) `None`
+
+<details>
+<summary>Answer</summary>
+
+**B) `1`**. Reading a global name works without any keyword. (See Q27.)
+
+</details>
+
+**M65.** What does this print?
+
+```python
+def outer():
+    x = "enclosing"
+    def inner():
+        return x
+    return inner()
+
+print(outer())
+```
+
+- A) `NameError`
+- B) `local`
+- C) `None`
+- D) `enclosing`
+
+<details>
+<summary>Answer</summary>
+
+**D) `enclosing`**. `inner` finds `x` in the enclosing function. (See Q28.)
+
+</details>
+
+**M66.** Which keyword lets a nested function change a variable in its outer function?
+
+- A) `global`
+- B) `local`
+- C) `outer`
+- D) `nonlocal`
+
+<details>
+<summary>Answer</summary>
+
+**D) `nonlocal`**. `global` targets the module level instead. (See Q29.)
+
+</details>
+
+**M67.** Which keyword lets a function change a module-level variable?
+
+- A) `static`
+- B) `module`
+- C) `nonlocal`
+- D) `global`
+
+<details>
+<summary>Answer</summary>
+
+**D) `global`**. `global` points the name at the module scope. (See Q29.)
+
+</details>
+
+**M68.** What does this print?
+
+```python
+def outer():
+    n = 1
+    def inner():
+        nonlocal n
+        n += 1
+    inner()
+    return n
+
+print(outer())
+```
+
+- A) `None`
+- B) `1`
+- C) `UnboundLocalError`
+- D) `2`
+
+<details>
+<summary>Answer</summary>
+
+**D) `2`**. `nonlocal` updates the enclosing `n`. (See Q29.)
+
+</details>
+
+**M69.** What does this print?
+
+```python
+def outer():
+    n = 1
+    def inner():
+        n = 5
+    inner()
+    return n
+
+print(outer())
+```
+
+- A) `1`
+- B) `UnboundLocalError`
+- C) `None`
+- D) `5`
+
+<details>
+<summary>Answer</summary>
+
+**A) `1`**. Without `nonlocal`, `n = 5` is a new local variable. (See Q29.)
+
+</details>
+
+**M70.** What does this print?
+
+```python
+count = 0
+
+def inc():
+    count += 1
+
+inc()
+```
+
+- A) `UnboundLocalError`
+- B) `NameError`
+- C) `1`
+- D) `TypeError`
+
+<details>
+<summary>Answer</summary>
+
+**A) `UnboundLocalError`**. Assigning makes `count` local, and it's read before it has a value. (See Q30.)
+
+</details>
+
+### append and extend (Q33–38)
+
+**M71.** What does this print?
+
+```python
+a = [1]
+a.append("hi")
+print(a)
+```
+
+- A) `[1, 'h', 'i']`
+- B) `['hi']`
+- C) `[1, 'hi']`
+- D) `TypeError`
+
+<details>
+<summary>Answer</summary>
+
+**C) `[1, 'hi']`**. `append()` adds one element. (See Q33, Q34.)
+
+</details>
+
+**M72.** What does this print?
+
+```python
+a = [1]
+a.extend("hi")
+print(a)
+```
+
+- A) `[1, 'h', 'i']`
+- B) `['hi']`
+- C) `[1, 'hi']`
+- D) `TypeError`
+
+<details>
+<summary>Answer</summary>
+
+**A) `[1, 'h', 'i']`**. `extend()` loops over the string. (See Q33, Q34.)
+
+</details>
+
+**M73.** What does this print?
+
+```python
+a = []
+a.extend("I love AI".split())
+print(a)
+```
+
+- A) `['I', ' ', 'l']`
+- B) `['I', 'love', 'AI']`
+- C) `['I love AI']`
+- D) `None`
+
+<details>
+<summary>Answer</summary>
+
+**B) `['I', 'love', 'AI']`**. `split()` gives words, and `extend()` adds each one. (See Q35.)
+
+</details>
+
+**M74.** What does this print?
+
+```python
+a = [0]
+a.extend(range(1, 3))
+print(a)
+```
+
+- A) `[0, range(1, 3)]`
+- B) `TypeError`
+- C) `[0, 1, 2]`
+- D) `[0, 1, 2, 3]`
+
+<details>
+<summary>Answer</summary>
+
+**C) `[0, 1, 2]`**. `range(1, 3)` gives 1 and 2. (See Q36.)
+
+</details>
+
+**M75.** What does this print?
+
+```python
+a = []
+a.extend({"x": 1, "y": 2})
+print(a)
+```
+
+- A) `TypeError`
+- B) `['x', 'y']`
+- C) `[1, 2]`
+- D) `[('x', 1), ('y', 2)]`
+
+<details>
+<summary>Answer</summary>
+
+**B) `['x', 'y']`**. Looping over a dict gives its keys. (See Q37.)
+
+</details>
+
+**M76.** What does this print?
+
+```python
+a = [1]
+print(a.extend([2]))
+```
+
+- A) `[2]`
+- B) `[1, 2]`
+- C) `TypeError`
+- D) `None`
+
+<details>
+<summary>Answer</summary>
+
+**D) `None`**. `extend()` changes the list and returns `None`. (See Q38.)
+
+</details>
+
+**M77.** What does this print?
+
+```python
+a = [1]
+b = a.append(2)
+print(a, b)
+```
+
+- A) `None None`
+- B) `[1, 2] None`
+- C) `[1, 2] [1, 2]`
+- D) `[1] [1, 2]`
+
+<details>
+<summary>Answer</summary>
+
+**B) `[1, 2] None`**. `append()` changes `a` in place and returns `None`. (See Q38.)
+
+</details>
+
+### Removing duplicates (Q39–43)
+
+**M78.** Which option removes duplicates and keeps first-seen order?
+
+- A) `list(set(items))`
+- B) `list(dict.fromkeys(items))`
+- C) `items.sort()`
+- D) `sorted(set(items))`
+
+<details>
+<summary>Answer</summary>
+
+**B) `list(dict.fromkeys(items))`**. Dict keys are unique and keep insertion order. (See Q39.)
+
+</details>
+
+**M79.** What does this print?
+
+```python
+print(list(dict.fromkeys("banana")))
+```
+
+- A) `['b', 'a', 'n']`
+- B) `['a', 'b', 'n']`
+- C) `['banana']`
+- D) `['b', 'a', 'n', 'a']`
+
+<details>
+<summary>Answer</summary>
+
+**A) `['b', 'a', 'n']`**. Each letter stays where it first appeared. (See Q39, Q40.)
+
+</details>
+
+**M80.** `[3, 1, 2, 3, 1]` after removing duplicates and preserving order is:
+
+- A) `[2, 3, 1]`
+- B) `[3, 1, 2]`
+- C) `[3, 2, 1]`
+- D) `[1, 2, 3]`
+
+<details>
+<summary>Answer</summary>
+
+**B) `[3, 1, 2]`**. Each value keeps its first position. (See Q40.)
+
+</details>
+
+**M81.** Does `list(set(items))` guarantee order?
+
+- A) Yes, always insertion order
+- B) No, sets are unordered
+- C) Only for lists of strings
+- D) Yes, always sorted
+
+<details>
+<summary>Answer</summary>
+
+**B) No, sets are unordered**. Use `dict.fromkeys()` to keep order. (See Q41.)
+
+</details>
+
+**M82.** Which pandas call gives the number of unique values in a Series?
+
+- A) `s.value_counts()`
+- B) `s.count()`
+- C) `s.nunique()`
+- D) `s.unique()`
+
+<details>
+<summary>Answer</summary>
+
+**C) `s.nunique()`**. `unique()` returns the values, and `count()` returns non-null rows. (See Q42.)
+
+</details>
+
+**M83.** What does `s.drop_duplicates()` return for a pandas Series?
+
+- A) A dictionary
+- B) A set
+- C) A Series
+- D) A Python list
+
+<details>
+<summary>Answer</summary>
+
+**C) A Series**. Add `.tolist()` to get a list. (See Q42.)
+
+</details>
+
+**M84.** What does this print?
+
+```python
+print(sorted(set(["pear", "apple", "pear"])))
+```
+
+- A) `['pear', 'apple']`
+- B) `['apple', 'pear']`
+- C) `{'apple', 'pear'}`
+- D) `['apple', 'pear', 'pear']`
+
+<details>
+<summary>Answer</summary>
+
+**B) `['apple', 'pear']`**. `set()` removes duplicates, and `sorted()` returns a sorted list. (See Q43.)
+
+</details>
+
+### Slicing (Q44–48, Q51)
+
+**M85.** What does this print?
+
+```python
+n = [10, 20, 30, 40, 50]
+print(n[1:3])
+```
+
+- A) `[10, 20]`
+- B) `[10, 20, 30]`
+- C) `[20, 30, 40]`
+- D) `[20, 30]`
+
+<details>
+<summary>Answer</summary>
+
+**D) `[20, 30]`**. Start is included, stop is excluded. (See Q44, Q46.)
+
+</details>
+
+**M86.** What does this print?
+
+```python
+n = [10, 20, 30, 40, 50]
+print(n[0:5:2])
+```
+
+- A) `[10, 30]`
+- B) `[20, 40]`
+- C) `[10, 30, 50]`
+- D) `[10, 20]`
+
+<details>
+<summary>Answer</summary>
+
+**C) `[10, 30, 50]`**. The step of 2 takes indices 0, 2, and 4. (See Q45.)
+
+</details>
+
+**M87.** What does this print?
+
+```python
+n = [10, 20, 30, 40, 50]
+print(n[:2] + n[2:] == n)
+```
+
+- A) `True`
+- B) `False`
+- C) `TypeError`
+- D) `None`
+
+<details>
+<summary>Answer</summary>
+
+**A) `True`**. Because stop is excluded, the two slices fit together with no overlap. (See Q46.)
+
+</details>
+
+**M88.** What does this print?
+
+```python
+n = [10, 20, 30]
+print(n[::-1])
+```
+
+- A) `[10, 20, 30]`
+- B) `ValueError`
+- C) `[30, 20, 10]`
+- D) `[30]`
+
+<details>
+<summary>Answer</summary>
+
+**C) `[30, 20, 10]`**. A step of `-1` walks backwards. (See Q47.)
+
+</details>
+
+**M89.** What does this print?
+
+```python
+n = [1, 2, 3]
+print(n.reverse())
+```
+
+- A) `[1, 2, 3]`
+- B) `[3, 2, 1]`
+- C) `TypeError`
+- D) `None`
+
+<details>
+<summary>Answer</summary>
+
+**D) `None`**. `reverse()` works in place and returns `None`. (See Q47.)
+
+</details>
+
+**M90.** What does this print?
+
+```python
+n = [10, 20, 30, 40, 50]
+print(n[-2:])
+```
+
+- A) `[50]`
+- B) `[40, 50]`
+- C) `[10, 20, 30]`
+- D) `[10, 20]`
+
+<details>
+<summary>Answer</summary>
+
+**B) `[40, 50]`**. `-2` starts at the second-last item. (See Q48.)
+
+</details>
+
+**M91.** What does this print?
+
+```python
+n = [10, 20, 30, 40, 50]
+print(n[1:-1])
+```
+
+- A) `[20, 30, 40, 50]`
+- B) `[20, 30, 40]`
+- C) `[10, 20, 30, 40]`
+- D) `[30]`
+
+<details>
+<summary>Answer</summary>
+
+**B) `[20, 30, 40]`**. This removes the first and last items. (See Q48.)
+
+</details>
+
+**M92.** What does this print?
+
+```python
+n = [10, 20]
+print(n[5:])
+```
+
+- A) `[]`
+- B) `IndexError`
+- C) `None`
+- D) `[10, 20]`
+
+<details>
+<summary>Answer</summary>
+
+**A) `[]`**. Slices never go out of range. `n[5]` would raise `IndexError`. (See Q44.)
+
+</details>
+
+**M93.** What does this print?
+
+```python
+n = [10, 20, 30, 40, 50]
+print(n[4:1:-1])
+```
+
+- A) `[50, 40, 30, 20]`
+- B) `[40, 30, 20]`
+- C) `[]`
+- D) `[50, 40, 30]`
+
+<details>
+<summary>Answer</summary>
+
+**D) `[50, 40, 30]`**. It goes backwards from index 4 and stops before index 1. (See Q45.)
+
+</details>
+
+**M94.** What does this print?
+
+```python
+print("python"[::2])
+```
+
+- A) `yhn`
+- B) `pto`
+- C) `python`
+- D) `nohtyp`
+
+<details>
+<summary>Answer</summary>
+
+**B) `pto`**. Strings can be sliced too. (See Q45.)
+
+</details>
+
+**M95.** What does this print?
+
+```python
+a = [1, 2, 3]
+b = a[:]
+b[0] = 9
+print(a)
+```
+
+- A) `[9]`
+- B) `[9, 2, 3]`
+- C) `[1, 2, 3]`
+- D) `TypeError`
+
+<details>
+<summary>Answer</summary>
+
+**C) `[1, 2, 3]`**. `a[:]` makes a shallow copy. (See Q16, Q44.)
+
+</details>
+
+**M96.** What does this print?
+
+```python
+print([1, 2, 3][::0])
+```
+
+- A) `[1, 2, 3]`
+- B) `TypeError`
+- C) `ValueError`
+- D) `[]`
+
+<details>
+<summary>Answer</summary>
+
+**C) `ValueError`**. A slice step can't be zero. (See Q51.)
+
+</details>
+
+### Sorting (Q49–59)
+
+**M97.** What does this print?
+
+```python
+a = [3, 1, 2]
+r = a.sort()
+print(r, a)
+```
+
+- A) `[1, 2, 3] [1, 2, 3]`
+- B) `None [1, 2, 3]`
+- C) `[1, 2, 3] [3, 1, 2]`
+- D) `None [3, 1, 2]`
+
+<details>
+<summary>Answer</summary>
+
+**B) `None [1, 2, 3]`**. `.sort()` works in place and returns `None`. (See Q49.)
+
+</details>
+
+**M98.** What does this print?
+
+```python
+a = [3, 1]
+print(sorted(a), a)
+```
+
+- A) `[3, 1] [1, 3]`
+- B) `None [1, 3]`
+- C) `[1, 3] [3, 1]`
+- D) `[1, 3] [1, 3]`
+
+<details>
+<summary>Answer</summary>
+
+**C) `[1, 3] [3, 1]`**. `sorted()` returns a new list. (See Q49.)
+
+</details>
+
+**M99.** Which types have a `.sort()` method?
+
+- A) `list` and `set`
+- B) `list` and `tuple`
+- C) All iterables
+- D) Only `list`
+
+<details>
+<summary>Answer</summary>
+
+**D) Only `list`**. `sorted()` works on any iterable, but `.sort()` belongs to lists. (See Q49.)
+
+</details>
+
+**M100.** What does this print?
+
+```python
+m = [{"n": "a", "acc": 0.8}, {"n": "b", "acc": 0.9}]
+print([x["n"] for x in sorted(m, key=lambda x: x["acc"], reverse=True)])
+```
+
+- A) `['b', 'a']`
+- B) `KeyError`
+- C) `[0.9, 0.8]`
+- D) `['a', 'b']`
+
+<details>
+<summary>Answer</summary>
+
+**A) `['b', 'a']`**. Sort by accuracy, highest first, then pick out the names. (See Q50, Q56.)
+
+</details>
+
+**M101.** What does this print?
+
+```python
+d = {"a": 2, "b": 1}
+print(sorted(d, key=d.get))
+```
+
+- A) `['a', 'b']`
+- B) `[('b', 1), ('a', 2)]`
+- C) `['b', 'a']`
+- D) `[1, 2]`
+
+<details>
+<summary>Answer</summary>
+
+**C) `['b', 'a']`**. Sorting a dict gives keys, ordered here by their values. (See Q52.)
+
+</details>
+
+**M102.** What does this print?
+
+```python
+print(type(sorted("cab")).__name__, type(sorted((2, 1))).__name__)
+```
+
+- A) `str tuple`
+- B) `str list`
+- C) `list tuple`
+- D) `list list`
+
+<details>
+<summary>Answer</summary>
+
+**D) `list list`**. `sorted()` always returns a list. (See Q53.)
+
+</details>
+
+**M103.** What does this print?
+
+```python
+print("".join(sorted("cab")))
+```
+
+- A) `['a', 'b', 'c']`
+- B) `abc`
+- C) `TypeError`
+- D) `cab`
+
+<details>
+<summary>Answer</summary>
+
+**B) `abc`**. `join()` turns the sorted list back into a string. (See Q53.)
+
+</details>
+
+**M104.** What does this print?
+
+```python
+print(sorted(["b", "A", "C"]))
+```
+
+- A) `['b', 'C', 'A']`
+- B) `TypeError`
+- C) `['A', 'C', 'b']`
+- D) `['A', 'b', 'C']`
+
+<details>
+<summary>Answer</summary>
+
+**C) `['A', 'C', 'b']`**. Uppercase letters sort before lowercase. (See Q54.)
+
+</details>
+
+**M105.** What does this print?
+
+```python
+print(sorted(["b", "A", "C"], key=str.lower))
+```
+
+- A) `['a', 'b', 'c']`
+- B) `['A', 'b', 'C']`
+- C) `TypeError`
+- D) `['A', 'C', 'b']`
+
+<details>
+<summary>Answer</summary>
+
+**B) `['A', 'b', 'C']`**. The key only changes the comparison. Items stay unchanged. (See Q54.)
+
+</details>
+
+**M106.** What does this print?
+
+```python
+print(sorted(["10", "9", "100"]))
+```
+
+- A) `['10', '100', '9']`
+- B) `[9, 10, 100]`
+- C) `['9', '10', '100']`
+- D) `['100', '10', '9']`
+
+<details>
+<summary>Answer</summary>
+
+**A) `['10', '100', '9']`**. Strings compare character by character. (See Q54.)
+
+</details>
+
+**M107.** What does this print?
+
+```python
+print(sorted(["10", "9", "100"], key=int))
+```
+
+- A) `['10', '100', '9']`
+- B) `TypeError`
+- C) `['9', '10', '100']`
+- D) `[9, 10, 100]`
+
+<details>
+<summary>Answer</summary>
+
+**C) `['9', '10', '100']`**. It sorts by number, but the items stay as strings. (See Q54.)
+
+</details>
+
+**M108.** What does this print?
+
+```python
+print(sorted(["kiwi", "fig", "pear"], key=len))
+```
+
+- A) `['fig', 'kiwi', 'pear']`
+- B) `['fig', 'pear', 'kiwi']`
+- C) `['kiwi', 'pear', 'fig']`
+- D) `['kiwi', 'fig', 'pear']`
+
+<details>
+<summary>Answer</summary>
+
+**A) `['fig', 'kiwi', 'pear']`**. Python's sort is stable, so `kiwi` stays before `pear`. (See Q54.)
+
+</details>
+
+**M109.** What does this print?
+
+```python
+print(sorted([1, "a"]))
+```
+
+- A) `ValueError`
+- B) `TypeError`
+- C) `['a', 1]`
+- D) `[1, 'a']`
+
+<details>
+<summary>Answer</summary>
+
+**B) `TypeError`**. `int` and `str` can't be compared. (See Q54.)
+
+</details>
+
+**M110.** What does this print?
+
+```python
+d = {"b": 1, "a": 2}
+print(sorted(d))
+```
+
+- A) `['b', 'a']`
+- B) `[('a', 2), ('b', 1)]`
+- C) `[1, 2]`
+- D) `['a', 'b']`
+
+<details>
+<summary>Answer</summary>
+
+**D) `['a', 'b']`**. Sorting a dict sorts its keys only. (See Q55.)
+
+</details>
+
+**M111.** What does this print?
+
+```python
+d = {"a": 3, "b": 1}
+print(dict(sorted(d.items(), key=lambda p: p[1])))
+```
+
+- A) `{'a': 3, 'b': 1}`
+- B) `['b', 'a']`
+- C) `[('b', 1), ('a', 3)]`
+- D) `{'b': 1, 'a': 3}`
+
+<details>
+<summary>Answer</summary>
+
+**D) `{'b': 1, 'a': 3}`**. `p[1]` is the value, and `dict()` rebuilds a dictionary. (See Q55.)
+
+</details>
+
+**M112.** What does this print?
+
+```python
+print(sorted(["cat", "dog", "apple"], reverse=True))
+```
+
+- A) `['apple', 'dog', 'cat']`
+- B) `['dog', 'cat', 'apple']`
+- C) `['cat', 'dog', 'apple']`
+- D) `['apple', 'cat', 'dog']`
+
+<details>
+<summary>Answer</summary>
+
+**B) `['dog', 'cat', 'apple']`**. `reverse=True` gives Z to A. (See Q57.)
+
+</details>
+
+**M113.** What does this print?
+
+```python
+print(sum(c in "aeiou" for c in "apple"))
+```
+
+- A) `TypeError`
+- B) `1`
+- C) `5`
+- D) `2`
+
+<details>
+<summary>Answer</summary>
+
+**D) `2`**. Each `True` counts as 1, so `sum()` counts the vowels. (See Q58.)
+
+</details>
+
+**M114.** What does this print?
+
+```python
+print(sorted(["java", "Python"], key=lambda w: "py" not in w.lower()))
+```
+
+- A) `['java', 'Python']`
+- B) `TypeError`
+- C) `[False, True]`
+- D) `['Python', 'java']`
+
+<details>
+<summary>Answer</summary>
+
+**D) `['Python', 'java']`**. `False` sorts before `True`, so words containing "py" go first. (See Q58, Q59.)
+
+</details>
+
+**M115.** What does this print?
+
+```python
+d = {"a12": 1, "abc": 2}
+print(dict(sorted(d.items(), key=lambda p: sum(c.isdigit() for c in p[0]))))
+```
+
+- A) `['abc', 'a12']`
+- B) `TypeError`
+- C) `{'abc': 2, 'a12': 1}`
+- D) `{'a12': 1, 'abc': 2}`
+
+<details>
+<summary>Answer</summary>
+
+**C) `{'abc': 2, 'a12': 1}`**. `abc` has 0 digits, and `a12` has 2. (See Q59.)
+
+</details>
+
+### Sorting by multiple criteria (Q60–67)
+
+**M116.** What does this print?
+
+```python
+rows = [("a", 2), ("b", 1), ("c", 2)]
+print(sorted(rows, key=lambda t: (-t[1], t[0])))
+```
+
+- A) `[('c', 2), ('a', 2), ('b', 1)]`
+- B) `[('b', 1), ('a', 2), ('c', 2)]`
+- C) `TypeError`
+- D) `[('a', 2), ('c', 2), ('b', 1)]`
+
+<details>
+<summary>Answer</summary>
+
+**D) `[('a', 2), ('c', 2), ('b', 1)]`**. Highest number first, then A to Z. (See Q60.)
+
+</details>
+
+**M117.** What does this print?
+
+```python
+print(sorted([True, False, True]))
+```
+
+- A) `[True, False, True]`
+- B) `[True, True, False]`
+- C) `TypeError`
+- D) `[False, True, True]`
+
+<details>
+<summary>Answer</summary>
+
+**D) `[False, True, True]`**. `False` is 0 and `True` is 1. (See Q61.)
+
+</details>
+
+**M118.** Which key puts in-stock products first?
+
+- A) `p["in_stock"]`
+- B) `not p["in_stock"]`
+- C) `len(p)`
+- D) `-p["price"]`
+
+<details>
+<summary>Answer</summary>
+
+**B) `not p["in_stock"]`**. Items in stock get `False`, which sorts first. (See Q61.)
+
+</details>
+
+**M119.** In a sort key, how do you put the highest severity first?
+
+- A) `-t["severity"]`
+- B) `t["severity"][::-1]`
+- C) `t["severity"]`
+- D) `not t["severity"]`
+
+<details>
+<summary>Answer</summary>
+
+**A) `-t["severity"]`**. The minus sign flips number order. (See Q62.)
+
+</details>
+
+**M120.** Why do ISO dates like `"2026-01-05"` sort correctly as plain text?
+
+- A) Year, month, and day run from largest to smallest unit
+- B) Dashes are ignored while sorting
+- C) Strings sort by length first
+- D) Python detects dates automatically
+
+<details>
+<summary>Answer</summary>
+
+**A) Year, month, and day run from largest to smallest unit**. Text comparison goes left to right, the same order as date size. (See Q62, Q66.)
+
+</details>
+
+**M121.** What is the best key for department, last name, then first name, all A to Z?
+
+- A) `[-e["dept"], e["last"]]`
+- B) `(e["dept"], e["last"], e["first"])`
+- C) `len(e["dept"])`
+- D) `e["dept"] + e["last"]`
+
+<details>
+<summary>Answer</summary>
+
+**B) `(e["dept"], e["last"], e["first"])`**. A tuple key compares each part in turn. (See Q63.)
+
+</details>
+
+**M122.** What does this print?
+
+```python
+print(sorted(["a"], key=lambda s: -s))
+```
+
+- A) `[]`
+- B) `['a']`
+- C) `TypeError`
+- D) `ValueError`
+
+<details>
+<summary>Answer</summary>
+
+**C) `TypeError`**. You can't negate a string, so use `reverse=True` or a separate sort pass. (See Q64.)
+
+</details>
+
+**M123.** Sort key for highest rating first, then cheapest, then shortest:
+
+- A) `(t["rating"], -t["price"], -t["days"])`
+- B) `(-t["rating"], t["price"], t["days"])`
+- C) `(t["rating"], t["price"], t["days"])`
+- D) `(-t["rating"], -t["price"], -t["days"])`
+
+<details>
+<summary>Answer</summary>
+
+**B) `(-t["rating"], t["price"], t["days"])`**. Only the rating needs reversing. (See Q64.)
+
+</details>
+
+**M124.** Sort key for exact matches first, then highest score, then title A to Z:
+
+- A) `(r["exact"], -r["score"], r["title"])`
+- B) `(not r["exact"], -r["score"], r["title"])`
+- C) `(not r["exact"], r["score"], -r["title"])`
+- D) `(r["exact"], r["score"], r["title"])`
+
+<details>
+<summary>Answer</summary>
+
+**B) `(not r["exact"], -r["score"], r["title"])`**. Use `not` for True-first and a minus sign for highest-first. (See Q65.)
+
+</details>
+
+**M125.** Date and ID must both go highest first, and the date is a string. What do you use?
+
+- A) `key=lambda o: (o["date"], o["id"]), reverse=True`
+- B) `key=lambda o: not o["date"]`
+- C) `key=lambda o: (o["date"], -o["id"])`
+- D) `key=lambda o: (-o["date"], -o["id"])`
+
+<details>
+<summary>Answer</summary>
+
+**A) `key=lambda o: (o["date"], o["id"]), reverse=True`**. `reverse=True` flips the whole tuple, and a date string can't be negated. (See Q66.)
+
+</details>
+
+**M126.** What does this print?
+
+```python
+order = {"blocked": 0, "todo": 1, "done": 2}
+print(sorted(["done", "blocked", "todo"], key=lambda s: order[s]))
+```
+
+- A) `['done', 'todo', 'blocked']`
+- B) `['blocked', 'done', 'todo']`
+- C) `[0, 1, 2]`
+- D) `['blocked', 'todo', 'done']`
+
+<details>
+<summary>Answer</summary>
+
+**D) `['blocked', 'todo', 'done']`**. The dict gives each status its position. (See Q67.)
+
+</details>
+
+### Dictionaries and complexity (Q68–70)
+
+**M127.** What does this print?
+
+```python
+d = {}
+d["z"] = 1
+d["a"] = 2
+print(list(d), sorted(d))
+```
+
+- A) `['z', 'a'] ['z', 'a']`
+- B) `['z', 'a'] ['a', 'z']`
+- C) `[1, 2] ['a', 'z']`
+- D) `['a', 'z'] ['a', 'z']`
+
+<details>
+<summary>Answer</summary>
+
+**B) `['z', 'a'] ['a', 'z']`**. Insertion order isn't the same as sorted order. (See Q68.)
+
+</details>
+
+**M128.** What is the time to insert at the beginning of a list?
+
+- A) O(1)
+- B) O(log n)
+- C) O(n)
+- D) O(n²)
+
+<details>
+<summary>Answer</summary>
+
+**C) O(n)**. Every existing item has to shift right. (See Q69.)
+
+</details>
+
+**M129.** What is the amortized time of `list.append()`?
+
+- A) O(log n)
+- B) O(1)
+- C) O(n)
+- D) O(n²)
+
+<details>
+<summary>Answer</summary>
+
+**B) O(1)**. A resize is only needed occasionally. (See Q69.)
+
+</details>
+
+**M130.** Which operation is slowest on a large list?
+
+- A) `items.append(1)`
+- B) `items[5]`
+- C) `items.pop(0)`
+- D) `items.pop()`
+
+<details>
+<summary>Answer</summary>
+
+**C) `items.pop(0)`**. `pop(0)` shifts every remaining item left. (See Q69.)
+
+</details>
+
+**M131.** What is the average time to look up, insert, or delete by key in a dict?
+
+- A) O(1)
+- B) O(log n)
+- C) O(n)
+- D) O(n log n)
+
+<details>
+<summary>Answer</summary>
+
+**A) O(1)**. Dicts use a hash table. The worst case is O(n). (See Q69.)
+
+</details>
+
+**M132.** Why can't a list be a dict key?
+
+- A) It's mutable, so it's unhashable
+- B) Keys must be strings
+- C) Lists have no order
+- D) It's too large to store
+
+<details>
+<summary>Answer</summary>
+
+**A) It's mutable, so it's unhashable**. A key's hash must stay stable. Use a tuple instead. (See Q70.)
+
+</details>
+
+### Creating dictionaries and lists (Q71–82)
+
+**M133.** What does this print?
+
+```python
+print({"a": 1, "a": 2})
+```
+
+- A) `KeyError`
+- B) `{'a': 1}`
+- C) `{'a': [1, 2]}`
+- D) `{'a': 2}`
+
+<details>
+<summary>Answer</summary>
+
+**D) `{'a': 2}`**. The last value wins for a repeated key. (See Q71.)
+
+</details>
+
+**M134.** What does this print?
+
+```python
+print(dict(zip(["a", "b"], [1, 2, 3])))
+```
+
+- A) `TypeError`
+- B) `{'a': 1, 'b': 2, None: 3}`
+- C) `ValueError`
+- D) `{'a': 1, 'b': 2}`
+
+<details>
+<summary>Answer</summary>
+
+**D) `{'a': 1, 'b': 2}`**. `zip()` stops at the shortest input. (See Q71.)
+
+</details>
+
+**M135.** What does this print?
+
+```python
+print(dict(enumerate("ab")))
+```
+
+- A) `{'a': 0, 'b': 1}`
+- B) `{0: 'a', 1: 'b'}`
+- C) `{1: 'a', 2: 'b'}`
+- D) `['a', 'b']`
+
+<details>
+<summary>Answer</summary>
+
+**B) `{0: 'a', 1: 'b'}`**. `enumerate()` gives `(index, item)` pairs. (See Q71, Q81.)
+
+</details>
+
+**M136.** What does this print?
+
+```python
+print(dict.fromkeys(["a", "b"], 0))
+```
+
+- A) `{'a': 0, 'b': 0}`
+- B) `{0: 'a', 0: 'b'}`
+- C) `{'a': 0}`
+- D) `TypeError`
+
+<details>
+<summary>Answer</summary>
+
+**A) `{'a': 0, 'b': 0}`**. Every key gets the same default value. (See Q71.)
+
+</details>
+
+**M137.** What does this print?
+
+```python
+from collections import Counter
+print(Counter("aab")["a"])
+```
+
+- A) `1`
+- B) `3`
+- C) `KeyError`
+- D) `2`
+
+<details>
+<summary>Answer</summary>
+
+**D) `2`**. `Counter` counts repeated items. (See Q71.)
+
+</details>
+
+**M138.** What does this print?
+
+```python
+import json
+print(json.loads('{"a": 1}')["a"])
+```
+
+- A) `{'a': 1}`
+- B) `a`
+- C) `KeyError`
+- D) `1`
+
+<details>
+<summary>Answer</summary>
+
+**D) `1`**. `json.loads()` turns a JSON string into a dict. (See Q71.)
+
+</details>
+
+**M139.** What does this print?
+
+```python
+d = dict.fromkeys(["a", "b"], [])
+d["a"].append(1)
+print(d)
+```
+
+- A) `{'a': [1], 'b': []}`
+- B) `KeyError`
+- C) `{'a': [1], 'b': [1]}`
+- D) `{'a': 1, 'b': []}`
+
+<details>
+<summary>Answer</summary>
+
+**C) `{'a': [1], 'b': [1]}`**. Every key shares the same list. (See Q72.)
+
+</details>
+
+**M140.** What does this print?
+
+```python
+d = {k: [] for k in ["a", "b"]}
+d["a"].append(1)
+print(d)
+```
+
+- A) `KeyError`
+- B) `{'a': [1], 'b': [1]}`
+- C) `{'a': [1], 'b': []}`
+- D) `{'a': 1, 'b': []}`
+
+<details>
+<summary>Answer</summary>
+
+**C) `{'a': [1], 'b': []}`**. The comprehension makes a new list for each key. (See Q72.)
+
+</details>
+
+**M141.** What does this print?
+
+```python
+print({n: n * n for n in [1, 2, 3]})
+```
+
+- A) `{1: 2, 2: 4, 3: 6}`
+- B) `{1: 1, 2: 4, 3: 9}`
+- C) `[1, 4, 9]`
+- D) `{1, 4, 9}`
+
+<details>
+<summary>Answer</summary>
+
+**B) `{1: 1, 2: 4, 3: 9}`**. Each number becomes a key, and its square the value. (See Q73.)
+
+</details>
+
+**M142.** What does this print?
+
+```python
+print({w: len(w) for w in ["hi", "hey"]})
+```
+
+- A) `{'hi': 2, 'hey': 3}`
+- B) `[2, 3]`
+- C) `{2: 'hi', 3: 'hey'}`
+- D) `{'hi': 3, 'hey': 3}`
+
+<details>
+<summary>Answer</summary>
+
+**A) `{'hi': 2, 'hey': 3}`**. Each word becomes a key, and its length the value. (See Q74.)
+
+</details>
+
+**M143.** What does this print?
+
+```python
+users = [{"id": 7, "name": "Asha"}]
+print({u["id"]: u for u in users}[7]["name"])
+```
+
+- A) `KeyError`
+- B) `TypeError`
+- C) `7`
+- D) `Asha`
+
+<details>
+<summary>Answer</summary>
+
+**D) `Asha`**. Now users can be found directly by ID. (See Q75.)
+
+</details>
+
+**M144.** What does this print?
+
+```python
+print({k: v for k, v in {"a": 40, "b": 60}.items() if v >= 60})
+```
+
+- A) `{'a': 40, 'b': 60}`
+- B) `{'b': 60}`
+- C) `{}`
+- D) `{'a': 40}`
+
+<details>
+<summary>Answer</summary>
+
+**B) `{'b': 60}`**. The `if` at the end filters entries. (See Q76, Q80.)
+
+</details>
+
+**M145.** What does this print?
+
+```python
+print(list({"a": 1}))
+```
+
+- A) `[1]`
+- B) `TypeError`
+- C) `['a']`
+- D) `[('a', 1)]`
+
+<details>
+<summary>Answer</summary>
+
+**C) `['a']`**. A dict gives its keys when you loop over it. (See Q77.)
+
+</details>
+
+**M146.** What does this print?
+
+```python
+print(list("hi"), list(range(2)))
+```
+
+- A) `['hi'] [0, 1]`
+- B) `['hi'] [2]`
+- C) `['h', 'i'] [0, 1]`
+- D) `['h', 'i'] [1, 2]`
+
+<details>
+<summary>Answer</summary>
+
+**C) `['h', 'i'] [0, 1]`**. `list()` loops over any iterable. (See Q77.)
+
+</details>
+
+**M147.** What does this print?
+
+```python
+print([1, 2] + [3])
+```
+
+- A) `[1, 2, [3]]`
+- B) `TypeError`
+- C) `[4, 5]`
+- D) `[1, 2, 3]`
+
+<details>
+<summary>Answer</summary>
+
+**D) `[1, 2, 3]`**. `+` joins two lists into a new one. (See Q77.)
+
+</details>
+
+**M148.** What does this print?
+
+```python
+print([int(n) for n in "1,2".split(",")])
+```
+
+- A) `[12]`
+- B) `['1', '2']`
+- C) `[1, 2]`
+- D) `ValueError`
+
+<details>
+<summary>Answer</summary>
+
+**C) `[1, 2]`**. `split()` gives strings, and `int()` converts each one. (See Q78.)
+
+</details>
+
+**M149.** What does this print?
+
+```python
+print([x * 2 for x in range(3) if x])
+```
+
+- A) `[2]`
+- B) `[2, 4]`
+- C) `[0, 2, 4]`
+- D) `[0, 1, 2]`
+
+<details>
+<summary>Answer</summary>
+
+**B) `[2, 4]`**. `0` is falsy, so it's skipped. (See Q78.)
+
+</details>
+
+**M150.** What does this print?
+
+```python
+print(sorted(set(["dog", "cat", "dog"])))
+```
+
+- A) `['dog', 'cat']`
+- B) `{'cat', 'dog'}`
+- C) `['cat', 'dog', 'dog']`
+- D) `['cat', 'dog']`
+
+<details>
+<summary>Answer</summary>
+
+**D) `['cat', 'dog']`**. Remove duplicates, then sort. (See Q79.)
+
+</details>
+
+**M151.** What does this print?
+
+```python
+print({label: i for i, label in enumerate(["cat", "dog"])})
+```
+
+- A) `{'cat': 1, 'dog': 2}`
+- B) `{0: 'cat', 1: 'dog'}`
+- C) `['cat', 'dog']`
+- D) `{'cat': 0, 'dog': 1}`
+
+<details>
+<summary>Answer</summary>
+
+**D) `{'cat': 0, 'dog': 1}`**. Labels become keys, and positions become IDs. (See Q81.)
+
+</details>
+
+**M152.** What does this print?
+
+```python
+print({v: k for k, v in {"a": 1, "b": 2}.items()})
+```
+
+- A) `{'a': 1, 'b': 2}`
+- B) `{1: 2}`
+- C) `TypeError`
+- D) `{1: 'a', 2: 'b'}`
+
+<details>
+<summary>Answer</summary>
+
+**D) `{1: 'a', 2: 'b'}`**. Swapping `k` and `v` inverts the dictionary. (See Q82.)
+
+</details>
+
+**M153.** What does this print?
+
+```python
+print({c: 1 for c in "aab"})
+```
+
+- A) `{'a': 1, 'b': 1}`
+- B) `{'a': 2, 'b': 1}`
+- C) `['a', 'a', 'b']`
+- D) `{'a': 1, 'a': 1, 'b': 1}`
+
+<details>
+<summary>Answer</summary>
+
+**A) `{'a': 1, 'b': 1}`**. Repeated keys collapse into one. (See Q82.)
+
+</details>
+
+### enumerate, zip, and unpacking (Q83–93)
+
+**M154.** What does this print?
+
+```python
+print(list(enumerate(["a", "b"], start=1)))
+```
+
+- A) `[(1, 'a'), (2, 'b')]`
+- B) `[('a', 1), ('b', 2)]`
+- C) `{1: 'a', 2: 'b'}`
+- D) `[(0, 'a'), (1, 'b')]`
+
+<details>
+<summary>Answer</summary>
+
+**A) `[(1, 'a'), (2, 'b')]`**. `start=1` sets the first number. (See Q83.)
+
+</details>
+
+**M155.** What does this print?
+
+```python
+print(list(zip([1, 2], "abc")))
+```
+
+- A) `[(1, 'a'), (2, 'b')]`
+- B) `[(1, 'a'), (2, 'b'), (None, 'c')]`
+- C) `[1, 2, 'a', 'b', 'c']`
+- D) `ValueError`
+
+<details>
+<summary>Answer</summary>
+
+**A) `[(1, 'a'), (2, 'b')]`**. Without `strict=True`, `zip()` silently drops the extra item. (See Q84.)
+
+</details>
+
+**M156.** What does this print?
+
+```python
+print(list(zip([1, 2], "abc", strict=True)))
+```
+
+- A) `TypeError`
+- B) `IndexError`
+- C) `[(1, 'a'), (2, 'b')]`
+- D) `ValueError`
+
+<details>
+<summary>Answer</summary>
+
+**D) `ValueError`**. `strict=True` raises an error when lengths differ. (See Q84.)
+
+</details>
+
+**M157.** What does this print?
+
+```python
+names, scores = zip(*[("a", 1), ("b", 2)])
+print(names, scores)
+```
+
+- A) `['a', 'b'] [1, 2]`
+- B) `('a', 1) ('b', 2)`
+- C) `TypeError`
+- D) `('a', 'b') (1, 2)`
+
+<details>
+<summary>Answer</summary>
+
+**D) `('a', 'b') (1, 2)`**. `zip(*pairs)` separates the pairs into tuples. (See Q85.)
+
+</details>
+
+**M158.** What does this print?
+
+```python
+names, scores = zip(*{"a": 1, "b": 2}.items())
+print(scores)
+```
+
+- A) `('a', 'b')`
+- B) `[1, 2]`
+- C) `(1, 2)`
+- D) `TypeError`
+
+<details>
+<summary>Answer</summary>
+
+**C) `(1, 2)`**. `.items()` gives pairs. (See Q86.)
+
+</details>
+
+**M159.** What does this print?
+
+```python
+rows = [{"n": "a", "s": 1}, {"n": "b", "s": 2}]
+names, scores = zip(*[(r["n"], r["s"]) for r in rows])
+print(names)
+```
+
+- A) `KeyError`
+- B) `['a', 'b']`
+- C) `(1, 2)`
+- D) `('a', 'b')`
+
+<details>
+<summary>Answer</summary>
+
+**D) `('a', 'b')`**. Build pairs first, then unzip them. (See Q87.)
+
+</details>
+
+**M160.** What does this print?
+
+```python
+print(list((1, 2)))
+```
+
+- A) `[1, 2]`
+- B) `[(1, 2)]`
+- C) `(1, 2)`
+- D) `TypeError`
+
+<details>
+<summary>Answer</summary>
+
+**A) `[1, 2]`**. `list()` converts a tuple. (See Q88.)
+
+</details>
+
+**M161.** What does this print?
+
+```python
+a, b = map(list, zip(*[("x", 1), ("y", 2)]))
+print(a, b)
+```
+
+- A) `('x', 'y') (1, 2)`
+- B) `['x', 'y'] [1, 2]`
+- C) `TypeError`
+- D) `['x', 1] ['y', 2]`
+
+<details>
+<summary>Answer</summary>
+
+**B) `['x', 'y'] [1, 2]`**. `map(list, ...)` turns each tuple into a list. (See Q89.)
+
+</details>
+
+**M162.** What does this print?
+
+```python
+def f(*a, **k):
+    return type(a).__name__, type(k).__name__
+
+print(f(1, x=2))
+```
+
+- A) `('tuple', 'set')`
+- B) `('tuple', 'dict')`
+- C) `('list', 'list')`
+- D) `('list', 'dict')`
+
+<details>
+<summary>Answer</summary>
+
+**B) `('tuple', 'dict')`**. `*args` is a tuple, and `**kwargs` is a dict. (See Q90.)
+
+</details>
+
+**M163.** What does this print?
+
+```python
+def f(*a, **k):
+    return list(a), k
+
+print(f(1, 2, lr=0.1))
+```
+
+- A) `([1, 2], {'lr': 0.1})`
+- B) `([1, 2, 0.1], {})`
+- C) `TypeError`
+- D) `((1, 2), {'lr': 0.1})`
+
+<details>
+<summary>Answer</summary>
+
+**A) `([1, 2], {'lr': 0.1})`**. `a` is converted with `list()`. (See Q90.)
+
+</details>
+
+**M164.** What does this print?
+
+```python
+def f(a, *args):
+    return args
+
+print(f(1))
+```
+
+- A) `None`
+- B) `[]`
+- C) `TypeError`
+- D) `()`
+
+<details>
+<summary>Answer</summary>
+
+**D) `()`**. With no extra arguments, `*args` is an empty tuple. (See Q90.)
+
+</details>
+
+**M165.** When are `*args` and `**kwargs` most useful?
+
+- A) You want faster loops
+- B) The data is already one list
+- C) A function must take exactly two arguments
+- D) A wrapper forwards unknown arguments to another function
+
+<details>
+<summary>Answer</summary>
+
+**D) A wrapper forwards unknown arguments to another function**. Decorators and wrappers use this a lot. (See Q91.)
+
+</details>
+
+**M166.** What does this print?
+
+```python
+def add(a, b):
+    return a + b
+
+print(add(*[1, 2]))
+```
+
+- A) `[1, 2]`
+- B) `TypeError`
+- C) `3`
+- D) `None`
+
+<details>
+<summary>Answer</summary>
+
+**C) `3`**. `*` unpacks the list into positional arguments. (See Q92.)
+
+</details>
+
+**M167.** What does this print?
+
+```python
+def add(a, b):
+    return a + b
+
+print(add(**{"a": 1, "b": 2}))
+```
+
+- A) `KeyError`
+- B) `ab`
+- C) `TypeError`
+- D) `3`
+
+<details>
+<summary>Answer</summary>
+
+**D) `3`**. `**` unpacks the dict into keyword arguments. (See Q92.)
+
+</details>
+
+**M168.** What does this print?
+
+```python
+def add(a, b):
+    return a + b
+
+print(add(**{"a": 1, "c": 2}))
+```
+
+- A) `KeyError`
+- B) `TypeError`
+- C) `1`
+- D) `3`
+
+<details>
+<summary>Answer</summary>
+
+**B) `TypeError`**. The dict keys must match the parameter names. (See Q92.)
+
+</details>
+
+**M169.** What does this print?
+
+```python
+first, *rest = [1, 2, 3]
+print(rest)
+```
+
+- A) `3`
+- B) `(2, 3)`
+- C) `[2, 3]`
+- D) `[1, 2, 3]`
+
+<details>
+<summary>Answer</summary>
+
+**C) `[2, 3]`**. `*rest` collects the remaining items into a list. (See Q92.)
+
+</details>
+
+**M170.** Why write `model.fit(*train_data, **settings)` in experiments?
+
+- A) It turns off validation
+- B) It saves the model automatically
+- C) Each run changes only the settings dict
+- D) It makes training run faster
+
+<details>
+<summary>Answer</summary>
+
+**C) Each run changes only the settings dict**. The `fit()` line stays the same across experiments. (See Q93.)
+
+</details>
+
+### Merging and safe dictionary access (Q94–98)
+
+**M171.** What does this print?
+
+```python
+print({"x": 1, "y": 2} | {"y": 9, "z": 3})
+```
+
+- A) `{'x': 1, 'z': 3, 'y': 9}`
+- B) `{'x': 1, 'y': 2, 'z': 3}`
+- C) `{'x': 1, 'y': 9, 'z': 3}`
+- D) `KeyError`
+
+<details>
+<summary>Answer</summary>
+
+**C) `{'x': 1, 'y': 9, 'z': 3}`**. The right value wins, the key keeps its place, and new keys go at the end. (See Q94, Q95.)
+
+</details>
+
+**M172.** What does this print?
+
+```python
+print({**{"a": 1}, **{"a": 2, "b": 3}})
+```
+
+- A) `{'a': 2, 'b': 3}`
+- B) `TypeError`
+- C) `{'a': 1, 'b': 3}`
+- D) `{'a': [1, 2], 'b': 3}`
+
+<details>
+<summary>Answer</summary>
+
+**A) `{'a': 2, 'b': 3}`**. Later dictionaries overwrite earlier ones. (See Q94.)
+
+</details>
+
+**M173.** What does this print?
+
+```python
+a = {"x": 1}
+r = a.update({"y": 2})
+print(r, a)
+```
+
+- A) `None {'x': 1}`
+- B) `{'x': 1, 'y': 2} {'x': 1, 'y': 2}`
+- C) `None {'x': 1, 'y': 2}`
+- D) `{'x': 1, 'y': 2} {'x': 1}`
+
+<details>
+<summary>Answer</summary>
+
+**C) `None {'x': 1, 'y': 2}`**. `update()` changes the dict in place and returns `None`. (See Q94.)
+
+</details>
+
+**M174.** What does this print?
+
+```python
+print({"a": 1, "b": 2}.keys() & {"b": 3}.keys())
+```
+
+- A) `{'a', 'b'}`
+- B) `{'b'}`
+- C) `TypeError`
+- D) `{'a'}`
+
+<details>
+<summary>Answer</summary>
+
+**B) `{'b'}`**. Key views support set operators, so `&` finds shared keys. (See Q95.)
+
+</details>
+
+**M175.** What does this print?
+
+```python
+print({"a": 1} | [("b", 2)])
+```
+
+- A) `KeyError`
+- B) `[('b', 2)]`
+- C) `{'a': 1, 'b': 2}`
+- D) `TypeError`
+
+<details>
+<summary>Answer</summary>
+
+**D) `TypeError`**. Both sides of `|` must be dictionaries. (See Q96.)
+
+</details>
+
+**M176.** What does this print?
+
+```python
+d = {"a": 1}
+d |= [("b", 2)]
+print(d)
+```
+
+- A) `[('b', 2)]`
+- B) `{'a': 1}`
+- C) `TypeError`
+- D) `{'a': 1, 'b': 2}`
+
+<details>
+<summary>Answer</summary>
+
+**D) `{'a': 1, 'b': 2}`**. The in-place form accepts a list of pairs. (See Q96.)
+
+</details>
+
+**M177.** What does this print?
+
+```python
+d = {"a": 1}
+print(d["z"])
+```
+
+- A) `0`
+- B) `IndexError`
+- C) `KeyError`
+- D) `None`
+
+<details>
+<summary>Answer</summary>
+
+**C) `KeyError`**. Square brackets raise an error for a missing key. (See Q97.)
+
+</details>
+
+**M178.** What does this print?
+
+```python
+d = {"a": 1}
+print(d.get("z"), d.get("z", 0))
+```
+
+- A) `0 0`
+- B) `None None`
+- C) `KeyError`
+- D) `None 0`
+
+<details>
+<summary>Answer</summary>
+
+**D) `None 0`**. `get()` returns `None` or your default. (See Q98.)
+
+</details>
+
+**M179.** What does this print?
+
+```python
+print({"a": None}.get("a", "x"))
+```
+
+- A) `KeyError`
+- B) `None`
+- C) `a`
+- D) `x`
+
+<details>
+<summary>Answer</summary>
+
+**B) `None`**. The key exists, so its stored value is returned, not the default. (See Q98.)
+
+</details>
+
+**M180.** What does this print?
+
+```python
+print("z" in {"z": 1}, 1 in {"z": 1})
+```
+
+- A) `False True`
+- B) `True True`
+- C) `True False`
+- D) `False False`
+
+<details>
+<summary>Answer</summary>
+
+**C) `True False`**. `in` checks keys, not values. (See Q98.)
+
+</details>
+
+**M181.** Which one is LBYL (Look Before You Leap)?
+
+- A) try `d["k"]`, then `except KeyError`
+- B) `if "k" in d: use(d["k"])`
+- C) `d.setdefault("k", 0)`
+- D) `d.get("k", 0)`
+
+<details>
+<summary>Answer</summary>
+
+**B) `if "k" in d: use(d["k"])`**. LBYL checks first. (See Q98.)
+
+</details>
+
+**M182.** Which one is EAFP (Easier to Ask Forgiveness than Permission)?
+
+- A) `if "k" in d: use(d["k"])`
+- B) `len(d) > 0`
+- C) `d.get("k", 0)`
+- D) try `d["k"]`, then `except KeyError`
+
+<details>
+<summary>Answer</summary>
+
+**D) try `d["k"]`, then `except KeyError`**. EAFP tries first and handles the error. (See Q98.)
+
+</details>
+
+**M183.** Which is the simplest choice when a missing key should just give a default?
+
+- A) `d.get(key, default)`
+- B) `if key in d`
+- C) `try/except KeyError`
+- D) `d[key]`
+
+<details>
+<summary>Answer</summary>
+
+**A) `d.get(key, default)`**. `get()` needs no extra branch. (See Q98.)
+
+</details>
+
 ---
 
 ## Part C: Rapid-Fire Revision
@@ -1803,5 +4894,1330 @@ No, both names refer to the same list. Use `.copy()` for a separate one.
 <summary>Answer</summary>
 
 No. Reassignment changes a binding; mutation changes an object.
+
+</details>
+
+### Python basics and libraries
+
+**R7.** Why is Python popular for ML?
+
+<details>
+<summary>Answer</summary>
+
+Simple syntax, plus fast libraries that run native code underneath.
+
+</details>
+
+**R8.** Name six key Python features.
+
+<details>
+<summary>Answer</summary>
+
+Readable syntax, dynamic typing, multiple styles, cross-platform, large ecosystem, native code integration.
+
+</details>
+
+**R9.** What are the three main programming styles in Python?
+
+<details>
+<summary>Answer</summary>
+
+Procedural, functional, and object-oriented.
+
+</details>
+
+**R10.** What are the main tools of the functional style?
+
+<details>
+<summary>Answer</summary>
+
+`map()`, `filter()`, `lambda`, and comprehensions.
+
+</details>
+
+**R11.** Readable vs concise?
+
+<details>
+<summary>Answer</summary>
+
+Readable = easy to understand. Concise = fewer lines for the same task.
+
+</details>
+
+**R12.** What does integration with native code mean?
+
+<details>
+<summary>Answer</summary>
+
+Python calls compiled C, C++, or GPU code that does the heavy work.
+
+</details>
+
+**R13.** Name the library for: arrays, tables, classical ML, deep learning, plots, APIs.
+
+<details>
+<summary>Answer</summary>
+
+NumPy, pandas, scikit-learn, PyTorch, Matplotlib, FastAPI.
+
+</details>
+
+**R14.** Which tool is used for experimenting interactively?
+
+<details>
+<summary>Answer</summary>
+
+Jupyter notebooks.
+
+</details>
+
+**R15.** What is vectorization?
+
+<details>
+<summary>Answer</summary>
+
+Running an operation on a whole array without a Python loop, like `arr * 2`.
+
+</details>
+
+**R16.** Why is NumPy fast?
+
+<details>
+<summary>Answer</summary>
+
+Whole-array work runs in compiled code, without Python's per-element overhead.
+
+</details>
+
+### Types and mutability
+
+**R17.** What is dynamic typing?
+
+<details>
+<summary>Answer</summary>
+
+Types are checked at runtime, and you never declare them.
+
+</details>
+
+**R18.** What is `type(x)` actually telling you?
+
+<details>
+<summary>Answer</summary>
+
+The type of the object that `x` refers to.
+
+</details>
+
+**R19.** Is `x = 1` then `x = "a"` allowed?
+
+<details>
+<summary>Answer</summary>
+
+Yes, reassignment can point a name at any type.
+
+</details>
+
+**R20.** Does `"1" + 1` fail when defined inside a function?
+
+<details>
+<summary>Answer</summary>
+
+No, only when that line runs.
+
+</details>
+
+**R21.** Do type hints stop wrong types at runtime?
+
+<details>
+<summary>Answer</summary>
+
+No. Use mypy for static checks or Pydantic for runtime validation.
+
+</details>
+
+**R22.** Name the mutable types.
+
+<details>
+<summary>Answer</summary>
+
+`list`, `dict`, `set`, `bytearray`.
+
+</details>
+
+**R23.** Name the immutable types.
+
+<details>
+<summary>Answer</summary>
+
+`int`, `float`, `bool`, `str`, `tuple`, `frozenset`.
+
+</details>
+
+**R24.** What is a binding?
+
+<details>
+<summary>Answer</summary>
+
+A name referring to an object.
+
+</details>
+
+**R25.** What does in place mean?
+
+<details>
+<summary>Answer</summary>
+
+The same object is changed, and no new one is created.
+
+</details>
+
+**R26.** `list += [x]` or `list = list + [x]`: which changes in place?
+
+<details>
+<summary>Answer</summary>
+
+`+=` changes in place. `list + [x]` builds a new list.
+
+</details>
+
+**R27.** What is a shared reference?
+
+<details>
+<summary>Answer</summary>
+
+Two names pointing to the same object.
+
+</details>
+
+**R28.** How do you copy a list?
+
+<details>
+<summary>Answer</summary>
+
+`a.copy()`, `list(a)`, or `a[:]`. All of these are shallow.
+
+</details>
+
+**R29.** Shallow vs deep copy?
+
+<details>
+<summary>Answer</summary>
+
+Shallow copies only the outer object. `copy.deepcopy()` copies nested objects too.
+
+</details>
+
+**R30.** Can a list inside a tuple change?
+
+<details>
+<summary>Answer</summary>
+
+Yes. The tuple can't swap the list, but the list can change itself.
+
+</details>
+
+**R31.** What does hashable mean?
+
+<details>
+<summary>Answer</summary>
+
+The object has a hash value that never changes.
+
+</details>
+
+**R32.** When is a tuple hashable?
+
+<details>
+<summary>Answer</summary>
+
+Only when all of its items are hashable.
+
+</details>
+
+**R33.** Why can't a list be a dict key?
+
+<details>
+<summary>Answer</summary>
+
+It's mutable, so it's unhashable.
+
+</details>
+
+### Collections
+
+**R34.** List vs tuple?
+
+<details>
+<summary>Answer</summary>
+
+A list can change. A tuple is fixed and can be a dict key.
+
+</details>
+
+**R35.** When do you use a set?
+
+<details>
+<summary>Answer</summary>
+
+To remove duplicates or for fast membership checks.
+
+</details>
+
+**R36.** When do you use a dict?
+
+<details>
+<summary>Answer</summary>
+
+For key-to-value lookups.
+
+</details>
+
+**R37.** How do you make an empty set?
+
+<details>
+<summary>Answer</summary>
+
+`set()`, because `{}` is an empty dict.
+
+</details>
+
+**R38.** How do you make a one-item tuple?
+
+<details>
+<summary>Answer</summary>
+
+With a trailing comma: `(1,)`.
+
+</details>
+
+**R39.** Which collections are ordered sequences?
+
+<details>
+<summary>Answer</summary>
+
+`list`, `tuple`, `str`, and `range`.
+
+</details>
+
+**R40.** Does a dict keep order?
+
+<details>
+<summary>Answer</summary>
+
+Yes, insertion order, but it isn't a sequence.
+
+</details>
+
+**R41.** List vs set membership speed?
+
+<details>
+<summary>Answer</summary>
+
+List is O(n). Set and dict are O(1) on average.
+
+</details>
+
+**R42.** What must set items and dict keys be?
+
+<details>
+<summary>Answer</summary>
+
+Hashable.
+
+</details>
+
+### Identity, None, and truthiness
+
+**R43.** `==` vs `is`?
+
+<details>
+<summary>Answer</summary>
+
+`==` compares contents. `is` compares objects.
+
+</details>
+
+**R44.** How do you see an object's identity?
+
+<details>
+<summary>Answer</summary>
+
+`id(x)`.
+
+</details>
+
+**R45.** How do you check for None?
+
+<details>
+<summary>Answer</summary>
+
+`x is None`.
+
+</details>
+
+**R46.** Why avoid `if not x` to check for None?
+
+<details>
+<summary>Answer</summary>
+
+It's also true for `0`, `""`, and `[]`.
+
+</details>
+
+**R47.** Which operator compares any two values for equality?
+
+<details>
+<summary>Answer</summary>
+
+`==`.
+
+</details>
+
+**R48.** Can dictionaries use `<`?
+
+<details>
+<summary>Answer</summary>
+
+No, it raises `TypeError`.
+
+</details>
+
+**R49.** What is `type(None)`?
+
+<details>
+<summary>Answer</summary>
+
+`NoneType`.
+
+</details>
+
+**R50.** What is `type(False)`?
+
+<details>
+<summary>Answer</summary>
+
+`bool`, which is a subclass of `int`.
+
+</details>
+
+**R51.** How do you check any collection is empty?
+
+<details>
+<summary>Answer</summary>
+
+`if not items:`.
+
+</details>
+
+**R52.** List the falsy values.
+
+<details>
+<summary>Answer</summary>
+
+`None`, `False`, `0`, `0.0`, and empty collections.
+
+</details>
+
+### Scope
+
+**R53.** What does LEGB stand for?
+
+<details>
+<summary>Answer</summary>
+
+Local, Enclosing, Global, Built-in.
+
+</details>
+
+**R54.** Variable in the outer function?
+
+<details>
+<summary>Answer</summary>
+
+Enclosing.
+
+</details>
+
+**R55.** Variable in the current function?
+
+<details>
+<summary>Answer</summary>
+
+Local.
+
+</details>
+
+**R56.** Variable at module level?
+
+<details>
+<summary>Answer</summary>
+
+Global.
+
+</details>
+
+**R57.** `global` vs `nonlocal`?
+
+<details>
+<summary>Answer</summary>
+
+`global` is for module variables. `nonlocal` is for enclosing function variables.
+
+</details>
+
+**R58.** What causes UnboundLocalError?
+
+<details>
+<summary>Answer</summary>
+
+Reading a local variable before it's assigned.
+
+</details>
+
+**R59.** How do you fix `count += 1` on a global?
+
+<details>
+<summary>Answer</summary>
+
+Add `global count`, or better, pass it in and return it.
+
+</details>
+
+### Lists: append, duplicates, slicing
+
+**R60.** `append()` vs `extend()`?
+
+<details>
+<summary>Answer</summary>
+
+`append()` adds one item. `extend()` adds each item of an iterable.
+
+</details>
+
+**R61.** Adding a whole object or its elements?
+
+<details>
+<summary>Answer</summary>
+
+Whole object: `append()`. Elements: `extend()`.
+
+</details>
+
+**R62.** What does `extend("hi")` add?
+
+<details>
+<summary>Answer</summary>
+
+`'h'` and `'i'`.
+
+</details>
+
+**R63.** Can `extend()` take a range?
+
+<details>
+<summary>Answer</summary>
+
+Yes, any iterable: `extend(range(1, 4))`.
+
+</details>
+
+**R64.** What does `extend(dict)` add?
+
+<details>
+<summary>Answer</summary>
+
+The keys.
+
+</details>
+
+**R65.** What do `append()` and `extend()` return?
+
+<details>
+<summary>Answer</summary>
+
+`None`, because they change the list in place.
+
+</details>
+
+**R66.** Remove duplicates, keep order?
+
+<details>
+<summary>Answer</summary>
+
+`list(dict.fromkeys(items))`.
+
+</details>
+
+**R67.** What does preserving order mean?
+
+<details>
+<summary>Answer</summary>
+
+Values stay where they first appeared.
+
+</details>
+
+**R68.** Is `list(set(items))` ordered?
+
+<details>
+<summary>Answer</summary>
+
+Not guaranteed.
+
+</details>
+
+**R69.** Unique values in a pandas Series?
+
+<details>
+<summary>Answer</summary>
+
+`s.unique()` or `s.drop_duplicates()`.
+
+</details>
+
+**R70.** Unique words in A to Z order?
+
+<details>
+<summary>Answer</summary>
+
+`sorted(set(words))`.
+
+</details>
+
+**R71.** How do you take part of a list?
+
+<details>
+<summary>Answer</summary>
+
+Slicing: `items[start:stop]`.
+
+</details>
+
+**R72.** What is the slice syntax?
+
+<details>
+<summary>Answer</summary>
+
+`items[start:stop:step]`.
+
+</details>
+
+**R73.** Is the stop index included?
+
+<details>
+<summary>Answer</summary>
+
+No. Start is included, stop is excluded.
+
+</details>
+
+**R74.** How do you reverse a list into a new list?
+
+<details>
+<summary>Answer</summary>
+
+`items[::-1]`.
+
+</details>
+
+**R75.** How do you reverse in place?
+
+<details>
+<summary>Answer</summary>
+
+`items.reverse()`.
+
+</details>
+
+**R76.** First 3 items?
+
+<details>
+<summary>Answer</summary>
+
+`items[:3]`.
+
+</details>
+
+**R77.** Last 3 items?
+
+<details>
+<summary>Answer</summary>
+
+`items[-3:]`.
+
+</details>
+
+**R78.** Without the first and last?
+
+<details>
+<summary>Answer</summary>
+
+`items[1:-1]`.
+
+</details>
+
+**R79.** Every second item?
+
+<details>
+<summary>Answer</summary>
+
+`items[::2]`.
+
+</details>
+
+**R80.** Can a slice step be zero?
+
+<details>
+<summary>Answer</summary>
+
+No, it raises `ValueError`.
+
+</details>
+
+**R81.** Slice past the end of a list?
+
+<details>
+<summary>Answer</summary>
+
+It gives a shorter or empty list, with no error.
+
+</details>
+
+### Sorting
+
+**R82.** `sorted()` vs `.sort()`?
+
+<details>
+<summary>Answer</summary>
+
+`sorted()` returns a new list. `.sort()` changes the list and returns `None`.
+
+</details>
+
+**R83.** Sort model dicts by accuracy, highest first?
+
+<details>
+<summary>Answer</summary>
+
+`sorted(models, key=lambda m: m["accuracy"], reverse=True)`.
+
+</details>
+
+**R84.** Sort dict keys by value?
+
+<details>
+<summary>Answer</summary>
+
+`sorted(d, key=d.get)`.
+
+</details>
+
+**R85.** What does `sorted()` return for a string, set, or tuple?
+
+<details>
+<summary>Answer</summary>
+
+Always a list.
+
+</details>
+
+**R86.** What does `key=` do?
+
+<details>
+<summary>Answer</summary>
+
+It gives the value used for comparing each item.
+
+</details>
+
+**R87.** Sort strings ignoring case?
+
+<details>
+<summary>Answer</summary>
+
+`key=str.lower`.
+
+</details>
+
+**R88.** Sort number strings by value?
+
+<details>
+<summary>Answer</summary>
+
+`key=int`.
+
+</details>
+
+**R89.** Is Python's sort stable?
+
+<details>
+<summary>Answer</summary>
+
+Yes, equal items keep their original order.
+
+</details>
+
+**R90.** Sort a dict and keep a dict?
+
+<details>
+<summary>Answer</summary>
+
+`dict(sorted(d.items()))`.
+
+</details>
+
+**R91.** In `sorted(d.items(), key=lambda p: ...)`, what are `p[0]` and `p[1]`?
+
+<details>
+<summary>Answer</summary>
+
+The key and the value.
+
+</details>
+
+**R92.** What does `reverse=True` do?
+
+<details>
+<summary>Answer</summary>
+
+It gives largest first, or Z to A.
+
+</details>
+
+**R93.** How do you count vowels in a sort key?
+
+<details>
+<summary>Answer</summary>
+
+`sum(c in "aeiou" for c in w.lower())`.
+
+</details>
+
+**R94.** How do you put words containing "py" first?
+
+<details>
+<summary>Answer</summary>
+
+`key=lambda w: "py" not in w.lower()`.
+
+</details>
+
+**R95.** How do you apply a rule to dict keys while sorting?
+
+<details>
+<summary>Answer</summary>
+
+Use `p[0]` inside the key on `d.items()`.
+
+</details>
+
+**R96.** How do you sort by several rules?
+
+<details>
+<summary>Answer</summary>
+
+Return a tuple from the key.
+
+</details>
+
+**R97.** How do you sort numbers highest first inside a tuple key?
+
+<details>
+<summary>Answer</summary>
+
+Negate them: `-x["marks"]`.
+
+</details>
+
+**R98.** How do you put `True` values first?
+
+<details>
+<summary>Answer</summary>
+
+`not x["flag"]`, because `False` sorts first.
+
+</details>
+
+**R99.** Do ISO date strings sort correctly?
+
+<details>
+<summary>Answer</summary>
+
+Yes, oldest first.
+
+</details>
+
+**R100.** All rules A to Z: which key?
+
+<details>
+<summary>Answer</summary>
+
+A plain tuple of the fields.
+
+</details>
+
+**R101.** What is the key for rating high, price low, days low?
+
+<details>
+<summary>Answer</summary>
+
+`(-rating, price, days)`.
+
+</details>
+
+**R102.** What is the key for exact first, score high, title A to Z?
+
+<details>
+<summary>Answer</summary>
+
+`(not exact, -score, title)`.
+
+</details>
+
+**R103.** Both rules highest first, with a date string?
+
+<details>
+<summary>Answer</summary>
+
+A tuple key with `reverse=True`.
+
+</details>
+
+**R104.** How do you sort by a custom status order?
+
+<details>
+<summary>Answer</summary>
+
+Map each status to a number with a dict.
+
+</details>
+
+### Dictionaries and complexity
+
+**R105.** Does a dict keep insertion order?
+
+<details>
+<summary>Answer</summary>
+
+Yes, since Python 3.7. That isn't the same as sorted order.
+
+</details>
+
+**R106.** List insert or delete at the start?
+
+<details>
+<summary>Answer</summary>
+
+O(n), because items shift.
+
+</details>
+
+**R107.** List `append()` and `pop()`?
+
+<details>
+<summary>Answer</summary>
+
+O(1) amortized for `append()`, and O(1) for `pop()`.
+
+</details>
+
+**R108.** Dict lookup, insert, or delete by key?
+
+<details>
+<summary>Answer</summary>
+
+O(1) on average, O(n) worst case.
+
+</details>
+
+**R109.** Iterating a list or dict?
+
+<details>
+<summary>Answer</summary>
+
+O(n).
+
+</details>
+
+**R110.** Name four ways to build a dict.
+
+<details>
+<summary>Answer</summary>
+
+`{...}`, `dict(a=1)`, `dict(zip(k, v))`, and a comprehension.
+
+</details>
+
+**R111.** Keys sharing one default value?
+
+<details>
+<summary>Answer</summary>
+
+`dict.fromkeys(keys, 0)`.
+
+</details>
+
+**R112.** Count repeated items?
+
+<details>
+<summary>Answer</summary>
+
+`collections.Counter(items)`.
+
+</details>
+
+**R113.** `key=value` string to a dict?
+
+<details>
+<summary>Answer</summary>
+
+`dict(p.split("=") for p in s.split(","))`.
+
+</details>
+
+**R114.** JSON string to a dict?
+
+<details>
+<summary>Answer</summary>
+
+`json.loads(s)`.
+
+</details>
+
+**R115.** Give each key its own list?
+
+<details>
+<summary>Answer</summary>
+
+`{k: [] for k in keys}`.
+
+</details>
+
+**R116.** What is the trap in `dict.fromkeys(keys, [])`?
+
+<details>
+<summary>Answer</summary>
+
+All keys share one list.
+
+</details>
+
+**R117.** Number to its square?
+
+<details>
+<summary>Answer</summary>
+
+`{n: n ** 2 for n in nums}`.
+
+</details>
+
+**R118.** Word to its length?
+
+<details>
+<summary>Answer</summary>
+
+`{w: len(w) for w in words}`.
+
+</details>
+
+**R119.** Index users by ID?
+
+<details>
+<summary>Answer</summary>
+
+`{u["id"]: u for u in users}`.
+
+</details>
+
+**R120.** Keep scores of 60 or higher?
+
+<details>
+<summary>Answer</summary>
+
+`{k: v for k, v in d.items() if v >= 60}`.
+
+</details>
+
+**R121.** Tuple, string, or range to a list?
+
+<details>
+<summary>Answer</summary>
+
+`list(x)`.
+
+</details>
+
+**R122.** JSON array to a list?
+
+<details>
+<summary>Answer</summary>
+
+`json.loads(s)`.
+
+</details>
+
+**R123.** Comma text to integers?
+
+<details>
+<summary>Answer</summary>
+
+`[int(n) for n in s.split(",")]`.
+
+</details>
+
+**R124.** Extract one field from dicts?
+
+<details>
+<summary>Answer</summary>
+
+`[d["name"] for d in rows]`.
+
+</details>
+
+**R125.** Unique sorted labels?
+
+<details>
+<summary>Answer</summary>
+
+`sorted(set(labels))`.
+
+</details>
+
+**R126.** Models with at least 90% accuracy?
+
+<details>
+<summary>Answer</summary>
+
+`{m: a for m, a in d.items() if a >= 0.90}`.
+
+</details>
+
+**R127.** Label to ID from 0?
+
+<details>
+<summary>Answer</summary>
+
+`{l: i for i, l in enumerate(labels)}`.
+
+</details>
+
+**R128.** What is the dict comprehension pattern?
+
+<details>
+<summary>Answer</summary>
+
+`{key: value for item in iterable}`.
+
+</details>
+
+### enumerate, zip, and unpacking
+
+**R129.** Index with values, starting at 1?
+
+<details>
+<summary>Answer</summary>
+
+`enumerate(items, start=1)`.
+
+</details>
+
+**R130.** What does `zip()` do with unequal lengths?
+
+<details>
+<summary>Answer</summary>
+
+It silently stops at the shortest.
+
+</details>
+
+**R131.** What does `strict=True` do?
+
+<details>
+<summary>Answer</summary>
+
+It raises `ValueError` if lengths differ (Python 3.10+).
+
+</details>
+
+**R132.** Separate pairs into two tuples?
+
+<details>
+<summary>Answer</summary>
+
+`names, scores = zip(*pairs)`.
+
+</details>
+
+**R133.** Separate a dict into names and scores?
+
+<details>
+<summary>Answer</summary>
+
+`zip(*d.items())`.
+
+</details>
+
+**R134.** List of dicts into two tuples?
+
+<details>
+<summary>Answer</summary>
+
+Build pairs with a comprehension, then use `zip(*pairs)`.
+
+</details>
+
+**R135.** Tuple to a list?
+
+<details>
+<summary>Answer</summary>
+
+`list(t)`.
+
+</details>
+
+**R136.** Pairs into two lists in one line?
+
+<details>
+<summary>Answer</summary>
+
+`a, b = map(list, zip(*pairs))`.
+
+</details>
+
+**R137.** What type is `*args`?
+
+<details>
+<summary>Answer</summary>
+
+A tuple.
+
+</details>
+
+**R138.** What type is `**kwargs`?
+
+<details>
+<summary>Answer</summary>
+
+A dict.
+
+</details>
+
+**R139.** When do you use `*args` and `**kwargs`?
+
+<details>
+<summary>Answer</summary>
+
+For flexible calls and wrappers that forward arguments.
+
+</details>
+
+**R140.** `*` and `**` in a function call?
+
+<details>
+<summary>Answer</summary>
+
+`*` unpacks positional arguments. `**` unpacks keyword arguments.
+
+</details>
+
+**R141.** Why unpack settings into `fit()`?
+
+<details>
+<summary>Answer</summary>
+
+Each experiment changes only the settings dict.
+
+</details>
+
+### Merging and safe access
+
+**R142.** Three ways to merge dicts?
+
+<details>
+<summary>Answer</summary>
+
+`a | b`, `{**a, **b}`, and `a.update(b)`.
+
+</details>
+
+**R143.** Which merge changes `a` in place?
+
+<details>
+<summary>Answer</summary>
+
+`a.update(b)` or `a |= b`.
+
+</details>
+
+**R144.** Shared key: which value is kept?
+
+<details>
+<summary>Answer</summary>
+
+The right dictionary's value.
+
+</details>
+
+**R145.** Where does a shared key sit?
+
+<details>
+<summary>Answer</summary>
+
+In its original position. New keys go at the end.
+
+</details>
+
+**R146.** How do you find shared keys?
+
+<details>
+<summary>Answer</summary>
+
+`a.keys() & b.keys()`.
+
+</details>
+
+**R147.** Does `dict | list` work?
+
+<details>
+<summary>Answer</summary>
+
+No, it raises `TypeError`.
+
+</details>
+
+**R148.** What does `d[key]` do for a missing key?
+
+<details>
+<summary>Answer</summary>
+
+It raises `KeyError`.
+
+</details>
+
+**R149.** What does `d.get(key)` return for a missing key?
+
+<details>
+<summary>Answer</summary>
+
+`None`, or the default you pass.
+
+</details>
+
+**R150.** What does LBYL mean?
+
+<details>
+<summary>Answer</summary>
+
+Look Before You Leap: check first with `in`.
+
+</details>
+
+**R151.** What does EAFP mean?
+
+<details>
+<summary>Answer</summary>
+
+Easier to Ask Forgiveness than Permission: use `try/except`.
 
 </details>
