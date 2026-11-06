@@ -481,3 +481,13 @@ When does an unsupported operation fail?    	When that operation executes
 What is the difference between an object and a name?	The object has identity, type and value; the name refers to it
 Does assigning one list name to another copy the list?	No; both names refer to the same list
 Is reassignment the same as mutation?	No; reassignment changes a binding, while mutation changes an Object
+===================================================================
+What are Python's key features, and why is it popular for ML?-6
+How do procedural, functional, and OOP styles differ? Show doubling the values in a list in each style
+How is Python's syntax readable and concise?=meaning of readble and concise
+How does Python integrate with native code? ==or how numpy compiled
+Which libraries and tools are used for each ML task? =numerical computing,data preparation
+visualization,ml,dl(3),experimentaion(2),deployment(2)
+
+
+

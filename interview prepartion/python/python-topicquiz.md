@@ -1575,192 +1575,45 @@ Python raises a `KeyError`.
 
 ## Part B: Predict the Output (MCQ practice)
 
-**M1.** What does each line print?
+- [Basics and Data Types](#basics-and-data-types) (M1–M69)
+  - Basics (M1–M16)
+    - Basics theory (M1–M10)
+    - ML libraries and tools (M11–M16)
+  - Variables (M17–M37)
+    - Dynamic typing (M17–M22)
+    - Shared references (M23–M28)
+    - Scope (LEGB) (M29–M37)
+  - Operators (M38–M47)
+    - Equality and identity (M38–M43)
+    - Membership and comparison (M44–M47)
+  - Data types (M48–M69)
+    - bool, None, and truthiness (M48–M53)
+    - Mutable and immutable (M54–M59)
+    - list, tuple, set, and dict (M60–M69)
+- [Data Structures and Comprehensions](#data-structures-and-comprehensions) (M70–M180)
+  - Lists (M70–M101)
+    - append and extend (M70–M79)
+    - Slicing and reversing (M80–M94)
+    - Removing duplicates (M95–M101)
+  - Sorting (M102–M131)
+    - Basic sorting (M102–M120)
+    - Sorting by multiple criteria (M121–M131)
+  - Dictionaries (M132–M150)
+    - Dictionaries and complexity (M132–M137)
+    - Merging and safe dictionary access (M138–M150)
+  - Comprehensions and iteration (M151–M180)
+    - Creating dictionaries and lists (M151–M171)
+    - enumerate, zip, and unpacking (M172–M180)
+- [Functions](#functions) (M181–M188)
+  - `*args` and `**kwargs` (M181–M188)
 
-```python
-print(issubclass(bool, int))
-print(False == 0)
-print(True == 1)
-print(True + True)
-print(sum([True, False, True]))
-```
+### Basics and Data Types
 
-<details>
-<summary>Answer</summary>
+#### Basics
 
-`True`, `True`, `True`, `2`, `2`: `bool` is a subclass of `int`, so `True` = 1 and `False` = 0.
+##### Basics theory
 
-</details>
-
-**M2.** What does each line print?
-
-```python
-print(bool("0"))
-print(bool([0]))
-print(bool(-1))
-print(bool(0.0))
-```
-
-<details>
-<summary>Answer</summary>
-
-`True`, `True`, `True`, `False`: only empty or zero values are falsy. `"0"` and `[0]` are non-empty, and `-1` is non-zero.
-
-</details>
-
-**M3.** What does each line print?
-
-```python
-print(None == False)
-print(None == 0)
-print([] == ())
-print([] == False)
-print(0 == 0.0)
-print(False == 0)
-```
-
-<details>
-<summary>Answer</summary>
-
-`False`, `False`, `False`, `False`, `True`, `True`.
-Being falsy is not the same as being equal: `None` and `[]` are falsy but not `== False`. Different types (list vs tuple) aren't equal.
-
-</details>
-
-**M4.** What does each line print?
-
-```python
-a = int("256"); b = int("256")
-c = int("257"); d = int("257")
-print(a is b)
-print(c is d)
-print(c == d)
-```
-
-<details>
-<summary>Answer</summary>
-
-`True`, `False`, `True`. CPython caches small ints from −5 to 256, so `a` and `b` are the same object, while 257 creates two objects. This is an implementation detail: always use `==` for values.
-
-</details>
-
-**M5.** What does each line print?
-
-```python
-first = [1, 2]
-second = [1, 2]
-third = first
-print(first == second)
-print(first is second)
-print(first is third)
-```
-
-<details>
-<summary>Answer</summary>
-
-`True`, `False`, `True`: same contents but different objects; `third` is a shared reference to `first`.
-
-</details>
-
-**M6.** What happens?
-
-```python
-numbers = [1, 2]
-numbers.extend(3)
-```
-
-<details>
-<summary>Answer</summary>
-
-`TypeError: 'int' object is not iterable`. `extend()` needs an iterable, so use `append(3)` or `extend([3])`.
-
-</details>
-
-**M7.** Starting from `[1, 2]` each time, what's the result of each call?
-
-`append(3)` · `append([3, 4])` · `extend([3, 4])` · `extend((3, 4))` · `extend("ab")` · `extend(3)`
-
-<details>
-<summary>Answer</summary>
-
-| Call | Result |
-|---|---|
-| `append(3)` | `[1, 2, 3]` |
-| `append([3, 4])` | `[1, 2, [3, 4]]` |
-| `extend([3, 4])` | `[1, 2, 3, 4]` |
-| `extend((3, 4))` | `[1, 2, 3, 4]` |
-| `extend("ab")` | `[1, 2, 'a', 'b']` |
-| `extend(3)` | `TypeError` |
-
-</details>
-
-**M8.** What gets printed?
-
-```python
-numbers = [1, 2]
-result = numbers.append(3)
-print(result)
-print(numbers)
-
-features = ["age", "income"]
-features = features.extend(["score"])
-print(features)
-```
-
-<details>
-<summary>Answer</summary>
-
-`None`, `[1, 2, 3]`, `None`. Both methods return `None`, so `features = features.extend(...)` loses the list.
-
-</details>
-
-**M9.** With `numbers = [10, 20, 30, 40, 50, 60]`, what does each print?
-
-```python
-print(numbers[-3:])
-print(numbers[:-2])
-print(numbers[-4:-1])
-```
-
-<details>
-<summary>Answer</summary>
-
-`[40, 50, 60]` (last three) · `[10, 20, 30, 40]` (all except the last two) · `[30, 40, 50]` (start at 30, stop before 60).
-
-</details>
-
-**M10.** With `numbers = [10, 20, 30, 40, 50]`, what does each give?
-
-`numbers[1:4]` · `numbers[:3]` · `numbers[2:]` · `numbers[::2]` · `numbers[1::2]`
-
-<details>
-<summary>Answer</summary>
-
-| Slice | Meaning | Result |
-|---|---|---|
-| `numbers[1:4]` | Indices 1, 2, 3 | `[20, 30, 40]` |
-| `numbers[:3]` | Start up to index 3 | `[10, 20, 30]` |
-| `numbers[2:]` | Index 2 to the end | `[30, 40, 50]` |
-| `numbers[::2]` | Every second element | `[10, 30, 50]` |
-| `numbers[1::2]` | Every second, from index 1 | `[20, 40]` |
-
-</details>
-
-**M11.** Which of these reverses `items = [1, 2, 3]`, and what does each return?
-
-A) `items[::-1]`  B) `reversed(items)`  C) `items.reverse()`  D) `items.sort(reverse=True)`
-
-<details>
-<summary>Answer</summary>
-
-All four end up with the order `3, 2, 1`, but they return different things:
-A → new list `[3, 2, 1]` · B → an iterator (wrap it in `list()`) · C → reverses in place, returns `None` · D → sorts descending in place, returns `None` (same result here only because the list was already sorted).
-
-</details>
-
-### Python, ML libraries, and programming styles (Q1–6)
-
-**M12.** Why can Python be used for heavy ML work even though pure-Python loops are slow?
+**M1.** Why can Python be used for heavy ML work even though pure-Python loops are slow?
 
 - A) Dynamic typing removes the need for type checks
 - B) Python compiles every loop to machine code
@@ -1774,7 +1627,7 @@ A → new list `[3, 2, 1]` · B → an iterator (wrap it in `list()`) · C → r
 
 </details>
 
-**M13.** Which of these is NOT one of Python's key features?
+**M2.** Which of these is NOT one of Python's key features?
 
 - A) Large ecosystem of libraries
 - B) Multiple programming styles
@@ -1788,7 +1641,22 @@ A → new list `[3, 2, 1]` · B → an iterator (wrap it in `list()`) · C → r
 
 </details>
 
-**M14.** What does this print?
+**M3.** Which of these is NOT a key feature of Python?
+
+- A) Readable, concise syntax
+- B) Dynamic typing
+- C) Huge ecosystem and community
+- D) Manual memory management
+- E) Integration with native code
+
+<details>
+<summary>Answer</summary>
+
+**D) Manual memory management**. Python manages memory automatically. Its key features are readable, concise syntax, dynamic typing, multiple programming styles, cross-platform support, a huge ecosystem and community, and integration with native code. (See Q1.)
+
+</details>
+
+**M4.** What does this print?
 
 ```python
 print(list(map(lambda n: n * 2, [1, 2])))
@@ -1806,7 +1674,7 @@ print(list(map(lambda n: n * 2, [1, 2])))
 
 </details>
 
-**M15.** `list(map(lambda n: n * 2, nums))` is an example of which style?
+**M5.** `list(map(lambda n: n * 2, nums))` is an example of which style?
 
 - A) Declarative SQL
 - B) Object-oriented
@@ -1820,7 +1688,7 @@ print(list(map(lambda n: n * 2, [1, 2])))
 
 </details>
 
-**M16.** Which style groups data and behaviour together using classes?
+**M6.** Which style groups data and behaviour together using classes?
 
 - A) Functional
 - B) Object-oriented
@@ -1834,7 +1702,49 @@ print(list(map(lambda n: n * 2, [1, 2])))
 
 </details>
 
-**M17.** Which line best shows Python being concise?
+**M7.** Which code is an example of the procedural style?
+
+- A) `list(map(lambda n: n * 2, nums))`
+- B) `class Doubler:` with a `run()` method
+- C) `for n in nums: out.append(n * 2)`
+- D) `[n * 2 for n in nums]`
+
+<details>
+<summary>Answer</summary>
+
+**C) `for n in nums: out.append(n * 2)`**. Procedural code does the task step by step with loops and variables. (See Q2.)
+
+</details>
+
+**M8.** `map()`, `filter()`, `lambda`, and comprehensions belong to which programming style?
+
+- A) Procedural
+- B) Functional
+- C) Object-oriented
+- D) None of them
+
+<details>
+<summary>Answer</summary>
+
+**B) Functional**. These tools transform data with functions instead of changing state step by step. (See Q2.)
+
+</details>
+
+**M9.** Which is an example of object-oriented programming?
+
+- A) `sum(scores)`
+- B) `for n in nums: out.append(n * 2)`
+- C) A class with a method
+- D) None of them
+
+<details>
+<summary>Answer</summary>
+
+**C) A class with a method**. OOP groups data and behaviour into classes, objects, attributes, and methods. `sum()` is a built-in function, and a `for` loop is procedural. (See Q2.)
+
+</details>
+
+**M10.** Which line best shows Python being concise?
 
 - A) `count = count + 1`
 - B) `if s > 0: total = total + 1`
@@ -1848,7 +1758,9 @@ print(list(map(lambda n: n * 2, [1, 2])))
 
 </details>
 
-**M18.** Which library is the usual choice for loading and cleaning tabular data?
+##### ML libraries and tools
+
+**M11.** Which library is the usual choice for loading and cleaning tabular data?
 
 - A) Matplotlib
 - B) PyTorch
@@ -1862,7 +1774,7 @@ print(list(map(lambda n: n * 2, [1, 2])))
 
 </details>
 
-**M19.** Which tool is commonly used to serve a trained model as an API?
+**M12.** Which tool is commonly used to serve a trained model as an API?
 
 - A) Jupyter
 - B) FastAPI
@@ -1876,7 +1788,7 @@ print(list(map(lambda n: n * 2, [1, 2])))
 
 </details>
 
-**M20.** Which library is the standard choice for classical ML like random forests?
+**M13.** Which library is the standard choice for classical ML like random forests?
 
 - A) Matplotlib
 - B) pandas
@@ -1890,7 +1802,33 @@ print(list(map(lambda n: n * 2, [1, 2])))
 
 </details>
 
-**M21.** Which code is vectorized?
+**M14.** MLflow and FastAPI come under which ML task categories, in that order?
+
+- A) Deployment and Data preparation
+- B) Experimentation and Deployment
+- C) Visualization and Deep learning
+- D) Data preparation and Numerical computing
+
+<details>
+<summary>Answer</summary>
+
+**B) Experimentation and Deployment**. MLflow tracks runs and metrics; FastAPI serves the model as an API. (See Q5.)
+
+The 7 categories:
+
+| Category | Tools |
+|---|---|
+| Numerical computing | NumPy |
+| Data preparation | pandas |
+| Visualization | Matplotlib, Seaborn |
+| Classical ML | scikit-learn |
+| Deep learning (3) | PyTorch, TensorFlow, Keras |
+| Experimentation (2) | Jupyter, MLflow |
+| Deployment (2) | FastAPI, Docker |
+
+</details>
+
+**M15.** Which code is vectorized?
 
 - A) `[n * 2 for n in nums]`
 - B) `list(map(lambda n: n * 2, nums))`
@@ -1904,7 +1842,7 @@ print(list(map(lambda n: n * 2, [1, 2])))
 
 </details>
 
-**M22.** What does this print?
+**M16.** What does this print?
 
 ```python
 print([1, 2] * 2)
@@ -1922,9 +1860,11 @@ print([1, 2] * 2)
 
 </details>
 
-### Dynamic typing and type hints (Q7–12)
+#### Variables
 
-**M23.** What does this print?
+##### Dynamic typing
+
+**M17.** What does this print?
 
 ```python
 x = 5
@@ -1944,7 +1884,7 @@ print(type(x).__name__)
 
 </details>
 
-**M24.** In Python, a type belongs to:
+**M18.** In Python, a type belongs to:
 
 - A) The module
 - B) The line of code
@@ -1958,7 +1898,7 @@ print(type(x).__name__)
 
 </details>
 
-**M25.** What does this print?
+**M19.** What does this print?
 
 ```python
 def f():
@@ -1979,7 +1919,7 @@ print("defined")
 
 </details>
 
-**M26.** What does this print?
+**M20.** What does this print?
 
 ```python
 print("1" + 1)
@@ -1997,7 +1937,7 @@ print("1" + 1)
 
 </details>
 
-**M27.** What does this print?
+**M21.** What does this print?
 
 ```python
 def double(x: int) -> int:
@@ -2018,7 +1958,7 @@ print(double("ab"))
 
 </details>
 
-**M28.** Which tool checks type hints without running the code?
+**M22.** Which tool checks type hints without running the code?
 
 - A) mypy
 - B) pytest-cov
@@ -2032,43 +1972,9 @@ print(double("ab"))
 
 </details>
 
-### Mutability and shared references (Q13–18)
+##### Shared references
 
-**M29.** Which group contains only immutable types?
-
-- A) `int`, `set`, `dict`
-- B) `int`, `str`, `tuple`
-- C) `list`, `dict`, `set`
-- D) `str`, `list`, `tuple`
-
-<details>
-<summary>Answer</summary>
-
-**B) `int`, `str`, `tuple`**. `list`, `dict`, and `set` are mutable. (See Q13.)
-
-</details>
-
-**M30.** What does this print?
-
-```python
-s = "hi"
-s.upper()
-print(s)
-```
-
-- A) `AttributeError`
-- B) `hi`
-- C) `None`
-- D) `HI`
-
-<details>
-<summary>Answer</summary>
-
-**B) `hi`**. Strings are immutable, and the new string `HI` was never saved. (See Q13.)
-
-</details>
-
-**M31.** What does this print?
+**M23.** What does this print?
 
 ```python
 a = [1, 2]
@@ -2089,7 +1995,7 @@ print(a)
 
 </details>
 
-**M32.** What does this print?
+**M24.** What does this print?
 
 ```python
 a = [1, 2]
@@ -2110,7 +2016,7 @@ print(a)
 
 </details>
 
-**M33.** What does this print?
+**M25.** What does this print?
 
 ```python
 a = [1, 2]
@@ -2131,7 +2037,7 @@ print(a)
 
 </details>
 
-**M34.** What does this print?
+**M26.** What does this print?
 
 ```python
 a = [1, 2]
@@ -2152,7 +2058,7 @@ print(a)
 
 </details>
 
-**M35.** What does this print?
+**M27.** What does this print?
 
 ```python
 a = [1, 2]
@@ -2173,7 +2079,7 @@ print(a)
 
 </details>
 
-**M36.** What does this print?
+**M28.** What does this print?
 
 ```python
 a = [[1], [2]]
@@ -2194,430 +2100,9 @@ print(a)
 
 </details>
 
-**M37.** What does this print?
+##### Scope (LEGB)
 
-```python
-t = ([1], 2)
-t[0].append(5)
-print(t)
-```
-
-- A) `([5], 2)`
-- B) `([1], 2)`
-- C) `TypeError`
-- D) `([1, 5], 2)`
-
-<details>
-<summary>Answer</summary>
-
-**D) `([1, 5], 2)`**. The tuple still holds the same list, and that list changed itself. (See Q17.)
-
-</details>
-
-**M38.** What does this print?
-
-```python
-t = (1, 2)
-t[0] = 5
-```
-
-- A) `TypeError`
-- B) `(5, 2)`
-- C) `ValueError`
-- D) `(1, 2)`
-
-<details>
-<summary>Answer</summary>
-
-**A) `TypeError`**. A tuple's items can't be replaced. (See Q17.)
-
-</details>
-
-**M39.** Which of these can be a dictionary key?
-
-- A) `(1, (2, 3))`
-- B) `[1, 2]`
-- C) `(1, [2])`
-- D) `{1: 2}`
-
-<details>
-<summary>Answer</summary>
-
-**A) `(1, (2, 3))`**. A tuple is hashable only if everything inside it is hashable. (See Q18.)
-
-</details>
-
-**M40.** What does this print?
-
-```python
-d = {(1, [2]): "x"}
-```
-
-- A) `ValueError`
-- B) `KeyError`
-- C) `SyntaxError`
-- D) `TypeError`
-
-<details>
-<summary>Answer</summary>
-
-**D) `TypeError`**. The list inside makes the tuple unhashable. (See Q18.)
-
-</details>
-
-### list, tuple, set, and dict (Q19–22)
-
-**M41.** Which collection automatically removes duplicates?
-
-- A) `list`
-- B) `set`
-- C) `tuple`
-- D) `str`
-
-<details>
-<summary>Answer</summary>
-
-**B) `set`**. A set keeps unique values only. (See Q19.)
-
-</details>
-
-**M42.** You need a fixed record that can also be a dictionary key. Which do you choose?
-
-- A) `dict`
-- B) `list`
-- C) `set`
-- D) `tuple`
-
-<details>
-<summary>Answer</summary>
-
-**D) `tuple`**. A tuple is immutable and hashable if its items are. (See Q19.)
-
-</details>
-
-**M43.** What does this print?
-
-```python
-print(len({1, 2, 2, 3}))
-```
-
-- A) `3`
-- B) `2`
-- C) `4`
-- D) `TypeError`
-
-<details>
-<summary>Answer</summary>
-
-**A) `3`**. The duplicate `2` is removed. (See Q19.)
-
-</details>
-
-**M44.** What does this print?
-
-```python
-print(type({}).__name__, type(set()).__name__)
-```
-
-- A) `dict dict`
-- B) `set set`
-- C) `dict set`
-- D) `set dict`
-
-<details>
-<summary>Answer</summary>
-
-**C) `dict set`**. `{}` is an empty dict. Use `set()` for an empty set. (See Q19.)
-
-</details>
-
-**M45.** What does this print?
-
-```python
-print(type((1)).__name__, type((1,)).__name__)
-```
-
-- A) `tuple tuple`
-- B) `tuple int`
-- C) `int tuple`
-- D) `int int`
-
-<details>
-<summary>Answer</summary>
-
-**C) `int tuple`**. The comma makes a tuple, not the brackets. (See Q19.)
-
-</details>
-
-**M46.** Which of these does NOT support indexing like `x[0]`?
-
-- A) `list`
-- B) `tuple`
-- C) `set`
-- D) `str`
-
-<details>
-<summary>Answer</summary>
-
-**C) `set`**. Sets are unordered, so they have no positions. (See Q20.)
-
-</details>
-
-**M47.** Which group contains only ordered sequences?
-
-- A) `list`, `set`, `str`, `range`
-- B) `dict`, `list`, `set`, `tuple`
-- C) `list`, `tuple`, `str`, `range`
-- D) `set`, `dict`, `tuple`, `str`
-
-<details>
-<summary>Answer</summary>
-
-**C) `list`, `tuple`, `str`, `range`**. `dict` keeps insertion order but isn't a sequence, and `set` is unordered. (See Q20.)
-
-</details>
-
-**M48.** What is the average time for `x in some_set`?
-
-- A) O(1)
-- B) O(log n)
-- C) O(n)
-- D) O(n²)
-
-<details>
-<summary>Answer</summary>
-
-**A) O(1)**. Sets use a hash table. (See Q21.)
-
-</details>
-
-**M49.** What is the time for `x in some_list`?
-
-- A) O(log n)
-- B) O(1)
-- C) O(n²)
-- D) O(n)
-
-<details>
-<summary>Answer</summary>
-
-**D) O(n)**. A list is scanned item by item. (See Q21.)
-
-</details>
-
-**M50.** What does this print?
-
-```python
-s = {[1, 2]}
-```
-
-- A) `TypeError`
-- B) `KeyError`
-- C) `{[1, 2]}`
-- D) `{1, 2}`
-
-<details>
-<summary>Answer</summary>
-
-**A) `TypeError`**. Set elements must be hashable, and lists aren't. (See Q22.)
-
-</details>
-
-### Identity, equality, and None (Q23–26, Q31–32)
-
-**M51.** What does this print?
-
-```python
-a = [1]
-b = [1]
-print(a == b, a is b)
-```
-
-- A) `True False`
-- B) `False False`
-- C) `False True`
-- D) `True True`
-
-<details>
-<summary>Answer</summary>
-
-**A) `True False`**. Same contents, but two different objects. (See Q23, Q24.)
-
-</details>
-
-**M52.** What does this print?
-
-```python
-x = 1
-y = 1.0
-print(x == y, x is y)
-```
-
-- A) `True False`
-- B) `False False`
-- C) `True True`
-- D) `False True`
-
-<details>
-<summary>Answer</summary>
-
-**A) `True False`**. The values are equal, but one is an `int` and the other a `float`. (See Q23.)
-
-</details>
-
-**M53.** Which check compares identity?
-
-- A) `a != b`
-- B) `a = b`
-- C) `a is b`
-- D) `a == b`
-
-<details>
-<summary>Answer</summary>
-
-**C) `a is b`**. `is` asks whether both names are the same object. (See Q24.)
-
-</details>
-
-**M54.** What is the correct way to check for None?
-
-- A) `if x:`
-- B) `x = None`
-- C) `x is None`
-- D) `x == None`
-
-<details>
-<summary>Answer</summary>
-
-**C) `x is None`**. `if x:` would also treat `0` and `""` as missing. (See Q25.)
-
-</details>
-
-**M55.** How do you check whether a dict `d` has no key `"k"`?
-
-- A) `d == "k"`
-- B) `not d`
-- C) `"k" not in d`
-- D) `d is None`
-
-<details>
-<summary>Answer</summary>
-
-**C) `"k" not in d`**. `in` checks keys. (See Q25.)
-
-</details>
-
-**M56.** What does this print?
-
-```python
-print([1, 2] == [2, 1], {1, 2} == {2, 1}, {"a": 1, "b": 2} == {"b": 2, "a": 1})
-```
-
-- A) `False True True`
-- B) `False False True`
-- C) `False True False`
-- D) `True True True`
-
-<details>
-<summary>Answer</summary>
-
-**A) `False True True`**. List order matters. Set and dict order doesn't matter for `==`. (See Q26.)
-
-</details>
-
-**M57.** What does this print?
-
-```python
-print("apple" < "banana", [1, 2] < [1, 3])
-```
-
-- A) `False True`
-- B) `True False`
-- C) `TypeError`
-- D) `True True`
-
-<details>
-<summary>Answer</summary>
-
-**D) `True True`**. Strings and lists compare item by item. (See Q26.)
-
-</details>
-
-**M58.** What does this print?
-
-```python
-print({"a": 1} < {"b": 2})
-```
-
-- A) `TypeError`
-- B) `True`
-- C) `KeyError`
-- D) `False`
-
-<details>
-<summary>Answer</summary>
-
-**A) `TypeError`**. Dictionaries support `==` but not `<`. (See Q26.)
-
-</details>
-
-**M59.** What does this print?
-
-```python
-print(type(None).__name__, type(False).__name__)
-```
-
-- A) `object bool`
-- B) `NoneType bool`
-- C) `NoneType int`
-- D) `None bool`
-
-<details>
-<summary>Answer</summary>
-
-**B) `NoneType bool`**. `None` has its own type, `NoneType`. (See Q31.)
-
-</details>
-
-**M60.** What does this print?
-
-```python
-print(not "", not [], not (), not {}, not set(), not range(0))
-```
-
-- A) `True True True True True True`
-- B) `False False False False False False`
-- C) `True True True True False True`
-- D) `True True True False False True`
-
-<details>
-<summary>Answer</summary>
-
-**A) `True True True True True True`**. All empty collections are falsy. (See Q32.)
-
-</details>
-
-**M61.** What does this print?
-
-```python
-print(bool(" "), bool({0}), bool(None))
-```
-
-- A) `True True False`
-- B) `False True False`
-- C) `False False False`
-- D) `True False False`
-
-<details>
-<summary>Answer</summary>
-
-**A) `True True False`**. A space and `{0}` are not empty. `None` is falsy. (See Q32.)
-
-</details>
-
-### Scope and LEGB (Q27–30)
-
-**M62.** What is the order of Python's name lookup?
+**M29.** What is the order of Python's name lookup?
 
 - A) Local → Global → Enclosing → Built-in
 - B) Built-in → Global → Enclosing → Local
@@ -2631,7 +2116,7 @@ print(bool(" "), bool({0}), bool(None))
 
 </details>
 
-**M63.** What does this print?
+**M30.** What does this print?
 
 ```python
 x = 1
@@ -2655,7 +2140,7 @@ print(x)
 
 </details>
 
-**M64.** What does this print?
+**M31.** What does this print?
 
 ```python
 x = 1
@@ -2678,7 +2163,7 @@ f()
 
 </details>
 
-**M65.** What does this print?
+**M32.** What does this print?
 
 ```python
 def outer():
@@ -2702,7 +2187,7 @@ print(outer())
 
 </details>
 
-**M66.** Which keyword lets a nested function change a variable in its outer function?
+**M33.** Which keyword lets a nested function change a variable in its outer function?
 
 - A) `global`
 - B) `local`
@@ -2716,7 +2201,7 @@ print(outer())
 
 </details>
 
-**M67.** Which keyword lets a function change a module-level variable?
+**M34.** Which keyword lets a function change a module-level variable?
 
 - A) `static`
 - B) `module`
@@ -2730,7 +2215,7 @@ print(outer())
 
 </details>
 
-**M68.** What does this print?
+**M35.** What does this print?
 
 ```python
 def outer():
@@ -2756,7 +2241,7 @@ print(outer())
 
 </details>
 
-**M69.** What does this print?
+**M36.** What does this print?
 
 ```python
 def outer():
@@ -2781,7 +2266,7 @@ print(outer())
 
 </details>
 
-**M70.** What does this print?
+**M37.** What does this print?
 
 ```python
 count = 0
@@ -2804,9 +2289,565 @@ inc()
 
 </details>
 
-### append and extend (Q33–38)
+#### Operators
 
-**M71.** What does this print?
+##### Equality and identity
+
+**M38.** What does this print?
+
+```python
+a = [1]
+b = [1]
+print(a == b, a is b)
+```
+
+- A) `True False`
+- B) `False False`
+- C) `False True`
+- D) `True True`
+
+<details>
+<summary>Answer</summary>
+
+**A) `True False`**. Same contents, but two different objects. (See Q23, Q24.)
+
+</details>
+
+**M39.** What does each line print?
+
+```python
+first = [1, 2]
+second = [1, 2]
+third = first
+print(first == second)
+print(first is second)
+print(first is third)
+```
+
+<details>
+<summary>Answer</summary>
+
+`True`, `False`, `True`: same contents but different objects; `third` is a shared reference to `first`.
+
+</details>
+
+**M40.** What does this print?
+
+```python
+x = 1
+y = 1.0
+print(x == y, x is y)
+```
+
+- A) `True False`
+- B) `False False`
+- C) `True True`
+- D) `False True`
+
+<details>
+<summary>Answer</summary>
+
+**A) `True False`**. The values are equal, but one is an `int` and the other a `float`. (See Q23.)
+
+</details>
+
+**M41.** Which check compares identity?
+
+- A) `a != b`
+- B) `a = b`
+- C) `a is b`
+- D) `a == b`
+
+<details>
+<summary>Answer</summary>
+
+**C) `a is b`**. `is` asks whether both names are the same object. (See Q24.)
+
+</details>
+
+**M42.** What does each line print?
+
+```python
+a = int("256"); b = int("256")
+c = int("257"); d = int("257")
+print(a is b)
+print(c is d)
+print(c == d)
+```
+
+<details>
+<summary>Answer</summary>
+
+`True`, `False`, `True`. CPython caches small ints from −5 to 256, so `a` and `b` are the same object, while 257 creates two objects. This is an implementation detail: always use `==` for values.
+
+</details>
+
+**M43.** What is the correct way to check for None?
+
+- A) `if x:`
+- B) `x = None`
+- C) `x is None`
+- D) `x == None`
+
+<details>
+<summary>Answer</summary>
+
+**C) `x is None`**. `if x:` would also treat `0` and `""` as missing. (See Q25.)
+
+</details>
+
+##### Membership and comparison
+
+**M44.** How do you check whether a dict `d` has no key `"k"`?
+
+- A) `d == "k"`
+- B) `not d`
+- C) `"k" not in d`
+- D) `d is None`
+
+<details>
+<summary>Answer</summary>
+
+**C) `"k" not in d`**. `in` checks keys. (See Q25.)
+
+</details>
+
+**M45.** What does this print?
+
+```python
+print([1, 2] == [2, 1], {1, 2} == {2, 1}, {"a": 1, "b": 2} == {"b": 2, "a": 1})
+```
+
+- A) `False True True`
+- B) `False False True`
+- C) `False True False`
+- D) `True True True`
+
+<details>
+<summary>Answer</summary>
+
+**A) `False True True`**. List order matters. Set and dict order doesn't matter for `==`. (See Q26.)
+
+</details>
+
+**M46.** What does this print?
+
+```python
+print("apple" < "banana", [1, 2] < [1, 3])
+```
+
+- A) `False True`
+- B) `True False`
+- C) `TypeError`
+- D) `True True`
+
+<details>
+<summary>Answer</summary>
+
+**D) `True True`**. Strings and lists compare item by item. (See Q26.)
+
+</details>
+
+**M47.** What does this print?
+
+```python
+print({"a": 1} < {"b": 2})
+```
+
+- A) `TypeError`
+- B) `True`
+- C) `KeyError`
+- D) `False`
+
+<details>
+<summary>Answer</summary>
+
+**A) `TypeError`**. Dictionaries support `==` but not `<`. (See Q26.)
+
+</details>
+
+#### Data types
+
+##### bool, None, and truthiness
+
+**M48.** What does each line print?
+
+```python
+print(issubclass(bool, int))
+print(False == 0)
+print(True == 1)
+print(True + True)
+print(sum([True, False, True]))
+```
+
+<details>
+<summary>Answer</summary>
+
+`True`, `True`, `True`, `2`, `2`: `bool` is a subclass of `int`, so `True` = 1 and `False` = 0.
+
+</details>
+
+**M49.** What does each line print?
+
+```python
+print(bool("0"))
+print(bool([0]))
+print(bool(-1))
+print(bool(0.0))
+```
+
+<details>
+<summary>Answer</summary>
+
+`True`, `True`, `True`, `False`: only empty or zero values are falsy. `"0"` and `[0]` are non-empty, and `-1` is non-zero.
+
+</details>
+
+**M50.** What does each line print?
+
+```python
+print(None == False)
+print(None == 0)
+print([] == ())
+print([] == False)
+print(0 == 0.0)
+print(False == 0)
+```
+
+<details>
+<summary>Answer</summary>
+
+`False`, `False`, `False`, `False`, `True`, `True`.
+Being falsy is not the same as being equal: `None` and `[]` are falsy but not `== False`. Different types (list vs tuple) aren't equal.
+
+</details>
+
+**M51.** What does this print?
+
+```python
+print(type(None).__name__, type(False).__name__)
+```
+
+- A) `object bool`
+- B) `NoneType bool`
+- C) `NoneType int`
+- D) `None bool`
+
+<details>
+<summary>Answer</summary>
+
+**B) `NoneType bool`**. `None` has its own type, `NoneType`. (See Q31.)
+
+</details>
+
+**M52.** What does this print?
+
+```python
+print(not "", not [], not (), not {}, not set(), not range(0))
+```
+
+- A) `True True True True True True`
+- B) `False False False False False False`
+- C) `True True True True False True`
+- D) `True True True False False True`
+
+<details>
+<summary>Answer</summary>
+
+**A) `True True True True True True`**. All empty collections are falsy. (See Q32.)
+
+</details>
+
+**M53.** What does this print?
+
+```python
+print(bool(" "), bool({0}), bool(None))
+```
+
+- A) `True True False`
+- B) `False True False`
+- C) `False False False`
+- D) `True False False`
+
+<details>
+<summary>Answer</summary>
+
+**A) `True True False`**. A space and `{0}` are not empty. `None` is falsy. (See Q32.)
+
+</details>
+
+##### Mutable and immutable
+
+**M54.** Which group contains only immutable types?
+
+- A) `int`, `set`, `dict`
+- B) `int`, `str`, `tuple`
+- C) `list`, `dict`, `set`
+- D) `str`, `list`, `tuple`
+
+<details>
+<summary>Answer</summary>
+
+**B) `int`, `str`, `tuple`**. `list`, `dict`, and `set` are mutable. (See Q13.)
+
+</details>
+
+**M55.** What does this print?
+
+```python
+s = "hi"
+s.upper()
+print(s)
+```
+
+- A) `AttributeError`
+- B) `hi`
+- C) `None`
+- D) `HI`
+
+<details>
+<summary>Answer</summary>
+
+**B) `hi`**. Strings are immutable, and the new string `HI` was never saved. (See Q13.)
+
+</details>
+
+**M56.** What does this print?
+
+```python
+t = ([1], 2)
+t[0].append(5)
+print(t)
+```
+
+- A) `([5], 2)`
+- B) `([1], 2)`
+- C) `TypeError`
+- D) `([1, 5], 2)`
+
+<details>
+<summary>Answer</summary>
+
+**D) `([1, 5], 2)`**. The tuple still holds the same list, and that list changed itself. (See Q17.)
+
+</details>
+
+**M57.** What does this print?
+
+```python
+t = (1, 2)
+t[0] = 5
+```
+
+- A) `TypeError`
+- B) `(5, 2)`
+- C) `ValueError`
+- D) `(1, 2)`
+
+<details>
+<summary>Answer</summary>
+
+**A) `TypeError`**. A tuple's items can't be replaced. (See Q17.)
+
+</details>
+
+**M58.** Which of these can be a dictionary key?
+
+- A) `(1, (2, 3))`
+- B) `[1, 2]`
+- C) `(1, [2])`
+- D) `{1: 2}`
+
+<details>
+<summary>Answer</summary>
+
+**A) `(1, (2, 3))`**. A tuple is hashable only if everything inside it is hashable. (See Q18.)
+
+</details>
+
+**M59.** What does this print?
+
+```python
+d = {(1, [2]): "x"}
+```
+
+- A) `ValueError`
+- B) `KeyError`
+- C) `SyntaxError`
+- D) `TypeError`
+
+<details>
+<summary>Answer</summary>
+
+**D) `TypeError`**. The list inside makes the tuple unhashable. (See Q18.)
+
+</details>
+
+##### list, tuple, set, and dict
+
+**M60.** Which collection automatically removes duplicates?
+
+- A) `list`
+- B) `set`
+- C) `tuple`
+- D) `str`
+
+<details>
+<summary>Answer</summary>
+
+**B) `set`**. A set keeps unique values only. (See Q19.)
+
+</details>
+
+**M61.** You need a fixed record that can also be a dictionary key. Which do you choose?
+
+- A) `dict`
+- B) `list`
+- C) `set`
+- D) `tuple`
+
+<details>
+<summary>Answer</summary>
+
+**D) `tuple`**. A tuple is immutable and hashable if its items are. (See Q19.)
+
+</details>
+
+**M62.** What does this print?
+
+```python
+print(len({1, 2, 2, 3}))
+```
+
+- A) `3`
+- B) `2`
+- C) `4`
+- D) `TypeError`
+
+<details>
+<summary>Answer</summary>
+
+**A) `3`**. The duplicate `2` is removed. (See Q19.)
+
+</details>
+
+**M63.** What does this print?
+
+```python
+print(type({}).__name__, type(set()).__name__)
+```
+
+- A) `dict dict`
+- B) `set set`
+- C) `dict set`
+- D) `set dict`
+
+<details>
+<summary>Answer</summary>
+
+**C) `dict set`**. `{}` is an empty dict. Use `set()` for an empty set. (See Q19.)
+
+</details>
+
+**M64.** What does this print?
+
+```python
+print(type((1)).__name__, type((1,)).__name__)
+```
+
+- A) `tuple tuple`
+- B) `tuple int`
+- C) `int tuple`
+- D) `int int`
+
+<details>
+<summary>Answer</summary>
+
+**C) `int tuple`**. The comma makes a tuple, not the brackets. (See Q19.)
+
+</details>
+
+**M65.** Which of these does NOT support indexing like `x[0]`?
+
+- A) `list`
+- B) `tuple`
+- C) `set`
+- D) `str`
+
+<details>
+<summary>Answer</summary>
+
+**C) `set`**. Sets are unordered, so they have no positions. (See Q20.)
+
+</details>
+
+**M66.** Which group contains only ordered sequences?
+
+- A) `list`, `set`, `str`, `range`
+- B) `dict`, `list`, `set`, `tuple`
+- C) `list`, `tuple`, `str`, `range`
+- D) `set`, `dict`, `tuple`, `str`
+
+<details>
+<summary>Answer</summary>
+
+**C) `list`, `tuple`, `str`, `range`**. `dict` keeps insertion order but isn't a sequence, and `set` is unordered. (See Q20.)
+
+</details>
+
+**M67.** What is the average time for `x in some_set`?
+
+- A) O(1)
+- B) O(log n)
+- C) O(n)
+- D) O(n²)
+
+<details>
+<summary>Answer</summary>
+
+**A) O(1)**. Sets use a hash table. (See Q21.)
+
+</details>
+
+**M68.** What is the time for `x in some_list`?
+
+- A) O(log n)
+- B) O(1)
+- C) O(n²)
+- D) O(n)
+
+<details>
+<summary>Answer</summary>
+
+**D) O(n)**. A list is scanned item by item. (See Q21.)
+
+</details>
+
+**M69.** What does this print?
+
+```python
+s = {[1, 2]}
+```
+
+- A) `TypeError`
+- B) `KeyError`
+- C) `{[1, 2]}`
+- D) `{1, 2}`
+
+<details>
+<summary>Answer</summary>
+
+**A) `TypeError`**. Set elements must be hashable, and lists aren't. (See Q22.)
+
+</details>
+
+### Data Structures and Comprehensions
+
+#### Lists
+
+##### append and extend
+
+**M70.** What does this print?
 
 ```python
 a = [1]
@@ -2826,7 +2867,7 @@ print(a)
 
 </details>
 
-**M72.** What does this print?
+**M71.** What does this print?
 
 ```python
 a = [1]
@@ -2846,7 +2887,7 @@ print(a)
 
 </details>
 
-**M73.** What does this print?
+**M72.** What does this print?
 
 ```python
 a = []
@@ -2866,7 +2907,7 @@ print(a)
 
 </details>
 
-**M74.** What does this print?
+**M73.** What does this print?
 
 ```python
 a = [0]
@@ -2886,7 +2927,7 @@ print(a)
 
 </details>
 
-**M75.** What does this print?
+**M74.** What does this print?
 
 ```python
 a = []
@@ -2906,7 +2947,7 @@ print(a)
 
 </details>
 
-**M76.** What does this print?
+**M75.** What does this print?
 
 ```python
 a = [1]
@@ -2925,7 +2966,7 @@ print(a.extend([2]))
 
 </details>
 
-**M77.** What does this print?
+**M76.** What does this print?
 
 ```python
 a = [1]
@@ -2945,117 +2986,61 @@ print(a, b)
 
 </details>
 
-### Removing duplicates (Q39–43)
-
-**M78.** Which option removes duplicates and keeps first-seen order?
-
-- A) `list(set(items))`
-- B) `list(dict.fromkeys(items))`
-- C) `items.sort()`
-- D) `sorted(set(items))`
-
-<details>
-<summary>Answer</summary>
-
-**B) `list(dict.fromkeys(items))`**. Dict keys are unique and keep insertion order. (See Q39.)
-
-</details>
-
-**M79.** What does this print?
+**M77.** What happens?
 
 ```python
-print(list(dict.fromkeys("banana")))
+numbers = [1, 2]
+numbers.extend(3)
 ```
 
-- A) `['b', 'a', 'n']`
-- B) `['a', 'b', 'n']`
-- C) `['banana']`
-- D) `['b', 'a', 'n', 'a']`
+<details>
+<summary>Answer</summary>
+
+`TypeError: 'int' object is not iterable`. `extend()` needs an iterable, so use `append(3)` or `extend([3])`.
+
+</details>
+
+**M78.** Starting from `[1, 2]` each time, what's the result of each call?
+
+`append(3)` · `append([3, 4])` · `extend([3, 4])` · `extend((3, 4))` · `extend("ab")` · `extend(3)`
 
 <details>
 <summary>Answer</summary>
 
-**A) `['b', 'a', 'n']`**. Each letter stays where it first appeared. (See Q39, Q40.)
+| Call | Result |
+|---|---|
+| `append(3)` | `[1, 2, 3]` |
+| `append([3, 4])` | `[1, 2, [3, 4]]` |
+| `extend([3, 4])` | `[1, 2, 3, 4]` |
+| `extend((3, 4))` | `[1, 2, 3, 4]` |
+| `extend("ab")` | `[1, 2, 'a', 'b']` |
+| `extend(3)` | `TypeError` |
 
 </details>
 
-**M80.** `[3, 1, 2, 3, 1]` after removing duplicates and preserving order is:
-
-- A) `[2, 3, 1]`
-- B) `[3, 1, 2]`
-- C) `[3, 2, 1]`
-- D) `[1, 2, 3]`
-
-<details>
-<summary>Answer</summary>
-
-**B) `[3, 1, 2]`**. Each value keeps its first position. (See Q40.)
-
-</details>
-
-**M81.** Does `list(set(items))` guarantee order?
-
-- A) Yes, always insertion order
-- B) No, sets are unordered
-- C) Only for lists of strings
-- D) Yes, always sorted
-
-<details>
-<summary>Answer</summary>
-
-**B) No, sets are unordered**. Use `dict.fromkeys()` to keep order. (See Q41.)
-
-</details>
-
-**M82.** Which pandas call gives the number of unique values in a Series?
-
-- A) `s.value_counts()`
-- B) `s.count()`
-- C) `s.nunique()`
-- D) `s.unique()`
-
-<details>
-<summary>Answer</summary>
-
-**C) `s.nunique()`**. `unique()` returns the values, and `count()` returns non-null rows. (See Q42.)
-
-</details>
-
-**M83.** What does `s.drop_duplicates()` return for a pandas Series?
-
-- A) A dictionary
-- B) A set
-- C) A Series
-- D) A Python list
-
-<details>
-<summary>Answer</summary>
-
-**C) A Series**. Add `.tolist()` to get a list. (See Q42.)
-
-</details>
-
-**M84.** What does this print?
+**M79.** What gets printed?
 
 ```python
-print(sorted(set(["pear", "apple", "pear"])))
-```
+numbers = [1, 2]
+result = numbers.append(3)
+print(result)
+print(numbers)
 
-- A) `['pear', 'apple']`
-- B) `['apple', 'pear']`
-- C) `{'apple', 'pear'}`
-- D) `['apple', 'pear', 'pear']`
+features = ["age", "income"]
+features = features.extend(["score"])
+print(features)
+```
 
 <details>
 <summary>Answer</summary>
 
-**B) `['apple', 'pear']`**. `set()` removes duplicates, and `sorted()` returns a sorted list. (See Q43.)
+`None`, `[1, 2, 3]`, `None`. Both methods return `None`, so `features = features.extend(...)` loses the list.
 
 </details>
 
-### Slicing (Q44–48, Q51)
+##### Slicing and reversing
 
-**M85.** What does this print?
+**M80.** What does this print?
 
 ```python
 n = [10, 20, 30, 40, 50]
@@ -3074,7 +3059,7 @@ print(n[1:3])
 
 </details>
 
-**M86.** What does this print?
+**M81.** What does this print?
 
 ```python
 n = [10, 20, 30, 40, 50]
@@ -3093,7 +3078,7 @@ print(n[0:5:2])
 
 </details>
 
-**M87.** What does this print?
+**M82.** What does this print?
 
 ```python
 n = [10, 20, 30, 40, 50]
@@ -3112,7 +3097,7 @@ print(n[:2] + n[2:] == n)
 
 </details>
 
-**M88.** What does this print?
+**M83.** What does this print?
 
 ```python
 n = [10, 20, 30]
@@ -3131,7 +3116,7 @@ print(n[::-1])
 
 </details>
 
-**M89.** What does this print?
+**M84.** What does this print?
 
 ```python
 n = [1, 2, 3]
@@ -3150,7 +3135,7 @@ print(n.reverse())
 
 </details>
 
-**M90.** What does this print?
+**M85.** What does this print?
 
 ```python
 n = [10, 20, 30, 40, 50]
@@ -3169,7 +3154,7 @@ print(n[-2:])
 
 </details>
 
-**M91.** What does this print?
+**M86.** What does this print?
 
 ```python
 n = [10, 20, 30, 40, 50]
@@ -3188,7 +3173,7 @@ print(n[1:-1])
 
 </details>
 
-**M92.** What does this print?
+**M87.** What does this print?
 
 ```python
 n = [10, 20]
@@ -3207,7 +3192,7 @@ print(n[5:])
 
 </details>
 
-**M93.** What does this print?
+**M88.** What does this print?
 
 ```python
 n = [10, 20, 30, 40, 50]
@@ -3226,7 +3211,7 @@ print(n[4:1:-1])
 
 </details>
 
-**M94.** What does this print?
+**M89.** What does this print?
 
 ```python
 print("python"[::2])
@@ -3244,7 +3229,7 @@ print("python"[::2])
 
 </details>
 
-**M95.** What does this print?
+**M90.** What does this print?
 
 ```python
 a = [1, 2, 3]
@@ -3265,7 +3250,7 @@ print(a)
 
 </details>
 
-**M96.** What does this print?
+**M91.** What does this print?
 
 ```python
 print([1, 2, 3][::0])
@@ -3283,9 +3268,163 @@ print([1, 2, 3][::0])
 
 </details>
 
-### Sorting (Q49–59)
+**M92.** With `numbers = [10, 20, 30, 40, 50, 60]`, what does each print?
 
-**M97.** What does this print?
+```python
+print(numbers[-3:])
+print(numbers[:-2])
+print(numbers[-4:-1])
+```
+
+<details>
+<summary>Answer</summary>
+
+`[40, 50, 60]` (last three) · `[10, 20, 30, 40]` (all except the last two) · `[30, 40, 50]` (start at 30, stop before 60).
+
+</details>
+
+**M93.** With `numbers = [10, 20, 30, 40, 50]`, what does each give?
+
+`numbers[1:4]` · `numbers[:3]` · `numbers[2:]` · `numbers[::2]` · `numbers[1::2]`
+
+<details>
+<summary>Answer</summary>
+
+| Slice | Meaning | Result |
+|---|---|---|
+| `numbers[1:4]` | Indices 1, 2, 3 | `[20, 30, 40]` |
+| `numbers[:3]` | Start up to index 3 | `[10, 20, 30]` |
+| `numbers[2:]` | Index 2 to the end | `[30, 40, 50]` |
+| `numbers[::2]` | Every second element | `[10, 30, 50]` |
+| `numbers[1::2]` | Every second, from index 1 | `[20, 40]` |
+
+</details>
+
+**M94.** Which of these reverses `items = [1, 2, 3]`, and what does each return?
+
+A) `items[::-1]`  B) `reversed(items)`  C) `items.reverse()`  D) `items.sort(reverse=True)`
+
+<details>
+<summary>Answer</summary>
+
+All four end up with the order `3, 2, 1`, but they return different things:
+A → new list `[3, 2, 1]` · B → an iterator (wrap it in `list()`) · C → reverses in place, returns `None` · D → sorts descending in place, returns `None` (same result here only because the list was already sorted).
+
+</details>
+
+##### Removing duplicates
+
+**M95.** Which option removes duplicates and keeps first-seen order?
+
+- A) `list(set(items))`
+- B) `list(dict.fromkeys(items))`
+- C) `items.sort()`
+- D) `sorted(set(items))`
+
+<details>
+<summary>Answer</summary>
+
+**B) `list(dict.fromkeys(items))`**. Dict keys are unique and keep insertion order. (See Q39.)
+
+</details>
+
+**M96.** What does this print?
+
+```python
+print(list(dict.fromkeys("banana")))
+```
+
+- A) `['b', 'a', 'n']`
+- B) `['a', 'b', 'n']`
+- C) `['banana']`
+- D) `['b', 'a', 'n', 'a']`
+
+<details>
+<summary>Answer</summary>
+
+**A) `['b', 'a', 'n']`**. Each letter stays where it first appeared. (See Q39, Q40.)
+
+</details>
+
+**M97.** `[3, 1, 2, 3, 1]` after removing duplicates and preserving order is:
+
+- A) `[2, 3, 1]`
+- B) `[3, 1, 2]`
+- C) `[3, 2, 1]`
+- D) `[1, 2, 3]`
+
+<details>
+<summary>Answer</summary>
+
+**B) `[3, 1, 2]`**. Each value keeps its first position. (See Q40.)
+
+</details>
+
+**M98.** Does `list(set(items))` guarantee order?
+
+- A) Yes, always insertion order
+- B) No, sets are unordered
+- C) Only for lists of strings
+- D) Yes, always sorted
+
+<details>
+<summary>Answer</summary>
+
+**B) No, sets are unordered**. Use `dict.fromkeys()` to keep order. (See Q41.)
+
+</details>
+
+**M99.** Which pandas call gives the number of unique values in a Series?
+
+- A) `s.value_counts()`
+- B) `s.count()`
+- C) `s.nunique()`
+- D) `s.unique()`
+
+<details>
+<summary>Answer</summary>
+
+**C) `s.nunique()`**. `unique()` returns the values, and `count()` returns non-null rows. (See Q42.)
+
+</details>
+
+**M100.** What does `s.drop_duplicates()` return for a pandas Series?
+
+- A) A dictionary
+- B) A set
+- C) A Series
+- D) A Python list
+
+<details>
+<summary>Answer</summary>
+
+**C) A Series**. Add `.tolist()` to get a list. (See Q42.)
+
+</details>
+
+**M101.** What does this print?
+
+```python
+print(sorted(set(["pear", "apple", "pear"])))
+```
+
+- A) `['pear', 'apple']`
+- B) `['apple', 'pear']`
+- C) `{'apple', 'pear'}`
+- D) `['apple', 'pear', 'pear']`
+
+<details>
+<summary>Answer</summary>
+
+**B) `['apple', 'pear']`**. `set()` removes duplicates, and `sorted()` returns a sorted list. (See Q43.)
+
+</details>
+
+#### Sorting
+
+##### Basic sorting
+
+**M102.** What does this print?
 
 ```python
 a = [3, 1, 2]
@@ -3305,7 +3444,7 @@ print(r, a)
 
 </details>
 
-**M98.** What does this print?
+**M103.** What does this print?
 
 ```python
 a = [3, 1]
@@ -3324,7 +3463,7 @@ print(sorted(a), a)
 
 </details>
 
-**M99.** Which types have a `.sort()` method?
+**M104.** Which types have a `.sort()` method?
 
 - A) `list` and `set`
 - B) `list` and `tuple`
@@ -3338,7 +3477,7 @@ print(sorted(a), a)
 
 </details>
 
-**M100.** What does this print?
+**M105.** What does this print?
 
 ```python
 m = [{"n": "a", "acc": 0.8}, {"n": "b", "acc": 0.9}]
@@ -3357,7 +3496,7 @@ print([x["n"] for x in sorted(m, key=lambda x: x["acc"], reverse=True)])
 
 </details>
 
-**M101.** What does this print?
+**M106.** What does this print?
 
 ```python
 d = {"a": 2, "b": 1}
@@ -3376,7 +3515,7 @@ print(sorted(d, key=d.get))
 
 </details>
 
-**M102.** What does this print?
+**M107.** What does this print?
 
 ```python
 print(type(sorted("cab")).__name__, type(sorted((2, 1))).__name__)
@@ -3394,7 +3533,7 @@ print(type(sorted("cab")).__name__, type(sorted((2, 1))).__name__)
 
 </details>
 
-**M103.** What does this print?
+**M108.** What does this print?
 
 ```python
 print("".join(sorted("cab")))
@@ -3412,7 +3551,7 @@ print("".join(sorted("cab")))
 
 </details>
 
-**M104.** What does this print?
+**M109.** What does this print?
 
 ```python
 print(sorted(["b", "A", "C"]))
@@ -3430,7 +3569,7 @@ print(sorted(["b", "A", "C"]))
 
 </details>
 
-**M105.** What does this print?
+**M110.** What does this print?
 
 ```python
 print(sorted(["b", "A", "C"], key=str.lower))
@@ -3448,7 +3587,7 @@ print(sorted(["b", "A", "C"], key=str.lower))
 
 </details>
 
-**M106.** What does this print?
+**M111.** What does this print?
 
 ```python
 print(sorted(["10", "9", "100"]))
@@ -3466,7 +3605,7 @@ print(sorted(["10", "9", "100"]))
 
 </details>
 
-**M107.** What does this print?
+**M112.** What does this print?
 
 ```python
 print(sorted(["10", "9", "100"], key=int))
@@ -3484,7 +3623,7 @@ print(sorted(["10", "9", "100"], key=int))
 
 </details>
 
-**M108.** What does this print?
+**M113.** What does this print?
 
 ```python
 print(sorted(["kiwi", "fig", "pear"], key=len))
@@ -3502,7 +3641,7 @@ print(sorted(["kiwi", "fig", "pear"], key=len))
 
 </details>
 
-**M109.** What does this print?
+**M114.** What does this print?
 
 ```python
 print(sorted([1, "a"]))
@@ -3520,7 +3659,7 @@ print(sorted([1, "a"]))
 
 </details>
 
-**M110.** What does this print?
+**M115.** What does this print?
 
 ```python
 d = {"b": 1, "a": 2}
@@ -3539,7 +3678,7 @@ print(sorted(d))
 
 </details>
 
-**M111.** What does this print?
+**M116.** What does this print?
 
 ```python
 d = {"a": 3, "b": 1}
@@ -3558,7 +3697,7 @@ print(dict(sorted(d.items(), key=lambda p: p[1])))
 
 </details>
 
-**M112.** What does this print?
+**M117.** What does this print?
 
 ```python
 print(sorted(["cat", "dog", "apple"], reverse=True))
@@ -3576,7 +3715,7 @@ print(sorted(["cat", "dog", "apple"], reverse=True))
 
 </details>
 
-**M113.** What does this print?
+**M118.** What does this print?
 
 ```python
 print(sum(c in "aeiou" for c in "apple"))
@@ -3594,7 +3733,7 @@ print(sum(c in "aeiou" for c in "apple"))
 
 </details>
 
-**M114.** What does this print?
+**M119.** What does this print?
 
 ```python
 print(sorted(["java", "Python"], key=lambda w: "py" not in w.lower()))
@@ -3612,7 +3751,7 @@ print(sorted(["java", "Python"], key=lambda w: "py" not in w.lower()))
 
 </details>
 
-**M115.** What does this print?
+**M120.** What does this print?
 
 ```python
 d = {"a12": 1, "abc": 2}
@@ -3631,9 +3770,9 @@ print(dict(sorted(d.items(), key=lambda p: sum(c.isdigit() for c in p[0]))))
 
 </details>
 
-### Sorting by multiple criteria (Q60–67)
+##### Sorting by multiple criteria
 
-**M116.** What does this print?
+**M121.** What does this print?
 
 ```python
 rows = [("a", 2), ("b", 1), ("c", 2)]
@@ -3652,7 +3791,7 @@ print(sorted(rows, key=lambda t: (-t[1], t[0])))
 
 </details>
 
-**M117.** What does this print?
+**M122.** What does this print?
 
 ```python
 print(sorted([True, False, True]))
@@ -3670,7 +3809,7 @@ print(sorted([True, False, True]))
 
 </details>
 
-**M118.** Which key puts in-stock products first?
+**M123.** Which key puts in-stock products first?
 
 - A) `p["in_stock"]`
 - B) `not p["in_stock"]`
@@ -3684,7 +3823,7 @@ print(sorted([True, False, True]))
 
 </details>
 
-**M119.** In a sort key, how do you put the highest severity first?
+**M124.** In a sort key, how do you put the highest severity first?
 
 - A) `-t["severity"]`
 - B) `t["severity"][::-1]`
@@ -3698,7 +3837,7 @@ print(sorted([True, False, True]))
 
 </details>
 
-**M120.** Why do ISO dates like `"2026-01-05"` sort correctly as plain text?
+**M125.** Why do ISO dates like `"2026-01-05"` sort correctly as plain text?
 
 - A) Year, month, and day run from largest to smallest unit
 - B) Dashes are ignored while sorting
@@ -3712,7 +3851,7 @@ print(sorted([True, False, True]))
 
 </details>
 
-**M121.** What is the best key for department, last name, then first name, all A to Z?
+**M126.** What is the best key for department, last name, then first name, all A to Z?
 
 - A) `[-e["dept"], e["last"]]`
 - B) `(e["dept"], e["last"], e["first"])`
@@ -3726,7 +3865,7 @@ print(sorted([True, False, True]))
 
 </details>
 
-**M122.** What does this print?
+**M127.** What does this print?
 
 ```python
 print(sorted(["a"], key=lambda s: -s))
@@ -3744,7 +3883,7 @@ print(sorted(["a"], key=lambda s: -s))
 
 </details>
 
-**M123.** Sort key for highest rating first, then cheapest, then shortest:
+**M128.** Sort key for highest rating first, then cheapest, then shortest:
 
 - A) `(t["rating"], -t["price"], -t["days"])`
 - B) `(-t["rating"], t["price"], t["days"])`
@@ -3758,7 +3897,7 @@ print(sorted(["a"], key=lambda s: -s))
 
 </details>
 
-**M124.** Sort key for exact matches first, then highest score, then title A to Z:
+**M129.** Sort key for exact matches first, then highest score, then title A to Z:
 
 - A) `(r["exact"], -r["score"], r["title"])`
 - B) `(not r["exact"], -r["score"], r["title"])`
@@ -3772,7 +3911,7 @@ print(sorted(["a"], key=lambda s: -s))
 
 </details>
 
-**M125.** Date and ID must both go highest first, and the date is a string. What do you use?
+**M130.** Date and ID must both go highest first, and the date is a string. What do you use?
 
 - A) `key=lambda o: (o["date"], o["id"]), reverse=True`
 - B) `key=lambda o: not o["date"]`
@@ -3786,7 +3925,7 @@ print(sorted(["a"], key=lambda s: -s))
 
 </details>
 
-**M126.** What does this print?
+**M131.** What does this print?
 
 ```python
 order = {"blocked": 0, "todo": 1, "done": 2}
@@ -3805,9 +3944,11 @@ print(sorted(["done", "blocked", "todo"], key=lambda s: order[s]))
 
 </details>
 
-### Dictionaries and complexity (Q68–70)
+#### Dictionaries
 
-**M127.** What does this print?
+##### Dictionaries and complexity
+
+**M132.** What does this print?
 
 ```python
 d = {}
@@ -3828,7 +3969,7 @@ print(list(d), sorted(d))
 
 </details>
 
-**M128.** What is the time to insert at the beginning of a list?
+**M133.** What is the time to insert at the beginning of a list?
 
 - A) O(1)
 - B) O(log n)
@@ -3842,7 +3983,7 @@ print(list(d), sorted(d))
 
 </details>
 
-**M129.** What is the amortized time of `list.append()`?
+**M134.** What is the amortized time of `list.append()`?
 
 - A) O(log n)
 - B) O(1)
@@ -3856,7 +3997,7 @@ print(list(d), sorted(d))
 
 </details>
 
-**M130.** Which operation is slowest on a large list?
+**M135.** Which operation is slowest on a large list?
 
 - A) `items.append(1)`
 - B) `items[5]`
@@ -3870,7 +4011,7 @@ print(list(d), sorted(d))
 
 </details>
 
-**M131.** What is the average time to look up, insert, or delete by key in a dict?
+**M136.** What is the average time to look up, insert, or delete by key in a dict?
 
 - A) O(1)
 - B) O(log n)
@@ -3884,7 +4025,7 @@ print(list(d), sorted(d))
 
 </details>
 
-**M132.** Why can't a list be a dict key?
+**M137.** Why can't a list be a dict key?
 
 - A) It's mutable, so it's unhashable
 - B) Keys must be strings
@@ -3898,9 +4039,241 @@ print(list(d), sorted(d))
 
 </details>
 
-### Creating dictionaries and lists (Q71–82)
+##### Merging and safe dictionary access
 
-**M133.** What does this print?
+**M138.** What does this print?
+
+```python
+print({"x": 1, "y": 2} | {"y": 9, "z": 3})
+```
+
+- A) `{'x': 1, 'z': 3, 'y': 9}`
+- B) `{'x': 1, 'y': 2, 'z': 3}`
+- C) `{'x': 1, 'y': 9, 'z': 3}`
+- D) `KeyError`
+
+<details>
+<summary>Answer</summary>
+
+**C) `{'x': 1, 'y': 9, 'z': 3}`**. The right value wins, the key keeps its place, and new keys go at the end. (See Q94, Q95.)
+
+</details>
+
+**M139.** What does this print?
+
+```python
+print({**{"a": 1}, **{"a": 2, "b": 3}})
+```
+
+- A) `{'a': 2, 'b': 3}`
+- B) `TypeError`
+- C) `{'a': 1, 'b': 3}`
+- D) `{'a': [1, 2], 'b': 3}`
+
+<details>
+<summary>Answer</summary>
+
+**A) `{'a': 2, 'b': 3}`**. Later dictionaries overwrite earlier ones. (See Q94.)
+
+</details>
+
+**M140.** What does this print?
+
+```python
+a = {"x": 1}
+r = a.update({"y": 2})
+print(r, a)
+```
+
+- A) `None {'x': 1}`
+- B) `{'x': 1, 'y': 2} {'x': 1, 'y': 2}`
+- C) `None {'x': 1, 'y': 2}`
+- D) `{'x': 1, 'y': 2} {'x': 1}`
+
+<details>
+<summary>Answer</summary>
+
+**C) `None {'x': 1, 'y': 2}`**. `update()` changes the dict in place and returns `None`. (See Q94.)
+
+</details>
+
+**M141.** What does this print?
+
+```python
+print({"a": 1, "b": 2}.keys() & {"b": 3}.keys())
+```
+
+- A) `{'a', 'b'}`
+- B) `{'b'}`
+- C) `TypeError`
+- D) `{'a'}`
+
+<details>
+<summary>Answer</summary>
+
+**B) `{'b'}`**. Key views support set operators, so `&` finds shared keys. (See Q95.)
+
+</details>
+
+**M142.** What does this print?
+
+```python
+print({"a": 1} | [("b", 2)])
+```
+
+- A) `KeyError`
+- B) `[('b', 2)]`
+- C) `{'a': 1, 'b': 2}`
+- D) `TypeError`
+
+<details>
+<summary>Answer</summary>
+
+**D) `TypeError`**. Both sides of `|` must be dictionaries. (See Q96.)
+
+</details>
+
+**M143.** What does this print?
+
+```python
+d = {"a": 1}
+d |= [("b", 2)]
+print(d)
+```
+
+- A) `[('b', 2)]`
+- B) `{'a': 1}`
+- C) `TypeError`
+- D) `{'a': 1, 'b': 2}`
+
+<details>
+<summary>Answer</summary>
+
+**D) `{'a': 1, 'b': 2}`**. The in-place form accepts a list of pairs. (See Q96.)
+
+</details>
+
+**M144.** What does this print?
+
+```python
+d = {"a": 1}
+print(d["z"])
+```
+
+- A) `0`
+- B) `IndexError`
+- C) `KeyError`
+- D) `None`
+
+<details>
+<summary>Answer</summary>
+
+**C) `KeyError`**. Square brackets raise an error for a missing key. (See Q97.)
+
+</details>
+
+**M145.** What does this print?
+
+```python
+d = {"a": 1}
+print(d.get("z"), d.get("z", 0))
+```
+
+- A) `0 0`
+- B) `None None`
+- C) `KeyError`
+- D) `None 0`
+
+<details>
+<summary>Answer</summary>
+
+**D) `None 0`**. `get()` returns `None` or your default. (See Q98.)
+
+</details>
+
+**M146.** What does this print?
+
+```python
+print({"a": None}.get("a", "x"))
+```
+
+- A) `KeyError`
+- B) `None`
+- C) `a`
+- D) `x`
+
+<details>
+<summary>Answer</summary>
+
+**B) `None`**. The key exists, so its stored value is returned, not the default. (See Q98.)
+
+</details>
+
+**M147.** What does this print?
+
+```python
+print("z" in {"z": 1}, 1 in {"z": 1})
+```
+
+- A) `False True`
+- B) `True True`
+- C) `True False`
+- D) `False False`
+
+<details>
+<summary>Answer</summary>
+
+**C) `True False`**. `in` checks keys, not values. (See Q98.)
+
+</details>
+
+**M148.** Which one is LBYL (Look Before You Leap)?
+
+- A) try `d["k"]`, then `except KeyError`
+- B) `if "k" in d: use(d["k"])`
+- C) `d.setdefault("k", 0)`
+- D) `d.get("k", 0)`
+
+<details>
+<summary>Answer</summary>
+
+**B) `if "k" in d: use(d["k"])`**. LBYL checks first. (See Q98.)
+
+</details>
+
+**M149.** Which one is EAFP (Easier to Ask Forgiveness than Permission)?
+
+- A) `if "k" in d: use(d["k"])`
+- B) `len(d) > 0`
+- C) `d.get("k", 0)`
+- D) try `d["k"]`, then `except KeyError`
+
+<details>
+<summary>Answer</summary>
+
+**D) try `d["k"]`, then `except KeyError`**. EAFP tries first and handles the error. (See Q98.)
+
+</details>
+
+**M150.** Which is the simplest choice when a missing key should just give a default?
+
+- A) `d.get(key, default)`
+- B) `if key in d`
+- C) `try/except KeyError`
+- D) `d[key]`
+
+<details>
+<summary>Answer</summary>
+
+**A) `d.get(key, default)`**. `get()` needs no extra branch. (See Q98.)
+
+</details>
+
+#### Comprehensions and iteration
+
+##### Creating dictionaries and lists
+
+**M151.** What does this print?
 
 ```python
 print({"a": 1, "a": 2})
@@ -3918,7 +4291,7 @@ print({"a": 1, "a": 2})
 
 </details>
 
-**M134.** What does this print?
+**M152.** What does this print?
 
 ```python
 print(dict(zip(["a", "b"], [1, 2, 3])))
@@ -3936,7 +4309,7 @@ print(dict(zip(["a", "b"], [1, 2, 3])))
 
 </details>
 
-**M135.** What does this print?
+**M153.** What does this print?
 
 ```python
 print(dict(enumerate("ab")))
@@ -3954,7 +4327,7 @@ print(dict(enumerate("ab")))
 
 </details>
 
-**M136.** What does this print?
+**M154.** What does this print?
 
 ```python
 print(dict.fromkeys(["a", "b"], 0))
@@ -3972,7 +4345,7 @@ print(dict.fromkeys(["a", "b"], 0))
 
 </details>
 
-**M137.** What does this print?
+**M155.** What does this print?
 
 ```python
 from collections import Counter
@@ -3991,7 +4364,7 @@ print(Counter("aab")["a"])
 
 </details>
 
-**M138.** What does this print?
+**M156.** What does this print?
 
 ```python
 import json
@@ -4010,7 +4383,7 @@ print(json.loads('{"a": 1}')["a"])
 
 </details>
 
-**M139.** What does this print?
+**M157.** What does this print?
 
 ```python
 d = dict.fromkeys(["a", "b"], [])
@@ -4030,7 +4403,7 @@ print(d)
 
 </details>
 
-**M140.** What does this print?
+**M158.** What does this print?
 
 ```python
 d = {k: [] for k in ["a", "b"]}
@@ -4050,7 +4423,7 @@ print(d)
 
 </details>
 
-**M141.** What does this print?
+**M159.** What does this print?
 
 ```python
 print({n: n * n for n in [1, 2, 3]})
@@ -4068,7 +4441,7 @@ print({n: n * n for n in [1, 2, 3]})
 
 </details>
 
-**M142.** What does this print?
+**M160.** What does this print?
 
 ```python
 print({w: len(w) for w in ["hi", "hey"]})
@@ -4086,7 +4459,7 @@ print({w: len(w) for w in ["hi", "hey"]})
 
 </details>
 
-**M143.** What does this print?
+**M161.** What does this print?
 
 ```python
 users = [{"id": 7, "name": "Asha"}]
@@ -4105,7 +4478,7 @@ print({u["id"]: u for u in users}[7]["name"])
 
 </details>
 
-**M144.** What does this print?
+**M162.** What does this print?
 
 ```python
 print({k: v for k, v in {"a": 40, "b": 60}.items() if v >= 60})
@@ -4123,7 +4496,7 @@ print({k: v for k, v in {"a": 40, "b": 60}.items() if v >= 60})
 
 </details>
 
-**M145.** What does this print?
+**M163.** What does this print?
 
 ```python
 print(list({"a": 1}))
@@ -4141,7 +4514,7 @@ print(list({"a": 1}))
 
 </details>
 
-**M146.** What does this print?
+**M164.** What does this print?
 
 ```python
 print(list("hi"), list(range(2)))
@@ -4159,7 +4532,7 @@ print(list("hi"), list(range(2)))
 
 </details>
 
-**M147.** What does this print?
+**M165.** What does this print?
 
 ```python
 print([1, 2] + [3])
@@ -4177,7 +4550,7 @@ print([1, 2] + [3])
 
 </details>
 
-**M148.** What does this print?
+**M166.** What does this print?
 
 ```python
 print([int(n) for n in "1,2".split(",")])
@@ -4195,7 +4568,7 @@ print([int(n) for n in "1,2".split(",")])
 
 </details>
 
-**M149.** What does this print?
+**M167.** What does this print?
 
 ```python
 print([x * 2 for x in range(3) if x])
@@ -4213,7 +4586,7 @@ print([x * 2 for x in range(3) if x])
 
 </details>
 
-**M150.** What does this print?
+**M168.** What does this print?
 
 ```python
 print(sorted(set(["dog", "cat", "dog"])))
@@ -4231,7 +4604,7 @@ print(sorted(set(["dog", "cat", "dog"])))
 
 </details>
 
-**M151.** What does this print?
+**M169.** What does this print?
 
 ```python
 print({label: i for i, label in enumerate(["cat", "dog"])})
@@ -4249,7 +4622,7 @@ print({label: i for i, label in enumerate(["cat", "dog"])})
 
 </details>
 
-**M152.** What does this print?
+**M170.** What does this print?
 
 ```python
 print({v: k for k, v in {"a": 1, "b": 2}.items()})
@@ -4267,7 +4640,7 @@ print({v: k for k, v in {"a": 1, "b": 2}.items()})
 
 </details>
 
-**M153.** What does this print?
+**M171.** What does this print?
 
 ```python
 print({c: 1 for c in "aab"})
@@ -4285,9 +4658,9 @@ print({c: 1 for c in "aab"})
 
 </details>
 
-### enumerate, zip, and unpacking (Q83–93)
+##### enumerate, zip, and unpacking
 
-**M154.** What does this print?
+**M172.** What does this print?
 
 ```python
 print(list(enumerate(["a", "b"], start=1)))
@@ -4305,7 +4678,7 @@ print(list(enumerate(["a", "b"], start=1)))
 
 </details>
 
-**M155.** What does this print?
+**M173.** What does this print?
 
 ```python
 print(list(zip([1, 2], "abc")))
@@ -4323,7 +4696,7 @@ print(list(zip([1, 2], "abc")))
 
 </details>
 
-**M156.** What does this print?
+**M174.** What does this print?
 
 ```python
 print(list(zip([1, 2], "abc", strict=True)))
@@ -4341,7 +4714,7 @@ print(list(zip([1, 2], "abc", strict=True)))
 
 </details>
 
-**M157.** What does this print?
+**M175.** What does this print?
 
 ```python
 names, scores = zip(*[("a", 1), ("b", 2)])
@@ -4360,7 +4733,7 @@ print(names, scores)
 
 </details>
 
-**M158.** What does this print?
+**M176.** What does this print?
 
 ```python
 names, scores = zip(*{"a": 1, "b": 2}.items())
@@ -4379,7 +4752,7 @@ print(scores)
 
 </details>
 
-**M159.** What does this print?
+**M177.** What does this print?
 
 ```python
 rows = [{"n": "a", "s": 1}, {"n": "b", "s": 2}]
@@ -4399,7 +4772,7 @@ print(names)
 
 </details>
 
-**M160.** What does this print?
+**M178.** What does this print?
 
 ```python
 print(list((1, 2)))
@@ -4417,7 +4790,7 @@ print(list((1, 2)))
 
 </details>
 
-**M161.** What does this print?
+**M179.** What does this print?
 
 ```python
 a, b = map(list, zip(*[("x", 1), ("y", 2)]))
@@ -4436,7 +4809,30 @@ print(a, b)
 
 </details>
 
-**M162.** What does this print?
+**M180.** What does this print?
+
+```python
+first, *rest = [1, 2, 3]
+print(rest)
+```
+
+- A) `3`
+- B) `(2, 3)`
+- C) `[2, 3]`
+- D) `[1, 2, 3]`
+
+<details>
+<summary>Answer</summary>
+
+**C) `[2, 3]`**. `*rest` collects the remaining items into a list. (See Q92.)
+
+</details>
+
+### Functions
+
+#### `*args` and `**kwargs`
+
+**M181.** What does this print?
 
 ```python
 def f(*a, **k):
@@ -4457,7 +4853,7 @@ print(f(1, x=2))
 
 </details>
 
-**M163.** What does this print?
+**M182.** What does this print?
 
 ```python
 def f(*a, **k):
@@ -4478,7 +4874,7 @@ print(f(1, 2, lr=0.1))
 
 </details>
 
-**M164.** What does this print?
+**M183.** What does this print?
 
 ```python
 def f(a, *args):
@@ -4499,7 +4895,7 @@ print(f(1))
 
 </details>
 
-**M165.** When are `*args` and `**kwargs` most useful?
+**M184.** When are `*args` and `**kwargs` most useful?
 
 - A) You want faster loops
 - B) The data is already one list
@@ -4513,7 +4909,7 @@ print(f(1))
 
 </details>
 
-**M166.** What does this print?
+**M185.** What does this print?
 
 ```python
 def add(a, b):
@@ -4534,7 +4930,7 @@ print(add(*[1, 2]))
 
 </details>
 
-**M167.** What does this print?
+**M186.** What does this print?
 
 ```python
 def add(a, b):
@@ -4555,7 +4951,7 @@ print(add(**{"a": 1, "b": 2}))
 
 </details>
 
-**M168.** What does this print?
+**M187.** What does this print?
 
 ```python
 def add(a, b):
@@ -4576,26 +4972,7 @@ print(add(**{"a": 1, "c": 2}))
 
 </details>
 
-**M169.** What does this print?
-
-```python
-first, *rest = [1, 2, 3]
-print(rest)
-```
-
-- A) `3`
-- B) `(2, 3)`
-- C) `[2, 3]`
-- D) `[1, 2, 3]`
-
-<details>
-<summary>Answer</summary>
-
-**C) `[2, 3]`**. `*rest` collects the remaining items into a list. (See Q92.)
-
-</details>
-
-**M170.** Why write `model.fit(*train_data, **settings)` in experiments?
+**M188.** Why write `model.fit(*train_data, **settings)` in experiments?
 
 - A) It turns off validation
 - B) It saves the model automatically
@@ -4606,236 +4983,6 @@ print(rest)
 <summary>Answer</summary>
 
 **C) Each run changes only the settings dict**. The `fit()` line stays the same across experiments. (See Q93.)
-
-</details>
-
-### Merging and safe dictionary access (Q94–98)
-
-**M171.** What does this print?
-
-```python
-print({"x": 1, "y": 2} | {"y": 9, "z": 3})
-```
-
-- A) `{'x': 1, 'z': 3, 'y': 9}`
-- B) `{'x': 1, 'y': 2, 'z': 3}`
-- C) `{'x': 1, 'y': 9, 'z': 3}`
-- D) `KeyError`
-
-<details>
-<summary>Answer</summary>
-
-**C) `{'x': 1, 'y': 9, 'z': 3}`**. The right value wins, the key keeps its place, and new keys go at the end. (See Q94, Q95.)
-
-</details>
-
-**M172.** What does this print?
-
-```python
-print({**{"a": 1}, **{"a": 2, "b": 3}})
-```
-
-- A) `{'a': 2, 'b': 3}`
-- B) `TypeError`
-- C) `{'a': 1, 'b': 3}`
-- D) `{'a': [1, 2], 'b': 3}`
-
-<details>
-<summary>Answer</summary>
-
-**A) `{'a': 2, 'b': 3}`**. Later dictionaries overwrite earlier ones. (See Q94.)
-
-</details>
-
-**M173.** What does this print?
-
-```python
-a = {"x": 1}
-r = a.update({"y": 2})
-print(r, a)
-```
-
-- A) `None {'x': 1}`
-- B) `{'x': 1, 'y': 2} {'x': 1, 'y': 2}`
-- C) `None {'x': 1, 'y': 2}`
-- D) `{'x': 1, 'y': 2} {'x': 1}`
-
-<details>
-<summary>Answer</summary>
-
-**C) `None {'x': 1, 'y': 2}`**. `update()` changes the dict in place and returns `None`. (See Q94.)
-
-</details>
-
-**M174.** What does this print?
-
-```python
-print({"a": 1, "b": 2}.keys() & {"b": 3}.keys())
-```
-
-- A) `{'a', 'b'}`
-- B) `{'b'}`
-- C) `TypeError`
-- D) `{'a'}`
-
-<details>
-<summary>Answer</summary>
-
-**B) `{'b'}`**. Key views support set operators, so `&` finds shared keys. (See Q95.)
-
-</details>
-
-**M175.** What does this print?
-
-```python
-print({"a": 1} | [("b", 2)])
-```
-
-- A) `KeyError`
-- B) `[('b', 2)]`
-- C) `{'a': 1, 'b': 2}`
-- D) `TypeError`
-
-<details>
-<summary>Answer</summary>
-
-**D) `TypeError`**. Both sides of `|` must be dictionaries. (See Q96.)
-
-</details>
-
-**M176.** What does this print?
-
-```python
-d = {"a": 1}
-d |= [("b", 2)]
-print(d)
-```
-
-- A) `[('b', 2)]`
-- B) `{'a': 1}`
-- C) `TypeError`
-- D) `{'a': 1, 'b': 2}`
-
-<details>
-<summary>Answer</summary>
-
-**D) `{'a': 1, 'b': 2}`**. The in-place form accepts a list of pairs. (See Q96.)
-
-</details>
-
-**M177.** What does this print?
-
-```python
-d = {"a": 1}
-print(d["z"])
-```
-
-- A) `0`
-- B) `IndexError`
-- C) `KeyError`
-- D) `None`
-
-<details>
-<summary>Answer</summary>
-
-**C) `KeyError`**. Square brackets raise an error for a missing key. (See Q97.)
-
-</details>
-
-**M178.** What does this print?
-
-```python
-d = {"a": 1}
-print(d.get("z"), d.get("z", 0))
-```
-
-- A) `0 0`
-- B) `None None`
-- C) `KeyError`
-- D) `None 0`
-
-<details>
-<summary>Answer</summary>
-
-**D) `None 0`**. `get()` returns `None` or your default. (See Q98.)
-
-</details>
-
-**M179.** What does this print?
-
-```python
-print({"a": None}.get("a", "x"))
-```
-
-- A) `KeyError`
-- B) `None`
-- C) `a`
-- D) `x`
-
-<details>
-<summary>Answer</summary>
-
-**B) `None`**. The key exists, so its stored value is returned, not the default. (See Q98.)
-
-</details>
-
-**M180.** What does this print?
-
-```python
-print("z" in {"z": 1}, 1 in {"z": 1})
-```
-
-- A) `False True`
-- B) `True True`
-- C) `True False`
-- D) `False False`
-
-<details>
-<summary>Answer</summary>
-
-**C) `True False`**. `in` checks keys, not values. (See Q98.)
-
-</details>
-
-**M181.** Which one is LBYL (Look Before You Leap)?
-
-- A) try `d["k"]`, then `except KeyError`
-- B) `if "k" in d: use(d["k"])`
-- C) `d.setdefault("k", 0)`
-- D) `d.get("k", 0)`
-
-<details>
-<summary>Answer</summary>
-
-**B) `if "k" in d: use(d["k"])`**. LBYL checks first. (See Q98.)
-
-</details>
-
-**M182.** Which one is EAFP (Easier to Ask Forgiveness than Permission)?
-
-- A) `if "k" in d: use(d["k"])`
-- B) `len(d) > 0`
-- C) `d.get("k", 0)`
-- D) try `d["k"]`, then `except KeyError`
-
-<details>
-<summary>Answer</summary>
-
-**D) try `d["k"]`, then `except KeyError`**. EAFP tries first and handles the error. (See Q98.)
-
-</details>
-
-**M183.** Which is the simplest choice when a missing key should just give a default?
-
-- A) `d.get(key, default)`
-- B) `if key in d`
-- C) `try/except KeyError`
-- D) `d[key]`
-
-<details>
-<summary>Answer</summary>
-
-**A) `d.get(key, default)`**. `get()` needs no extra branch. (See Q98.)
 
 </details>
 
