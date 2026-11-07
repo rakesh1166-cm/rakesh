@@ -101,6 +101,43 @@ OR How do you merge two Python dictionaries only if they have no keys in common,
 96.it Can dict | list work?
 97.What happens when you use square brackets (dictionary[key]) to access a key that does not exist in a Python dictionary?
 98.How can you safely access a dictionary key that might be missing, and when should you use get(), in, or try/except?
+=======================OOPS====================================
+1.Can __init__() return a value such as an integer, or must it return None?
+2.Is self a reserved keyword in Python or a naming convention?
+3.What is an instance of a class, and which instance does self refer to inside a method?
+4.what do u mean by self and instance
+5.is A Mutable Class Attribute  Shared
+6.Can a child class in Python use its parent class’s __init__() if it doesn’t define its own?
+7.How can you read and modify the state of an object created from a Python class? Show six different examples in a table with Task, Method Call, and Result columns..
+8.How do you declare a subclass in Python? Show the syntax and where to put the parent class name.
+9.answer different way to call a Python instance method after object created
+10. What Is the Difference Between Instance, Class, and Static Methods?
+11.is class method can read and update attributes stored on the class:
+12 why classmethod use if we have instance method
+13, why use is-a relationship
+14.different form of super.
+15.What Is Multiple Inheritance and MRO? when mixns r used
+16.diamond inheritance problem
+17.What is a lambda function, and when should you avoid it?
+18.Find the Best Model and Sort by Several Fields using lambda fun
+19.What is a decorator, and how do you write one?
+20.What is the difference between a function decorator and a class decorator
+21.What are dunder/magic methods? Give exam
+22.what is dataclass decorator ?why they are usefull ?
+23.how to add validation while i use dataclass decorator?
+24.What is a generator, and how does yield work?
+25.When would you use a generator instead of a list?
+26.What is the difference between return and yield?
+27.How do try, except, else, and finally work?
+28.How do you create and raise custom exceptions
+29.What is exception chaining using raise ... from ...?
+30.difference between exception chaing and custom exception?
+31. What is a context manager, and how does with work? 
+32. in progamming what r scenario when context manager is used?
+33.What is the difference between finally and a context manager for cleanup?
+34.How do async and await work in Python?
+
+
 
 
 
@@ -470,6 +507,57 @@ Unpacking lets you store training data in a tuple and training settings in a dic
 98.get() — Use it when you want a fallback value if the key is missing.
 in — “Look before you leap.” Check whether the key exists before accessing it. A key with a value of None still exists.
 try/except KeyError — “Ask forgiveness.” Try accessing the key directly and handle the error if it’s missing.
+=================oops============================
+1._init__() must return None. If you leave out return, Python returns None automatically. Returning an integer raises TypeError
+2.self is a naming convention. It’s the standard name for the first parameter of an instance method. Python doesn’t reserve it as a keyword.
+3.An instance is an object created from a class. In model = Model("Random Forest"), model is the instance, and self refers to that same object inside __init__().
+4.self=referes particualar object,The current object,A way to read the object’s data.,	A way to change the object’s data.,A way to call another method on the same object.(self.start_engine())
+instance=An instance is an object created from a class
+5.yes
+6.yes
+7.class Model:
+    def __init__(self, name):
+        self.name = name
+        self.epoch = 0
+        self.is_trained = False
+        self.loss_history = [0.8]
+        self.metrics = {}
+        self.features = ["age", "income"]
+
+    def rename(self, new_name):
+        self.name = new_name
+
+    def next_epoch(self):
+        self.epoch += 1
+
+    def mark_trained(self):
+        self.is_trained = True
+
+    def record_loss(self, loss):
+        self.loss_history.append(loss)
+
+    def record_accuracy(self, score):
+        self.metrics["accuracy"] = score
+
+    def remove_feature(self, feature):
+        self.features.remove(feature)
+ 8. class ChildClass(ParentClass):
+    pass  
+  9.| Way to call | Example | How `self` is passed |
+|---|---|---|
+| Using the object variable ===> `config.describe()` |
+| Using the class name ===> `ModelConfig.describe(config)` 
+
+10.yes
+12.class method when you need another way to build an instance, such as from a dictionary, a JSON string, or a file
+13.The purpose of “is-a” is to show that a child class can be used wherever its parent class is expected. For example, a Classifier is a kind of Model, so a function that accepts a Model can also accept a Classifier.
+14.Parent constructor = super().__init__(name)
+Parent instance method = super().show()
+Parent class method = super().create() inside a @classmethod
+15.multiple inheritance=class D(B, C) has two direct bases(Class That Inherits from More Than One Base Class)=Multiple inheritance is most often used for mixins
+MRO====>The linear search order, such as D, B, C, A, object
+
+
 
 
 

@@ -16208,3 +16208,1199 @@ Q numbers refer to Part A. Theory-only questions Q1, Q3, Q4, Q5 are not included
 | 58 | Fetch 100 simulated URLs with asyncio, at most 5 at a time, with timeouts and a failure list | 197, 199 |
 | 59 | Fix an async service that calls a blocking function and runs heavy CPU work | 198, 201 |
 | 60 | Profile a text-cleaning job, then speed it up, and report the time and memory before and after | 202, 203 |
+
+---
+
+## Part E: Simple Answers with Real-Life Examples
+
+### OOP
+
+**E1.** Can `__init__()` return a value such as an integer, or must it return `None`?
+
+<details>
+<summary>Answer</summary>
+
+It must return `None`. Its only job is to set up the new object. If you return a number, Python raises a `TypeError`.
+
+```python
+class Bad:
+    def __init__(self):
+        return 10
+
+try:
+    Bad()
+except TypeError as error:
+    print(error)  # __init__() should return None, not 'int'
+```
+
+**Real-life example:** When you set up a new phone, you add your language and accounts. The setup doesn't give you a second phone. You just get the same phone, ready to use.
+
+</details>
+
+**E2.** Is `self` a reserved keyword in Python or a naming convention?
+
+<details>
+<summary>Answer</summary>
+
+It's a naming convention, not a keyword. Python passes the object as the first argument, whatever you call it. The code below works, but always use `self` so others can read your code.
+
+```python
+class Car:
+    def show(this):
+        return "works"
+
+print(Car().show())  # works
+```
+
+**Real-life example:** Everyone at school says "Good morning" to the teacher. No law forces those words, but everyone uses them, so everyone understands.
+
+</details>
+
+**E3.** What is an instance of a class, and which instance does `self` refer to inside a method?
+
+<details>
+<summary>Answer</summary>
+
+An **instance** is one real object made from a class. Inside a method, `self` is the object you called the method on: the one before the dot.
+
+```python
+class Car:
+    def __init__(self, color):
+        self.color = color
+
+    def show(self):
+        return self.color
+
+red = Car("red")
+blue = Car("blue")
+
+print(red.show())   # red: here self is the red object
+print(blue.show())  # blue: here self is the blue object
+```
+
+**Real-life example:** A car design is the class, and each car on the road is an instance. When you press your key, only your car unlocks. That's `self`: the exact car being used.
+
+</details>
+
+**E4.** What do you mean by `self` and instance?
+
+<details>
+<summary>Answer</summary>
+
+They point to the same object. The difference is who is talking:
+
+| Word | Where you use it | Meaning |
+|---|---|---|
+| Instance | Outside the class, such as `first` | The real object |
+| `self` | Inside the class | "This object" |
+
+```python
+class Student:
+    def __init__(self, name):
+        self.name = name
+
+    def same_as(self, other):
+        return self is other
+
+first = Student("Asha")
+print(first.same_as(first))  # True: self and first are the same object
+```
+
+**Real-life example:** Your friends call you by your name. You call yourself "I". It's the same person. The name is like the instance, and "I" is like `self`.
+
+</details>
+
+**E5.** Is a mutable class attribute shared?
+
+<details>
+<summary>Answer</summary>
+
+Yes. A list or dict written in the class body belongs to the class, so all objects share one copy. If one object changes it, all of them see the change. To give each object its own copy, create it in `__init__`.
+
+```python
+class Team:
+    members = []              # shared by all
+
+    def __init__(self):
+        self.tasks = []       # separate for each object
+
+a = Team()
+b = Team()
+a.members.append("Asha")
+a.tasks.append("report")
+
+print(b.members)  # ['Asha']: shared
+print(b.tasks)    # []: not shared
+```
+
+**Real-life example:** The office whiteboard is shared: anything one person writes, everyone sees. Your personal notebook is yours alone.
+
+</details>
+
+**E6.** Can a child class use its parent class's `__init__()` if it doesn't define its own?
+
+<details>
+<summary>Answer</summary>
+
+Yes. If the child has no `__init__`, Python uses the parent's automatically. If the child writes its own, the parent's no longer runs by itself, so call `super().__init__()`.
+
+```python
+class Parent:
+    def __init__(self, name):
+        self.name = name
+
+class Child(Parent):
+    pass
+
+print(Child("Asha").name)  # Asha
+```
+
+**Real-life example:** A new branch of a shop with no rules of its own follows head office's opening rules. If it writes its own rules, it must add head office's rules itself if it still wants them.
+
+</details>
+
+**E7.** How can you read and modify the state of an object created from a Python class? Show six different examples in a table with Task, Method Call, and Result columns.
+
+<details>
+<summary>Answer</summary>
+
+An object's **state** is the data it holds. You read and change it through its methods.
+
+```python
+class BankAccount:
+    def __init__(self, owner, balance):
+        self.owner = owner
+        self.balance = balance
+        self.history = []
+
+    def get_balance(self):
+        return self.balance
+
+    def deposit(self, amount):
+        self.balance += amount
+        self.history.append(amount)
+
+    def withdraw(self, amount):
+        self.balance -= amount
+        self.history.append(-amount)
+
+    def change_owner(self, name):
+        self.owner = name
+
+    def get_owner(self):
+        return self.owner
+
+    def get_history(self):
+        return self.history
+
+account = BankAccount("Asha", 1000)
+print(account.get_balance())   # 1000
+account.deposit(500)
+print(account.balance)         # 1500
+account.withdraw(200)
+print(account.balance)         # 1300
+account.change_owner("Ben")
+print(account.get_owner())     # Ben
+print(account.get_history())   # [500, -200]
+```
+
+| Task | Method Call | Result |
+|---|---|---|
+| Read the balance | `account.get_balance()` | `1000` |
+| Add money | `account.deposit(500)` | `balance` is now `1500` |
+| Remove money | `account.withdraw(200)` | `balance` is now `1300` |
+| Change the owner | `account.change_owner("Ben")` | `owner` is now `"Ben"` |
+| Read the owner | `account.get_owner()` | `"Ben"` |
+| Read the history | `account.get_history()` | `[500, -200]` |
+
+**Real-life example:** With your bank account, you check the balance, deposit, and withdraw through the ATM. You don't change the bank's records by hand. Methods are the ATM buttons.
+
+</details>
+
+**E8.** How do you declare a subclass in Python? Show the syntax and where to put the parent class name.
+
+<details>
+<summary>Answer</summary>
+
+Put the parent class name in brackets after the child class name.
+
+```python
+class Animal:
+    def eat(self):
+        return "eating"
+
+class Dog(Animal):      # Animal is the parent
+    def bark(self):
+        return "woof"
+
+dog = Dog()
+print(dog.eat())   # eating: from the parent
+print(dog.bark())  # woof: its own
+```
+
+**Real-life example:** A dog is an animal, so it can eat like all animals, and it can also bark. Writing `Dog(Animal)` tells Python this family link.
+
+</details>
+
+**E9.** What are the different ways to call a Python instance method after an object is created?
+
+<details>
+<summary>Answer</summary>
+
+```python
+class Greeter:
+    def hello(self):
+        return "hello"
+
+    def twice(self):
+        return self.hello() * 2
+
+class Loud(Greeter):
+    def hello(self):
+        return super().hello().upper()
+
+g = Greeter()
+print(g.hello())               # hello
+print(Greeter.hello(g))        # hello
+say = g.hello
+print(say())                   # hello
+print(getattr(g, "hello")())   # hello
+print(g.twice())               # hellohello
+print(Loud().hello())          # HELLO
+```
+
+| Way | Example | When to use it |
+|---|---|---|
+| Through the object | `g.hello()` | Normal way: use this |
+| Through the class | `Greeter.hello(g)` | Rare: you pass the object yourself |
+| Save it in a variable | `say = g.hello` then `say()` | Passing it as a callback |
+| By name | `getattr(g, "hello")()` | The name is known only at runtime |
+| Inside the class | `self.hello()` | One method calling another |
+| From a child class | `super().hello()` | Using the parent's version |
+
+**Real-life example:** To reach a friend, you can call directly, save the number and tap it later, search by name, or ask someone to call them. It's the same friend through different routes.
+
+</details>
+
+**E10.** What is the difference between instance, class, and static methods?
+
+<details>
+<summary>Answer</summary>
+
+| Type | Gets first | Use it for |
+|---|---|---|
+| Instance method | `self`: the object | Working with one object's data |
+| Class method | `cls`: the class | Data shared by the class, or making objects |
+| Static method | Nothing | A helper that needs neither |
+
+```python
+class Pizza:
+    size_unit = "inch"
+
+    def __init__(self, size):
+        self.size = size
+
+    def describe(self):
+        return f"{self.size} {self.size_unit}"
+
+    @classmethod
+    def large(cls):
+        return cls(12)
+
+    @staticmethod
+    def is_valid(size):
+        return size > 0
+
+print(Pizza(8).describe())    # 8 inch
+print(Pizza.large().size)     # 12
+print(Pizza.is_valid(-1))     # False
+```
+
+**Real-life example:** In a pizza shop, "How big is this pizza?" is about one pizza (instance). "Make the standard large pizza" is a shop-level rule (class). "Is this size a positive number?" is a general check that needs no pizza or shop (static).
+
+</details>
+
+**E11.** Can a class method read and update attributes stored on the class?
+
+<details>
+<summary>Answer</summary>
+
+Yes. It receives the class as `cls`, so it can read and change class attributes. All objects see the change.
+
+```python
+class Student:
+    school = "City School"
+
+    @classmethod
+    def rename_school(cls, name):
+        cls.school = name
+
+first = Student()
+second = Student()
+Student.rename_school("Green School")
+
+print(first.school)   # Green School
+print(second.school)  # Green School
+```
+
+**Real-life example:** When a school changes its name, the principal updates it once. Every student's school name changes together, with no need to visit each student.
+
+</details>
+
+**E12.** Why use a class method if we have instance methods?
+
+<details>
+<summary>Answer</summary>
+
+An instance method needs an object first. A class method doesn't, which helps in three cases:
+
+- Creating an object in another way, such as from a dict.
+- Reading or changing data shared by the class.
+- Giving a child class objects of its own type, because `cls` is whichever class called it.
+
+```python
+class User:
+    def __init__(self, name):
+        self.name = name
+
+    @classmethod
+    def from_dict(cls, data):
+        return cls(data["name"])
+
+class Admin(User):
+    pass
+
+print(type(Admin.from_dict({"name": "Asha"})).__name__)  # Admin
+```
+
+**Real-life example:** To open a bank account, you go to the bank itself, because you don't have an account yet. The bank is like the class, and your account is like an instance.
+
+</details>
+
+**E13.** Why use an is-a relationship?
+
+<details>
+<summary>Answer</summary>
+
+Use inheritance when the child really is a kind of the parent. You reuse the parent's code, and any code that works with the parent also works with the child.
+
+```python
+class Vehicle:
+    def start(self):
+        return "started"
+
+class Car(Vehicle):
+    pass
+
+class Bike(Vehicle):
+    pass
+
+for vehicle in (Car(), Bike()):
+    print(vehicle.start())  # started (printed twice)
+```
+
+If it isn't truly is-a, use has-a (composition) instead: a car **has an** engine, but a car isn't an engine.
+
+**Real-life example:** A car is a vehicle and a bike is a vehicle, so both can start and stop. Traffic rules for vehicles apply to both, without writing separate rules.
+
+</details>
+
+**E14.** What are the different forms of `super()`?
+
+<details>
+<summary>Answer</summary>
+
+| Form | Use it for |
+|---|---|
+| `super().__init__(...)` | Running the parent's setup |
+| `super().method()` | Using the parent's method, then adding to it |
+| `super().attribute` | Reading the parent's class attribute |
+| `super(Child, self).method()` | The older way of writing the same call |
+| `super().create()` in a class method | Calling the parent's class method |
+
+```python
+class Parent:
+    role = "parent"
+
+    def __init__(self, name):
+        self.name = name
+
+    def show(self):
+        return f"name: {self.name}"
+
+    @classmethod
+    def create(cls):
+        return cls("new")
+
+class Child(Parent):
+    def __init__(self, name):
+        super().__init__(name)
+
+    def show(self):
+        return super().show() + " (child)"
+
+    def old_style(self):
+        return super(Child, self).show()
+
+    def parent_role(self):
+        return super().role
+
+    @classmethod
+    def create(cls):
+        return super().create()
+
+child = Child("Asha")
+print(child.show())         # name: Asha (child)
+print(child.old_style())    # name: Asha
+print(child.parent_role())  # parent
+print(Child.create().name)  # new
+```
+
+**Real-life example:** At work you follow your manager's process, then add your own final step. `super()` is "do what my manager's process says first".
+
+</details>
+
+**E15.** What is multiple inheritance and MRO? When are mixins used?
+
+<details>
+<summary>Answer</summary>
+
+**Multiple inheritance:** a class has more than one parent.
+
+**MRO (method resolution order):** the fixed order Python searches classes to find a method. See it with `Class.__mro__`.
+
+**Mixin:** a small class that adds one extra ability, such as logging. Use a mixin when several unrelated classes need the same small feature. Put it before the main parent.
+
+```python
+class LogMixin:
+    def save(self):
+        return "log, " + super().save()
+
+class Model:
+    def save(self):
+        return "saved"
+
+class Report:
+    def save(self):
+        return "report saved"
+
+class LoggedModel(LogMixin, Model):
+    pass
+
+class LoggedReport(LogMixin, Report):
+    pass
+
+print(LoggedModel().save())   # log, saved
+print(LoggedReport().save())  # log, report saved
+print([c.__name__ for c in LoggedModel.__mro__])
+# ['LoggedModel', 'LogMixin', 'Model', 'object']
+```
+
+**Real-life example:** You add a phone cover with a card holder to any phone. The cover is a mixin: one small extra feature that fits many phones. The MRO is like a queue: Python asks the first person in line, then the next.
+
+</details>
+
+**E16.** What is the diamond inheritance problem?
+
+<details>
+<summary>Answer</summary>
+
+It happens when two parents share one grandparent, so the shape looks like a diamond. The question is which version runs, and whether the grandparent runs twice. Python solves this with the MRO: each class appears once, and `super()` moves to the next class in that order.
+
+```text
+    A
+   / \
+  B   C
+   \ /
+    D
+```
+
+```python
+class A:
+    def show(self):
+        print("A")
+
+class B(A):
+    def show(self):
+        print("B")
+        super().show()
+
+class C(A):
+    def show(self):
+        print("C")
+        super().show()
+
+class D(B, C):
+    def show(self):
+        print("D")
+        super().show()
+
+D().show()
+# D
+# B
+# C
+# A
+```
+
+`A` runs only once. `super()` in `B` goes to `C`, not straight to `A`, because `C` comes next in `D`'s order.
+
+**Real-life example:** Your father and mother both took the same family recipe from your grandmother. You wouldn't cook her step twice. You follow one clear order, and her step happens once.
+
+</details>
+
+### Lambda and decorators
+
+**E17.** What is a lambda function, and when should you avoid it?
+
+<details>
+<summary>Answer</summary>
+
+A lambda is a small function with no name, written in one line. It returns the value of one expression. It's best for short jobs, such as a sorting key.
+
+```python
+words = ["banana", "fig", "apple"]
+print(sorted(words, key=lambda word: len(word)))
+# ['fig', 'apple', 'banana']
+```
+
+**Avoid it when** the logic needs several steps, error handling, or a clear name. It isn't faster than `def`, so use `def` for anything you reuse.
+
+**Real-life example:** A sticky note is good for a quick reminder, like "buy milk". For a long procedure you need a proper document. A lambda is the sticky note, and `def` is the document.
+
+</details>
+
+**E18.** How do you find the best model and sort by several fields using a lambda function?
+
+<details>
+<summary>Answer</summary>
+
+Pass a lambda as `key`. For several fields, return a tuple. Python compares the first value, then the next one if they tie. Put a minus sign before a number to sort it from highest to lowest.
+
+```python
+models = [
+    {"name": "rf", "accuracy": 0.93, "time": 20},
+    {"name": "svm", "accuracy": 0.93, "time": 10},
+    {"name": "lr", "accuracy": 0.88, "time": 2},
+]
+
+best = max(models, key=lambda m: m["accuracy"])
+print(best["name"])  # rf
+
+ranked = sorted(models, key=lambda m: (-m["accuracy"], m["time"]))
+print([m["name"] for m in ranked])  # ['svm', 'rf', 'lr']
+```
+
+`rf` and `svm` tie on accuracy, so the faster `svm` comes first in the ranking. `max()` returns the first of the tied items.
+
+**Real-life example:** A class ranks students by highest marks. If two tie, the one who finished the exam faster comes first.
+
+</details>
+
+**E19.** What is a decorator, and how do you write one?
+
+<details>
+<summary>Answer</summary>
+
+A decorator is a function that wraps another function to add extra behaviour, without changing that function's code.
+
+1. Write a function that takes a function.
+2. Inside it, write a `wrapper` that adds the extra work and calls the original.
+3. Return the wrapper.
+4. Put `@name` above the function.
+
+```python
+from functools import wraps
+
+def log_call(function):
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        print("Starting")
+        result = function(*args, **kwargs)
+        print("Finished")
+        return result
+    return wrapper
+
+@log_call
+def add(a, b):
+    return a + b
+
+print(add(2, 3))
+# Starting
+# Finished
+# 5
+```
+
+**Real-life example:** Gift wrapping adds a nice cover, but the gift inside stays the same. Or think of a phone case: the phone doesn't change, but it gets extra protection.
+
+</details>
+
+**E20.** What is the difference between a function decorator and a class decorator?
+
+<details>
+<summary>Answer</summary>
+
+| | Function decorator | Class decorator |
+|---|---|---|
+| Decorates | A function | A class |
+| Usually returns | A wrapper function | The same class |
+| Typical use | Logging, timing, caching | Registering or changing a class |
+| Example | `@lru_cache` | `@dataclass` |
+
+Both run once, when the definition runs.
+
+```python
+registry = []
+
+def register(cls):
+    registry.append(cls.__name__)
+    return cls
+
+@register
+class Model:
+    pass
+
+print(registry)  # ['Model']
+```
+
+**Real-life example:** A function decorator is like a security check at each visit: it acts each time someone enters. A class decorator is like registering a new company: it happens once, when the company is created.
+
+</details>
+
+### Dunder methods and dataclasses
+
+**E21.** What are dunder/magic methods? Give examples.
+
+<details>
+<summary>Answer</summary>
+
+They are special methods with double underscores on both sides. Python calls them for you when you use normal operations like `print()`, `len()`, or `+`.
+
+| Method | Called by |
+|---|---|
+| `__init__` | Creating an object |
+| `__str__` | `print(obj)` |
+| `__len__` | `len(obj)` |
+| `__call__` | `obj()` |
+| `__add__` | `a + b` |
+| `__eq__` | `a == b` |
+
+```python
+class Cart:
+    def __init__(self, items):
+        self.items = items
+
+    def __str__(self):
+        return f"Cart with {len(self)} items"
+
+    def __len__(self):
+        return len(self.items)
+
+    def __add__(self, other):
+        return Cart(self.items + other.items)
+
+cart = Cart(["pen"]) + Cart(["book"])
+print(cart)       # Cart with 2 items
+print(len(cart))  # 2
+```
+
+**Real-life example:** When you press a car's accelerator, you don't handle the engine yourself. The car does the hidden work. You use `+` or `len()`, and the dunder method does the hidden work.
+
+</details>
+
+**E22.** What is the `dataclass` decorator? Why is it useful?
+
+<details>
+<summary>Answer</summary>
+
+`@dataclass` writes common code for a class that mainly stores data. You list the fields, and Python creates `__init__`, `__repr__`, and `__eq__`. You write less code and make fewer mistakes.
+
+```python
+from dataclasses import dataclass
+
+@dataclass
+class Student:
+    name: str
+    marks: int = 0
+
+first = Student("Asha", 90)
+print(first)                         # Student(name='Asha', marks=90)
+print(first == Student("Asha", 90))  # True
+```
+
+**Real-life example:** You fill in a ready-made form with just name and marks. You don't draw the whole form by hand each time. `@dataclass` is the ready-made form.
+
+</details>
+
+**E23.** How do you add validation when using the `dataclass` decorator?
+
+<details>
+<summary>Answer</summary>
+
+Write a `__post_init__` method. Python runs it right after the fields are set, so you can check the values and raise an error. Type hints alone don't check anything.
+
+```python
+from dataclasses import dataclass
+
+@dataclass
+class Student:
+    name: str
+    marks: int
+
+    def __post_init__(self):
+        if not 0 <= self.marks <= 100:
+            raise ValueError("marks must be between 0 and 100")
+
+try:
+    Student("Asha", 150)
+except ValueError as error:
+    print(error)  # marks must be between 0 and 100
+```
+
+**Real-life example:** After you fill in a form, the clerk checks it before accepting it. If your age says 150, the clerk rejects it. `__post_init__` is that clerk.
+
+</details>
+
+### Generators
+
+**E24.** What is a generator, and how does `yield` work?
+
+<details>
+<summary>Answer</summary>
+
+A generator gives values one at a time, only when asked. `yield` hands out one value and pauses the function. It remembers where it stopped, and the next request continues from there.
+
+```python
+def tokens():
+    print("Token 1 ready")
+    yield 1
+    print("Token 2 ready")
+    yield 2
+
+queue = tokens()
+print(next(queue))
+print(next(queue))
+# Token 1 ready
+# 1
+# Token 2 ready
+# 2
+```
+
+**Real-life example:** A bank token machine gives one token when you press the button, then waits. It doesn't print all the day's tokens in the morning.
+
+</details>
+
+**E25.** When would you use a generator instead of a list?
+
+<details>
+<summary>Answer</summary>
+
+Use a **generator** when the data is large, you read it once, or you may stop early, because it doesn't keep everything in memory. Use a **list** when you need indexing, sorting, `len()`, or several passes.
+
+```python
+import sys
+
+as_list = [n for n in range(100_000)]
+as_gen = (n for n in range(100_000))
+
+print(sys.getsizeof(as_list) > sys.getsizeof(as_gen))  # True
+print(sum(as_gen))  # 4999950000
+```
+
+**Real-life example:** Streaming a movie plays it piece by piece, so your phone needs little space. Downloading the full movie takes space, but you can jump around and watch it again. Streaming is a generator, and downloading is a list.
+
+</details>
+
+**E26.** What is the difference between `return` and `yield`?
+
+<details>
+<summary>Answer</summary>
+
+| `return` | `yield` |
+|---|---|
+| Ends the function | Pauses the function |
+| Gives one result | Gives many values, one at a time |
+| Local variables are lost | Local variables are kept |
+
+```python
+def with_return():
+    return [1, 2, 3]
+
+def with_yield():
+    yield 1
+    yield 2
+    yield 3
+
+print(with_return())       # [1, 2, 3]
+print(list(with_yield()))  # [1, 2, 3]
+```
+
+**Real-life example:** `return` is a waiter bringing the full meal at once, and the order is finished. `yield` is a waiter bringing one course, then waiting until you're ready for the next.
+
+</details>
+
+### Exceptions and Context Managers
+
+**E27.** How do `try`, `except`, `else`, and `finally` work?
+
+<details>
+<summary>Answer</summary>
+
+| Part | When it runs |
+|---|---|
+| `try` | Runs the risky code |
+| `except` | Only if an error happens |
+| `else` | Only if no error happens |
+| `finally` | Always, at the end |
+
+```python
+def divide(a, b):
+    try:
+        result = a / b
+    except ZeroDivisionError:
+        print("Cannot divide by zero")
+    else:
+        print("Result:", result)
+    finally:
+        print("Finished")
+
+divide(10, 2)
+divide(10, 0)
+# Result: 5.0
+# Finished
+# Cannot divide by zero
+# Finished
+```
+
+**Real-life example:** Withdrawing money at an ATM. `try`: enter the amount. `except`: not enough balance, so show a message. `else`: take your cash. `finally`: your card comes back in every case.
+
+</details>
+
+**E28.** How do you create and raise custom exceptions?
+
+<details>
+<summary>Answer</summary>
+
+Create a class that inherits from `Exception`. Raise it with `raise`, and catch it by name. This gives your error a clear meaning.
+
+```python
+class NotEnoughBalance(Exception):
+    pass
+
+def withdraw(balance, amount):
+    if amount > balance:
+        raise NotEnoughBalance("Your balance is too low")
+    return balance - amount
+
+try:
+    withdraw(100, 500)
+except NotEnoughBalance as error:
+    print(error)  # Your balance is too low
+```
+
+**Real-life example:** A hospital writes the exact problem, like "broken arm", not just "sick". A custom exception gives a clear name to the exact problem.
+
+</details>
+
+**E29.** What is exception chaining using `raise ... from ...`?
+
+<details>
+<summary>Answer</summary>
+
+You catch a low-level error and raise a clearer one, while keeping the original as the cause. The user sees a simple message, and developers can still find the real reason. The original is stored in `__cause__`.
+
+```python
+class ConfigError(Exception):
+    pass
+
+def read_epochs(text):
+    try:
+        return int(text)
+    except ValueError as error:
+        raise ConfigError("epochs must be a number") from error
+
+try:
+    read_epochs("ten")
+except ConfigError as error:
+    print(error)                        # epochs must be a number
+    print(type(error.__cause__).__name__)  # ValueError
+```
+
+**Real-life example:** A shop tells you "Delivery delayed". Its records also keep the real cause: "truck broke down". You get a simple message, and the manager can still see what happened.
+
+</details>
+
+**E30.** What is the difference between exception chaining and a custom exception?
+
+<details>
+<summary>Answer</summary>
+
+They answer different questions, and they often work together.
+
+| | Custom exception | Exception chaining |
+|---|---|---|
+| What it is | A new error type | A link between two errors |
+| Question it answers | What kind of error is it? | What caused this error? |
+| How you write it | `class MyError(Exception)` | `raise New() from error` |
+
+```python
+class PaymentError(Exception):    # custom exception
+    pass
+
+try:
+    try:
+        1 / 0
+    except ZeroDivisionError as error:
+        raise PaymentError("Payment failed") from error    # chaining
+except PaymentError as error:
+    print(error)                           # Payment failed
+    print(type(error.__cause__).__name__)  # ZeroDivisionError
+```
+
+**Real-life example:** "Delivery delayed" is the custom name for the problem. Noting "because the truck broke down" is the chaining: it links the problem to its cause.
+
+</details>
+
+**E31.** What is a context manager, and how does `with` work?
+
+<details>
+<summary>Answer</summary>
+
+A context manager handles setup and cleanup for you. `with` calls `__enter__()` at the start and `__exit__()` at the end, even if an error happens inside.
+
+```python
+class Room:
+    def __enter__(self):
+        print("Lights on")
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        print("Lights off")
+
+with Room():
+    print("Working")
+# Lights on
+# Working
+# Lights off
+```
+
+**Real-life example:** A room with automatic lights turns them on when you enter and off when you leave. You never have to remember the switch.
+
+</details>
+
+**E32.** In programming, what are the scenarios where a context manager is used?
+
+<details>
+<summary>Answer</summary>
+
+Use one whenever something must be opened and later closed, or set and later restored.
+
+| Scenario | Example | What it does at the end |
+|---|---|---|
+| Files | `with open("data.txt") as file:` | Closes the file |
+| Thread locks | `with lock:` | Releases the lock |
+| Database transactions | `with connection:` | Commits, or rolls back on error |
+| Temporary folders | `with TemporaryDirectory() as path:` | Deletes the folder |
+| Thread pools | `with ThreadPoolExecutor() as pool:` | Waits for and shuts down workers |
+| Ignoring an error | `with suppress(KeyError):` | Ignores that error |
+| ML evaluation | `with torch.no_grad():` | Restores gradient tracking |
+
+**1. Files: save and load project settings**
+
+```python
+import json
+
+settings = {"learning_rate": 0.01, "epochs": 10}
+
+with open("config.json", "w", encoding="utf-8") as file:
+    json.dump(settings, file)
+
+with open("config.json", encoding="utf-8") as file:
+    loaded = json.load(file)
+
+print(loaded["epochs"])  # 10
+print(file.closed)       # True
+```
+
+The file closes by itself, even if `json.load()` fails.
+
+**2. Thread locks: count requests safely**
+
+```python
+from threading import Lock, Thread
+
+request_count = 0
+lock = Lock()
+
+def handle_requests():
+    global request_count
+    for _ in range(1_000):
+        with lock:
+            request_count += 1
+
+threads = [Thread(target=handle_requests) for _ in range(4)]
+for thread in threads:
+    thread.start()
+for thread in threads:
+    thread.join()
+
+print(request_count)  # 4000
+```
+
+The lock lets one thread at a time update the count, and it's released even if an error happens.
+
+**3. Database transactions: undo a failed payment**
+
+```python
+import sqlite3
+
+connection = sqlite3.connect(":memory:")
+connection.execute("CREATE TABLE accounts (name TEXT, balance INTEGER)")
+
+with connection:
+    connection.execute("INSERT INTO accounts VALUES ('Asha', 1000)")
+
+try:
+    with connection:
+        connection.execute("UPDATE accounts SET balance = balance - 500")
+        raise ValueError("Payment failed")
+except ValueError:
+    print("Rolled back")  # Rolled back
+
+print(connection.execute("SELECT balance FROM accounts").fetchone())  # (1000,)
+connection.close()
+```
+
+The first block commits. The second fails, so the balance goes back to `1000`. This `with` doesn't close the connection, so call `close()` yourself.
+
+**4. Temporary folders: process an uploaded file**
+
+```python
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
+with TemporaryDirectory() as folder:
+    upload = Path(folder) / "upload.csv"
+    upload.write_text("name,score\nAsha,90\n", encoding="utf-8")
+    rows = upload.read_text(encoding="utf-8").splitlines()
+    print(len(rows))      # 2
+
+print(upload.exists())    # False
+```
+
+The folder and everything in it are deleted when the block ends, so no temporary files are left behind.
+
+**5. Thread pools: fetch many pages together**
+
+```python
+from concurrent.futures import ThreadPoolExecutor
+from time import sleep
+
+def fetch_page(page):
+    sleep(0.01)    # stands in for a network call
+    return f"page {page} loaded"
+
+with ThreadPoolExecutor(max_workers=3) as pool:
+    results = list(pool.map(fetch_page, [1, 2, 3]))
+
+print(results)  # ['page 1 loaded', 'page 2 loaded', 'page 3 loaded']
+```
+
+When the block ends, the pool waits for its work to finish, then shuts down its threads.
+
+**6. Ignoring an error: remove an item that may be missing**
+
+```python
+from contextlib import suppress
+
+cache = {"user_1": "Asha"}
+
+with suppress(KeyError):
+    del cache["user_2"]      # missing, so KeyError is ignored
+
+print("Still running")       # Still running
+```
+
+Use this only when the error is truly fine to ignore. Any other error still reaches the caller.
+
+**7. ML evaluation: predict without tracking gradients** (needs PyTorch)
+
+```python
+import torch
+
+model = torch.nn.Linear(2, 1)
+data = torch.ones(1, 2)
+
+model.eval()
+with torch.no_grad():
+    prediction = model(data)
+
+print(prediction.requires_grad)   # False
+print(torch.is_grad_enabled())    # True
+```
+
+Prediction uses less memory because gradients aren't tracked. Tracking comes back on after the block, so training can continue. `model.eval()` is a separate step that switches layers like dropout to evaluation mode.
+
+**Real-life example:** When you borrow a library book or rent a car, you must return it. A context manager makes sure the return always happens, even if something goes wrong.
+
+</details>
+
+**E33.** What is the difference between `finally` and a context manager for cleanup?
+
+<details>
+<summary>Answer</summary>
+
+`finally` runs cleanup code you write yourself, each time. A context manager keeps the cleanup inside the object, so `with` runs it for you. Both clean up, even after an error.
+
+```python
+from threading import Lock
+
+lock = Lock()
+
+lock.acquire()
+try:
+    print("Working")
+finally:
+    lock.release()     # you write the cleanup
+
+with lock:             # cleanup happens for you
+    print("Working")
+```
+
+Use `with` when a ready-made context manager exists. Use `finally` for one-off cleanup, such as resetting a status.
+
+**Real-life example:** `finally` is cleaning your own room after work: you must do it yourself each time. A context manager is hotel housekeeping: it's already built in, and it happens when you leave.
+
+</details>
+
+### Asyncio
+
+**E34.** How do `async` and `await` work in Python?
+
+<details>
+<summary>Answer</summary>
+
+`async def` creates a function that can pause. `await` means "wait here, and let other tasks run meanwhile". One thread switches between tasks while they wait. This suits waiting work like network calls, not heavy calculations.
+
+```python
+import asyncio
+
+async def cook(dish):
+    print("Start", dish)
+    await asyncio.sleep(0.01)    # waiting: other tasks can run
+    print("Done", dish)
+
+async def main():
+    await asyncio.gather(cook("rice"), cook("dal"))
+
+asyncio.run(main())
+# Start rice
+# Start dal
+# Done rice
+# Done dal
+```
+
+`asyncio.gather()` runs them together, and `asyncio.run()` starts everything.
+
+**Real-life example:** One cook puts rice on the stove. While it boils, the cook starts the dal, instead of standing and watching the rice. Nobody works in parallel: one person just uses the waiting time well.
+
+</details>
