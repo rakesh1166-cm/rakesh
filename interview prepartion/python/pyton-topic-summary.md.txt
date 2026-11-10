@@ -622,3 +622,52 @@ range of number,dictionary keys to a list?
 ===================mcq doubt=========================
 m75,m4,m16,m49,m58,m65,m69
 
+
+========================
+python 5 feature
+difference=procedural,functional and oops
+libraries=numerical computing,visualization,dataprepartion,Ml,DL,experimentaion,deployment
+how ==numpy faster than loop and array
+type refers=object or varible
+invalid operation raise=runtime/complie time
+type hints=runtime or compile time
+inplace modification vs reasiignment and examples
+shared refrence for same object with different varible name
+which collection are hashble or not
+difference between list,tuple,set and dictionary
+exanple of ordered collection sequence
+which collection membeship take o(1),o(n) best ,wrost cases
+difference between == and ?
+check value is missing=4 ways
+LEGB rule,global vs nonlocal,unbounded local error
+difference=none,0,False
+difference=append vs extend =is both modify orignal list
+extend=single char,word,sentence,dictionary key(2way)
+which collection=preserve order while remove duplicate
+get unique value from list with alphabetically sorting
+unique value from pandas Series =2 ways
+
+=================================oops===============
+init=return a value(code example-return10) or not RLE=phone
+self=reserved keyword or naming convention RLE=goodmorning
+differnce =self and instance (coding example)=RLE=car and name 
+self and instance where to use scope
+When creating an object of parant class or child class or calling method in Python, how do you know which arguments to pass to the class?=RLE=form,area
+set default value using init and how to override ?=RLE= pizza size
+add element to list using python class=RLE=officewhiteboard coding example=members
+mutable class attribute are shared  RLE=office whiteboard code example=members
+child class can use parent class init=RLE=new branch of shop rule,code example =name
+how to declare subclass in python RLE=dog is animal
+differnt way to call python instance member(5 ways object,class,geattr,inside class self,childclass using super) RLE==how to reach friend phone ,email,address many way
+differnce betwwen instance,class and Static  RLE==how is pizza,pizza size,
+class method read and update attribute stored on class RLE=change school name
+is-a relation ship
+different form of super=parent setup,parent method,parents class attribute,parent class method
+multiple inheritance and mro and mixins
+
+
+
+
+
+
+

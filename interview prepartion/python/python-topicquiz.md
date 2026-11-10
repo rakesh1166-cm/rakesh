@@ -16338,7 +16338,140 @@ print(b.city)  # Mumbai: default replaced
 
 </details>
 
-**E6.** How do you add an element to a list stored on an instance of a Python class?
+**E6.** When creating an object of a child class in Python, how do you decide which arguments to pass?
+
+<details>
+<summary>Answer</summary>
+
+Look at the `__init__` that Python will actually run for the child class. Python checks the child first, then the parent.
+
+| Scenario | Which `__init__` runs | What you pass |
+|---|---|---|
+| 1. Child has no `__init__` | The parent's | The parent's arguments |
+| 2. Child has its own `__init__` and calls `super().__init__()` | The child's, which then runs the parent's | The child's arguments (they include what the parent needs) |
+| 3. Child has its own `__init__` but doesn't call `super()` | Only the child's | Only the child's arguments (the parent's setup is skipped) |
+| 4. Child `__init__` has default values | The child's | Required arguments only. Defaults are optional |
+| 5. Child uses `*args, **kwargs` to forward | The child's, which forwards to the parent's | The parent's arguments plus any extra ones |
+
+`self` is always supplied by Python. You never pass it.
+
+**Scenario 1: child has no `__init__`**
+
+```python
+class Vehicle:
+    def __init__(self, brand):
+        self.brand = brand
+
+class Car(Vehicle):
+    pass
+
+car = Car("Toyota")        # Vehicle needs brand
+print(car.brand)  # Toyota
+```
+
+**Scenario 2: child has its own `__init__` and calls `super()`**
+
+```python
+class Vehicle:
+    def __init__(self, brand):
+        self.brand = brand
+
+class Car(Vehicle):
+    def __init__(self, brand, seats):
+        super().__init__(brand)   # parent sets brand
+        self.seats = seats        # child sets seats
+
+car = Car("Honda", 5)
+print(car.brand, car.seats)  # Honda 5
+```
+
+**Scenario 3: child has its own `__init__` but doesn't call `super()`**
+
+```python
+class Vehicle:
+    def __init__(self, brand):
+        self.brand = brand
+
+class Bike(Vehicle):
+    def __init__(self, gears):
+        self.gears = gears        # parent's __init__ never runs
+
+bike = Bike(21)
+print(bike.gears)                # 21
+print(hasattr(bike, "brand"))    # False: brand was never set
+```
+
+**Scenario 4: child `__init__` has default values**
+
+```python
+class Vehicle:
+    def __init__(self, brand):
+        self.brand = brand
+
+class Truck(Vehicle):
+    def __init__(self, brand, load="10 tons"):
+        super().__init__(brand)
+        self.load = load
+
+t1 = Truck("Tata")               # load uses the default
+t2 = Truck("Volvo", "20 tons")   # load replaced
+print(t1.load)  # 10 tons
+print(t2.load)  # 20 tons
+```
+
+**Scenario 5: child forwards with `*args, **kwargs`**
+
+```python
+class Vehicle:
+    def __init__(self, brand, color="white"):
+        self.brand = brand
+        self.color = color
+
+class ElectricCar(Vehicle):
+    def __init__(self, battery, *args, **kwargs):
+        super().__init__(*args, **kwargs)   # rest goes to the parent
+        self.battery = battery
+
+ev = ElectricCar("75 kWh", "Tesla", color="red")
+print(ev.battery, ev.brand, ev.color)  # 75 kWh Tesla red
+```
+
+**Common mistake:** passing too few or too many arguments raises `TypeError`, for example `Car("Honda")` in scenario 2 fails because `seats` is missing.
+
+**Real-life example:** Think of a job application form. If a branch office has no form of its own, you fill in the head office form (scenario 1). If the branch has its own form, you fill in that one. Usually it asks for the head office details too and sends them on (scenario 2). A careless branch form may skip the head office details completely (scenario 3). Some fields are pre-filled, and you change them only if you want (scenario 4). Some branch forms ask for one extra detail and simply forward everything else to the head office (scenario 5).
+
+</details>
+
+**E7.** How do you set a default value for a parameter in Python's `__init__` method, and what happens when you pass a different value while creating an object?
+
+<details>
+<summary>Answer</summary>
+
+Write the default with `=` in the `__init__` parameter list, like `size="medium"`.
+
+- If you don't pass that argument, Python uses the default.
+- If you pass a different value, your value replaces the default for that object only.
+- Other objects keep their own values.
+- Parameters with defaults must come after required ones.
+
+```python
+class Coffee:
+    def __init__(self, name, size="medium"):
+        self.name = name
+        self.size = size
+
+c1 = Coffee("Latte")            # size not passed
+c2 = Coffee("Mocha", "large")   # size passed
+
+print(c1.size)  # medium: default used
+print(c2.size)  # large: default replaced
+```
+
+**Real-life example:** At a coffee shop, if you don't say a size, you get a medium. If you ask for a large, you get a large, and the next customer still gets a medium unless they ask for something else.
+
+</details>
+
+**E8.** How do you add an element to a list stored on an instance of a Python class?
 
 <details>
 <summary>Answer</summary>
@@ -16365,7 +16498,7 @@ print(b.tasks)    # []: not shared
 
 </details>
 
-**E7.** When calling a method on a Python class or object, how do you decide which arguments to pass and which ones Python supplies automatically?
+**E9.** When calling a method on a Python class or object, how do you decide which arguments to pass and which ones Python supplies automatically?
 
 <details>
 <summary>Answer</summary>
@@ -16399,7 +16532,7 @@ print(rectangle.area(5))       # 50
 
 </details>
 
-**E8.** Is a mutable class attribute shared?
+**E10.** Is a mutable class attribute shared?
 
 <details>
 <summary>Answer</summary>
@@ -16426,7 +16559,7 @@ print(b.tasks)    # []: not shared
 
 </details>
 
-**E9.** Can a child class use its parent class's `__init__()` if it doesn't define its own?
+**E11.** Can a child class use its parent class's `__init__()` if it doesn't define its own?
 
 <details>
 <summary>Answer</summary>
@@ -16448,7 +16581,7 @@ print(Child("Asha").name)  # Asha
 
 </details>
 
-**E10.** How can you read and modify the state of an object created from a Python class? Show six different examples in a table with Task, Method Call, and Result columns.
+**E12.** How can you read and modify the state of an object created from a Python class? Show six different examples in a table with Task, Method Call, and Result columns.
 
 <details>
 <summary>Answer</summary>
@@ -16506,7 +16639,7 @@ print(account.get_history())   # [500, -200]
 
 </details>
 
-**E11.** How do you declare a subclass in Python? Show the syntax and where to put the parent class name.
+**E13.** How do you declare a subclass in Python? Show the syntax and where to put the parent class name.
 
 <details>
 <summary>Answer</summary>
@@ -16539,7 +16672,7 @@ print(dog.bark())  # woof: its own
 
 </details>
 
-**E12.** What are the different ways to call a Python instance method after an object is created?
+**E14.** What are the different ways to call a Python instance method after an object is created?
 
 <details>
 <summary>Answer</summary>
@@ -16579,7 +16712,7 @@ print(Loud().hello())          # HELLO
 
 </details>
 
-**E13.** What is the difference between instance, class, and static methods?
+**E15.** What is the difference between instance, class, and static methods?
 
 <details>
 <summary>Answer</summary>
@@ -16617,7 +16750,7 @@ print(Pizza.is_valid(-1))     # False
 
 </details>
 
-**E14.** Can a class method read and update attributes stored on the class?
+**E16.** Can a class method read and update attributes stored on the class?
 
 <details>
 <summary>Answer</summary>
@@ -16644,7 +16777,7 @@ print(second.school)  # Green School
 
 </details>
 
-**E15.** Why use a class method if we have instance methods?
+**E17.** Why use a class method if we have instance methods?
 
 <details>
 <summary>Answer</summary>
@@ -16674,7 +16807,7 @@ print(type(Admin.from_dict({"name": "Asha"})).__name__)  # Admin
 
 </details>
 
-**E16.** Why use an is-a relationship?
+**E18.** Why use an is-a relationship?
 
 <details>
 <summary>Answer</summary>
@@ -16702,7 +16835,7 @@ If it isn't truly is-a, use has-a (composition) instead: a car **has an** engine
 
 </details>
 
-**E17.** What are the different forms of `super()`?
+**E19.** What are the different forms of `super()`?
 
 <details>
 <summary>Answer</summary>
@@ -16757,7 +16890,7 @@ print(Child.create().name)  # new
 
 </details>
 
-**E18.** What is multiple inheritance and MRO? When are mixins used?
+**E20.** What is multiple inheritance and MRO? When are mixins used?
 
 <details>
 <summary>Answer</summary>
@@ -16797,7 +16930,7 @@ print([c.__name__ for c in LoggedModel.__mro__])
 
 </details>
 
-**E19.** What is the diamond inheritance problem?
+**E21.** What is the diamond inheritance problem?
 
 <details>
 <summary>Answer</summary>
@@ -16847,7 +16980,7 @@ D().show()
 
 ### Lambda and decorators
 
-**E20.** What is a lambda function, and when should you avoid it?
+**E22.** What is a lambda function, and when should you avoid it?
 
 <details>
 <summary>Answer</summary>
@@ -16866,7 +16999,7 @@ print(sorted(words, key=lambda word: len(word)))
 
 </details>
 
-**E21.** How do you find the best model and sort by several fields using a lambda function?
+**E23.** How do you find the best model and sort by several fields using a lambda function?
 
 <details>
 <summary>Answer</summary>
@@ -16893,7 +17026,7 @@ print([m["name"] for m in ranked])  # ['svm', 'rf', 'lr']
 
 </details>
 
-**E22.** What is a decorator, and how do you write one?
+**E24.** What is a decorator, and how do you write one?
 
 <details>
 <summary>Answer</summary>
@@ -16931,7 +17064,7 @@ print(add(2, 3))
 
 </details>
 
-**E23.** What is the difference between a function decorator and a class decorator?
+**E25.** What is the difference between a function decorator and a class decorator?
 
 <details>
 <summary>Answer</summary>
@@ -16965,7 +17098,7 @@ print(registry)  # ['Model']
 
 ### Dunder methods and dataclasses
 
-**E24.** What are dunder/magic methods? Give examples.
+**E26.** What are dunder/magic methods? Give examples.
 
 <details>
 <summary>Answer</summary>
@@ -17004,7 +17137,7 @@ print(len(cart))  # 2
 
 </details>
 
-**E25.** What is the `dataclass` decorator? Why is it useful?
+**E27.** What is the `dataclass` decorator? Why is it useful?
 
 <details>
 <summary>Answer</summary>
@@ -17028,7 +17161,7 @@ print(first == Student("Asha", 90))  # True
 
 </details>
 
-**E26.** How do you add validation when using the `dataclass` decorator?
+**E28.** How do you add validation when using the `dataclass` decorator?
 
 <details>
 <summary>Answer</summary>
@@ -17059,7 +17192,7 @@ except ValueError as error:
 
 ### Generators
 
-**E27.** What is a generator, and how does `yield` work?
+**E29.** What is a generator, and how does `yield` work?
 
 <details>
 <summary>Answer</summary>
@@ -17086,7 +17219,7 @@ print(next(queue))
 
 </details>
 
-**E28.** When would you use a generator instead of a list?
+**E30.** When would you use a generator instead of a list?
 
 <details>
 <summary>Answer</summary>
@@ -17107,7 +17240,7 @@ print(sum(as_gen))  # 4999950000
 
 </details>
 
-**E29.** What is the difference between `return` and `yield`?
+**E31.** What is the difference between `return` and `yield`?
 
 <details>
 <summary>Answer</summary>
@@ -17137,7 +17270,7 @@ print(list(with_yield()))  # [1, 2, 3]
 
 ### Exceptions and Context Managers
 
-**E30.** How do `try`, `except`, `else`, and `finally` work?
+**E32.** How do `try`, `except`, `else`, and `finally` work?
 
 <details>
 <summary>Answer</summary>
@@ -17172,7 +17305,7 @@ divide(10, 0)
 
 </details>
 
-**E31.** How do you create and raise custom exceptions?
+**E33.** How do you create and raise custom exceptions?
 
 <details>
 <summary>Answer</summary>
@@ -17198,7 +17331,7 @@ except NotEnoughBalance as error:
 
 </details>
 
-**E32.** What is exception chaining using `raise ... from ...`?
+**E34.** What is exception chaining using `raise ... from ...`?
 
 <details>
 <summary>Answer</summary>
@@ -17226,7 +17359,7 @@ except ConfigError as error:
 
 </details>
 
-**E33.** What is the difference between exception chaining and a custom exception?
+**E35.** What is the difference between exception chaining and a custom exception?
 
 <details>
 <summary>Answer</summary>
@@ -17257,7 +17390,7 @@ except PaymentError as error:
 
 </details>
 
-**E34.** What is a context manager, and how does `with` work?
+**E36.** What is a context manager, and how does `with` work?
 
 <details>
 <summary>Answer</summary>
@@ -17284,7 +17417,7 @@ with Room():
 
 </details>
 
-**E35.** In programming, what are the scenarios where a context manager is used?
+**E37.** In programming, what are the scenarios where a context manager is used?
 
 <details>
 <summary>Answer</summary>
@@ -17441,7 +17574,7 @@ Prediction uses less memory because gradients aren't tracked. Tracking comes bac
 
 </details>
 
-**E36.** What is the difference between `finally` and a context manager for cleanup?
+**E38.** What is the difference between `finally` and a context manager for cleanup?
 
 <details>
 <summary>Answer</summary>
@@ -17471,7 +17604,7 @@ Use `with` when a ready-made context manager exists. Use `finally` for one-off c
 
 ### Asyncio
 
-**E37.** How do `async` and `await` work in Python?
+**E39.** How do `async` and `await` work in Python?
 
 <details>
 <summary>Answer</summary>

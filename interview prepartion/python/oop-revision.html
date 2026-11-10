@@ -1,0 +1,738 @@
+<title>Python OOP Revision Deck</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: sticky tab bar; flashcard trainer first, then a 4-group cheat sheet, then flow diagrams. */
+:root {
+  --bg: #f3f5f9;
+  --surface: #ffffff;
+  --ink: #17213a;
+  --muted: #5a6582;
+  --line: #d9dfeb;
+  --accent: #2f5bd3;       /* python blue */
+  --accent-soft: #e4ebfc;
+  --gold: #c98a00;         /* python yellow, darkened for text */
+  --gold-soft: #fff4d6;
+  --code-bg: #f0f2f8;
+  --good: #1f8a55;
+  --good-soft: #e1f4ea;
+  --warn: #b5541c;
+  --warn-soft: #fbe9dd;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", Consolas, "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1424; --surface: #171e33; --ink: #e8ecf6; --muted: #9aa6c4; --line: #2a3452;
+    --accent: #7ea2ff; --accent-soft: #1f2b4f; --gold: #ffcf4a; --gold-soft: #2e2817;
+    --code-bg: #10172b; --good: #5fd39a; --good-soft: #16342a; --warn: #ff9e66; --warn-soft: #3a2418;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1424; --surface: #171e33; --ink: #e8ecf6; --muted: #9aa6c4; --line: #2a3452;
+  --accent: #7ea2ff; --accent-soft: #1f2b4f; --gold: #ffcf4a; --gold-soft: #2e2817;
+  --code-bg: #10172b; --good: #5fd39a; --good-soft: #16342a; --warn: #ff9e66; --warn-soft: #3a2418;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.55; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+.wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header.top { background: var(--surface); border-bottom: 1px solid var(--line); }
+header.top .wrap { padding-block: 28px 20px; display: grid; gap: 6px; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); font-weight: 600; }
+h1 { font-family: var(--display); font-weight: 800; font-size: clamp(28px, 5vw, 44px); line-height: 1.05; margin: 0; text-wrap: balance; }
+h1 .py { color: var(--accent); }
+.lede { color: var(--muted); margin: 0; max-width: 62ch; }
+nav.tabs { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line); }
+nav.tabs .wrap { display: flex; gap: 4px; overflow-x: auto; padding-block: 0; }
+nav.tabs a { font-weight: 600; color: var(--muted); text-decoration: none; padding: 12px 14px; border-bottom: 3px solid transparent; white-space: nowrap; }
+nav.tabs a:hover { color: var(--ink); }
+nav.tabs a.on { color: var(--accent); border-bottom-color: var(--accent); }
+main .wrap { padding-block: 28px 64px; display: grid; gap: 48px; }
+section > h2 { font-family: var(--display); font-weight: 800; font-size: 26px; margin: 0 0 4px; }
+section > .sub { color: var(--muted); margin: 0 0 20px; }
+a:focus-visible, button:focus-visible, select:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+
+/* ---------- flashcards ---------- */
+.trainer { display: grid; gap: 14px; }
+.tbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+.stats { display: flex; gap: 8px; flex-wrap: wrap; font-size: 13px; font-variant-numeric: tabular-nums; }
+.pill { padding: 3px 10px; border-radius: 999px; font-weight: 600; background: var(--accent-soft); color: var(--accent); }
+.pill.good { background: var(--good-soft); color: var(--good); }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+.controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+select, button { font: inherit; font-size: 14px; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 7px 12px; cursor: pointer; }
+button:hover { border-color: var(--accent); }
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--surface); font-weight: 600; }
+button.good { color: var(--good); border-color: var(--good); font-weight: 600; }
+button.warn { color: var(--warn); border-color: var(--warn); font-weight: 600; }
+.flash { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; min-height: 300px; display: grid; grid-template-rows: auto 1fr auto; overflow: hidden; }
+.flash .meta { display: flex; justify-content: space-between; gap: 8px; padding: 12px 18px; border-bottom: 1px solid var(--line); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.flash .meta b { color: var(--gold); font-family: var(--mono); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; font-size: 12px; }
+.flash .face { padding: 22px 18px; min-width: 0; }
+.flash .q { font-family: var(--display); font-weight: 600; font-size: clamp(20px, 3vw, 26px); line-height: 1.25; text-wrap: balance; margin: 0; }
+.flash .hint { color: var(--muted); margin-top: 14px; font-size: 14px; }
+.flash .back { display: grid; gap: 12px; }
+.flash .actions { display: flex; gap: 8px; flex-wrap: wrap; padding: 12px 18px; border-top: 1px solid var(--line); background: var(--bg); }
+.flash .actions .spacer { flex: 1; }
+.kbd { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+
+/* ---------- cheat sheet ---------- */
+.group { display: grid; gap: 14px; }
+.group + .group { margin-top: 30px; }
+.group h3.gh { font-family: var(--display); font-size: 19px; margin: 0; display: flex; align-items: baseline; gap: 10px; }
+.group h3.gh span { font-family: var(--mono); font-size: 12px; color: var(--muted); font-weight: 400; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.card h4 { margin: 0; font-size: 16px; font-weight: 600; line-height: 1.35; text-wrap: balance; }
+.card h4 .n { font-family: var(--mono); color: var(--accent); font-size: 13px; margin-right: 6px; }
+.key { margin: 0; padding-left: 18px; display: grid; gap: 3px; }
+.key li::marker { color: var(--accent); }
+pre.code { margin: 0; background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; overflow-x: auto; font-family: var(--mono); font-size: 12.5px; line-height: 1.5; color: var(--ink); }
+.c { color: var(--muted); }
+.k { color: var(--accent); font-weight: 600; }
+.rle { background: var(--gold-soft); border-radius: 8px; padding: 8px 12px; font-size: 14px; }
+.rle b { color: var(--gold); font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; display: block; }
+code { font-family: var(--mono); font-size: .9em; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+pre code { background: none; padding: 0; }
+
+/* ---------- diagrams ---------- */
+.dgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(460px, 1fr)); gap: 14px; }
+.diagram { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: grid; gap: 10px; min-width: 0; }
+.diagram h4 { margin: 0; font-size: 16px; }
+.diagram p { margin: 0; color: var(--muted); font-size: 14px; }
+.diagram .scroll { overflow-x: auto; }
+pre.mermaid { margin: 0; background: transparent; text-align: center; }
+@media (max-width: 520px) {
+  .grid, .dgrid { grid-template-columns: 1fr; }
+  .flash .actions button { flex: 1 1 auto; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .flash .face { animation: none; }
+  .flash .face.in { animation: rise .22s ease-out; }
+  @keyframes rise { from { transform: translateY(6px); opacity: .4; } to { transform: none; opacity: 1; } }
+}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="eyebrow">Python · Object-Oriented Programming</div>
+    <h1>OOP revision in <span class="py">16 cards</span></h1>
+    <p class="lede">Flip the cards to test yourself, scan the cheat sheet before an interview, and use the diagrams to see how Python decides what runs. Every card has a real-life example to help you remember it.</p>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="Sections">
+  <div class="wrap">
+    <a href="#flashcards" class="on">Flashcards</a>
+    <a href="#cheatsheet">Cheat sheet</a>
+    <a href="#diagrams">Diagrams</a>
+  </div>
+</nav>
+
+<main>
+<div class="wrap">
+
+<!-- ================= FLASHCARDS ================= -->
+<section id="flashcards">
+  <h2>Flashcards</h2>
+  <p class="sub">Answer out loud first, then flip. Mark each card so you know what to revise again. Your marks stay in this browser.</p>
+  <div class="trainer">
+    <div class="tbar">
+      <div class="stats">
+        <span class="pill good" id="sKnow">0 know it</span>
+        <span class="pill warn" id="sAgain">0 revise again</span>
+        <span class="pill" id="sLeft">16 not marked</span>
+      </div>
+      <div class="controls">
+        <label for="deckFilter" class="kbd">Show</label>
+        <select id="deckFilter">
+          <option value="all">All cards</option>
+          <option value="again">Revise again only</option>
+          <option value="unmarked">Not marked only</option>
+        </select>
+        <button id="shuffleBtn" type="button">Shuffle</button>
+        <button id="resetBtn" type="button">Clear marks</button>
+      </div>
+    </div>
+    <div class="flash" id="flash">
+      <div class="meta"><b id="fGroup">Creating objects</b><span id="fPos">1 / 16</span></div>
+      <div class="face" id="fFace"></div>
+      <div class="actions">
+        <button id="prevBtn" type="button">← Prev</button>
+        <button id="flipBtn" type="button" class="primary">Show answer</button>
+        <span class="spacer"></span>
+        <button id="againBtn" type="button" class="warn">Revise again</button>
+        <button id="knowBtn" type="button" class="good">I know it</button>
+        <button id="nextBtn" type="button">Next →</button>
+      </div>
+    </div>
+    <div class="kbd">Keys: Space flips · ← → move · K know it · R revise again</div>
+  </div>
+</section>
+
+<!-- ================= CHEAT SHEET ================= -->
+<section id="cheatsheet">
+  <h2>Cheat sheet</h2>
+  <p class="sub">One card per question: the key points, a small example, and a real-life example.</p>
+
+  <div class="group">
+    <h3 class="gh">Creating objects <span>__init__ · arguments · defaults</span></h3>
+    <div class="grid">
+
+      <article class="card" data-group="Creating objects">
+        <h4><span class="n">01</span>Can <code>__init__</code> return a value?</h4>
+        <ul class="key">
+          <li>No. <code>__init__</code> must return <code>None</code>.</li>
+          <li>The object already exists. <code>__init__</code> only fills it in.</li>
+          <li>Returning anything else, like <code>10</code>, raises <code>TypeError</code>.</li>
+        </ul>
+<pre class="code"><span class="k">class</span> Phone:
+    <span class="k">def</span> __init__(self, model):
+        self.model = model
+        <span class="k">return</span> 10          <span class="c"># not allowed</span>
+
+Phone(<span>"A1"</span>)
+<span class="c"># TypeError: __init__() should return None, not 'int'</span></pre>
+        <div class="rle"><b>Real life · New phone</b>When you set up a new phone, you choose the language and Wi-Fi. Setup doesn't hand you a second phone. The phone already exists.</div>
+      </article>
+
+      <article class="card" data-group="Creating objects">
+        <h4><span class="n">02</span>How do you know which arguments to pass when creating an object or calling a method?</h4>
+        <ul class="key">
+          <li>Look at the parameters of <code>__init__</code> or the method.</li>
+          <li>Pass a value for each required parameter.</li>
+          <li>Parameters with defaults are optional.</li>
+          <li>Python supplies <code>self</code> automatically.</li>
+          <li>Child class: Python runs the child's <code>__init__</code> if it has one, otherwise the parent's.</li>
+        </ul>
+<pre class="code"><span class="k">class</span> Rectangle:
+    <span class="k">def</span> __init__(self, length):
+        self.length = length
+
+    <span class="k">def</span> area(self, width):
+        <span class="k">return</span> self.length * width
+
+r = Rectangle(10)      <span class="c"># pass length</span>
+print(r.area(5))       <span class="c"># 50: pass width, self = r</span></pre>
+        <div class="rle"><b>Real life · Form, area</b>A form marks which fields are required and which are optional. Your name (<code>self</code>) is already filled in. To find a room's area, you give only the width, because the room already knows its length.</div>
+      </article>
+
+      <article class="card" data-group="Creating objects">
+        <h4><span class="n">03</span>How do you set a default value in <code>__init__</code>, and how do you override it?</h4>
+        <ul class="key">
+          <li>Write the default with <code>=</code>, like <code>size="medium"</code>.</li>
+          <li>Leave the argument out to use the default.</li>
+          <li>Pass a value to override it for that object only.</li>
+          <li>Parameters with defaults come after required ones.</li>
+        </ul>
+<pre class="code"><span class="k">class</span> Pizza:
+    <span class="k">def</span> __init__(self, size=<span>"medium"</span>):
+        self.size = size
+
+print(Pizza().size)          <span class="c"># medium</span>
+print(Pizza(<span>"large"</span>).size)   <span class="c"># large</span></pre>
+        <div class="rle"><b>Real life · Pizza size</b>You get a medium pizza unless you ask for something else. Ask for a large and you get a large. The next customer still gets a medium.</div>
+      </article>
+    </div>
+  </div>
+
+  <div class="group">
+    <h3 class="gh">self and instance <span>keyword? · difference · scope</span></h3>
+    <div class="grid">
+
+      <article class="card" data-group="self and instance">
+        <h4><span class="n">04</span>Is <code>self</code> a reserved keyword or a naming convention?</h4>
+        <ul class="key">
+          <li>A naming convention, not a keyword.</li>
+          <li>The first parameter of a method receives the object, whatever you call it.</li>
+          <li>Always name it <code>self</code> so others can read your code.</li>
+        </ul>
+<pre class="code"><span class="k">class</span> Greeter:
+    <span class="k">def</span> hello(me):       <span class="c"># works, but don't do this</span>
+        <span class="k">return</span> <span>"Good morning"</span>
+
+print(Greeter().hello())  <span class="c"># Good morning</span></pre>
+        <div class="rle"><b>Real life · "Good morning"</b>Saying "Good morning" is a habit everyone follows, not a law. You could say something else and it would still work, but people would find it odd.</div>
+      </article>
+
+      <article class="card" data-group="self and instance">
+        <h4><span class="n">05</span>What is the difference between <code>self</code> and an instance?</h4>
+        <ul class="key">
+          <li>They are the <b>same object</b>.</li>
+          <li><code>self</code> is the name used <b>inside</b> the class.</li>
+          <li>The instance name, like <code>car</code>, is used <b>outside</b> the class.</li>
+        </ul>
+<pre class="code"><span class="k">class</span> Car:
+    <span class="k">def</span> __init__(self, name):
+        self.name = name     <span class="c"># inside: self</span>
+
+    <span class="k">def</span> me(self):
+        <span class="k">return</span> self
+
+car = Car(<span>"Swift"</span>)          <span class="c"># outside: car</span>
+print(car.me() <span class="k">is</span> car)     <span class="c"># True</span></pre>
+        <div class="rle"><b>Real life · Car and name</b>Other people call you by your name, like the instance <code>car</code>. You call yourself "I", like <code>self</code>. It's the same person.</div>
+      </article>
+
+      <article class="card" data-group="self and instance">
+        <h4><span class="n">06</span>Where can you use <code>self</code> and the instance name (scope)?</h4>
+        <ul class="key">
+          <li><code>self</code> exists only inside methods.</li>
+          <li><code>self.x</code> is stored on the object and every method can use it.</li>
+          <li>A plain <code>x</code> is a local variable and disappears when the method ends.</li>
+          <li>Use the instance name outside, after you create the object.</li>
+        </ul>
+<pre class="code"><span class="k">class</span> Car:
+    <span class="k">def</span> __init__(self, name):
+        self.name = name   <span class="c"># on the object</span>
+        speed = 0          <span class="c"># local, gone after __init__</span>
+
+    <span class="k">def</span> show(self):
+        <span class="k">return</span> self.name   <span class="c"># OK; using speed here fails</span>
+
+car = Car(<span>"Swift"</span>)
+print(car.name)   <span class="c"># Swift</span></pre>
+        <div class="rle"><b>Real life · Your room</b>At home you say "my room" (<code>self</code>). Outside, people say "Asha's room" (the instance). A sticky note you throw away after one task is a local variable.</div>
+      </article>
+    </div>
+  </div>
+
+  <div class="group">
+    <h3 class="gh">Attributes and methods <span>lists · shared data · calling · method types</span></h3>
+    <div class="grid">
+
+      <article class="card" data-group="Attributes and methods">
+        <h4><span class="n">07</span>How do you add an element to a list stored on an instance?</h4>
+        <ul class="key">
+          <li>Create the list in <code>__init__</code> so each object gets its own.</li>
+          <li>Inside the class, use <code>self.members.append(x)</code>.</li>
+          <li>Outside the class, use <code>t.members.append(x)</code>.</li>
+        </ul>
+<pre class="code"><span class="k">class</span> Team:
+    <span class="k">def</span> __init__(self):
+        self.members = []
+
+    <span class="k">def</span> add(self, name):
+        self.members.append(name)
+
+t = Team()
+t.add(<span>"Asha"</span>)
+print(t.members)   <span class="c"># ['Asha']</span></pre>
+        <div class="rle"><b>Real life · Your own notebook</b>Each person in the office has their own notebook. When you write in yours, nobody else's changes.</div>
+      </article>
+
+      <article class="card" data-group="Attributes and methods">
+        <h4><span class="n">08</span>Is a mutable class attribute shared?</h4>
+        <ul class="key">
+          <li>Yes. A list or dict in the class body belongs to the class.</li>
+          <li>Every object sees the same single copy.</li>
+          <li>For a separate copy per object, create it in <code>__init__</code>.</li>
+        </ul>
+<pre class="code"><span class="k">class</span> Team:
+    members = []         <span class="c"># shared by all</span>
+
+a, b = Team(), Team()
+a.members.append(<span>"Asha"</span>)
+print(b.members)   <span class="c"># ['Asha']: b sees it too</span></pre>
+        <div class="rle"><b>Real life · Office whiteboard</b>The office whiteboard is shared. Anything one person writes on it, everyone sees.</div>
+      </article>
+
+      <article class="card" data-group="Attributes and methods">
+        <h4><span class="n">09</span>What are the different ways to call an instance method?</h4>
+        <ul class="key">
+          <li><b>1.</b> Through the object: <code>f.call()</code></li>
+          <li><b>2.</b> Through the class, passing the object: <code>Friend.call(f)</code></li>
+          <li><b>3.</b> By name with <code>getattr(f, "call")()</code></li>
+          <li><b>4.</b> Inside the class with <code>self.call()</code></li>
+          <li><b>5.</b> From a child class with <code>super().call()</code></li>
+        </ul>
+<pre class="code"><span class="k">class</span> Friend:
+    <span class="k">def</span> call(self):
+        <span class="k">return</span> <span>"ringing"</span>
+    <span class="k">def</span> remind(self):
+        <span class="k">return</span> self.call()          <span class="c"># 4</span>
+
+<span class="k">class</span> BestFriend(Friend):
+    <span class="k">def</span> call(self):
+        <span class="k">return</span> super().call()       <span class="c"># 5</span>
+
+f = Friend()
+f.call()                 <span class="c"># 1</span>
+Friend.call(f)           <span class="c"># 2</span>
+getattr(f, <span>"call"</span>)()     <span class="c"># 3</span>
+<span class="c"># all return 'ringing'</span></pre>
+        <div class="rle"><b>Real life · Reaching a friend</b>You can reach the same friend by phone, email, a message, or a visit to their home. There are many routes, but it's always the same friend.</div>
+      </article>
+
+      <article class="card" data-group="Attributes and methods">
+        <h4><span class="n">10</span>What is the difference between instance, class, and static methods?</h4>
+        <ul class="key">
+          <li><b>Instance</b> method: gets <code>self</code> and uses one object's data.</li>
+          <li><b>Class</b> method: has <code>@classmethod</code>, gets <code>cls</code>, and uses data shared by all objects.</li>
+          <li><b>Static</b> method: has <code>@staticmethod</code> and gets neither. It's a helper function grouped with the class.</li>
+        </ul>
+<pre class="code"><span class="k">class</span> Pizza:
+    price_per_inch = 50
+
+    <span class="k">def</span> __init__(self, inches):
+        self.inches = inches
+
+    <span class="k">def</span> price(self):                <span class="c"># instance</span>
+        <span class="k">return</span> self.inches * self.price_per_inch
+
+    <span class="k">@classmethod</span>
+    <span class="k">def</span> set_rate(cls, rate):        <span class="c"># class</span>
+        cls.price_per_inch = rate
+
+    <span class="k">@staticmethod</span>
+    <span class="k">def</span> to_cm(inches):              <span class="c"># static</span>
+        <span class="k">return</span> inches * 2.54
+
+print(Pizza(10).price())   <span class="c"># 500</span>
+Pizza.set_rate(60)
+print(Pizza(10).price())   <span class="c"># 600</span>
+print(Pizza.to_cm(10))     <span class="c"># 25.4</span></pre>
+        <div class="rle"><b>Real life · Pizza shop</b>The price of <i>this</i> pizza is an instance method. The menu rate for every pizza is a class method. An inch-to-cm converter on the wall needs no pizza at all, like a static method.</div>
+      </article>
+
+      <article class="card" data-group="Attributes and methods">
+        <h4><span class="n">11</span>Can a class method read and update attributes stored on the class?</h4>
+        <ul class="key">
+          <li>Yes. Through <code>cls</code> it reads and changes class attributes.</li>
+          <li>Every object sees the new value, unless an object has its own value with the same name.</li>
+        </ul>
+<pre class="code"><span class="k">class</span> Student:
+    school = <span>"City School"</span>
+
+    <span class="k">@classmethod</span>
+    <span class="k">def</span> rename_school(cls, new):
+        cls.school = new
+
+a = Student()
+Student.rename_school(<span>"Green Valley"</span>)
+print(a.school)   <span class="c"># Green Valley</span></pre>
+        <div class="rle"><b>Real life · Change school name</b>When the principal renames the school, every student's ID card shows the new name. Nobody updates each card one by one.</div>
+      </article>
+    </div>
+  </div>
+
+  <div class="group">
+    <h3 class="gh">Inheritance <span>subclass · parent __init__ · is-a · super() · MRO</span></h3>
+    <div class="grid">
+
+      <article class="card" data-group="Inheritance">
+        <h4><span class="n">12</span>How do you declare a subclass in Python?</h4>
+        <ul class="key">
+          <li>Syntax: <code>class ChildClass(ParentClass):</code></li>
+          <li>Put the parent class name in brackets after the child's name.</li>
+          <li>The child gets every parent method and can add or replace methods.</li>
+        </ul>
+<pre class="code"><span class="k">class</span> Animal:
+    <span class="k">def</span> eat(self):
+        <span class="k">return</span> <span>"eating"</span>
+
+<span class="k">class</span> Dog(Animal):      <span class="c"># Animal is the parent</span>
+    <span class="k">def</span> bark(self):
+        <span class="k">return</span> <span>"woof"</span>
+
+print(Dog().eat())    <span class="c"># eating: from the parent</span></pre>
+        <div class="rle"><b>Real life · A dog is an animal</b>A dog is an animal, so it eats like all animals. It also barks, which is its own extra skill.</div>
+      </article>
+
+      <article class="card" data-group="Inheritance">
+        <h4><span class="n">13</span>Can a child class use its parent's <code>__init__</code> if it doesn't define one?</h4>
+        <ul class="key">
+          <li>Yes. Python looks up <code>__init__</code> in the parent.</li>
+          <li>Pass the parent's arguments when you create the child.</li>
+          <li>If the child defines its own <code>__init__</code>, call <code>super().__init__(...)</code> to keep the parent's setup.</li>
+        </ul>
+<pre class="code"><span class="k">class</span> Shop:
+    <span class="k">def</span> __init__(self, name):
+        self.name = name
+
+<span class="k">class</span> Branch(Shop):
+    <span class="k">pass</span>
+
+print(Branch(<span>"Pune"</span>).name)   <span class="c"># Pune</span></pre>
+        <div class="rle"><b>Real life · New shop branch</b>A new branch follows the head office's opening rules unless it writes its own rules.</div>
+      </article>
+
+      <article class="card" data-group="Inheritance">
+        <h4><span class="n">14</span>What is an is-a relationship, and why use it?</h4>
+        <ul class="key">
+          <li>Use inheritance only when the child <b>is a</b> kind of parent: a Dog is an Animal.</li>
+          <li>If it <b>has a</b> part, like a Car has an Engine, use composition instead.</li>
+          <li>Benefit: you reuse the parent's code, and <code>isinstance</code> checks work.</li>
+        </ul>
+<pre class="code"><span class="k">class</span> Animal: <span class="k">pass</span>
+<span class="k">class</span> Dog(Animal): <span class="k">pass</span>     <span class="c"># is-a</span>
+
+<span class="k">class</span> Engine: <span class="k">pass</span>
+<span class="k">class</span> Car:
+    <span class="k">def</span> __init__(self):
+        self.engine = Engine()  <span class="c"># has-a</span>
+
+print(isinstance(Dog(), Animal))  <span class="c"># True</span></pre>
+        <div class="rle"><b>Real life · Manager</b>A manager <i>is an</i> employee, so the manager gets every employee benefit. A manager <i>has a</i> laptop, but a manager is not a laptop.</div>
+      </article>
+
+      <article class="card" data-group="Inheritance">
+        <h4><span class="n">15</span>What are the different forms of <code>super()</code>?</h4>
+        <ul class="key">
+          <li><b>1.</b> Parent setup: <code>super().__init__(name)</code></li>
+          <li><b>2.</b> Parent method: <code>super().greet()</code></li>
+          <li><b>3.</b> Parent class attribute: <code>super().kind</code></li>
+          <li><b>4.</b> Parent class method: <code>super().describe()</code> inside a <code>@classmethod</code></li>
+        </ul>
+<pre class="code"><span class="k">class</span> Parent:
+    kind = <span>"parent"</span>
+    <span class="k">def</span> __init__(self, name): self.name = name
+    <span class="k">def</span> greet(self): <span class="k">return</span> <span>"hello"</span>
+    <span class="k">@classmethod</span>
+    <span class="k">def</span> describe(cls): <span class="k">return</span> f<span>"class {cls.__name__}"</span>
+
+<span class="k">class</span> Child(Parent):
+    <span class="k">def</span> __init__(self, name, age):
+        super().__init__(name)             <span class="c"># 1</span>
+        self.age = age
+    <span class="k">def</span> greet(self):
+        <span class="k">return</span> super().greet() + <span>"!"</span>     <span class="c"># 2</span>
+    <span class="k">def</span> info(self):
+        <span class="k">return</span> super().kind               <span class="c"># 3</span>
+    <span class="k">@classmethod</span>
+    <span class="k">def</span> describe(cls):
+        <span class="k">return</span> super().describe() + <span>" (child)"</span>  <span class="c"># 4</span>
+
+c = Child(<span>"Asha"</span>, 21)
+print(c.greet())          <span class="c"># hello!</span>
+print(c.info())           <span class="c"># parent</span>
+print(Child.describe())   <span class="c"># class Child (child)</span></pre>
+        <div class="rle"><b>Real life · Family</b>You move into the family house (setup), cook grandma's recipe with your own twist (method), keep the family surname (class attribute), and follow the family traditions (class method).</div>
+      </article>
+
+      <article class="card" data-group="Inheritance">
+        <h4><span class="n">16</span>What are multiple inheritance, MRO, and mixins?</h4>
+        <ul class="key">
+          <li><b>Multiple inheritance:</b> a class with more than one parent, like <code>class D(B, C)</code>.</li>
+          <li><b>MRO</b> (method resolution order): the order Python searches. It goes left to right, and a shared parent comes last. See it with <code>D.__mro__</code>.</li>
+          <li><b>Mixin:</b> a small class that adds one feature and isn't meant to be used alone.</li>
+        </ul>
+<pre class="code"><span class="k">class</span> A:
+    <span class="k">def</span> hi(self): <span class="k">return</span> <span>"A"</span>
+<span class="k">class</span> B(A):
+    <span class="k">def</span> hi(self): <span class="k">return</span> <span>"B"</span>
+<span class="k">class</span> C(A):
+    <span class="k">def</span> hi(self): <span class="k">return</span> <span>"C"</span>
+<span class="k">class</span> D(B, C): <span class="k">pass</span>
+
+print(D().hi())   <span class="c"># B</span>
+print([k.__name__ <span class="k">for</span> k <span class="k">in</span> D.__mro__])
+<span class="c"># ['D', 'B', 'C', 'A', 'object']</span>
+
+<span class="k">import</span> json
+<span class="k">class</span> JsonMixin:
+    <span class="k">def</span> to_json(self):
+        <span class="k">return</span> json.dumps(self.__dict__)
+
+<span class="k">class</span> User(JsonMixin):
+    <span class="k">def</span> __init__(self, name): self.name = name
+
+print(User(<span>"Asha"</span>).to_json())   <span class="c"># {"name": "Asha"}</span></pre>
+        <div class="rle"><b>Real life · Help desk and phone add-ons</b>MRO is like a help-desk queue: you ask the first parent you listed, then the next, and the shared grandparent last. A mixin is like a phone cover or charger: it adds one feature to any phone.</div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ================= DIAGRAMS ================= -->
+<section id="diagrams">
+  <h2>Diagrams</h2>
+  <p class="sub">How Python decides what runs. Trace each one with a finger before an interview.</p>
+  <div class="dgrid">
+
+    <div class="diagram">
+      <h4>What happens in <code>car = Car("Swift")</code></h4>
+      <p>Cards 01 and 02. <code>__new__</code> makes the object, and <code>__init__</code> fills it in.</p>
+      <div class="scroll"><pre class="mermaid">
+flowchart TD
+  A["car = Car('Swift')"] --> B["__new__ creates an empty object"]
+  B --> C["__init__(self, 'Swift') runs<br/>self = the new object"]
+  C --> D{"__init__ returned None?"}
+  D -- yes --> E["car points to the ready object"]
+  D -- no --> F["TypeError"]
+</pre></div>
+    </div>
+
+    <div class="diagram">
+      <h4>Which <code>__init__</code> runs for a child object?</h4>
+      <p>Cards 02 and 13. This tells you which arguments to pass.</p>
+      <div class="scroll"><pre class="mermaid">
+flowchart TD
+  A["child = Child(...)"] --> B{"Child has its own __init__?"}
+  B -- no --> C["Parent's __init__ runs<br/>pass the parent's arguments"]
+  B -- yes --> D{"Does it call super().__init__()?"}
+  D -- yes --> E["Child's, then the parent's __init__<br/>pass the child's arguments"]
+  D -- no --> F["Only the child's __init__<br/>parent setup is skipped"]
+</pre></div>
+    </div>
+
+    <div class="diagram">
+      <h4>Where Python looks for <code>obj.x</code></h4>
+      <p>Cards 07, 08 and 11. This is why a class attribute is shared and an object's own value wins.</p>
+      <div class="scroll"><pre class="mermaid">
+flowchart LR
+  A["obj.x"] --> B["The object itself<br/>(set with self.x)"]
+  B -- not found --> C["Its class<br/>(class attribute)"]
+  C -- not found --> D["Parent classes<br/>in MRO order"]
+  D -- not found --> E["AttributeError"]
+</pre></div>
+    </div>
+
+    <div class="diagram">
+      <h4>Which method type should you use?</h4>
+      <p>Card 10. Ask what data the method needs.</p>
+      <div class="scroll"><pre class="mermaid">
+flowchart TD
+  A["New method"] --> B{"Needs one object's data?"}
+  B -- yes --> C["Instance method<br/>def m(self)"]
+  B -- no --> D{"Needs data shared by the class?"}
+  D -- yes --> E["@classmethod<br/>def m(cls)"]
+  D -- no --> F["@staticmethod<br/>def m()"]
+</pre></div>
+    </div>
+
+    <div class="diagram">
+      <h4>Diamond inheritance and MRO</h4>
+      <p>Card 16. <code>class D(B, C)</code> searches D → B → C → A → object.</p>
+      <div class="scroll"><pre class="mermaid">
+flowchart BT
+  D["D(B, C)"] -->|"1st"| B["B(A)"]
+  D -->|"2nd"| C["C(A)"]
+  B --> A["A"]
+  C --> A
+  A --> O["object"]
+</pre></div>
+    </div>
+
+    <div class="diagram">
+      <h4>Is-a or has-a?</h4>
+      <p>Card 14. Pick inheritance or composition.</p>
+      <div class="scroll"><pre class="mermaid">
+flowchart TD
+  A["Class X and class Y"] --> B{"Is X a kind of Y?"}
+  B -- "yes: Dog is an Animal" --> C["Inheritance<br/>class Dog(Animal)"]
+  B -- "no: Car has an Engine" --> D["Composition<br/>self.engine = Engine()"]
+</pre></div>
+    </div>
+  </div>
+</section>
+
+</div>
+</main>
+
+<script>
+(function () {
+  var KEY = "oop-flash-marks-v1";
+  var cards = Array.prototype.map.call(document.querySelectorAll("#cheatsheet .card"), function (el, i) {
+    var h = el.querySelector("h4").cloneNode(true);
+    var n = h.querySelector(".n"); if (n) n.remove();
+    return {
+      id: i,
+      group: el.getAttribute("data-group"),
+      q: h.innerHTML,
+      key: el.querySelector(".key").outerHTML,
+      code: el.querySelector("pre.code").outerHTML,
+      rle: el.querySelector(".rle").outerHTML
+    };
+  });
+  var marks = {};
+  try { marks = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { marks = {}; }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(marks)); } catch (e) {} }
+
+  var order = cards.map(function (c) { return c.id; });
+  var deck = order.slice();
+  var pos = 0, flipped = false;
+  var $ = function (id) { return document.getElementById(id); };
+
+  function buildDeck() {
+    var f = $("deckFilter").value;
+    deck = order.filter(function (id) {
+      if (f === "again") return marks[id] === "again";
+      if (f === "unmarked") return !marks[id];
+      return true;
+    });
+    if (pos >= deck.length) pos = 0;
+  }
+  function stats() {
+    var k = 0, a = 0;
+    cards.forEach(function (c) { if (marks[c.id] === "know") k++; else if (marks[c.id] === "again") a++; });
+    $("sKnow").textContent = k + " know it";
+    $("sAgain").textContent = a + " revise again";
+    $("sLeft").textContent = (cards.length - k - a) + " not marked";
+  }
+  function render() {
+    stats();
+    var face = $("fFace");
+    face.classList.remove("in"); void face.offsetWidth; face.classList.add("in");
+    if (!deck.length) {
+      $("fGroup").textContent = "Nothing here";
+      $("fPos").textContent = "0 / 0";
+      face.innerHTML = '<p class="q">No cards match this filter.</p><p class="hint">Switch the filter to "All cards" to keep revising.</p>';
+      return;
+    }
+    var c = cards[deck[pos]];
+    $("fGroup").textContent = c.group;
+    var m = marks[c.id] === "know" ? " · known" : marks[c.id] === "again" ? " · revise again" : "";
+    $("fPos").textContent = (pos + 1) + " / " + deck.length + m;
+    if (!flipped) {
+      face.innerHTML = '<p class="q">' + c.q + '</p><p class="hint">Say the answer, an example, and a real-life comparison. Then flip.</p>';
+      $("flipBtn").textContent = "Show answer";
+    } else {
+      face.innerHTML = '<div class="back"><p class="q" style="font-size:18px">' + c.q + '</p>' + c.key + c.code + c.rle + '</div>';
+      $("flipBtn").textContent = "Hide answer";
+    }
+  }
+  function go(d) { if (!deck.length) return; pos = (pos + d + deck.length) % deck.length; flipped = false; render(); }
+  function mark(v) {
+    if (!deck.length) return;
+    marks[deck[pos]] = v; save();
+    var f = $("deckFilter").value;
+    if (f !== "all") { buildDeck(); flipped = false; render(); } else { go(1); }
+  }
+  $("flipBtn").onclick = function () { flipped = !flipped; render(); };
+  $("nextBtn").onclick = function () { go(1); };
+  $("prevBtn").onclick = function () { go(-1); };
+  $("knowBtn").onclick = function () { mark("know"); };
+  $("againBtn").onclick = function () { mark("again"); };
+  $("deckFilter").onchange = function () { pos = 0; flipped = false; buildDeck(); render(); };
+  $("shuffleBtn").onclick = function () {
+    for (var i = order.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = order[i]; order[i] = order[j]; order[j] = t; }
+    pos = 0; flipped = false; buildDeck(); render();
+  };
+  $("resetBtn").onclick = function () { marks = {}; save(); buildDeck(); flipped = false; render(); };
+  document.addEventListener("keydown", function (e) {
+    if (e.target.tagName === "SELECT" || e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.key === " ") { e.preventDefault(); flipped = !flipped; render(); }
+    else if (e.key === "ArrowRight") go(1);
+    else if (e.key === "ArrowLeft") go(-1);
+    else if (e.key === "k" || e.key === "K") mark("know");
+    else if (e.key === "r" || e.key === "R") mark("again");
+  });
+
+  // tab highlight follows scroll
+  var links = Array.prototype.slice.call(document.querySelectorAll("nav.tabs a"));
+  var secs = links.map(function (a) { return document.querySelector(a.getAttribute("href")); });
+  function onScroll() {
+    var y = window.scrollY + 120, cur = 0;
+    secs.forEach(function (s, i) { if (s && s.offsetTop <= y) cur = i; });
+    links.forEach(function (a, i) { a.classList.toggle("on", i === cur); });
+  }
+  window.addEventListener("scroll", onScroll, { passive: true });
+
+  buildDeck(); render(); onScroll();
+})();
+</script>
