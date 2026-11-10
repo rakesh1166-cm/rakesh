@@ -17093,6 +17093,40 @@ print(delete_user.__name__)    # delete_user: kept by @wraps
 <details>
 <summary>Answer</summary>
 
+**Simple example 1: function decorator**
+
+```python
+def add_greeting(function):
+    def wrapper():
+        return "Hello, " + function()
+    return wrapper
+
+@add_greeting
+def get_name():
+    return "Asha"
+
+print(get_name())  # Hello, Asha
+```
+
+`@add_greeting` is the same as `get_name = add_greeting(get_name)`. The decorator receives `get_name` and returns a wrapper that adds `"Hello, "` every time you call it.
+
+**Simple example 2: class decorator**
+
+```python
+def add_greeting(cls):
+    cls.greeting = "Hello"
+    return cls
+
+@add_greeting
+class Student:
+    pass
+
+student = Student()
+print(student.greeting)  # Hello
+```
+
+`@add_greeting` is the same as `Student = add_greeting(Student)`. The decorator receives the `Student` class, adds a class attribute, and returns the same class.
+
 | | Function decorator | Class decorator |
 |---|---|---|
 | Decorates | A function | A class |
@@ -17530,6 +17564,91 @@ with Room():
 ```
 
 **Real-life example:** A room with automatic lights turns them on when you enter and off when you leave. You never have to remember the switch.
+
+**Developer examples you'll write in real projects:**
+
+**1. Database connection: always close it**
+
+```python
+import sqlite3
+
+class Database:
+    def __init__(self, path):
+        self.path = path
+
+    def __enter__(self):
+        print("Connected")
+        self.connection = sqlite3.connect(self.path)
+        return self.connection
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.connection.close()
+        print("Connection closed")
+
+with Database(":memory:") as db:
+    db.execute("CREATE TABLE users (name TEXT)")
+    db.execute("INSERT INTO users VALUES ('Asha')")
+    print(db.execute("SELECT name FROM users").fetchone())
+# Connected
+# ('Asha',)
+# Connection closed
+```
+
+Too many open connections can crash a database server. Here the connection closes even if a query fails.
+
+**2. Timer: measure how long a block takes**
+
+```python
+import time
+from contextlib import contextmanager
+
+@contextmanager
+def timer(label):
+    start = time.perf_counter()
+    yield                              # the with block runs here
+    seconds = time.perf_counter() - start
+    print(f"{label} took {seconds:.1f}s")
+
+with timer("Load data"):
+    time.sleep(0.2)                    # pretend this is a slow API or query
+# Load data took 0.2s
+```
+
+Use this to find slow API calls, queries, or model training steps without changing the code inside.
+
+**3. Temporary setting: switch config only for a test**
+
+```python
+import os
+from contextlib import contextmanager
+
+@contextmanager
+def temp_env(key, value):
+    old = os.environ.get(key)
+    os.environ[key] = value            # setup: change the setting
+    try:
+        yield
+    finally:
+        if old is None:                # cleanup: put it back
+            del os.environ[key]
+        else:
+            os.environ[key] = old
+
+os.environ["APP_MODE"] = "production"
+
+with temp_env("APP_MODE", "test"):
+    print(os.environ["APP_MODE"])  # test
+
+print(os.environ["APP_MODE"])      # production
+```
+
+Tests often need a different setting (test database, debug mode). The `finally` makes sure the real setting comes back, even if the test fails.
+
+| Example | Setup (`__enter__`) | Cleanup (`__exit__`) | Real-life comparison |
+|---|---|---|---|
+| Database connection | Connect | Close the connection | Hang up the phone after the call |
+| Timer | Start the stopwatch | Stop it and print the time | A stopwatch at a race |
+| Temporary setting | Change the setting | Restore the old value | Borrow a friend's car seat setting, then put it back |
 
 </details>
 

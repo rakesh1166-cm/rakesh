@@ -668,7 +668,16 @@ multiple inheritance and mro and mixins
 avoiding lambda fun   RLE= sticky note and document
 sort then model based on accuracy and time RLE=sticky notes vs document
 decorator=Rle= view profile login rewd, delete user= login and role reqd
-difference=fuction decorator vs class decorator
+difference=fuction decorator vs class decorator RLE=securitycheck vs registercompany
+dunder method =5 example RLE car accelerator=engine works
+dataclassdecoraor=
+how to add validation in dataclass decorator
+=================exception handling
+diff between try,except,else,finally, RLE=enter ammt, not enough balnce else take cash ,finally take card at any case
+code example -zerodivision error
+custom exception= code example=notenough balance RLE= hospital exact problem
+difference between context manger and finally= cleaning task room vs hotel
+
 
 
 
