@@ -102,7 +102,7 @@ OR How do you merge two Python dictionaries only if they have no keys in common,
 97.What happens when you use square brackets (dictionary[key]) to access a key that does not exist in a Python dictionary?
 98.How can you safely access a dictionary key that might be missing, and when should you use get(), in, or try/except?
 =======================OOPS====================================
-1.Can __init__() return a value such as an integer, or must it return None?
+1. as an integer, or must it return None?
 2.Is self a reserved keyword in Python or a naming convention?
 3.What is an instance of a class, and which instance does self refer to inside a method?
 4.what do u mean by self and instance
