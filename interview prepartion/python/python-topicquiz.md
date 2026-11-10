@@ -17041,26 +17041,50 @@ A decorator is a function that wraps another function to add extra behaviour, wi
 ```python
 from functools import wraps
 
-def log_call(function):
+def login_required(function):
     @wraps(function)
-    def wrapper(*args, **kwargs):
-        print("Starting")
-        result = function(*args, **kwargs)
-        print("Finished")
-        return result
+    def wrapper(user, *args, **kwargs):
+        if not user.get("logged_in"):
+            return "401 Unauthorized: please log in"
+        return function(user, *args, **kwargs)
     return wrapper
 
-@log_call
-def add(a, b):
-    return a + b
+def role_required(role):
+    def decorator(function):
+        @wraps(function)
+        def wrapper(user, *args, **kwargs):
+            if user.get("role") != role:
+                return f"403 Forbidden: {role} only"
+            return function(user, *args, **kwargs)
+        return wrapper
+    return decorator
 
-print(add(2, 3))
-# Starting
-# Finished
-# 5
+@login_required
+def view_profile(user):
+    return f"Profile of {user['name']}"
+
+@login_required
+@role_required("admin")
+def delete_user(user, user_id):
+    return f"User {user_id} deleted by {user['name']}"
+
+guest = {"name": "Guest", "logged_in": False}
+asha = {"name": "Asha", "logged_in": True, "role": "user"}
+admin = {"name": "Ravi", "logged_in": True, "role": "admin"}
+
+print(view_profile(guest))     # 401 Unauthorized: please log in
+print(view_profile(asha))      # Profile of Asha
+print(delete_user(asha, 7))    # 403 Forbidden: admin only
+print(delete_user(admin, 7))   # User 7 deleted by Ravi
+print(delete_user.__name__)    # delete_user: kept by @wraps
 ```
 
-**Real-life example:** Gift wrapping adds a nice cover, but the gift inside stays the same. Or think of a phone case: the phone doesn't change, but it gets extra protection.
+- `@login_required` checks **authentication**: is the user logged in?
+- `@role_required("admin")` checks **authorization**: is the user allowed to do this? It takes an argument, so it has one extra outer function.
+- Decorators run top to bottom: login is checked first, then the role.
+- The real functions (`view_profile`, `delete_user`) contain only business logic. The security check is written once and reused everywhere, just like `@login_required` in Flask or `Depends(get_current_user)` in FastAPI.
+
+**Real-life example:** An office has a security guard at the main gate who checks your ID card (login), and a server room door that opens only for IT staff (authorization). The guard and the door don't change the work done inside; they only decide who gets in.
 
 </details>
 
@@ -17076,23 +17100,115 @@ print(add(2, 3))
 | Typical use | Logging, timing, caching | Registering or changing a class |
 | Example | `@lru_cache` | `@dataclass` |
 
-Both run once, when the definition runs.
+Both run once, when the definition runs. A function decorator's wrapper then runs **on every call**. A class decorator usually does its work **once** and hands the class back.
+
+**Real example 1: function decorator, retry a flaky API call**
 
 ```python
-registry = []
+import time
+from functools import wraps
 
-def register(cls):
-    registry.append(cls.__name__)
-    return cls
+def retry(times):
+    def decorator(function):
+        @wraps(function)
+        def wrapper(*args, **kwargs):
+            for attempt in range(1, times + 1):
+                try:
+                    return function(*args, **kwargs)
+                except ConnectionError:
+                    print(f"Attempt {attempt} failed")
+                    time.sleep(0.1)
+            raise ConnectionError("All retries failed")
+        return wrapper
+    return decorator
 
-@register
-class Model:
-    pass
+calls = {"count": 0}
 
-print(registry)  # ['Model']
+@retry(times=3)
+def fetch_weather(city):
+    calls["count"] += 1
+    if calls["count"] < 3:              # fails twice, then works
+        raise ConnectionError
+    return f"{city}: 31°C"
+
+print(fetch_weather("Delhi"))
+# Attempt 1 failed
+# Attempt 2 failed
+# Delhi: 31°C
 ```
 
-**Real-life example:** A function decorator is like a security check at each visit: it acts each time someone enters. A class decorator is like registering a new company: it happens once, when the company is created.
+The wrapper runs around **each call** to `fetch_weather`.
+
+**Real example 2: class decorator, register ML models by name**
+
+```python
+MODELS = {}
+
+def register_model(name):
+    def decorator(cls):
+        MODELS[name] = cls             # runs once, when the class is defined
+        return cls                     # same class back
+    return decorator
+
+@register_model("linear")
+class LinearModel:
+    def predict(self, x):
+        return x * 2
+
+@register_model("constant")
+class ConstantModel:
+    def predict(self, x):
+        return 10
+
+choice = "linear"                      # e.g. read from a config file
+model = MODELS[choice]()
+print(sorted(MODELS))                  # ['constant', 'linear']
+print(model.predict(5))                # 10
+```
+
+This is how plugin systems pick a class from a config value, without a long `if/elif`.
+
+**Real example 3: class decorator, add a method to every class it decorates**
+
+```python
+def add_to_dict(cls):
+    def to_dict(self):
+        return dict(self.__dict__)
+    cls.to_dict = to_dict              # changes the class once
+    return cls
+
+@add_to_dict
+class User:
+    def __init__(self, name, role):
+        self.name = name
+        self.role = role
+
+@add_to_dict
+class Order:
+    def __init__(self, order_id, total):
+        self.order_id = order_id
+        self.total = total
+
+print(User("Asha", "admin").to_dict())  # {'name': 'Asha', 'role': 'admin'}
+print(Order(101, 499).to_dict())        # {'order_id': 101, 'total': 499}
+```
+
+`@dataclass` works the same way: it adds `__init__`, `__repr__` and `__eq__` to your class.
+
+**Decorators you'll meet in real projects:**
+
+| Kind | Decorator | What it does |
+|---|---|---|
+| Function | `@app.get("/users")` (FastAPI) | Turns a function into an API route |
+| Function | `@login_required` (Flask/Django) | Blocks users who aren't logged in |
+| Function | `@lru_cache` | Remembers results of slow calls |
+| Function | `@pytest.fixture` | Gives tests ready-made data |
+| Function | `@retry` (tenacity) | Retries failed network calls |
+| Class | `@dataclass` | Adds `__init__`, `__repr__`, `__eq__` |
+| Class | `@total_ordering` | Adds `<=`, `>`, `>=` from `<` and `==` |
+| Class | `@register_model("name")` | Adds the class to a plugin registry |
+
+**Real-life example:** A function decorator is like a security check at each visit: it acts each time someone enters. A class decorator is like registering a new company: it happens once, when the company is created, and the company is still the same company afterwards.
 
 </details>
 

@@ -664,6 +664,13 @@ class method read and update attribute stored on class RLE=change school name
 is-a relation ship
 different form of super=parent setup,parent method,parents class attribute,parent class method
 multiple inheritance and mro and mixins
+==============lambda and decorator==============
+avoiding lambda fun   RLE= sticky note and document
+sort then model based on accuracy and time RLE=sticky notes vs document
+decorator=Rle= view profile login rewd, delete user= login and role reqd
+difference=fuction decorator vs class decorator
+
+
 
 
 
