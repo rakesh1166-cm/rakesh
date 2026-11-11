@@ -901,133 +901,34 @@ A
 
 **Steps**
 
-**A. Build the class**
-
-1. Create a `DatabaseConfig` class.
-2. `__init__` takes `host` and `port`.
-3. Check the host is a non-empty string → else raise `ValueError("Host must be a non-empty string")`.
-4. Check the port is between 1 and 65535 → else raise `ValueError("Invalid port: <port>")`.
-5. Store `host` and `port` on the object.
-
-**B. Read from the environment (`from_env`)**
-
-6. Read the host from `DB_HOST` → use `"localhost"` if the key is missing.
-7. Read the port from `DB_PORT` → use `"5432"` if the key is missing.
-8. Convert the port to an integer.
-9. Return `cls(host, port)` → this runs steps 3–5, so the values are checked.
-
-**C. Test it**
-
-10. `from_env({"DB_HOST": "db.internal", "DB_PORT": "5432"})` → print `db.internal 5432`.
-11. `from_env({})` → print `localhost 5432` (both defaults used).
-12. `DatabaseConfig("", 5432)` → print `Host must be a non-empty string`.
-13. `DatabaseConfig("db.internal", 99999)` → print `Invalid port: 99999`.
-
-Direct inputs (steps 12–13) skip steps 6–9 but still go through the checks in steps 3–4.
+1. Read host from `DB_HOST` → default `"localhost"`.
+2. Read port from `DB_PORT` → default `"5432"`.
+3. Convert port to `int`.
+4. Check host is a non-empty string → else `ValueError`.
+5. Check port is 1–65535 → else `ValueError`.
+6. Store host and port.
 
 **Program flow**
 
 ```text
-Step 10: from_env({"DB_HOST": "db.internal", "DB_PORT": "5432"})
-  ├─ Step 6: DB_HOST found   → host = "db.internal"
-  ├─ Step 7: DB_PORT found   → port = "5432"
-  ├─ Step 8: convert         → port = 5432
-  └─ Step 9: cls(host, port) → __init__
-        ├─ Step 3: host non-empty string?  YES
-        ├─ Step 4: 1 <= 5432 <= 65535?     YES
-        └─ Step 5: store values → print "db.internal 5432"
-
-Step 11: from_env({})
-  ├─ Step 6: DB_HOST missing → host = "localhost"
-  ├─ Step 7: DB_PORT missing → port = "5432"
-  ├─ Step 8: convert         → port = 5432
-  └─ Step 9: cls(host, port) → __init__
-        ├─ Step 3: YES
-        ├─ Step 4: YES
-        └─ Step 5: store values → print "localhost 5432"
-
-Step 12: DatabaseConfig("", 5432)              (direct input: steps 6–9 skipped)
-  └─ __init__
-        └─ Step 3: host non-empty string?  NO → raise ValueError
-              └─ except → print "Host must be a non-empty string"
-
-Step 13: DatabaseConfig("db.internal", 99999)  (direct input: steps 6–9 skipped)
-  └─ __init__
-        ├─ Step 3: host non-empty string?  YES
-        └─ Step 4: 1 <= 99999 <= 65535?    NO → raise ValueError
-              └─ except → print "Invalid port: 99999"
+from_env({"DB_HOST": "db.internal", "DB_PORT": "5432"}) → values found → "db.internal 5432"
+from_env({})                                            → defaults used → "localhost 5432"
+DatabaseConfig("", 5432)                                → host empty    → "Host must be a non-empty string"
+DatabaseConfig("db.internal", 99999)                    → port too big  → "Invalid port: 99999"
 ```
 
 **Pseudocode**
 
 ```text
-// Step 1: create the class
-CLASS DatabaseConfig
+from_env(env):
+    host = env["DB_HOST"] IF present ELSE "localhost"
+    port = integer(env["DB_PORT"] IF present ELSE "5432")
+    RETURN DatabaseConfig(host, port)
 
-    // Step 2: init takes host and port
-    FUNCTION init(host, port)
-
-        // Step 3: validate the host
-        IF host is not a string OR host is empty THEN
-            RAISE ValueError "Host must be a non-empty string"
-        END IF
-
-        // Step 4: validate the port
-        IF port < 1 OR port > 65535 THEN
-            RAISE ValueError "Invalid port: " + port
-        END IF
-
-        // Step 5: store the values
-        SET self.host = host
-        SET self.port = port
-    END FUNCTION
-
-    CLASS METHOD from_env(env)
-
-        // Step 6: read the host
-        IF "DB_HOST" is in env THEN
-            host = env["DB_HOST"]
-        ELSE
-            host = "localhost"
-        END IF
-
-        // Step 7: read the port
-        IF "DB_PORT" is in env THEN
-            port = env["DB_PORT"]
-        ELSE
-            port = "5432"
-        END IF
-
-        // Step 8: convert the port
-        port = CONVERT port TO integer
-
-        // Step 9: create the object (runs steps 3–5)
-        RETURN new DatabaseConfig(host, port)
-    END METHOD
-
-END CLASS
-
-// Step 10: values from the environment
-config = DatabaseConfig.from_env({DB_HOST: "db.internal", DB_PORT: "5432"})
-PRINT config.host, config.port               // db.internal 5432
-
-// Step 11: empty environment, so defaults are used
-default = DatabaseConfig.from_env({})
-PRINT default.host, default.port             // localhost 5432
-
-// Step 12: direct input with an empty host
-TRY
-    DatabaseConfig("", 5432)
-CATCH ValueError AS error
-    PRINT error                              // Host must be a non-empty string
-END TRY
-
-// Step 13: direct input with an invalid port
-TRY
-    DatabaseConfig("db.internal", 99999)
-CATCH ValueError AS error
-    PRINT error                              // Invalid port: 99999
-END TRY
+init(host, port):
+    IF host is empty THEN raise "Host must be a non-empty string"
+    IF port NOT between 1 and 65535 THEN raise "Invalid port: <port>"
+    ELSE store host and port
 ```
 
 **Code**
