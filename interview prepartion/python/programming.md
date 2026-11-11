@@ -13,6 +13,37 @@ Write each program from memory first, then click **Answer** to check it. Every a
 <details>
 <summary>Answer</summary>
 
+**Steps**
+
+1. Create a `Car` class.
+2. `__init__` stores `color` → `self.color`.
+3. `show()` returns `self.color`.
+4. Create `red = Car("red")` and `blue = Car("blue")`.
+5. Print `red.show()` and `blue.show()`.
+
+**Program flow**
+
+```text
+Car("red")   → self.color = "red"  → red object
+Car("blue")  → self.color = "blue" → blue object
+red.show()   → self is red         → "red"
+blue.show()  → self is blue        → "blue"
+```
+
+**Pseudocode**
+
+```text
+CLASS Car:
+    init(color):  self.color = color
+    show():       RETURN self.color
+
+red = Car("red");  blue = Car("blue")
+PRINT red.show()     // red
+PRINT blue.show()    // blue
+```
+
+**Code**
+
 ```python
 class Car:
     def __init__(self, color):
@@ -48,6 +79,34 @@ blue
 <details>
 <summary>Answer</summary>
 
+**Steps**
+
+1. Create a `Student` class.
+2. `__init__` stores `name`.
+3. `same_as(other)` returns `self is other`.
+4. Create `first = Student("Asha")`.
+5. Print `first.same_as(first)`.
+
+**Program flow**
+
+```text
+Student("Asha")         → self.name = "Asha"            → first
+first.same_as(first)    → self is first, other is first → True
+```
+
+**Pseudocode**
+
+```text
+CLASS Student:
+    init(name):        self.name = name
+    same_as(other):    RETURN self IS other
+
+first = Student("Asha")
+PRINT first.same_as(first)    // True
+```
+
+**Code**
+
 ```python
 class Student:
     def __init__(self, name):
@@ -78,6 +137,37 @@ True
 
 <details>
 <summary>Answer</summary>
+
+**Steps**
+
+1. Create a `Student` class.
+2. `__init__` takes `name`, `age` (required) and `city` → default `"Delhi"`.
+3. Store all three on `self`.
+4. Create `a` without a city and `b` with `"Mumbai"`.
+5. Print both cities.
+
+**Program flow**
+
+```text
+Student("Asha", 21)            → city not passed → default "Delhi"
+Student("Ravi", 22, "Mumbai")  → city passed     → "Mumbai"
+print(a.city), print(b.city)   →                 → "Delhi", "Mumbai"
+```
+
+**Pseudocode**
+
+```text
+CLASS Student:
+    init(name, age, city = "Delhi"):
+        store name, age, city
+
+a = Student("Asha", 21)
+b = Student("Ravi", 22, "Mumbai")
+PRINT a.city    // Delhi
+PRINT b.city    // Mumbai
+```
+
+**Code**
 
 ```python
 class Student:
@@ -113,6 +203,33 @@ Mumbai
 <details>
 <summary>Answer</summary>
 
+**Steps**
+
+1. Create a `Vehicle` class whose `__init__` stores `brand`.
+2. Create `Car(Vehicle)` with no `__init__` (`pass`).
+3. Create `Car("Toyota")` → the parent's `__init__` runs.
+4. Print `car.brand`.
+
+**Program flow**
+
+```text
+Car("Toyota")  → Car has no __init__ → Vehicle.__init__ runs → brand = "Toyota"
+car.brand      →                                             → "Toyota"
+```
+
+**Pseudocode**
+
+```text
+CLASS Vehicle:
+    init(brand):  self.brand = brand
+CLASS Car EXTENDS Vehicle:  (nothing)
+
+car = Car("Toyota")     // uses Vehicle's init
+PRINT car.brand         // Toyota
+```
+
+**Code**
+
 ```python
 class Vehicle:
     def __init__(self, brand):
@@ -143,6 +260,38 @@ Toyota
 
 <details>
 <summary>Answer</summary>
+
+**Steps**
+
+1. Create a `Vehicle` class whose `__init__` stores `brand`.
+2. Create `Car(Vehicle)` whose `__init__` takes `brand` and `seats`.
+3. Send `brand` to the parent with `super().__init__(brand)`.
+4. Store `seats` in the child.
+5. Create `Car("Honda", 5)` and print both values.
+
+**Program flow**
+
+```text
+Car("Honda", 5) → Car.__init__ → super().__init__("Honda") → brand = "Honda"
+                               → self.seats = 5
+print           →                                          → "Honda 5"
+```
+
+**Pseudocode**
+
+```text
+CLASS Vehicle:
+    init(brand):  self.brand = brand
+CLASS Car EXTENDS Vehicle:
+    init(brand, seats):
+        CALL parent init(brand)
+        self.seats = seats
+
+car = Car("Honda", 5)
+PRINT car.brand, car.seats    // Honda 5
+```
+
+**Code**
 
 ```python
 class Vehicle:
@@ -177,6 +326,37 @@ Honda 5
 <details>
 <summary>Answer</summary>
 
+**Steps**
+
+1. Create a `Vehicle` class whose `__init__` stores `brand`.
+2. Create `Bike(Vehicle)` whose `__init__` takes only `gears`.
+3. Store `gears`, and don't call `super()`.
+4. Create `Bike(21)`.
+5. Print `gears` and `hasattr(bike, "brand")`.
+
+**Program flow**
+
+```text
+Bike(21)                → Bike.__init__ only → gears = 21, parent init skipped
+bike.gears              →                    → 21
+hasattr(bike, "brand")  → brand never set    → False
+```
+
+**Pseudocode**
+
+```text
+CLASS Vehicle:
+    init(brand):  self.brand = brand
+CLASS Bike EXTENDS Vehicle:
+    init(gears):  self.gears = gears      // no parent init call
+
+bike = Bike(21)
+PRINT bike.gears                 // 21
+PRINT bike HAS "brand"?          // False
+```
+
+**Code**
+
 ```python
 class Vehicle:
     def __init__(self, brand):
@@ -210,6 +390,38 @@ False
 
 <details>
 <summary>Answer</summary>
+
+**Steps**
+
+1. Create a `Vehicle` class whose `__init__` stores `brand`.
+2. Create `Truck(Vehicle)` whose `__init__` takes `brand` and `load` → default `"10 tons"`.
+3. Send `brand` to the parent with `super()`, and store `load`.
+4. Create `t1` without a load and `t2` with `"20 tons"`.
+5. Print both loads.
+
+**Program flow**
+
+```text
+Truck("Tata")             → load not passed → default "10 tons"
+Truck("Volvo", "20 tons") → load passed     → "20 tons"
+print loads               →                 → "10 tons", "20 tons"
+```
+
+**Pseudocode**
+
+```text
+CLASS Truck EXTENDS Vehicle:
+    init(brand, load = "10 tons"):
+        CALL parent init(brand)
+        self.load = load
+
+t1 = Truck("Tata")
+t2 = Truck("Volvo", "20 tons")
+PRINT t1.load    // 10 tons
+PRINT t2.load    // 20 tons
+```
+
+**Code**
 
 ```python
 class Vehicle:
@@ -247,6 +459,39 @@ print(t2.load)  # 20 tons
 <details>
 <summary>Answer</summary>
 
+**Steps**
+
+1. Create a `Vehicle` class whose `__init__` stores `brand` and `color` → default `"white"`.
+2. Create `ElectricCar(Vehicle)` whose `__init__` takes `battery, *args, **kwargs`.
+3. Forward `*args, **kwargs` to the parent with `super()`.
+4. Store `battery`.
+5. Create `ElectricCar("75 kWh", "Tesla", color="red")` and print all three values.
+
+**Program flow**
+
+```text
+ElectricCar("75 kWh", "Tesla", color="red")
+  → battery = "75 kWh", args = ("Tesla",), kwargs = {"color": "red"}
+  → super().__init__("Tesla", color="red") → brand = "Tesla", color = "red"
+print → "75 kWh Tesla red"
+```
+
+**Pseudocode**
+
+```text
+CLASS Vehicle:
+    init(brand, color = "white"):  store brand, color
+CLASS ElectricCar EXTENDS Vehicle:
+    init(battery, rest of arguments):
+        CALL parent init(rest of arguments)
+        self.battery = battery
+
+ev = ElectricCar("75 kWh", "Tesla", color = "red")
+PRINT ev.battery, ev.brand, ev.color    // 75 kWh Tesla red
+```
+
+**Code**
+
 ```python
 class Vehicle:
     def __init__(self, brand, color="white"):
@@ -281,6 +526,34 @@ print(ev.battery, ev.brand, ev.color)  # 75 kWh Tesla red
 <details>
 <summary>Answer</summary>
 
+**Steps**
+
+1. Create a `Coffee` class.
+2. `__init__` takes `name` and `size` → default `"medium"`.
+3. Create `Coffee("Latte")` and `Coffee("Mocha", "large")`.
+4. Print both sizes.
+
+**Program flow**
+
+```text
+Coffee("Latte")          → size not passed → "medium"
+Coffee("Mocha", "large") → size passed     → "large"
+```
+
+**Pseudocode**
+
+```text
+CLASS Coffee:
+    init(name, size = "medium"):  store name, size
+
+c1 = Coffee("Latte")
+c2 = Coffee("Mocha", "large")
+PRINT c1.size    // medium
+PRINT c2.size    // large
+```
+
+**Code**
+
 ```python
 class Coffee:
     def __init__(self, name, size="medium"):
@@ -313,6 +586,39 @@ large
 
 <details>
 <summary>Answer</summary>
+
+**Steps**
+
+1. Create a `Team` class with a class-level list `members = []`.
+2. In `__init__`, create `self.tasks = []`.
+3. Create teams `a` and `b`.
+4. Append `"Asha"` to `a.members` and `"report"` to `a.tasks`.
+5. Print `b.members` and `b.tasks`.
+
+**Program flow**
+
+```text
+a.members.append("Asha")  → members is on the class → shared by a and b
+a.tasks.append("report")  → tasks is on a only      → b.tasks unchanged
+print(b.members)          →                         → ['Asha']
+print(b.tasks)            →                         → []
+```
+
+**Pseudocode**
+
+```text
+CLASS Team:
+    members = []                // one list for the class
+    init():  self.tasks = []    // new list for each object
+
+a = Team();  b = Team()
+ADD "Asha" TO a.members
+ADD "report" TO a.tasks
+PRINT b.members    // ['Asha']
+PRINT b.tasks      // []
+```
+
+**Code**
 
 ```python
 class Team:
@@ -349,6 +655,36 @@ print(b.tasks)    # []: not shared
 
 <details>
 <summary>Answer</summary>
+
+**Steps**
+
+1. Create a `Rectangle` class whose `__init__` stores `length`.
+2. `get_length()` returns `self.length` (no arguments).
+3. `area(width)` returns `self.length * width`.
+4. Create `Rectangle(10)`.
+5. Print `get_length()` and `area(5)`.
+
+**Program flow**
+
+```text
+rectangle.get_length() → Python passes self only       → 10
+rectangle.area(5)      → Python passes self, you pass 5 → 10 * 5 = 50
+```
+
+**Pseudocode**
+
+```text
+CLASS Rectangle:
+    init(length):     self.length = length
+    get_length():     RETURN self.length
+    area(width):      RETURN self.length * width
+
+rectangle = Rectangle(10)
+PRINT rectangle.get_length()    // 10
+PRINT rectangle.area(5)         // 50
+```
+
+**Code**
 
 ```python
 class Rectangle:
@@ -388,6 +724,36 @@ print(rectangle.area(5))       # 50
 <details>
 <summary>Answer</summary>
 
+**Steps**
+
+1. Create a `Team` class with a class-level list `members = []`.
+2. In `__init__`, create `self.tasks = []`.
+3. Create teams `a` and `b`.
+4. Change both lists through `a`.
+5. Print `b`'s lists → `members` shared, `tasks` not shared.
+
+**Program flow**
+
+```text
+a.members.append("Asha") → one class list → b.members = ['Asha']
+a.tasks.append("report") → a's own list   → b.tasks = []
+```
+
+**Pseudocode**
+
+```text
+CLASS Team:
+    members = []                // shared
+    init():  self.tasks = []    // per object
+
+a = Team();  b = Team()
+ADD "Asha" TO a.members;  ADD "report" TO a.tasks
+PRINT b.members    // ['Asha']
+PRINT b.tasks      // []
+```
+
+**Code**
+
 ```python
 class Team:
     members = []              # shared by all
@@ -424,6 +790,32 @@ print(b.tasks)    # []: not shared
 <details>
 <summary>Answer</summary>
 
+**Steps**
+
+1. Create a `Parent` class whose `__init__` stores `name`.
+2. Create `Child(Parent)` with no `__init__` (`pass`).
+3. Create `Child("Asha")` → the parent's `__init__` runs.
+4. Print `name`.
+
+**Program flow**
+
+```text
+Child("Asha") → Child has no __init__ → Parent.__init__ runs → name = "Asha"
+.name         →                                              → "Asha"
+```
+
+**Pseudocode**
+
+```text
+CLASS Parent:
+    init(name):  self.name = name
+CLASS Child EXTENDS Parent:  (nothing)
+
+PRINT Child("Asha").name    // Asha
+```
+
+**Code**
+
 ```python
 class Parent:
     def __init__(self, name):
@@ -453,6 +845,43 @@ Asha
 
 <details>
 <summary>Answer</summary>
+
+**Steps**
+
+1. Create a `BankAccount` class.
+2. `__init__` stores `owner`, `balance` and `history = []`.
+3. `deposit(amount)` → add to balance and history.
+4. `withdraw(amount)` → subtract from balance, add `-amount` to history.
+5. Add getters for balance, owner and history, and `change_owner(name)`.
+6. Start with `"Asha"`, 1000 and call each method once.
+
+**Program flow**
+
+```text
+BankAccount("Asha", 1000) → balance = 1000, history = []
+get_balance()             →                        → 1000
+deposit(500)              → balance = 1500         → history = [500]
+withdraw(200)             → balance = 1300         → history = [500, -200]
+change_owner("Ben")       → owner = "Ben"          → get_owner() = "Ben"
+get_history()             →                        → [500, -200]
+```
+
+**Pseudocode**
+
+```text
+CLASS BankAccount:
+    init(owner, balance):   store owner, balance; history = []
+    deposit(amount):        balance += amount;  ADD amount TO history
+    withdraw(amount):       balance -= amount;  ADD -amount TO history
+    change_owner(name):     owner = name
+    get_balance / get_owner / get_history:  RETURN the value
+
+account = BankAccount("Asha", 1000)
+PRINT balance (1000) → deposit 500 → PRINT (1500) → withdraw 200 → PRINT (1300)
+change_owner("Ben") → PRINT owner (Ben) → PRINT history ([500, -200])
+```
+
+**Code**
 
 ```python
 class BankAccount:
@@ -515,6 +944,35 @@ Ben
 <details>
 <summary>Answer</summary>
 
+**Steps**
+
+1. Create an `Animal` class with `eat()` → `"eating"`.
+2. Create `Dog(Animal)` with `bark()` → `"woof"`.
+3. Create `dog = Dog()`.
+4. Call `dog.eat()` and `dog.bark()`.
+
+**Program flow**
+
+```text
+dog.eat()  → not in Dog → found in Animal → "eating"
+dog.bark() → found in Dog                 → "woof"
+```
+
+**Pseudocode**
+
+```text
+CLASS Animal:
+    eat():  RETURN "eating"
+CLASS Dog EXTENDS Animal:
+    bark(): RETURN "woof"
+
+dog = Dog()
+PRINT dog.eat()     // eating (from parent)
+PRINT dog.bark()    // woof (its own)
+```
+
+**Code**
+
 ```python
 class Animal:
     def eat(self):
@@ -548,6 +1006,41 @@ woof
 
 <details>
 <summary>Answer</summary>
+
+**Steps**
+
+1. Create a `Greeter` class with `hello()` → `"hello"`.
+2. Add `twice()` → `self.hello() * 2`.
+3. Create `Loud(Greeter)` whose `hello()` returns `super().hello().upper()`.
+4. Call `hello` six ways: object, class, saved variable, `getattr`, `self`, `super()`.
+
+**Program flow**
+
+```text
+g.hello()              → normal call              → "hello"
+Greeter.hello(g)       → through the class        → "hello"
+say = g.hello; say()   → saved bound method       → "hello"
+getattr(g, "hello")()  → found by name            → "hello"
+g.twice()              → self.hello() * 2         → "hellohello"
+Loud().hello()         → super().hello().upper()  → "HELLO"
+```
+
+**Pseudocode**
+
+```text
+CLASS Greeter:
+    hello():  RETURN "hello"
+    twice():  RETURN self.hello() repeated 2 times
+CLASS Loud EXTENDS Greeter:
+    hello():  RETURN UPPERCASE(parent hello())
+
+g = Greeter()
+PRINT g.hello(), Greeter.hello(g), saved g.hello(), getattr(g, "hello")()   // hello x4
+PRINT g.twice()          // hellohello
+PRINT Loud().hello()     // HELLO
+```
+
+**Code**
 
 ```python
 class Greeter:
@@ -595,6 +1088,40 @@ HELLO
 <details>
 <summary>Answer</summary>
 
+**Steps**
+
+1. Create a `Pizza` class with class attribute `size_unit = "inch"`.
+2. `__init__` stores `size`.
+3. Instance method `describe()` → `"<size> inch"`.
+4. Class method `large()` → `cls(12)`.
+5. Static method `is_valid(size)` → `size > 0`.
+6. Call all three.
+
+**Program flow**
+
+```text
+Pizza(8).describe()  → instance: uses self.size → "8 inch"
+Pizza.large().size   → class: cls(12)           → 12
+Pizza.is_valid(-1)   → static: -1 > 0?  NO      → False
+```
+
+**Pseudocode**
+
+```text
+CLASS Pizza:
+    size_unit = "inch"
+    init(size):              self.size = size
+    describe():              RETURN size + " " + size_unit
+    CLASS METHOD large():    RETURN new Pizza(12)
+    STATIC is_valid(size):   RETURN size > 0
+
+PRINT Pizza(8).describe()    // 8 inch
+PRINT Pizza.large().size     // 12
+PRINT Pizza.is_valid(-1)     // False
+```
+
+**Code**
+
 ```python
 class Pizza:
     size_unit = "inch"
@@ -639,6 +1166,36 @@ False
 <details>
 <summary>Answer</summary>
 
+**Steps**
+
+1. Create a `Student` class with class attribute `school = "City School"`.
+2. Class method `rename_school(name)` → `cls.school = name`.
+3. Create `first` and `second`.
+4. Call `Student.rename_school("Green School")` once.
+5. Print both students' school.
+
+**Program flow**
+
+```text
+Student.rename_school("Green School") → cls.school changed → all objects see it
+first.school, second.school           →                    → "Green School", "Green School"
+```
+
+**Pseudocode**
+
+```text
+CLASS Student:
+    school = "City School"
+    CLASS METHOD rename_school(name):  cls.school = name
+
+first = Student();  second = Student()
+Student.rename_school("Green School")
+PRINT first.school     // Green School
+PRINT second.school    // Green School
+```
+
+**Code**
+
 ```python
 class Student:
     school = "City School"
@@ -675,6 +1232,34 @@ Green School
 <details>
 <summary>Answer</summary>
 
+**Steps**
+
+1. Create a `User` class whose `__init__` stores `name`.
+2. Class method `from_dict(data)` → `cls(data["name"])`.
+3. Create `Admin(User)` with no code (`pass`).
+4. Call `Admin.from_dict({"name": "Asha"})`.
+5. Print the type name.
+
+**Program flow**
+
+```text
+Admin.from_dict({"name": "Asha"}) → cls is Admin → Admin("Asha") → type "Admin"
+```
+
+**Pseudocode**
+
+```text
+CLASS User:
+    init(name):                     self.name = name
+    CLASS METHOD from_dict(data):   RETURN new cls(data["name"])
+CLASS Admin EXTENDS User:  (nothing)
+
+obj = Admin.from_dict({"name": "Asha"})
+PRINT type name of obj    // Admin
+```
+
+**Code**
+
 ```python
 class User:
     def __init__(self, name):
@@ -708,6 +1293,35 @@ Admin
 
 <details>
 <summary>Answer</summary>
+
+**Steps**
+
+1. Create a `Vehicle` class with `start()` → `"started"`.
+2. Create `Car(Vehicle)` and `Bike(Vehicle)` with no code.
+3. Loop over `Car()` and `Bike()`.
+4. Call `start()` on each.
+
+**Program flow**
+
+```text
+for vehicle in (Car(), Bike()):
+  Car().start()  → not in Car  → Vehicle.start → "started"
+  Bike().start() → not in Bike → Vehicle.start → "started"
+```
+
+**Pseudocode**
+
+```text
+CLASS Vehicle:
+    start():  RETURN "started"
+CLASS Car EXTENDS Vehicle;  CLASS Bike EXTENDS Vehicle
+
+FOR EACH vehicle IN [Car(), Bike()]:
+    PRINT vehicle.start()    // started
+END FOR
+```
+
+**Code**
 
 ```python
 class Vehicle:
@@ -743,6 +1357,47 @@ started
 
 <details>
 <summary>Answer</summary>
+
+**Steps**
+
+1. Create `Parent` with `role = "parent"`, `__init__(name)`, `show()` and class method `create()` → `cls("new")`.
+2. In `Child.__init__`, call `super().__init__(name)`.
+3. `Child.show()` → `super().show() + " (child)"`.
+4. `old_style()` → `super(Child, self).show()`.
+5. `parent_role()` → `super().role`.
+6. Class method `Child.create()` → `super().create()`.
+
+**Program flow**
+
+```text
+Child("Asha")        → super().__init__("Asha")    → name = "Asha"
+child.show()         → parent show + " (child)"    → "name: Asha (child)"
+child.old_style()    → super(Child, self).show()   → "name: Asha"
+child.parent_role()  → super().role                → "parent"
+Child.create().name  → super().create() → cls("new") → "new"
+```
+
+**Pseudocode**
+
+```text
+CLASS Parent:
+    role = "parent"
+    init(name):            self.name = name
+    show():                RETURN "name: " + name
+    CLASS METHOD create(): RETURN new cls("new")
+
+CLASS Child EXTENDS Parent:
+    init(name):     CALL parent init(name)
+    show():         RETURN parent show() + " (child)"
+    old_style():    RETURN parent show()      // old super(Child, self) form
+    parent_role():  RETURN parent role
+    CLASS METHOD create():  RETURN parent create()
+
+PRINT show, old_style, parent_role, create().name
+// name: Asha (child), name: Asha, parent, new
+```
+
+**Code**
 
 ```python
 class Parent:
@@ -804,6 +1459,40 @@ new
 <details>
 <summary>Answer</summary>
 
+**Steps**
+
+1. Create `LogMixin` whose `save()` → `"log, " + super().save()`.
+2. Create `Model.save()` → `"saved"` and `Report.save()` → `"report saved"`.
+3. Create `LoggedModel(LogMixin, Model)` and `LoggedReport(LogMixin, Report)`.
+4. Call `save()` on each.
+5. Print the MRO of `LoggedModel`.
+
+**Program flow**
+
+```text
+LoggedModel().save()  → LogMixin.save → super() = Model.save  → "log, saved"
+LoggedReport().save() → LogMixin.save → super() = Report.save → "log, report saved"
+LoggedModel.__mro__   →                                       → LoggedModel, LogMixin, Model, object
+```
+
+**Pseudocode**
+
+```text
+CLASS LogMixin:
+    save():  RETURN "log, " + next class's save()
+CLASS Model:   save(): RETURN "saved"
+CLASS Report:  save(): RETURN "report saved"
+
+CLASS LoggedModel EXTENDS LogMixin, Model
+CLASS LoggedReport EXTENDS LogMixin, Report
+
+PRINT LoggedModel().save()     // log, saved
+PRINT LoggedReport().save()    // log, report saved
+PRINT MRO of LoggedModel       // LoggedModel, LogMixin, Model, object
+```
+
+**Code**
+
 ```python
 class LogMixin:
     def save(self):
@@ -849,6 +1538,36 @@ log, report saved
 
 <details>
 <summary>Answer</summary>
+
+**Steps**
+
+1. Create `A` whose `show()` prints `"A"`.
+2. Create `B(A)` and `C(A)`: each prints its name, then calls `super().show()`.
+3. Create `D(B, C)`: it prints `"D"`, then calls `super().show()`.
+4. Call `D().show()`.
+
+**Program flow**
+
+```text
+MRO of D: D → B → C → A
+D.show() → print "D" → super() = B
+B.show() → print "B" → super() = C   (next in D's MRO, not A)
+C.show() → print "C" → super() = A
+A.show() → print "A" → stop          (A runs once)
+```
+
+**Pseudocode**
+
+```text
+CLASS A:              show(): PRINT "A"
+CLASS B EXTENDS A:    show(): PRINT "B";  CALL next show()
+CLASS C EXTENDS A:    show(): PRINT "C";  CALL next show()
+CLASS D EXTENDS B, C: show(): PRINT "D";  CALL next show()
+
+D().show()    // D, B, C, A
+```
+
+**Code**
 
 ```python
 class A:
