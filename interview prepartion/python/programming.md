@@ -55,6 +55,43 @@ Do about **6 a day, in 45–60 minutes**:
 - **After day 14:** stop adding new programs and only review the due ones, about 4–5 a day, until every program is 🟢 Strong twice in a row.
 - **On a busy day,** do 1 new and 2 review programs. Skipping a day is worse than doing a small day.
 
+### Why expert trainers rarely make mistakes
+
+Expert trainers aren't magic. Most of what you see comes from preparation and habits, and you can learn them.
+
+1. **They've written that program many times before.** A trainer who shows a `BankAccount` class has probably written it 50+ times. It's memory and practice, not live problem-solving.
+2. **Slides are prepared and tested.** Code on a slide was usually written in an editor, run and checked first, then pasted in.
+3. **They plan before they write.** They first say or write the steps: "We need a class, `__init__` stores the balance, `deposit` adds…". It's the same **Steps → Pseudocode → Code** order used in this file.
+4. **They write the skeleton first and fill it in later.** They write the class and method names first, then the body of each method:
+
+   ```python
+   class BankAccount:
+       def __init__(self, ...):
+
+       def deposit(self, ...):
+
+       def withdraw(self, ...):
+   ```
+
+5. **They know common patterns, not just separate programs.** Most programs reuse a few patterns: store in `__init__`, validate then raise, loop and collect into a list, try/except/else/finally, `super().__init__()`.
+6. **They keep examples small.** They use 2–3 objects, short names and simple numbers like 1000 and 500, which leaves little room for mistakes.
+7. **They trace before saying "done".** They run through the code once with a sample input ("`deposit(500)` makes the balance 1500…"). This dry run catches most bugs without a computer.
+8. **They do make mistakes, and fix them calmly.** Good trainers say "oops, I forgot `self`" and fix it. Interviewers expect small slips too. What they watch is whether you **notice and fix** them.
+
+### Build the same skill yourself
+
+| Expert habit | What to practise |
+|---|---|
+| Repetition | 6 programs a day from this file |
+| Plan first | Always write Steps → Pseudocode before code |
+| Skeleton first | Write the class and method names first, then the bodies |
+| Know patterns | Notice which pattern each program uses |
+| Dry run | Trace one input by hand before running the code |
+| Small examples | Use simple values when practising |
+| Explain aloud | Say each line out loud while writing, like teaching |
+
+**Whiteboard practice:** once a week, write 2–3 programs on paper with a pen (no editor and no autocomplete), explaining out loud as you go. Then type them in and run them. This is the closest practice to a whiteboard interview.
+
 ---
 
 ## Program 1
