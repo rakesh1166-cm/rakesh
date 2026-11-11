@@ -66,12 +66,17 @@ Expert trainers aren't magic. Most of what you see comes from preparation and ha
 
    ```python
    class BankAccount:
-       def __init__(self, ...):
+       def __init__(self, owner, balance):
+           pass                      # fill in later
 
-       def deposit(self, ...):
+       def deposit(self, amount):
+           pass                      # fill in later
 
-       def withdraw(self, ...):
+       def withdraw(self, amount):
+           pass                      # fill in later
    ```
+
+   Write the real parameter names, and put `pass` in each empty method so the skeleton already runs. Then replace each `pass` with the real code, one method at a time.
 
 5. **They know common patterns, not just separate programs.** Most programs reuse a few patterns: store in `__init__`, validate then raise, loop and collect into a list, try/except/else/finally, `super().__init__()`.
 6. **They keep examples small.** They use 2–3 objects, short names and simple numbers like 1000 and 500, which leaves little room for mistakes.
@@ -91,6 +96,52 @@ Expert trainers aren't magic. Most of what you see comes from preparation and ha
 | Explain aloud | Say each line out loud while writing, like teaching |
 
 **Whiteboard practice:** once a week, write 2–3 programs on paper with a pen (no editor and no autocomplete), explaining out loud as you go. Then type them in and run them. This is the closest practice to a whiteboard interview.
+
+### Tips to make fewer mistakes
+
+**While planning**
+
+1. **Read the Task twice.** Underline the inputs, defaults, rules and expected output before writing anything.
+2. **Write the expected output first.** If you know you should get `1500`, you'll notice at once when you get something else.
+3. **Choose clear names.** `balance`, `amount` and `order_id` are easier to get right than `b`, `x` and `n`.
+4. **Use the same name everywhere.** If the Task says `order_id`, don't switch to `orderId` or `id` halfway through.
+
+**While writing**
+
+5. **Skeleton first, with `pass`.** Write the class and method names, run it, then fill in one method at a time.
+6. **Write a small piece, then run it.** Don't write 30 lines and run them once. Run after every method.
+7. **Finish each line's pairs right away.** When you type `(`, `[`, `{` or `"`, close it before typing what goes inside.
+8. **Check the colon and indent.** Every `class`, `def`, `if`, `for`, `while`, `try` and `with` line ends with `:`, and the next line is indented 4 spaces.
+
+**Common Python mistakes in these programs**
+
+| Mistake | Wrong | Right |
+|---|---|---|
+| Forgetting `self` in a method | `def show():` | `def show(self):` |
+| Forgetting `self.` when storing | `color = color` | `self.color = color` |
+| Calling a method without `()` | `print(red.show)` | `print(red.show())` |
+| Using `print` when the task needs `return` | `print(self.color)` inside the method | `return self.color` |
+| Forgetting `super().__init__()` in a child | parent's attributes are missing | `super().__init__(brand)` |
+| A list default in the parameters | `def __init__(self, tags=[]):` | `tags=None`, then `self.tags = tags if tags is not None else []` |
+| A list in the class body when each object needs its own | `items = []` under `class` | `self.items = []` in `__init__` |
+| Forgetting the `f` in an f-string | `"Invalid port: {port}"` | `f"Invalid port: {port}"` |
+| `=` instead of `==` in a condition | `if status = "paid":` | `if status == "paid":` |
+| `is` instead of `==` for values | `if name is "Asha":` | `if name == "Asha":` (use `is` only for `None` or the same object) |
+| A key name typo in a dict | `data["Name"]` | `data["name"]` (match the exact key) |
+| Catching the wrong error type | `except TypeError:` for `int("abc")` | `except ValueError:` |
+
+**While checking**
+
+9. **Dry run once by hand.** Trace one input through the code line by line before you run it.
+10. **Test the edge cases.** Try an empty value, zero, a negative number and the limit (for example port `0`, `1`, `65535`, `65536`).
+11. **Read the last line of an error first.** `NameError`, `TypeError`, `AttributeError` and the line number usually tell you exactly what's wrong.
+12. **Use `print()` to look inside.** If the result is wrong, print the values in the middle to see where they go wrong.
+13. **Compare with the expected Output exactly.** Check spaces, capital letters, brackets and quotes, not just "roughly the same".
+
+**After checking**
+
+14. **Write down your mistake** in one line, such as "forgot `self.` in `__init__`". You'll see the same few mistakes repeat, and then you'll stop making them.
+15. **Rewrite a program you got wrong** from a blank file the next day, without looking.
 
 ---
 
