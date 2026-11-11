@@ -16281,7 +16281,7 @@ print(Car().show())  # works
 
 **Developer example: `self` is just the first argument**
 
-Because `self` is only the first argument, you can call a method through its class and pass the object yourself. Developers use this with `map()` and `sorted()`:
+Because `self` is only the first argument, you can call a method through its class and pass the object yourself. Developers use this with `map()`:
 
 ```python
 names = ["  asha ", "RAVI", " meera"]
@@ -16297,12 +16297,15 @@ class User:
         return f"{self.first} {self.last}"
 
 
-users = [User("Ravi", "Kumar"), User("Asha", "Patel")]
-print([u.full_name() for u in sorted(users, key=User.full_name)])
-# ['Asha Patel', 'Ravi Kumar']
+asha = User("Asha", "Patel")
+ravi = User("Ravi", "Kumar")
+
+print(asha.full_name())         # Asha Patel: here self is asha
+print(ravi.full_name())         # Ravi Kumar: here self is ravi
+print(User.full_name(asha))     # Asha Patel: same call, you pass asha as self
 ```
 
-`str.strip` and `User.full_name` are plain functions. `map()` and `sorted()` pass each item as the first argument, which becomes `self`. Linters such as pylint warn you if the first argument isn't named `self`.
+`asha.full_name()` and `User.full_name(asha)` do the same thing. In the first, Python passes `asha` as `self` for you; in the second, you pass it yourself. `str.strip` works the same way: `map()` passes each name as the first argument, which becomes `self`. Linters such as pylint warn you if the first argument isn't named `self`.
 
 **Real-life example:** Everyone at school says "Good morning" to the teacher. No law forces those words, but everyone uses them, so everyone understands.
 
