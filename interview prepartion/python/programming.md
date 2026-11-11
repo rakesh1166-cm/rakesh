@@ -4,6 +4,59 @@ Write each program from memory first, then click **Answer** to check it. Every a
 
 > Open the preview (Ctrl+Shift+V) so the arrows work.
 
+## How to Practise
+
+### Write a program without looking
+
+Keep the **Answer** closed and use a blank `.py` file.
+
+1. **Read only the Task.** Don't open the Answer.
+2. **Write your own Steps** on paper, one action per line (about 2 minutes).
+3. **Write rough pseudocode** with IF / ELSE / FOR (about 3 minutes).
+4. **Write the code** in the blank file (10 minutes at most).
+5. **Run it** and compare with the expected **Output**.
+6. **Now open the Answer.** Compare it with your version and note what you missed.
+
+### If you get stuck for more than 5 minutes
+
+Open the hints one at a time:
+
+| Hint level | Open this | Grade |
+|---|---|---|
+| 0 | Nothing | 🟢 Strong |
+| 1 | Only **Steps** | 🟡 Partial |
+| 2 | **Program flow** + **Pseudocode** | 🟡 Partial |
+| 3 | **Code** | 🔴 Weak: rewrite it tomorrow from a blank file |
+
+### Check you really understand it
+
+- **Change it slightly** once it works. For example, add a `WalletPayment` class to Program 38, use an empty host in Program 24, or add a third user to Program 42.
+- **Explain it out loud** in 30 seconds, the way you would in an interview.
+
+### How many programs per day
+
+Do about **6 a day, in 45–60 minutes**:
+
+| Part | Count | What |
+|---|---|---|
+| New | 3 | The next 3 programs you haven't done yet |
+| Review | 3 | Programs that are due again |
+
+**When to repeat a program:**
+
+- 🔴 Weak: the **next day**
+- 🟡 Partial: after **3 days**
+- 🟢 Strong: after **7 days**, then 14 days
+
+### Schedule
+
+- **Days 1–14:** all 42 programs, done for the first time.
+- **Every 7th day:** a mock test. Pick 5 random programs, give yourself 30 minutes, and use no hints.
+- **After day 14:** stop adding new programs and only review the due ones, about 4–5 a day, until every program is 🟢 Strong twice in a row.
+- **On a busy day,** do 1 new and 2 review programs. Skipping a day is worse than doing a small day.
+
+---
+
 ## Program 1
 
 **Task:** Create a `Car` class that stores a `color`. Add a `show()` method that returns the color. Create a red car and a blue car, and print each car's color using `show()`.
