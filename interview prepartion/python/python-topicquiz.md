@@ -16233,6 +16233,33 @@ except TypeError as error:
     print(error)  # __init__() should return None, not 'int'
 ```
 
+**Developer example: validate config in `__init__`, build objects in a class method**
+
+```python
+class DatabaseConfig:
+    def __init__(self, host, port):
+        if not 1 <= port <= 65535:
+            raise ValueError(f"Invalid port: {port}")   # report problems by raising, not returning
+        self.host = host
+        self.port = port
+
+    @classmethod
+    def from_env(cls, env):
+        # Need to build and return an object in a special way? Use a class method.
+        return cls(env.get("DB_HOST", "localhost"), int(env.get("DB_PORT", "5432")))
+
+
+config = DatabaseConfig.from_env({"DB_HOST": "db.internal", "DB_PORT": "5432"})
+print(config.host, config.port)   # db.internal 5432
+
+try:
+    DatabaseConfig("db.internal", 99999)
+except ValueError as error:
+    print(error)                  # Invalid port: 99999
+```
+
+`__init__` reports bad input by raising an error, never by returning an error code. When you need to create and return an object in a special way, such as from environment variables, use a class method like `from_env()`.
+
 **Real-life example:** When you set up a new phone, you add your language and accounts. The setup doesn't give you a second phone. You just get the same phone, ready to use.
 
 </details>
@@ -16251,6 +16278,31 @@ class Car:
 
 print(Car().show())  # works
 ```
+
+**Developer example: `self` is just the first argument**
+
+Because `self` is only the first argument, you can call a method through its class and pass the object yourself. Developers use this with `map()` and `sorted()`:
+
+```python
+names = ["  asha ", "RAVI", " meera"]
+print(list(map(str.strip, names)))   # ['asha', 'RAVI', 'meera']
+
+
+class User:
+    def __init__(self, first, last):
+        self.first = first
+        self.last = last
+
+    def full_name(self):
+        return f"{self.first} {self.last}"
+
+
+users = [User("Ravi", "Kumar"), User("Asha", "Patel")]
+print([u.full_name() for u in sorted(users, key=User.full_name)])
+# ['Asha Patel', 'Ravi Kumar']
+```
+
+`str.strip` and `User.full_name` are plain functions. `map()` and `sorted()` pass each item as the first argument, which becomes `self`. Linters such as pylint warn you if the first argument isn't named `self`.
 
 **Real-life example:** Everyone at school says "Good morning" to the teacher. No law forces those words, but everyone uses them, so everyone understands.
 
@@ -16278,7 +16330,62 @@ print(red.show())   # red: here self is the red object
 print(blue.show())  # blue: here self is the blue object
 ```
 
-**Real-life example:** A car design is the class, and each car on the road is an instance. When you press your key, only your car unlocks. That's `self`: the exact car being used.
+**Developer example: two API clients, each with its own settings**
+
+```python
+class ApiClient:
+    def __init__(self, base_url, token):
+        self.base_url = base_url
+        self.token = token
+
+    def build_request(self, path):
+        return {
+            "url": f"{self.base_url}{path}",
+            "headers": {"Authorization": f"Bearer {self.token}"},
+        }
+
+
+payments = ApiClient("https://pay.example.com", "pay-123")
+emails = ApiClient("https://mail.example.com", "mail-456")
+
+print(payments.build_request("/charge")["url"])   # https://pay.example.com/charge
+print(emails.build_request("/send")["url"])       # https://mail.example.com/send
+```
+
+One class, two instances. In `payments.build_request()`, `self` is `payments`, so it uses the payment URL and token. The same method on `emails` uses the email settings. SDK clients such as `httpx.Client` and `boto3` clients work the same way.
+
+**Real-life example:** Think of an online admission form.
+
+| Python | Form world | Example |
+|---|---|---|
+| Class | The blank form template | The admission form with fields for name, age and city |
+| `__init__` | Filling in the form | Ram types his name, age and city |
+| Instance / `self` | One particular filled form | Ram's form (Sita's form is a different instance) |
+| Method | An action button on the form | Save, Update, Edit, Export |
+
+When Ram clicks **Export**, only Ram's form is exported, not Sita's. That's `self`: the button always works on the form it belongs to.
+
+```python
+class AdmissionForm:                              # the blank template
+    def __init__(self, name, age, city):          # filling in the form
+        self.name = name
+        self.age = age
+        self.city = city
+
+    def update(self, city):                       # action button: Update
+        self.city = city
+
+    def export(self):                             # action button: Export
+        return f"{self.name}, {self.age}, {self.city}"
+
+
+ram = AdmissionForm("Ram", 21, "Delhi")           # Ram's filled form
+sita = AdmissionForm("Sita", 22, "Pune")          # Sita's filled form
+
+ram.update("Mumbai")                              # self is ram: only Ram's form changes
+print(ram.export())    # Ram, 21, Mumbai
+print(sita.export())   # Sita, 22, Pune
+```
 
 </details>
 
@@ -16305,6 +16412,42 @@ class Student:
 first = Student("Asha")
 print(first.same_as(first))  # True: self and first are the same object
 ```
+
+**Developer example: method chaining with `return self`**
+
+```python
+class QueryBuilder:
+    def __init__(self, table):
+        self.table = table
+        self.filters = []
+        self.max_rows = None
+
+    def where(self, condition):
+        self.filters.append(condition)
+        return self                      # give back the same object
+
+    def limit(self, count):
+        self.max_rows = count
+        return self
+
+    def build(self):
+        sql = f"SELECT * FROM {self.table}"
+        if self.filters:
+            sql += " WHERE " + " AND ".join(self.filters)
+        if self.max_rows:
+            sql += f" LIMIT {self.max_rows}"
+        return sql
+
+
+query = QueryBuilder("users")
+result = query.where("age > 18").where("city = 'Delhi'").limit(10)
+
+print(result is query)   # True: self and query are the same object
+print(query.build())
+# SELECT * FROM users WHERE age > 18 AND city = 'Delhi' LIMIT 10
+```
+
+Inside the class, the object is called `self`. Outside, the same object is called `query`. Returning `self` lets you chain calls, a style you'll see in query builders, ORMs and test libraries.
 
 **Real-life example:** Your friends call you by your name. You call yourself "I". It's the same person. The name is like the instance, and "I" is like `self`.
 
@@ -16333,6 +16476,33 @@ b = Student("Ravi", 22, "Mumbai")  # city is optional
 print(a.city)  # Delhi: default used
 print(b.city)  # Mumbai: default replaced
 ```
+
+**Developer example: check a class's parameters before using it**
+
+```python
+import inspect
+
+
+class HttpClient:
+    def __init__(self, base_url, timeout=10, retries=3, *, verify_ssl=True):
+        self.base_url = base_url
+        self.timeout = timeout
+        self.retries = retries
+        self.verify_ssl = verify_ssl
+
+
+print(inspect.signature(HttpClient))
+# (base_url, timeout=10, retries=3, *, verify_ssl=True)
+
+client = HttpClient("https://api.example.com", timeout=30)   # change only what you need
+print(client.timeout, client.retries)   # 30 3
+```
+
+- `base_url` has no default, so it's required.
+- Pass optional settings by keyword (`timeout=30`). It's clearer, and still works if the parameter order changes.
+- Parameters after `*` can only be passed by keyword, such as `verify_ssl=False`.
+
+In your editor, hovering over the class or running `help(HttpClient)` shows the same information.
 
 **Real-life example:** A form shows which fields are required and which are optional. `__init__` is that form for the class.
 
@@ -16438,6 +16608,28 @@ print(ev.battery, ev.brand, ev.color)  # 75 kWh Tesla red
 
 **Common mistake:** passing too few or too many arguments raises `TypeError`, for example `Car("Honda")` in scenario 2 fails because `seats` is missing.
 
+**Developer example: custom exception with an extra field**
+
+```python
+class APIError(Exception):
+    def __init__(self, message, status_code):
+        super().__init__(message)        # Exception stores the message
+        self.status_code = status_code   # extra field for our app
+
+
+class NotFoundError(APIError):
+    def __init__(self, resource, resource_id):
+        super().__init__(f"{resource} {resource_id} not found", status_code=404)
+
+
+try:
+    raise NotFoundError("User", 7)
+except APIError as error:
+    print(error.status_code, error)   # 404 User 7 not found
+```
+
+`NotFoundError` has its own `__init__` (scenario 2), so you pass its arguments: `resource` and `resource_id`. It builds the message and status code and passes them up to `APIError`, which passes the message up to `Exception`.
+
 **Real-life example:** Think of a job application form. If a branch office has no form of its own, you fill in the head office form (scenario 1). If the branch has its own form, you fill in that one. Usually it asks for the head office details too and sends them on (scenario 2). A careless branch form may skip the head office details completely (scenario 3). Some fields are pre-filled, and you change them only if you want (scenario 4). Some branch forms ask for one extra detail and simply forward everything else to the head office (scenario 5).
 
 </details>
@@ -16467,6 +16659,26 @@ print(c1.size)  # medium: default used
 print(c2.size)  # large: default replaced
 ```
 
+**Developer example: a safe default for a list**
+
+```python
+class Task:
+    def __init__(self, title, tags=None, priority="normal"):
+        self.title = title
+        self.tags = tags if tags is not None else []   # new list for each task
+        self.priority = priority
+
+
+first = Task("Write tests")
+second = Task("Fix bug", priority="high")
+first.tags.append("backend")
+
+print(first.tags, second.tags)   # ['backend'] []
+print(second.priority)           # high
+```
+
+Don't write `tags=[]`. A default value is created only once, when the function is defined, so every task would share the same list. Use `None` as the default and create a new list inside. Linters flag `tags=[]` as a bug.
+
 **Real-life example:** At a coffee shop, if you don't say a size, you get a medium. If you ask for a large, you get a large, and the next customer still gets a medium unless they ask for something else.
 
 </details>
@@ -16493,6 +16705,31 @@ a.tasks.append("report")
 print(b.members)  # ['Asha']: shared
 print(b.tasks)    # []: not shared
 ```
+
+**Developer example: a shopping cart**
+
+```python
+class ShoppingCart:
+    def __init__(self, user):
+        self.user = user
+        self.items = []                      # each cart gets its own list
+
+    def add_item(self, name, price, qty=1):
+        self.items.append({"name": name, "price": price, "qty": qty})
+
+    def total(self):
+        return sum(item["price"] * item["qty"] for item in self.items)
+
+
+cart = ShoppingCart("Asha")
+cart.add_item("Keyboard", 1500)
+cart.add_item("Mouse", 500, qty=2)
+
+print(len(cart.items))   # 2
+print(cart.total())      # 2500
+```
+
+Add items through a method (`add_item`) instead of calling `cart.items.append(...)` from outside. The method is the one place to add checks later, such as stock or quantity limits.
 
 **Real-life example:** The office whiteboard is shared: anything one person writes, everyone sees. Your personal notebook is yours alone.
 
@@ -16528,6 +16765,37 @@ print(rectangle.area(5))       # 50
 - `get_length(self)` has only `self`, so you pass nothing.
 - `area(self, width)` needs `width`, so you pass `5`. Python passes `rectangle` as `self`.
 
+**Developer example: passing a method as a callback**
+
+```python
+class EmailService:
+    def __init__(self, sender):
+        self.sender = sender
+
+    def send_confirmation(self, order_id):
+        return f"{self.sender}: order {order_id} confirmed"
+
+
+class EventBus:
+    def __init__(self):
+        self.handlers = []
+
+    def subscribe(self, handler):
+        self.handlers.append(handler)
+
+    def publish(self, order_id):
+        return [handler(order_id) for handler in self.handlers]
+
+
+email = EmailService("shop@example.com")
+bus = EventBus()
+bus.subscribe(email.send_confirmation)   # no brackets: pass the method, don't call it
+
+print(bus.publish(101))   # ['shop@example.com: order 101 confirmed']
+```
+
+`email.send_confirmation` is a bound method: it already remembers `self` (the `email` object). The event bus calls it with only `order_id`, and Python fills in `self`. Button click handlers and `threading.Thread(target=worker.run)` work the same way.
+
 **Real-life example:** When you order at your usual cafe, the staff already know who you are (`self`). You only tell them what's new, like the size of your coffee (`width`).
 
 </details>
@@ -16555,6 +16823,37 @@ print(b.members)  # ['Asha']: shared
 print(b.tasks)    # []: not shared
 ```
 
+**Developer example: a shared list leaks data between requests**
+
+```python
+class FormValidator:
+    errors = []                      # BUG: shared by every validator
+
+    def check(self, data):
+        if not data.get("email"):
+            self.errors.append("email is required")
+        return self.errors
+
+
+print(FormValidator().check({}))                    # ['email is required']
+print(FormValidator().check({"email": "a@b.com"}))  # ['email is required']  <- old error leaked
+
+
+class FixedValidator:
+    def __init__(self):
+        self.errors = []             # fresh list for each request
+
+    def check(self, data):
+        if not data.get("email"):
+            self.errors.append("email is required")
+        return self.errors
+
+
+print(FixedValidator().check({"email": "a@b.com"}))  # []
+```
+
+In a web server, one user's errors would show up for the next user. A shared class attribute is fine for constants, or for things you really mean to share, such as a cache or a counter.
+
 **Real-life example:** The office whiteboard is shared: anything one person writes, everyone sees. Your personal notebook is yours alone.
 
 </details>
@@ -16576,6 +16875,20 @@ class Child(Parent):
 
 print(Child("Asha").name)  # Asha
 ```
+
+**Developer example: custom exceptions use `Exception.__init__`**
+
+```python
+class OrderNotFound(Exception):
+    pass                                  # no __init__: uses Exception's
+
+
+error = OrderNotFound("Order 4521 not found")
+print(error)        # Order 4521 not found
+print(error.args)   # ('Order 4521 not found',)
+```
+
+Most custom exceptions are written like this. They have no `__init__`, so `Exception.__init__` stores the message for you. The same happens when a test class inherits from `unittest.TestCase` without writing its own `__init__`.
 
 **Real-life example:** A new branch of a shop with no rules of its own follows head office's opening rules. If it writes its own rules, it must add head office's rules itself if it still wants them.
 
@@ -16635,6 +16948,39 @@ print(account.get_history())   # [500, -200]
 | Read the owner | `account.get_owner()` | `"Ben"` |
 | Read the history | `account.get_history()` | `[500, -200]` |
 
+**Developer example: an order that protects its own status**
+
+```python
+class Order:
+    def __init__(self, order_id):
+        self.order_id = order_id
+        self.status = "created"
+
+    def pay(self):
+        if self.status != "created":
+            raise ValueError(f"Cannot pay an order that is {self.status}")
+        self.status = "paid"
+
+    def ship(self):
+        if self.status != "paid":
+            raise ValueError(f"Cannot ship an order that is {self.status}")
+        self.status = "shipped"
+
+
+order = Order(4521)
+order.pay()
+order.ship()
+print(order.status)   # shipped
+
+new_order = Order(4522)
+try:
+    new_order.ship()
+except ValueError as error:
+    print(error)      # Cannot ship an order that is created
+```
+
+State changes go through methods, so the methods can block wrong changes, such as shipping before payment. If any code could set `order.status = "shipped"` directly, these rules could be skipped.
+
 **Real-life example:** With your bank account, you check the balance, deposit, and withdraw through the ATM. You don't change the bank's records by hand. Methods are the ATM buttons.
 
 </details>
@@ -16667,6 +17013,30 @@ dog = Dog()
 print(dog.eat())   # eating: from the parent
 print(dog.bark())  # woof: its own
 ```
+
+**Developer example: subclass a standard library class**
+
+```python
+import json
+import logging
+import sys
+
+
+class JsonFormatter(logging.Formatter):          # parent comes from the standard library
+    def format(self, record):
+        return json.dumps({"level": record.levelname, "message": record.getMessage()})
+
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setFormatter(JsonFormatter())
+logger = logging.getLogger("app")
+logger.addHandler(handler)
+
+logger.warning("Disk almost full")
+# {"level": "WARNING", "message": "Disk almost full"}
+```
+
+You don't write a whole logging system. You subclass `logging.Formatter` and change only `format()`. Developers subclass ready-made classes all the time: `Exception`, `unittest.TestCase`, Pydantic's `BaseModel`, and PyTorch's `nn.Module`.
 
 **Real-life example:** A dog is an animal, so it can eat like all animals, and it can also bark. Writing `Dog(Animal)` tells Python this family link.
 
@@ -16708,6 +17078,31 @@ print(Loud().hello())          # HELLO
 | Inside the class | `self.hello()` | One method calling another |
 | From a child class | `super().hello()` | Using the parent's version |
 
+**Developer example: call a method by name with `getattr()`**
+
+```python
+class CommandHandler:
+    def handle(self, command, *args):
+        method = getattr(self, f"do_{command}", None)   # find the method by name
+        if method is None:
+            return f"Unknown command: {command}"
+        return method(*args)
+
+    def do_start(self, service):
+        return f"Starting {service}"
+
+    def do_stop(self, service):
+        return f"Stopping {service}"
+
+
+handler = CommandHandler()
+print(handler.handle("start", "web"))   # Starting web
+print(handler.handle("stop", "db"))     # Stopping db
+print(handler.handle("delete", "db"))   # Unknown command: delete
+```
+
+The command name comes from user input, a CLI or a message queue, so you only know it at runtime. `getattr()` finds the right method without a long `if/elif`. Python's own `http.server` uses this pattern to call `do_GET()` or `do_POST()`.
+
 **Real-life example:** To reach a friend, you can call directly, save the number and tap it later, search by name, or ask someone to call them. It's the same friend through different routes.
 
 </details>
@@ -16746,6 +17141,39 @@ print(Pizza.large().size)     # 12
 print(Pizza.is_valid(-1))     # False
 ```
 
+**Developer example: all three in one class**
+
+```python
+import json
+
+
+class Order:
+    TAX_RATE = 0.18
+
+    def __init__(self, order_id, amount):
+        self.order_id = order_id
+        self.amount = amount
+
+    def total(self):                         # instance: uses this order's data
+        return self.amount + self.calculate_tax(self.amount, self.TAX_RATE)
+
+    @classmethod
+    def from_json(cls, text):                # class: builds an Order from API data
+        data = json.loads(text)
+        return cls(data["id"], data["amount"])
+
+    @staticmethod
+    def calculate_tax(amount, rate):         # static: plain helper, no self or cls
+        return round(amount * rate, 2)
+
+
+order = Order.from_json('{"id": 7, "amount": 1000}')
+print(order.order_id, order.total())        # 7 1180.0
+print(Order.calculate_tax(500, 0.05))       # 25.0
+```
+
+Rule of thumb: needs one object's data → instance method. Creates objects or uses class data → class method. Needs neither → static method (or a plain function in the module).
+
 **Real-life example:** In a pizza shop, "How big is this pizza?" is about one pizza (instance). "Make the standard large pizza" is a shop-level rule (class). "Is this size a positive number?" is a general check that needs no pizza or shop (static).
 
 </details>
@@ -16772,6 +17200,33 @@ Student.rename_school("Green School")
 print(first.school)   # Green School
 print(second.school)  # Green School
 ```
+
+**Developer example: switch every API client to staging**
+
+```python
+class ApiClient:
+    base_url = "https://api.example.com"     # shared by all clients
+
+    def __init__(self, name):
+        self.name = name
+
+    @classmethod
+    def use_environment(cls, env):
+        cls.base_url = f"https://{env}.api.example.com"
+
+    def url(self, path):
+        return self.base_url + path
+
+
+users = ApiClient("users")
+orders = ApiClient("orders")
+
+ApiClient.use_environment("staging")         # one call, e.g. before tests run
+print(users.url("/list"))    # https://staging.api.example.com/list
+print(orders.url("/list"))   # https://staging.api.example.com/list
+```
+
+One call changes the setting for every client. Be careful: it changes it for the whole program, so use this only for app-wide settings.
 
 **Real-life example:** When a school changes its name, the principal updates it once. Every student's school name changes together, with no need to visit each student.
 
@@ -16803,6 +17258,38 @@ class Admin(User):
 print(type(Admin.from_dict({"name": "Asha"})).__name__)  # Admin
 ```
 
+**Developer example: load settings from JSON or environment variables**
+
+```python
+import json
+from datetime import date
+
+
+class Settings:
+    def __init__(self, debug, db_url):
+        self.debug = debug
+        self.db_url = db_url
+
+    @classmethod
+    def from_json(cls, text):
+        data = json.loads(text)
+        return cls(data["debug"], data["db_url"])
+
+    @classmethod
+    def from_env(cls, env):
+        return cls(env.get("DEBUG") == "1", env["DB_URL"])
+
+
+a = Settings.from_json('{"debug": true, "db_url": "sqlite:///dev.db"}')
+b = Settings.from_env({"DEBUG": "0", "DB_URL": "postgres://prod"})
+print(a.debug, a.db_url)   # True sqlite:///dev.db
+print(b.debug, b.db_url)   # False postgres://prod
+
+print(date.fromisoformat("2026-11-11"))   # 2026-11-11: the same idea in the standard library
+```
+
+One class, several ways to create it. You already use these every day: `date.fromisoformat()`, `datetime.now()`, `dict.fromkeys()` and `Path.home()` are all class methods.
+
 **Real-life example:** To open a bank account, you go to the bank itself, because you don't have an account yet. The bank is like the class, and your account is like an instance.
 
 </details>
@@ -16830,6 +17317,34 @@ for vehicle in (Car(), Bike()):
 ```
 
 If it isn't truly is-a, use has-a (composition) instead: a car **has an** engine, but a car isn't an engine.
+
+**Developer example: payment methods at checkout**
+
+```python
+class PaymentMethod:
+    def pay(self, amount):
+        raise NotImplementedError
+
+
+class CardPayment(PaymentMethod):
+    def pay(self, amount):
+        return f"Charged Rs.{amount} to card"
+
+
+class UpiPayment(PaymentMethod):
+    def pay(self, amount):
+        return f"Collected Rs.{amount} via UPI"
+
+
+def checkout(method: PaymentMethod, amount):
+    return method.pay(amount)               # works for every kind of payment
+
+
+print(checkout(CardPayment(), 499))   # Charged Rs.499 to card
+print(checkout(UpiPayment(), 499))    # Collected Rs.499 via UPI
+```
+
+Card and UPI **are** payment methods, so `checkout()` works with any of them. Adding wallet payments later only needs a new class, with no change to `checkout()`.
 
 **Real-life example:** A car is a vehicle and a bike is a vehicle, so both can start and stop. Traffic rules for vehicles apply to both, without writing separate rules.
 
@@ -16886,6 +17401,32 @@ print(child.parent_role())  # parent
 print(Child.create().name)  # new
 ```
 
+**Developer example: override `save()` and still let the parent save**
+
+```python
+class BaseModel:
+    def __init__(self, **fields):
+        self.fields = fields
+
+    def save(self):
+        return f"INSERT {self.fields}"
+
+
+class Article(BaseModel):
+    def __init__(self, title):
+        super().__init__(title=title)                 # parent stores the fields
+
+    def save(self):
+        self.fields["slug"] = self.fields["title"].lower().replace(" ", "-")
+        return super().save()                         # parent does the real saving
+
+
+print(Article("Hello World").save())
+# INSERT {'title': 'Hello World', 'slug': 'hello-world'}
+```
+
+This is how you override `save()` in a Django model or `setUp()` in a test class: add your own step, then call `super()` so the parent's work still happens. If you forget `super().save()`, nothing gets saved.
+
 **Real-life example:** At work you follow your manager's process, then add your own final step. `super()` is "do what my manager's process says first".
 
 </details>
@@ -16925,6 +17466,45 @@ print(LoggedReport().save())  # log, report saved
 print([c.__name__ for c in LoggedModel.__mro__])
 # ['LoggedModel', 'LogMixin', 'Model', 'object']
 ```
+
+**Developer example: reusable `to_dict()` and `to_json()` mixins**
+
+```python
+import json
+
+
+class ToDictMixin:
+    def to_dict(self):
+        return dict(self.__dict__)
+
+
+class ToJsonMixin:
+    def to_json(self):
+        return json.dumps(self.to_dict())       # uses ToDictMixin's method
+
+
+class Entity:
+    def __init__(self, id):
+        self.id = id
+
+
+class User(ToDictMixin, ToJsonMixin, Entity):
+    def __init__(self, id, name):
+        super().__init__(id)
+        self.name = name
+
+
+class Product(ToDictMixin, ToJsonMixin, Entity):
+    def __init__(self, id, price):
+        super().__init__(id)
+        self.price = price
+
+
+print(User(1, "Asha").to_json())    # {"id": 1, "name": "Asha"}
+print(Product(9, 499).to_dict())    # {'id': 9, 'price': 499}
+```
+
+Unrelated classes get the same small features without copying code. Django uses mixins heavily, for example `class ProfileView(LoginRequiredMixin, DetailView)`.
 
 **Real-life example:** You add a phone cover with a card holder to any phone. The cover is a mixin: one small extra feature that fits many phones. The MRO is like a queue: Python asks the first person in line, then the next.
 
@@ -16974,6 +17554,41 @@ D().show()
 
 `A` runs only once. `super()` in `B` goes to `C`, not straight to `A`, because `C` comes next in `D`'s order.
 
+**Developer example: request handlers that all call `super()`**
+
+```python
+class BaseHandler:
+    def handle(self, request):
+        print("BaseHandler: send response")
+
+
+class AuthMixin(BaseHandler):
+    def handle(self, request):
+        print("AuthMixin: check token")
+        super().handle(request)
+
+
+class LoggingMixin(BaseHandler):
+    def handle(self, request):
+        print("LoggingMixin: log request")
+        super().handle(request)
+
+
+class OrderHandler(AuthMixin, LoggingMixin):
+    pass
+
+
+OrderHandler().handle({"path": "/orders"})
+# AuthMixin: check token
+# LoggingMixin: log request
+# BaseHandler: send response
+
+print([c.__name__ for c in OrderHandler.__mro__])
+# ['OrderHandler', 'AuthMixin', 'LoggingMixin', 'BaseHandler', 'object']
+```
+
+Both mixins inherit from `BaseHandler`, which makes a diamond. Because each one calls `super()`, every step runs in MRO order and the response is sent only once. If `AuthMixin` called `BaseHandler.handle(self, request)` directly, the logging step would be skipped.
+
 **Real-life example:** Your father and mother both took the same family recipe from your grandmother. You wouldn't cook her step twice. You follow one clear order, and her step happens once.
 
 </details>
@@ -16994,6 +17609,27 @@ print(sorted(words, key=lambda word: len(word)))
 ```
 
 **Avoid it when** the logic needs several steps, error handling, or a clear name. It isn't faster than `def`, so use `def` for anything you reuse.
+
+**Developer example: filter and sort API records**
+
+```python
+from operator import itemgetter
+
+users = [
+    {"name": "Asha", "age": 30, "active": True},
+    {"name": "Ravi", "age": 25, "active": False},
+    {"name": "Meera", "age": 35, "active": True},
+]
+
+active = list(filter(lambda u: u["active"], users))
+by_age = sorted(active, key=lambda u: u["age"], reverse=True)
+print([u["name"] for u in by_age])            # ['Meera', 'Asha']
+
+oldest = max(users, key=itemgetter("age"))    # same as key=lambda u: u["age"]
+print(oldest["name"])                         # Meera
+```
+
+Developers use lambdas as short `key=` functions for `sorted()`, `max()` and `min()`, in `defaultdict(lambda: 0)`, and in pandas, such as `df["price"].apply(lambda x: x * 1.18)`. For a simple field lookup, `itemgetter` is a clean alternative. A list comprehension is often clearer than `filter` with a lambda: `[u for u in users if u["active"]]`.
 
 **Real-life example:** A sticky note is good for a quick reminder, like "buy milk". For a long procedure you need a proper document. A lambda is the sticky note, and `def` is the document.
 
@@ -17283,6 +17919,38 @@ print(cart)       # Cart with 2 items
 print(len(cart))  # 2
 ```
 
+**Developer example: a dataset class like the ones PyTorch uses**
+
+```python
+class TextDataset:
+    def __init__(self, texts, labels):
+        self.texts = texts
+        self.labels = labels
+
+    def __len__(self):                       # len(dataset)
+        return len(self.texts)
+
+    def __getitem__(self, index):            # dataset[index]
+        return self.texts[index], self.labels[index]
+
+    def __repr__(self):                      # shown in logs and the debugger
+        return f"TextDataset(size={len(self)})"
+
+
+dataset = TextDataset(["good movie", "bad plot", "great acting"], [1, 0, 1])
+print(len(dataset))     # 3
+print(dataset[0])       # ('good movie', 1)
+print(dataset)          # TextDataset(size=3)
+
+for text, label in dataset:                  # __getitem__ also makes it loopable
+    print(label, text)
+# 1 good movie
+# 0 bad plot
+# 1 great acting
+```
+
+A PyTorch `Dataset` needs exactly `__len__` and `__getitem__`, and the `DataLoader` uses them to build batches. `__repr__` makes objects readable in logs, instead of `<TextDataset object at 0x...>`.
+
 **Real-life example:** When you press a car's accelerator, you don't handle the engine yourself. The car does the hidden work. You use `+` or `len()`, and the dunder method does the hidden work.
 
 </details>
@@ -17306,6 +17974,30 @@ first = Student("Asha", 90)
 print(first)                         # Student(name='Asha', marks=90)
 print(first == Student("Asha", 90))  # True
 ```
+
+**Developer example: a training config you can save as JSON**
+
+```python
+import json
+from dataclasses import asdict, dataclass, field
+
+
+@dataclass
+class TrainingConfig:
+    model_name: str
+    epochs: int = 10
+    learning_rate: float = 0.001
+    tags: list = field(default_factory=list)   # safe default: a new list each time
+
+
+config = TrainingConfig("bert-base", epochs=3, tags=["nlp"])
+print(config)
+# TrainingConfig(model_name='bert-base', epochs=3, learning_rate=0.001, tags=['nlp'])
+print(json.dumps(asdict(config)))
+# {"model_name": "bert-base", "epochs": 3, "learning_rate": 0.001, "tags": ["nlp"]}
+```
+
+Developers use dataclasses for configs, API responses and other data-only objects. `asdict()` turns one into a dict for JSON or logging, and `field(default_factory=list)` gives each object its own list. Use `@dataclass(frozen=True)` when the object should never change.
 
 **Real-life example:** You fill in a ready-made form with just name and marks. You don't draw the whole form by hand each time. `@dataclass` is the ready-made form.
 
@@ -17336,6 +18028,39 @@ except ValueError as error:
     print(error)  # marks must be between 0 and 100
 ```
 
+**Developer example: clean and validate a signup request**
+
+```python
+from dataclasses import dataclass
+
+
+@dataclass
+class SignupRequest:
+    email: str
+    password: str
+    age: int
+
+    def __post_init__(self):
+        self.email = self.email.strip().lower()          # clean the data
+        if "@" not in self.email:
+            raise ValueError("invalid email")
+        if len(self.password) < 8:
+            raise ValueError("password must be at least 8 characters")
+        if self.age < 18:
+            raise ValueError("must be 18 or older")
+
+
+request = SignupRequest("  Asha@Example.COM ", "secret123", 25)
+print(request.email)   # asha@example.com
+
+try:
+    SignupRequest("ravi@example.com", "123", 30)
+except ValueError as error:
+    print(error)       # password must be at least 8 characters
+```
+
+`__post_init__` can clean values (trim spaces, lowercase) as well as check them. In FastAPI projects, Pydantic models do this for you with type conversion and field validators, but `__post_init__` is the plain-Python way.
+
 **Real-life example:** After you fill in a form, the clerk checks it before accepting it. If your age says 150, the clerk rejects it. `__post_init__` is that clerk.
 
 </details>
@@ -17365,6 +18090,33 @@ print(next(queue))
 # 2
 ```
 
+**Developer example: read only the error lines from a large log file**
+
+```python
+import io
+
+log_file = io.StringIO(              # stands in for open("app.log")
+    "INFO started\n"
+    "ERROR db timeout\n"
+    "INFO request ok\n"
+    "ERROR disk full\n"
+)
+
+
+def error_lines(file):
+    for line in file:                # reads one line at a time
+        if line.startswith("ERROR"):
+            yield line.strip()
+
+
+for line in error_lines(log_file):
+    print(line)
+# ERROR db timeout
+# ERROR disk full
+```
+
+With a real file, write `with open("app.log") as file:` and loop over `error_lines(file)`. Even a 10 GB log file uses very little memory, because only one line is in memory at a time.
+
 **Real-life example:** A bank token machine gives one token when you press the button, then waits. It doesn't print all the day's tokens in the morning.
 
 </details>
@@ -17385,6 +18137,25 @@ as_gen = (n for n in range(100_000))
 print(sys.getsizeof(as_list) > sys.getsizeof(as_gen))  # True
 print(sum(as_gen))  # 4999950000
 ```
+
+**Developer example: send data in batches**
+
+```python
+def batches(items, size):
+    for start in range(0, len(items), size):
+        yield items[start:start + size]
+
+
+documents = [f"doc{i}" for i in range(1, 8)]
+
+for batch in batches(documents, 3):
+    print("Embedding", batch)       # e.g. send each batch to an embedding API
+# Embedding ['doc1', 'doc2', 'doc3']
+# Embedding ['doc4', 'doc5', 'doc6']
+# Embedding ['doc7']
+```
+
+APIs and databases accept only a limited number of items per call, so developers send data in batches: bulk database inserts, embedding thousands of documents for RAG, or training in mini-batches. Python 3.12 added `itertools.batched(items, 3)` for the same job.
 
 **Real-life example:** Streaming a movie plays it piece by piece, so your phone needs little space. Downloading the full movie takes space, but you can jump around and watch it again. Streaming is a generator, and downloading is a list.
 
@@ -17413,6 +18184,50 @@ def with_yield():
 print(with_return())       # [1, 2, 3]
 print(list(with_yield()))  # [1, 2, 3]
 ```
+
+**Developer example: fetch a paginated API**
+
+```python
+def fake_api(page):                          # pretend each call is a slow HTTP request
+    pages = {1: ["u1", "u2"], 2: ["u3", "u4"], 3: ["u5"]}
+    print(f"  (fetching page {page})")
+    return pages.get(page, [])
+
+
+def all_users_list():                        # return: fetches every page first
+    users, page = [], 1
+    while batch := fake_api(page):
+        users.extend(batch)
+        page += 1
+    return users
+
+
+def all_users_stream():                      # yield: fetches pages only when needed
+    page = 1
+    while batch := fake_api(page):
+        yield from batch
+        page += 1
+
+
+print(len(all_users_list()))
+#   (fetching page 1)
+#   (fetching page 2)
+#   (fetching page 3)
+#   (fetching page 4)
+# 5
+
+for user in all_users_stream():
+    print(user)
+    if user == "u3":                         # found what we need: stop early
+        break
+#   (fetching page 1)
+# u1
+# u2
+#   (fetching page 2)
+# u3
+```
+
+The `return` version calls the API for every page before you can use anything. The `yield` version made only 2 calls, because the loop stopped early. SDK paginators, such as those in boto3 and the Stripe and GitHub clients, use generators this way.
 
 **Real-life example:** `return` is a waiter bringing the full meal at once, and the order is finished. `yield` is a waiter bringing one course, then waiting until you're ready for the next.
 
@@ -17451,6 +18266,41 @@ divide(10, 0)
 # Finished
 ```
 
+**Developer example: a database transaction**
+
+```python
+import sqlite3
+
+
+def transfer(db, amount):
+    cursor = db.cursor()
+    try:
+        cursor.execute("UPDATE accounts SET balance = balance - ? WHERE name = 'asha'", (amount,))
+        cursor.execute("UPDATE accounts SET balance = balance + ? WHERE name = 'ravi'", (amount,))
+        if amount > 1000:
+            raise ValueError("Transfer limit is 1000")
+    except ValueError as error:
+        db.rollback()                        # undo both updates
+        print("Rolled back:", error)
+    else:
+        db.commit()                          # save only if everything worked
+        print("Committed")
+    finally:
+        cursor.close()                       # always release the cursor
+
+
+db = sqlite3.connect(":memory:")
+db.execute("CREATE TABLE accounts (name TEXT, balance INTEGER)")
+db.executemany("INSERT INTO accounts VALUES (?, ?)", [("asha", 2000), ("ravi", 0)])
+db.commit()
+
+transfer(db, 500)    # Committed
+transfer(db, 5000)   # Rolled back: Transfer limit is 1000
+print(db.execute("SELECT * FROM accounts").fetchall())   # [('asha', 1500), ('ravi', 500)]
+```
+
+This is the standard database pattern. `else` commits only when no error happened. `except` rolls back, so half a transfer is never saved. `finally` frees the resource either way.
+
 **Real-life example:** Withdrawing money at an ATM. `try`: enter the amount. `except`: not enough balance, so show a message. `else`: take your cash. `finally`: your card comes back in every case.
 
 </details>
@@ -17476,6 +18326,47 @@ try:
 except NotEnoughBalance as error:
     print(error)  # Your balance is too low
 ```
+
+**Developer example: service errors that map to HTTP status codes**
+
+```python
+class AppError(Exception):
+    status_code = 500
+
+
+class NotFoundError(AppError):
+    status_code = 404
+
+
+class PermissionDeniedError(AppError):
+    status_code = 403
+
+
+ORDERS = {1: {"owner": "asha", "total": 499}}
+
+
+def get_order(order_id, user):
+    order = ORDERS.get(order_id)
+    if order is None:
+        raise NotFoundError(f"Order {order_id} not found")
+    if order["owner"] != user:
+        raise PermissionDeniedError("You cannot view this order")
+    return order
+
+
+def handle_request(order_id, user):          # like a FastAPI exception handler
+    try:
+        return 200, get_order(order_id, user)
+    except AppError as error:
+        return error.status_code, str(error)
+
+
+print(handle_request(1, "asha"))   # (200, {'owner': 'asha', 'total': 499})
+print(handle_request(2, "asha"))   # (404, 'Order 2 not found')
+print(handle_request(1, "ravi"))   # (403, 'You cannot view this order')
+```
+
+The service code raises meaningful errors and knows nothing about HTTP. One handler turns any `AppError` into the right status code. In FastAPI, you register it with `@app.exception_handler(AppError)`.
 
 **Real-life example:** A hospital writes the exact problem, like "broken arm", not just "sick". A custom exception gives a clear name to the exact problem.
 
@@ -17518,6 +18409,56 @@ ValueError: Age must be a whole number.
 - `int("abc")` raises the original error: `ValueError: invalid literal for int() with base 10: 'abc'`.
 - `read_age()` raises a new error with a message specific to the age field: `ValueError: Age must be a whole number.`
 - `from original_error` links the two. The traceback shows both errors and says the first was the **direct cause** of the second.
+
+**Code example 1b: ATM withdrawal (chaining two custom exceptions)**
+
+The original error doesn't have to be a built-in one. Here, a low-level `NotEnoughBalance` error is wrapped in a higher-level `WithdrawalFailed` error.
+
+```python
+class NotEnoughBalance(Exception):
+    pass
+
+class WithdrawalFailed(Exception):
+    pass
+
+def withdraw(balance, amount):
+    if amount > balance:
+        raise NotEnoughBalance(f"Balance {balance} is less than {amount}")
+    return balance - amount
+
+def atm_withdraw(balance, amount):
+    try:
+        return withdraw(balance, amount)
+    except NotEnoughBalance as balance_error:
+        raise WithdrawalFailed("ATM withdrawal failed") from balance_error
+
+print(atm_withdraw(1000, 300))   # 700
+atm_withdraw(100, 500)
+```
+
+Output of `atm_withdraw(100, 500)`:
+
+```
+Traceback (most recent call last):
+  File "main.py", line 14, in atm_withdraw
+    return withdraw(balance, amount)
+  File "main.py", line 9, in withdraw
+    raise NotEnoughBalance(f"Balance {balance} is less than {amount}")
+NotEnoughBalance: Balance 100 is less than 500
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "main.py", line 19, in <module>
+    atm_withdraw(100, 500)
+  File "main.py", line 16, in atm_withdraw
+    raise WithdrawalFailed("ATM withdrawal failed") from balance_error
+WithdrawalFailed: ATM withdrawal failed
+```
+
+- `withdraw()` raises the original error: `NotEnoughBalance: Balance 100 is less than 500`.
+- `atm_withdraw()` raises a new, higher-level error: `WithdrawalFailed: ATM withdrawal failed`. The ATM screen shows this message.
+- `from balance_error` links the two, so the bank's developers can see the real reason: the balance was too low.
 
 **Code example 2: what developers write every day**
 
@@ -17574,6 +18515,20 @@ They answer different questions, and they often work together.
 | Question it answers | What kind of error is it? | What caused this error? |
 | How you write it | `class MyError(Exception)` | `raise New() from error` |
 
+**In one line:** A custom exception tells your code **what failed** in your application. Exception chaining tells developers **which original error caused it**.
+
+Look at this line from E34:
+
+```python
+raise UserAlreadyExistsError(f"{email} is already registered") from db_error
+#     ^ custom exception: what failed                            ^ chaining: what caused it
+```
+
+| Part | Role | Who uses it |
+|---|---|---|
+| `UserAlreadyExistsError(...)` | **Custom exception.** Says what failed in the application: this email is already registered. | Your code catches `UserAlreadyExistsError` and returns `409 Conflict` with a friendly message. |
+| `from db_error` | **Exception chaining.** Keeps the original `sqlite3.IntegrityError: UNIQUE constraint failed: users.email` as `__cause__`. | Developers see the real database error in logs and tracebacks while debugging. |
+
 **Code example 1: easy to understand**
 
 ```python
@@ -17599,20 +18554,24 @@ You can also raise a custom exception by itself. For example, if `age < 0`, you 
 class InvalidAgeError(ValueError):
     pass
 
+
 def parse_age(text):
     try:
         age = int(text)
-    except ValueError as error:
-        raise InvalidAgeError("Age must be a whole number.") from error  # custom + chaining
+    except ValueError as conversion_error:
+        raise InvalidAgeError("Age must be a whole number.") from conversion_error
+
     if age < 0:
-        raise InvalidAgeError("Age cannot be negative.")                 # custom only
+        raise InvalidAgeError("Age cannot be negative.")
+
     return age
+
 
 for value in ["25", "abc", "-5"]:
     try:
         print(parse_age(value))
-    except InvalidAgeError as error:
-        print(error, "| cause:", repr(error.__cause__))
+    except InvalidAgeError as age_error:
+        print(age_error, "| cause:", repr(age_error.__cause__))
 
 # 25
 # Age must be a whole number. | cause: ValueError("invalid literal for int() with base 10: 'abc'")
@@ -17624,34 +18583,51 @@ for value in ["25", "abc", "-5"]:
 A payment service uses one family of custom exceptions. A business rule failure is raised by itself. A network failure from the bank is chained, so the real cause is kept for logs.
 
 ```python
-class PaymentError(Exception):                 # base custom exception
+class PaymentError(Exception):
     pass
 
-class InsufficientBalanceError(PaymentError):  # business rule failed
+
+class InsufficientBalanceError(PaymentError):
     pass
 
-class PaymentGatewayError(PaymentError):       # outside service failed
+
+class PaymentGatewayError(PaymentError):
     pass
+
 
 def call_gateway(amount):
-    raise ConnectionError("Connection to bank timed out")   # simulate bank outage
+    # Simulate a failed connection to the bank.
+    raise ConnectionError("Connection to bank timed out")
+
 
 def pay(balance, amount):
     if amount > balance:
-        raise InsufficientBalanceError(f"Balance {balance} is less than {amount}.")  # custom only
+        # Custom exception raised directly by a business rule.
+        raise InsufficientBalanceError(f"Balance {balance} is less than {amount}.")
+
     try:
         return call_gateway(amount)
-    except ConnectionError as error:
-        raise PaymentGatewayError("Payment service is down. Try again later.") from error  # custom + chaining
+    except ConnectionError as bank_connection_error:
+        # Raise a custom exception and keep the actual bank connection error.
+        raise PaymentGatewayError(
+            "Payment service is unavailable. Try again later."
+        ) from bank_connection_error
+
 
 for balance, amount in [(100, 500), (1000, 500)]:
     try:
         pay(balance, amount)
-    except PaymentError as error:
-        print(type(error).__name__, "-", error, "| cause:", repr(error.__cause__))
+    except PaymentError as payment_error:
+        print(
+            type(payment_error).__name__,
+            "-",
+            payment_error,
+            "| cause:",
+            repr(payment_error.__cause__),
+        )
 
 # InsufficientBalanceError - Balance 100 is less than 500. | cause: None
-# PaymentGatewayError - Payment service is down. Try again later. | cause: ConnectionError('Connection to bank timed out')
+# PaymentGatewayError - Payment service is unavailable. Try again later. | cause: ConnectionError('Connection to bank timed out')
 ```
 
 In a FastAPI app, the endpoint maps `InsufficientBalanceError` to `400 Bad Request` and `PaymentGatewayError` to `503 Service Unavailable`. Catching the base `PaymentError` handles both in one place.
