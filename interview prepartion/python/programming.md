@@ -1699,3 +1699,1424 @@ Invalid port: 99999
 **Fact (why this program):** `__init__` must return `None`, so it reports bad input by **raising** an error, not by returning an error code. When you need to build and return an object in a special way, such as from environment settings, use a class method. It calls `cls(...)`, so `__init__` still validates the host and port.
 
 </details>
+
+## Program 25
+
+**Task:** Create a `User` class that stores `first` and `last`. Add a `full_name()` method that returns both names joined by a space. Create users `"Asha Patel"` and `"Ravi Kumar"`, print each full name, then call `full_name()` through the class by passing `asha` yourself.
+
+*From E2: Is `self` a reserved keyword in Python or a naming convention?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Create a `User` class.
+2. `__init__` stores `first` and `last` on `self`.
+3. `full_name()` returns `"<first> <last>"`.
+4. Create `asha = User("Asha", "Patel")` and `ravi = User("Ravi", "Kumar")`.
+5. Print `asha.full_name()` and `ravi.full_name()`.
+6. Print `User.full_name(asha)` → pass `asha` as `self` yourself.
+
+**Program flow**
+
+```text
+User("Asha", "Patel")   → first = "Asha", last = "Patel" → asha
+User("Ravi", "Kumar")   → first = "Ravi", last = "Kumar" → ravi
+asha.full_name()        → Python passes asha as self     → "Asha Patel"
+ravi.full_name()        → Python passes ravi as self     → "Ravi Kumar"
+User.full_name(asha)    → you pass asha as self          → "Asha Patel"
+```
+
+**Pseudocode**
+
+```text
+CLASS User:
+    init(first, last):  store first, last
+    full_name():        RETURN first + " " + last
+
+asha = User("Asha", "Patel")
+ravi = User("Ravi", "Kumar")
+PRINT asha.full_name()        // Asha Patel
+PRINT ravi.full_name()        // Ravi Kumar
+PRINT User.full_name(asha)    // Asha Patel
+```
+
+**Code**
+
+```python
+class User:
+    def __init__(self, first, last):
+        self.first = first
+        self.last = last
+
+    def full_name(self):
+        return f"{self.first} {self.last}"
+
+
+asha = User("Asha", "Patel")
+ravi = User("Ravi", "Kumar")
+
+print(asha.full_name())         # Asha Patel: here self is asha
+print(ravi.full_name())         # Ravi Kumar: here self is ravi
+print(User.full_name(asha))     # Asha Patel: same call, you pass asha as self
+```
+
+**Output:**
+
+```text
+Asha Patel
+Ravi Kumar
+Asha Patel
+```
+
+**Fact (why this program):** `self` is just the first argument, not a keyword. `asha.full_name()` is the same as `User.full_name(asha)`: in the first, Python passes `asha` as `self` for you; in the second, you pass it yourself.
+
+</details>
+
+## Program 26
+
+**Task:** Create an `ApiClient` class that stores a `base_url` and a `token`. Add a `build_request(path)` method that returns a dict with the full `url` and an `Authorization` header. Create a payments client and an emails client, and print the URL each one builds.
+
+*From E3: What is an instance of a class, and which instance does `self` refer to inside a method?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Create an `ApiClient` class.
+2. `__init__` stores `base_url` and `token` on `self`.
+3. `build_request(path)` → URL = `base_url + path`.
+4. Add header → `"Authorization": "Bearer <token>"`.
+5. Return the URL and headers as a dict.
+6. Create `payments` and `emails` clients with their own URL and token.
+7. Print the `"url"` from `payments.build_request("/charge")` and `emails.build_request("/send")`.
+
+**Program flow**
+
+```text
+ApiClient("https://pay.example.com", "pay-123")   → payments object
+ApiClient("https://mail.example.com", "mail-456") → emails object
+payments.build_request("/charge") → self is payments → "https://pay.example.com/charge"
+emails.build_request("/send")     → self is emails   → "https://mail.example.com/send"
+```
+
+**Pseudocode**
+
+```text
+CLASS ApiClient:
+    init(base_url, token):  store base_url, token
+    build_request(path):
+        url = self.base_url + path
+        headers = {"Authorization": "Bearer " + self.token}
+        RETURN {url, headers}
+
+payments = ApiClient("https://pay.example.com", "pay-123")
+emails = ApiClient("https://mail.example.com", "mail-456")
+PRINT payments.build_request("/charge").url    // https://pay.example.com/charge
+PRINT emails.build_request("/send").url        // https://mail.example.com/send
+```
+
+**Code**
+
+```python
+class ApiClient:
+    def __init__(self, base_url, token):
+        self.base_url = base_url
+        self.token = token
+
+    def build_request(self, path):
+        return {
+            "url": f"{self.base_url}{path}",
+            "headers": {"Authorization": f"Bearer {self.token}"},
+        }
+
+
+payments = ApiClient("https://pay.example.com", "pay-123")
+emails = ApiClient("https://mail.example.com", "mail-456")
+
+print(payments.build_request("/charge")["url"])   # https://pay.example.com/charge
+print(emails.build_request("/send")["url"])       # https://mail.example.com/send
+```
+
+**Output:**
+
+```text
+https://pay.example.com/charge
+https://mail.example.com/send
+```
+
+**Fact (why this program):** One class, two instances, each with its own settings. In `payments.build_request()`, `self` is `payments`, so it uses the payment URL and token. The same method on `emails` uses the email settings.
+
+</details>
+
+## Program 27
+
+**Task:** Create an `AdmissionForm` class that stores `name`, `age`, and `city`. Add an `update(city)` method that changes the city and an `export()` method that returns all three values as text. Create forms for Ram and Sita, update only Ram's city to `"Mumbai"`, and export both forms.
+
+*From E3: What is an instance of a class, and which instance does `self` refer to inside a method?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Create an `AdmissionForm` class → the blank template.
+2. `__init__` stores `name`, `age` and `city` → filling in the form.
+3. `update(city)` → change `self.city`.
+4. `export()` → return `"<name>, <age>, <city>"`.
+5. Create `ram` (`"Ram", 21, "Delhi"`) and `sita` (`"Sita", 22, "Pune"`).
+6. Call `ram.update("Mumbai")` → only Ram's form changes.
+7. Print `ram.export()` and `sita.export()`.
+
+**Program flow**
+
+```text
+AdmissionForm("Ram", 21, "Delhi")  → Ram's filled form   → ram
+AdmissionForm("Sita", 22, "Pune")  → Sita's filled form  → sita
+ram.update("Mumbai")               → self is ram         → ram.city = "Mumbai"
+ram.export()                       → self is ram         → "Ram, 21, Mumbai"
+sita.export()                      → self is sita        → "Sita, 22, Pune" (unchanged)
+```
+
+**Pseudocode**
+
+```text
+CLASS AdmissionForm:
+    init(name, age, city):  store name, age, city
+    update(city):           self.city = city
+    export():               RETURN name + ", " + age + ", " + city
+
+ram = AdmissionForm("Ram", 21, "Delhi")
+sita = AdmissionForm("Sita", 22, "Pune")
+ram.update("Mumbai")
+PRINT ram.export()     // Ram, 21, Mumbai
+PRINT sita.export()    // Sita, 22, Pune
+```
+
+**Code**
+
+```python
+class AdmissionForm:                              # the blank template
+    def __init__(self, name, age, city):          # filling in the form
+        self.name = name
+        self.age = age
+        self.city = city
+
+    def update(self, city):                       # action button: Update
+        self.city = city
+
+    def export(self):                             # action button: Export
+        return f"{self.name}, {self.age}, {self.city}"
+
+
+ram = AdmissionForm("Ram", 21, "Delhi")           # Ram's filled form
+sita = AdmissionForm("Sita", 22, "Pune")          # Sita's filled form
+
+ram.update("Mumbai")                              # self is ram: only Ram's form changes
+print(ram.export())    # Ram, 21, Mumbai
+print(sita.export())   # Sita, 22, Pune
+```
+
+**Output:**
+
+```text
+Ram, 21, Mumbai
+Sita, 22, Pune
+```
+
+**Fact (why this program):** The class is the blank form template, `__init__` fills it in, each instance is one filled form, and methods are the action buttons. A button works only on the form it belongs to: `ram.update()` changes Ram's form, not Sita's, because `self` is `ram`.
+
+</details>
+
+## Program 28
+
+**Task:** Create an `HttpClient` class whose `__init__` takes a required `base_url`, optional `timeout` (default `10`) and `retries` (default `3`), and a keyword-only `verify_ssl` (default `True`). Print the class's signature with `inspect.signature()`. Then create a client that changes only the timeout to `30`, and print its timeout and retries.
+
+*From E5: When creating an object in Python, how do you know which arguments to pass to the class?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Import `inspect`.
+2. Create an `HttpClient` class.
+3. `__init__` takes `base_url` (required), `timeout` → default `10`, `retries` → default `3`.
+4. After `*`, add `verify_ssl` → default `True` (keyword-only).
+5. Store all four on `self`.
+6. Print `inspect.signature(HttpClient)` → shows which arguments to pass.
+7. Create a client with `base_url` and `timeout=30` only.
+8. Print `timeout` and `retries`.
+
+**Program flow**
+
+```text
+inspect.signature(HttpClient)                        → reads __init__ (self hidden) → "(base_url, timeout=10, retries=3, *, verify_ssl=True)"
+HttpClient("https://api.example.com", timeout=30)    → timeout passed               → timeout = 30
+                                                     → retries not passed           → default 3
+                                                     → verify_ssl not passed        → default True
+print(client.timeout, client.retries)                →                              → "30 3"
+```
+
+**Pseudocode**
+
+```text
+IMPORT inspect
+
+CLASS HttpClient:
+    init(base_url, timeout = 10, retries = 3, *, verify_ssl = True):
+        store base_url, timeout, retries, verify_ssl
+
+PRINT signature of HttpClient    // (base_url, timeout=10, retries=3, *, verify_ssl=True)
+
+client = HttpClient("https://api.example.com", timeout = 30)
+PRINT client.timeout, client.retries    // 30 3
+```
+
+**Code**
+
+```python
+import inspect
+
+
+class HttpClient:
+    def __init__(self, base_url, timeout=10, retries=3, *, verify_ssl=True):
+        self.base_url = base_url
+        self.timeout = timeout
+        self.retries = retries
+        self.verify_ssl = verify_ssl
+
+
+print(inspect.signature(HttpClient))
+# (base_url, timeout=10, retries=3, *, verify_ssl=True)
+
+client = HttpClient("https://api.example.com", timeout=30)   # change only what you need
+print(client.timeout, client.retries)   # 30 3
+```
+
+**Output:**
+
+```text
+(base_url, timeout=10, retries=3, *, verify_ssl=True)
+30 3
+```
+
+**Fact (why this program):** `inspect.signature()` shows exactly which arguments a class needs. Parameters without a default (`base_url`) are required, parameters with a default are optional, and parameters after `*` (`verify_ssl`) must be passed by keyword. Python hides `self` because it passes it for you.
+
+</details>
+
+## Program 29
+
+**Task:** Create an `APIError` exception whose `__init__` takes a `message` and a `status_code`, passes the message to `Exception` with `super()`, and stores the status code. Create a `NotFoundError` child whose `__init__` takes `resource` and `resource_id`, and builds the message and a `404` status code for the parent. Raise `NotFoundError("User", 7)`, catch it as `APIError`, and print the status code and message.
+
+*From E6, scenario 2: When creating an object of a child class in Python, how do you decide which arguments to pass?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Create `APIError(Exception)`.
+2. `APIError.__init__` takes `message` and `status_code`.
+3. Send `message` to `Exception` with `super().__init__(message)`.
+4. Store `status_code` on `self`.
+5. Create `NotFoundError(APIError)` whose `__init__` takes `resource` and `resource_id`.
+6. Build `"<resource> <resource_id> not found"` and send it with `status_code=404` to `APIError`.
+7. Raise `NotFoundError("User", 7)` → catch it as `APIError`.
+8. Print `status_code` and the message.
+
+**Program flow**
+
+```text
+NotFoundError("User", 7)  → NotFoundError.__init__ → message = "User 7 not found", status_code = 404
+                          → APIError.__init__      → self.status_code = 404
+                          → Exception.__init__     → stores "User 7 not found"
+raise                     → except APIError?       → YES (NotFoundError is an APIError)
+print                     →                        → "404 User 7 not found"
+```
+
+**Pseudocode**
+
+```text
+CLASS APIError EXTENDS Exception:
+    init(message, status_code):
+        CALL parent init(message)
+        self.status_code = status_code
+
+CLASS NotFoundError EXTENDS APIError:
+    init(resource, resource_id):
+        CALL parent init(resource + " " + resource_id + " not found", status_code = 404)
+
+TRY
+    RAISE NotFoundError("User", 7)
+CATCH APIError AS error
+    PRINT error.status_code, error    // 404 User 7 not found
+END TRY
+```
+
+**Code**
+
+```python
+class APIError(Exception):
+    def __init__(self, message, status_code):
+        super().__init__(message)        # Exception stores the message
+        self.status_code = status_code   # extra field for our app
+
+
+class NotFoundError(APIError):
+    def __init__(self, resource, resource_id):
+        super().__init__(f"{resource} {resource_id} not found", status_code=404)
+
+
+try:
+    raise NotFoundError("User", 7)
+except APIError as error:
+    print(error.status_code, error)   # 404 User 7 not found
+```
+
+**Output:**
+
+```text
+404 User 7 not found
+```
+
+**Fact (why this program):** **Scenario 2:** `NotFoundError` has its own `__init__`, so you pass **its** arguments (`resource`, `resource_id`). Each class hands its parent what the parent needs: `NotFoundError` passes the message and `404` to `APIError`, and `APIError` passes the message to `Exception`.
+
+</details>
+
+## Program 30
+
+**Task:** Create a `ShoppingCart` class that stores a `user` and its own empty `items` list. Add an `add_item(name, price, qty=1)` method that appends an item dict, and a `total()` method that returns the sum of `price * qty`. Create a cart for Asha, add a keyboard (1500) and two mice (500 each), then print the number of items and the total.
+
+*From E8: How do you add an element to a list stored on an instance of a Python class?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Create a `ShoppingCart` class.
+2. `__init__` stores `user` and creates `self.items = []` → each cart gets its own list.
+3. `add_item(name, price, qty=1)` → append `{"name", "price", "qty"}` to `self.items`.
+4. `total()` → sum of `price * qty` for every item.
+5. Create `cart = ShoppingCart("Asha")`.
+6. Add `"Keyboard", 1500` → `qty` default `1`.
+7. Add `"Mouse", 500, qty=2`.
+8. Print `len(cart.items)` and `cart.total()`.
+
+**Program flow**
+
+```text
+ShoppingCart("Asha")               → user = "Asha"        → items = []
+add_item("Keyboard", 1500)         → qty not passed → 1   → items has 1 item
+add_item("Mouse", 500, qty=2)      → qty passed → 2       → items has 2 items
+len(cart.items)                    →                      → 2
+cart.total()                       → 1500*1 + 500*2       → 2500
+```
+
+**Pseudocode**
+
+```text
+CLASS ShoppingCart:
+    init(user):
+        self.user = user
+        self.items = empty list
+    add_item(name, price, qty = 1):
+        ADD {name, price, qty} TO self.items
+    total():
+        sum = 0
+        FOR EACH item IN self.items:
+            sum = sum + item.price * item.qty
+        END FOR
+        RETURN sum
+
+cart = ShoppingCart("Asha")
+cart.add_item("Keyboard", 1500)
+cart.add_item("Mouse", 500, qty = 2)
+PRINT length of cart.items    // 2
+PRINT cart.total()            // 2500
+```
+
+**Code**
+
+```python
+class ShoppingCart:
+    def __init__(self, user):
+        self.user = user
+        self.items = []                      # each cart gets its own list
+
+    def add_item(self, name, price, qty=1):
+        self.items.append({"name": name, "price": price, "qty": qty})
+
+    def total(self):
+        return sum(item["price"] * item["qty"] for item in self.items)
+
+
+cart = ShoppingCart("Asha")
+cart.add_item("Keyboard", 1500)
+cart.add_item("Mouse", 500, qty=2)
+
+print(len(cart.items))   # 2
+print(cart.total())      # 2500
+```
+
+**Output:**
+
+```text
+2
+2500
+```
+
+**Fact (why this program):** Create the list in `__init__` (`self.items = []`) so each object gets its own copy, then add to it with `append()` inside a method. Adding through `add_item()` gives you one place to put checks later, such as stock or quantity limits.
+
+</details>
+
+## Program 31
+
+**Task:** Create an `EmailService` class that stores a `sender`. Add a `send_confirmation(order_id)` method that returns a confirmation message. Create a service for `"shop@example.com"`, then collect the confirmations for orders 101 and 102 in a list **outside** the class, and print the list.
+
+*From E9, option 1: When calling a method on a Python class or object, how do you decide which arguments to pass and which ones Python supplies automatically?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Create an `EmailService` class.
+2. `__init__` stores `sender` on `self`.
+3. `send_confirmation(order_id)` → return `"<sender>: order <order_id> confirmed"`.
+4. Create `email = EmailService("shop@example.com")`.
+5. Create `confirmations = []` outside the class.
+6. Append `email.send_confirmation(101)` and `email.send_confirmation(102)` to the list.
+7. Print the list.
+
+**Program flow**
+
+```text
+EmailService("shop@example.com")   → sender = "shop@example.com"   → email
+confirmations = []                 → normal variable, outside class → []
+email.send_confirmation(101)       → self is email, you pass 101    → append "shop@example.com: order 101 confirmed"
+email.send_confirmation(102)       → self is email, you pass 102    → append "shop@example.com: order 102 confirmed"
+print(confirmations)               →                                → list of 2 messages
+```
+
+**Pseudocode**
+
+```text
+CLASS EmailService:
+    init(sender):                 self.sender = sender
+    send_confirmation(order_id):  RETURN sender + ": order " + order_id + " confirmed"
+
+email = EmailService("shop@example.com")
+confirmations = empty list
+ADD email.send_confirmation(101) TO confirmations
+ADD email.send_confirmation(102) TO confirmations
+PRINT confirmations    // ['shop@example.com: order 101 confirmed', 'shop@example.com: order 102 confirmed']
+```
+
+**Code**
+
+```python
+class EmailService:
+    def __init__(self, sender):
+        self.sender = sender
+
+    def send_confirmation(self, order_id):
+        return f"{self.sender}: order {order_id} confirmed"
+
+
+email = EmailService("shop@example.com")
+
+confirmations = []                                   # outside the class: a normal variable
+confirmations.append(email.send_confirmation(101))
+confirmations.append(email.send_confirmation(102))
+
+print(confirmations)
+```
+
+**Output:**
+
+```text
+['shop@example.com: order 101 confirmed', 'shop@example.com: order 102 confirmed']
+```
+
+**Fact (why this program):** `send_confirmation(self, order_id)` has two parameters, but you pass only `order_id`. Python passes `email` as `self`. The list lives outside the class, so **your code** collects the results.
+
+</details>
+
+## Program 32
+
+**Task:** Change `EmailService` so each object keeps its **own** `confirmations` list, created in `__init__`. `send_confirmation(order_id)` should build the message, add it to `self.confirmations`, and return it. Send confirmations for orders 101 and 102, then print `email.confirmations`.
+
+*From E9, option 2: When calling a method on a Python class or object, how do you decide which arguments to pass and which ones Python supplies automatically?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Create an `EmailService` class.
+2. `__init__` stores `sender` and creates `self.confirmations = []` → each object gets its own list.
+3. `send_confirmation(order_id)` → build `"<sender>: order <order_id> confirmed"`.
+4. Append the message to `self.confirmations`, then return it.
+5. Create `email = EmailService("shop@example.com")`.
+6. Call `send_confirmation(101)` and `send_confirmation(102)`.
+7. Print `email.confirmations`.
+
+**Program flow**
+
+```text
+EmailService("shop@example.com")  → sender set, confirmations = []    → email
+email.send_confirmation(101)      → self is email → build message     → self.confirmations has 1 item
+email.send_confirmation(102)      → self is email → build message     → self.confirmations has 2 items
+print(email.confirmations)        →                                   → list of 2 messages
+```
+
+**Pseudocode**
+
+```text
+CLASS EmailService:
+    init(sender):
+        self.sender = sender
+        self.confirmations = empty list
+    send_confirmation(order_id):
+        message = sender + ": order " + order_id + " confirmed"
+        ADD message TO self.confirmations
+        RETURN message
+
+email = EmailService("shop@example.com")
+email.send_confirmation(101)
+email.send_confirmation(102)
+PRINT email.confirmations    // ['shop@example.com: order 101 confirmed', 'shop@example.com: order 102 confirmed']
+```
+
+**Code**
+
+```python
+class EmailService:
+    def __init__(self, sender):
+        self.sender = sender
+        self.confirmations = []          # in __init__: each service gets its own list
+
+    def send_confirmation(self, order_id):
+        message = f"{self.sender}: order {order_id} confirmed"
+        self.confirmations.append(message)
+        return message
+
+
+email = EmailService("shop@example.com")
+
+email.send_confirmation(101)
+email.send_confirmation(102)
+
+print(email.confirmations)
+```
+
+**Output:**
+
+```text
+['shop@example.com: order 101 confirmed', 'shop@example.com: order 102 confirmed']
+```
+
+**Fact (why this program):** The list is created in `__init__`, so the **object** remembers its own history and the method adds to it. Don't put `confirmations = []` in the class body: that would be one list shared by every `EmailService` object.
+
+</details>
+
+## Program 33
+
+**Task:** Create a custom exception `OrderNotFound` that inherits from `Exception` and has no `__init__` (use `pass`). Create it with the message `"Order 4521 not found"`, then print the error and its `args`.
+
+*From E11: Can a child class use its parent class's `__init__()` if it doesn't define its own?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Create `OrderNotFound(Exception)` with no `__init__` (`pass`).
+2. Create `OrderNotFound("Order 4521 not found")` → `Exception.__init__` runs.
+3. Print the error → shows the message.
+4. Print `error.args` → shows the stored message as a tuple.
+
+**Program flow**
+
+```text
+OrderNotFound("Order 4521 not found") → no __init__ in OrderNotFound → Exception.__init__ stores message
+print(error)                          → uses Exception's __str__     → "Order 4521 not found"
+print(error.args)                     → message stored in args       → ('Order 4521 not found',)
+```
+
+**Pseudocode**
+
+```text
+CLASS OrderNotFound EXTENDS Exception:  (nothing)
+
+error = OrderNotFound("Order 4521 not found")    // uses Exception's init
+PRINT error         // Order 4521 not found
+PRINT error.args    // ('Order 4521 not found',)
+```
+
+**Code**
+
+```python
+class OrderNotFound(Exception):
+    pass                                  # no __init__: uses Exception's
+
+
+error = OrderNotFound("Order 4521 not found")
+print(error)        # Order 4521 not found
+print(error.args)   # ('Order 4521 not found',)
+```
+
+**Output:**
+
+```text
+Order 4521 not found
+('Order 4521 not found',)
+```
+
+**Fact (why this program):** `OrderNotFound` has no `__init__`, so Python uses the parent's (`Exception.__init__`). That's why passing a message works with only `pass` in the class: `Exception` stores it in `args` and shows it when printed.
+
+</details>
+
+## Program 34
+
+**Task:** Create an `Order` class that stores an `order_id` and starts with `status = "created"`. Add `pay()`, which works only when the status is `"created"`, and `ship()`, which works only when the status is `"paid"`. Each raises a `ValueError` otherwise. Pay and ship order 4521 and print its status. Then try to ship order 4522 without paying, and print the error.
+
+*From E12: How can you read and modify the state of an object created from a Python class?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Create an `Order` class.
+2. `__init__` stores `order_id` and sets `status` → `"created"`.
+3. `pay()` → check status is `"created"` → else `ValueError`; set status → `"paid"`.
+4. `ship()` → check status is `"paid"` → else `ValueError`; set status → `"shipped"`.
+5. Create `Order(4521)`, call `pay()` then `ship()`, and print the status.
+6. Create `Order(4522)`, call `ship()` without paying → catch the `ValueError` and print it.
+
+**Program flow**
+
+```text
+Order(4521)          → status = "created"
+order.pay()          → status "created"? YES → status = "paid"
+order.ship()         → status "paid"?    YES → status = "shipped"
+print(order.status)  →                       → "shipped"
+
+Order(4522)          → status = "created"
+new_order.ship()     → status "paid"?    NO  → raise ValueError
+except               →                       → "Cannot ship an order that is created"
+```
+
+**Pseudocode**
+
+```text
+CLASS Order:
+    init(order_id):
+        self.order_id = order_id
+        self.status = "created"
+    pay():
+        IF status != "created" THEN raise "Cannot pay an order that is <status>"
+        ELSE status = "paid"
+    ship():
+        IF status != "paid" THEN raise "Cannot ship an order that is <status>"
+        ELSE status = "shipped"
+
+order = Order(4521)
+order.pay();  order.ship()
+PRINT order.status    // shipped
+
+new_order = Order(4522)
+TRY
+    new_order.ship()
+CATCH ValueError AS error
+    PRINT error       // Cannot ship an order that is created
+END TRY
+```
+
+**Code**
+
+```python
+class Order:
+    def __init__(self, order_id):
+        self.order_id = order_id
+        self.status = "created"
+
+    def pay(self):
+        if self.status != "created":
+            raise ValueError(f"Cannot pay an order that is {self.status}")
+        self.status = "paid"
+
+    def ship(self):
+        if self.status != "paid":
+            raise ValueError(f"Cannot ship an order that is {self.status}")
+        self.status = "shipped"
+
+
+order = Order(4521)
+order.pay()
+order.ship()
+print(order.status)   # shipped
+
+new_order = Order(4522)
+try:
+    new_order.ship()
+except ValueError as error:
+    print(error)      # Cannot ship an order that is created
+```
+
+**Output:**
+
+```text
+shipped
+Cannot ship an order that is created
+```
+
+**Fact (why this program):** The object's state (`status`) changes only through its methods, so the methods can block wrong changes, such as shipping before payment. If any code could set `order.status = "shipped"` directly, these rules could be skipped.
+
+</details>
+
+## Program 35
+
+**Task:** Create an `Order` class with a class attribute `TAX_RATE = 0.18` that stores an `order_id` and an `amount`. Add a static method `calculate_tax(amount, rate)`, an instance method `total()` that adds the tax to the amount, and a class method `from_json(text)` that builds an order from a JSON string. Build an order from `'{"id": 7, "amount": 1000}'`, print its id and total, then call `calculate_tax(500, 0.05)` directly.
+
+*From E15: What is the difference between instance, class, and static methods?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Import `json`.
+2. Create an `Order` class with `TAX_RATE = 0.18`.
+3. `__init__` stores `order_id` and `amount`.
+4. Static `calculate_tax(amount, rate)` → `round(amount * rate, 2)`.
+5. Instance `total()` → `amount + calculate_tax(amount, TAX_RATE)`.
+6. Class `from_json(text)` → parse JSON → return `cls(data["id"], data["amount"])`.
+7. Build `order` with `Order.from_json('{"id": 7, "amount": 1000}')`.
+8. Print `order.order_id` and `order.total()`.
+9. Print `Order.calculate_tax(500, 0.05)`.
+
+**Program flow**
+
+```text
+Order.from_json('{"id": 7, "amount": 1000}') → class method: json.loads → cls(7, 1000)  → order
+order.total()                                → instance: 1000 + tax(1000, 0.18) = 180  → 1180.0
+print(order.order_id, order.total())         →                                         → "7 1180.0"
+Order.calculate_tax(500, 0.05)               → static: round(500 * 0.05, 2)            → 25.0
+```
+
+**Pseudocode**
+
+```text
+IMPORT json
+
+CLASS Order:
+    TAX_RATE = 0.18
+    init(order_id, amount):            store order_id, amount
+    total():                           RETURN amount + calculate_tax(amount, TAX_RATE)
+    CLASS METHOD from_json(text):
+        data = PARSE JSON text
+        RETURN new cls(data["id"], data["amount"])
+    STATIC calculate_tax(amount, rate):
+        RETURN ROUND(amount * rate, 2)
+
+order = Order.from_json('{"id": 7, "amount": 1000}')
+PRINT order.order_id, order.total()     // 7 1180.0
+PRINT Order.calculate_tax(500, 0.05)    // 25.0
+```
+
+**Code**
+
+```python
+import json
+
+
+class Order:
+    TAX_RATE = 0.18
+
+    def __init__(self, order_id, amount):
+        self.order_id = order_id
+        self.amount = amount
+
+    def total(self):                         # instance: uses this order's data
+        return self.amount + self.calculate_tax(self.amount, self.TAX_RATE)
+
+    @classmethod
+    def from_json(cls, text):                # class: builds an Order from API data
+        data = json.loads(text)
+        return cls(data["id"], data["amount"])
+
+    @staticmethod
+    def calculate_tax(amount, rate):         # static: plain helper, no self or cls
+        return round(amount * rate, 2)
+
+
+order = Order.from_json('{"id": 7, "amount": 1000}')
+print(order.order_id, order.total())        # 7 1180.0
+print(Order.calculate_tax(500, 0.05))       # 25.0
+```
+
+**Output:**
+
+```text
+7 1180.0
+25.0
+```
+
+**Fact (why this program):** Needs one object's data → **instance** method (`total`). Creates objects or uses class data → **class** method (`from_json`). Needs neither → **static** method (`calculate_tax`).
+
+</details>
+
+## Program 36
+
+**Task:** Create an `ApiClient` class with a class attribute `base_url = "https://api.example.com"`, an `__init__` that stores a `name`, and a `url(path)` method that returns `base_url + path`. Add a class method `use_environment(env)` that changes `base_url` to `"https://<env>.api.example.com"`. Create a users client and an orders client, switch to `"staging"` with one call, and print both URLs.
+
+*From E16: Can a class method read and update attributes stored on the class?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Create an `ApiClient` class with `base_url = "https://api.example.com"` → shared by all clients.
+2. `__init__` stores `name`.
+3. Class method `use_environment(env)` → `cls.base_url = "https://<env>.api.example.com"`.
+4. `url(path)` → return `self.base_url + path`.
+5. Create `users` and `orders` clients.
+6. Call `ApiClient.use_environment("staging")` once.
+7. Print `users.url("/list")` and `orders.url("/list")`.
+
+**Program flow**
+
+```text
+ApiClient("users"), ApiClient("orders")  → both read the class's base_url
+ApiClient.use_environment("staging")     → cls.base_url changed → "https://staging.api.example.com"
+users.url("/list")                       → reads class base_url → "https://staging.api.example.com/list"
+orders.url("/list")                      → reads class base_url → "https://staging.api.example.com/list"
+```
+
+**Pseudocode**
+
+```text
+CLASS ApiClient:
+    base_url = "https://api.example.com"     // one value for the class
+    init(name):                        self.name = name
+    CLASS METHOD use_environment(env): cls.base_url = "https://" + env + ".api.example.com"
+    url(path):                         RETURN self.base_url + path
+
+users = ApiClient("users")
+orders = ApiClient("orders")
+ApiClient.use_environment("staging")
+PRINT users.url("/list")     // https://staging.api.example.com/list
+PRINT orders.url("/list")    // https://staging.api.example.com/list
+```
+
+**Code**
+
+```python
+class ApiClient:
+    base_url = "https://api.example.com"     # shared by all clients
+
+    def __init__(self, name):
+        self.name = name
+
+    @classmethod
+    def use_environment(cls, env):
+        cls.base_url = f"https://{env}.api.example.com"
+
+    def url(self, path):
+        return self.base_url + path
+
+
+users = ApiClient("users")
+orders = ApiClient("orders")
+
+ApiClient.use_environment("staging")         # one call, e.g. before tests run
+print(users.url("/list"))    # https://staging.api.example.com/list
+print(orders.url("/list"))   # https://staging.api.example.com/list
+```
+
+**Output:**
+
+```text
+https://staging.api.example.com/list
+https://staging.api.example.com/list
+```
+
+**Fact (why this program):** A class method receives `cls`, so it can change a class attribute. Both clients read `base_url` from the class, so **one** call switches every client to staging. It changes the setting for the whole program, so use it only for app-wide settings.
+
+</details>
+
+## Program 37
+
+**Task:** Create a `Settings` class that stores `debug` and `db_url`. Add two class methods: `from_json(text)`, which builds settings from a JSON string, and `from_env(env)`, which builds them from an environment dictionary (`DEBUG` is `"1"` for on). Build one settings object from each, and print their values. Then call `date.fromisoformat("2026-11-11")` to see the same idea in the standard library.
+
+*From E17: Why use a class method if we have instance methods?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Import `json` and `date`.
+2. Create a `Settings` class whose `__init__` stores `debug` and `db_url`.
+3. Class method `from_json(text)` → parse JSON → return `cls(data["debug"], data["db_url"])`.
+4. Class method `from_env(env)` → `debug = (DEBUG == "1")` → return `cls(debug, env["DB_URL"])`.
+5. Build `a` with `from_json(...)` and `b` with `from_env(...)`.
+6. Print both objects' `debug` and `db_url`.
+7. Print `date.fromisoformat("2026-11-11")` → a standard library class method.
+
+**Program flow**
+
+```text
+Settings.from_json('{"debug": true, "db_url": "sqlite:///dev.db"}') → json.loads → cls(True, "sqlite:///dev.db")  → a
+Settings.from_env({"DEBUG": "0", "DB_URL": "postgres://prod"})     → "0" == "1"? NO → cls(False, "postgres://prod") → b
+print(a.debug, a.db_url)                                            →                                               → "True sqlite:///dev.db"
+print(b.debug, b.db_url)                                            →                                               → "False postgres://prod"
+date.fromisoformat("2026-11-11")                                    → class method builds a date                    → 2026-11-11
+```
+
+**Pseudocode**
+
+```text
+IMPORT json, date
+
+CLASS Settings:
+    init(debug, db_url):  store debug, db_url
+    CLASS METHOD from_json(text):
+        data = PARSE JSON text
+        RETURN new cls(data["debug"], data["db_url"])
+    CLASS METHOD from_env(env):
+        debug = TRUE IF env["DEBUG"] == "1" ELSE FALSE
+        RETURN new cls(debug, env["DB_URL"])
+
+a = Settings.from_json('{"debug": true, "db_url": "sqlite:///dev.db"}')
+b = Settings.from_env({"DEBUG": "0", "DB_URL": "postgres://prod"})
+PRINT a.debug, a.db_url                     // True sqlite:///dev.db
+PRINT b.debug, b.db_url                     // False postgres://prod
+PRINT date.fromisoformat("2026-11-11")      // 2026-11-11
+```
+
+**Code**
+
+```python
+import json
+from datetime import date
+
+
+class Settings:
+    def __init__(self, debug, db_url):
+        self.debug = debug
+        self.db_url = db_url
+
+    @classmethod
+    def from_json(cls, text):
+        data = json.loads(text)
+        return cls(data["debug"], data["db_url"])
+
+    @classmethod
+    def from_env(cls, env):
+        return cls(env.get("DEBUG") == "1", env["DB_URL"])
+
+
+a = Settings.from_json('{"debug": true, "db_url": "sqlite:///dev.db"}')
+b = Settings.from_env({"DEBUG": "0", "DB_URL": "postgres://prod"})
+print(a.debug, a.db_url)   # True sqlite:///dev.db
+print(b.debug, b.db_url)   # False postgres://prod
+
+print(date.fromisoformat("2026-11-11"))   # 2026-11-11: the same idea in the standard library
+```
+
+**Output:**
+
+```text
+True sqlite:///dev.db
+False postgres://prod
+2026-11-11
+```
+
+**Fact (why this program):** A class method creates an object **before** you have one, so it's the way to give a class several ways to be built (`from_json`, `from_env`). The standard library does the same: `date.fromisoformat()`, `datetime.now()`, `dict.fromkeys()`, and `Path.home()` are all class methods.
+
+</details>
+
+## Program 38
+
+**Task:** Create a `PaymentMethod` base class whose `pay(amount)` raises `NotImplementedError`. Create `CardPayment` and `UpiPayment` child classes, each with its own `pay(amount)` message. Create one of each and pay 499 with both.
+
+*From E18: Why use an is-a relationship?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Create a `PaymentMethod` class whose `pay(amount)` → `raise NotImplementedError`.
+2. Create `CardPayment(PaymentMethod)` whose `pay(amount)` → `"Charged Rs.<amount> to card"`.
+3. Create `UpiPayment(PaymentMethod)` whose `pay(amount)` → `"Collected Rs.<amount> via UPI"`.
+4. Create `card = CardPayment()` and `upi = UpiPayment()`.
+5. Print `card.pay(499)` and `upi.pay(499)`.
+
+**Program flow**
+
+```text
+card.pay(499)  → CardPayment has its own pay → "Charged Rs.499 to card"
+upi.pay(499)   → UpiPayment has its own pay  → "Collected Rs.499 via UPI"
+PaymentMethod().pay(499)  (not called)       → would raise NotImplementedError
+```
+
+**Pseudocode**
+
+```text
+CLASS PaymentMethod:
+    pay(amount):  RAISE NotImplementedError       // each child must write its own
+
+CLASS CardPayment EXTENDS PaymentMethod:
+    pay(amount):  RETURN "Charged Rs." + amount + " to card"
+
+CLASS UpiPayment EXTENDS PaymentMethod:
+    pay(amount):  RETURN "Collected Rs." + amount + " via UPI"
+
+card = CardPayment()
+upi = UpiPayment()
+PRINT card.pay(499)    // Charged Rs.499 to card
+PRINT upi.pay(499)     // Collected Rs.499 via UPI
+```
+
+**Code**
+
+```python
+class PaymentMethod:
+    def pay(self, amount):
+        raise NotImplementedError
+
+
+class CardPayment(PaymentMethod):
+    def pay(self, amount):
+        return f"Charged Rs.{amount} to card"
+
+
+class UpiPayment(PaymentMethod):
+    def pay(self, amount):
+        return f"Collected Rs.{amount} via UPI"
+
+
+card = CardPayment()
+upi = UpiPayment()
+
+print(card.pay(499))  # Charged Rs.499 to card
+print(upi.pay(499))   # Collected Rs.499 via UPI
+```
+
+**Output:**
+
+```text
+Charged Rs.499 to card
+Collected Rs.499 via UPI
+```
+
+**Fact (why this program):** Card and UPI **are** payment methods, so they inherit from `PaymentMethod` and share the same `pay()` method name, each with its own behaviour. The parent's `pay()` raises `NotImplementedError` to force every child to write its own. Adding wallet payments later only needs a new `WalletPayment(PaymentMethod)` class.
+
+</details>
+
+## Program 39
+
+**Task:** Create a `BaseModel` class whose `__init__` stores any keyword fields in `self.fields`, and whose `save()` returns `"INSERT <fields>"`. Create an `Article` child whose `__init__` takes a `title` and sends it to the parent with `super()`. Override `save()` so it first adds a `slug` (the title in lowercase, with spaces turned into `-`) and then calls the parent's `save()`. Save an article titled `"Hello World"`.
+
+*From E19: What are the different forms of `super()`?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Create a `BaseModel` class whose `__init__(**fields)` stores `self.fields`.
+2. `BaseModel.save()` → return `"INSERT <fields>"`.
+3. Create `Article(BaseModel)` whose `__init__(title)` → `super().__init__(title=title)`.
+4. `Article.save()` → add `slug` = title lowercase, spaces → `-`.
+5. Then return `super().save()` → the parent does the real saving.
+6. Print `Article("Hello World").save()`.
+
+**Program flow**
+
+```text
+Article("Hello World") → super().__init__(title="Hello World") → fields = {'title': 'Hello World'}
+.save()                → Article.save adds slug                → fields['slug'] = 'hello-world'
+                       → super().save()                        → "INSERT {'title': 'Hello World', 'slug': 'hello-world'}"
+```
+
+**Pseudocode**
+
+```text
+CLASS BaseModel:
+    init(any named fields):  self.fields = fields
+    save():                  RETURN "INSERT " + fields
+
+CLASS Article EXTENDS BaseModel:
+    init(title):  CALL parent init(title = title)
+    save():
+        fields["slug"] = LOWERCASE(title) with spaces REPLACED BY "-"
+        RETURN parent save()
+
+PRINT Article("Hello World").save()
+// INSERT {'title': 'Hello World', 'slug': 'hello-world'}
+```
+
+**Code**
+
+```python
+class BaseModel:
+    def __init__(self, **fields):
+        self.fields = fields
+
+    def save(self):
+        return f"INSERT {self.fields}"
+
+
+class Article(BaseModel):
+    def __init__(self, title):
+        super().__init__(title=title)                 # parent stores the fields
+
+    def save(self):
+        self.fields["slug"] = self.fields["title"].lower().replace(" ", "-")
+        return super().save()                         # parent does the real saving
+
+
+print(Article("Hello World").save())
+# INSERT {'title': 'Hello World', 'slug': 'hello-world'}
+```
+
+**Output:**
+
+```text
+INSERT {'title': 'Hello World', 'slug': 'hello-world'}
+```
+
+**Fact (why this program):** This uses two forms of `super()`: `super().__init__()` runs the parent's setup, and `super().save()` runs the parent's method after the child adds its own step. It's how you override `save()` in a Django model: add your step, then call `super()`. If you forget `super().save()`, nothing gets saved.
+
+</details>
+
+## Program 40
+
+**Task:** Create a `BaseHandler` whose `handle(request)` prints `"BaseHandler: send response"`. Create `AuthMixin` and `LoggingMixin`, both inheriting from `BaseHandler`. Each prints its own step and then calls `super().handle(request)`. Create `OrderHandler(AuthMixin, LoggingMixin)` with no code, handle one request, and print its MRO.
+
+*From E21: What is the diamond inheritance problem?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Create `BaseHandler` whose `handle()` → print `"BaseHandler: send response"`.
+2. Create `AuthMixin(BaseHandler)` → print `"AuthMixin: check token"`, then `super().handle()`.
+3. Create `LoggingMixin(BaseHandler)` → print `"LoggingMixin: log request"`, then `super().handle()`.
+4. Create `OrderHandler(AuthMixin, LoggingMixin)` with no code → this makes a diamond.
+5. Call `OrderHandler().handle({"path": "/orders"})`.
+6. Print the MRO class names.
+
+**Program flow**
+
+```text
+MRO of OrderHandler: OrderHandler → AuthMixin → LoggingMixin → BaseHandler → object
+OrderHandler.handle  → not in OrderHandler → AuthMixin.handle
+AuthMixin.handle     → print "AuthMixin: check token"    → super() = LoggingMixin  (not BaseHandler)
+LoggingMixin.handle  → print "LoggingMixin: log request" → super() = BaseHandler
+BaseHandler.handle   → print "BaseHandler: send response" → stop (runs once)
+```
+
+**Pseudocode**
+
+```text
+CLASS BaseHandler:
+    handle(request):  PRINT "BaseHandler: send response"
+
+CLASS AuthMixin EXTENDS BaseHandler:
+    handle(request):  PRINT "AuthMixin: check token";    CALL next handle(request)
+
+CLASS LoggingMixin EXTENDS BaseHandler:
+    handle(request):  PRINT "LoggingMixin: log request"; CALL next handle(request)
+
+CLASS OrderHandler EXTENDS AuthMixin, LoggingMixin:  (nothing)
+
+OrderHandler().handle({"path": "/orders"})
+// AuthMixin: check token
+// LoggingMixin: log request
+// BaseHandler: send response
+PRINT MRO names
+// ['OrderHandler', 'AuthMixin', 'LoggingMixin', 'BaseHandler', 'object']
+```
+
+**Code**
+
+```python
+class BaseHandler:
+    def handle(self, request):
+        print("BaseHandler: send response")
+
+
+class AuthMixin(BaseHandler):
+    def handle(self, request):
+        print("AuthMixin: check token")
+        super().handle(request)
+
+
+class LoggingMixin(BaseHandler):
+    def handle(self, request):
+        print("LoggingMixin: log request")
+        super().handle(request)
+
+
+class OrderHandler(AuthMixin, LoggingMixin):
+    pass
+
+
+OrderHandler().handle({"path": "/orders"})
+# AuthMixin: check token
+# LoggingMixin: log request
+# BaseHandler: send response
+
+print([c.__name__ for c in OrderHandler.__mro__])
+# ['OrderHandler', 'AuthMixin', 'LoggingMixin', 'BaseHandler', 'object']
+```
+
+**Output:**
+
+```text
+AuthMixin: check token
+LoggingMixin: log request
+BaseHandler: send response
+['OrderHandler', 'AuthMixin', 'LoggingMixin', 'BaseHandler', 'object']
+```
+
+**Fact (why this program):** Both mixins inherit from `BaseHandler`, which makes a diamond. Because each one calls `super()`, every step runs in MRO order, and the response is sent only **once**. If `AuthMixin` called `BaseHandler.handle(self, request)` directly, the logging step would be skipped.
+
+</details>
+
+## Program 41
+
+**Task:** Sort the list `["banana", "fig", "apple"]` from shortest word to longest, using a `lambda` as the `key` for `sorted()`.
+
+*From E22: What is a lambda function, and when should you avoid it?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Create `words = ["banana", "fig", "apple"]`.
+2. Write a lambda `lambda word: len(word)` → returns each word's length.
+3. Pass it as `key` to `sorted()` → sort by length, shortest first.
+4. Print the sorted list.
+
+**Program flow**
+
+```text
+key for each word → "banana" = 6, "fig" = 3, "apple" = 5
+sorted by key     → 3, 5, 6
+print             → ['fig', 'apple', 'banana']
+```
+
+**Pseudocode**
+
+```text
+words = ["banana", "fig", "apple"]
+key = FUNCTION(word): RETURN length of word
+PRINT words SORTED BY key    // ['fig', 'apple', 'banana']
+```
+
+**Code**
+
+```python
+words = ["banana", "fig", "apple"]
+print(sorted(words, key=lambda word: len(word)))
+```
+
+**Output:**
+
+```text
+['fig', 'apple', 'banana']
+```
+
+**Fact (why this program):** A lambda is a small one-line function with no name. It's ideal for a short `key=` like this. Here `key=len` would also work. For logic with several steps, error handling, or reuse, write a normal `def` function instead.
+
+</details>
+
+## Program 42
+
+**Task:** Given a list of user dicts (`name`, `age`, `active`), keep only the active users with `filter()` and a lambda, then sort them by age, oldest first, and print their names. Then find the oldest user overall with `max()` and `itemgetter("age")`, and print the name.
+
+*From E22: What is a lambda function, and when should you avoid it?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Import `itemgetter` from `operator`.
+2. Create `users`: Asha (30, active), Ravi (25, not active), Meera (35, active).
+3. `filter(lambda u: u["active"], users)` → keep active users only.
+4. `sorted(..., key=lambda u: u["age"], reverse=True)` → oldest first.
+5. Print the names.
+6. `max(users, key=itemgetter("age"))` → oldest user overall.
+7. Print the name.
+
+**Program flow**
+
+```text
+filter active?   → Asha YES, Ravi NO, Meera YES  → [Asha, Meera]
+sort by age desc → Meera 35, Asha 30             → ['Meera', 'Asha']
+max by age       → 30, 25, 35 → highest is 35    → "Meera"
+```
+
+**Pseudocode**
+
+```text
+IMPORT itemgetter
+
+users = [Asha 30 active, Ravi 25 not active, Meera 35 active]
+
+active = empty list
+FOR EACH user IN users:
+    IF user.active THEN ADD user TO active
+END FOR
+
+by_age = active SORTED BY age, highest first
+PRINT names of by_age          // ['Meera', 'Asha']
+
+oldest = user IN users WITH highest age
+PRINT oldest.name              // Meera
+```
+
+**Code**
+
+```python
+from operator import itemgetter
+
+users = [
+    {"name": "Asha", "age": 30, "active": True},
+    {"name": "Ravi", "age": 25, "active": False},
+    {"name": "Meera", "age": 35, "active": True},
+]
+
+active = list(filter(lambda u: u["active"], users))
+by_age = sorted(active, key=lambda u: u["age"], reverse=True)
+print([u["name"] for u in by_age])            # ['Meera', 'Asha']
+
+oldest = max(users, key=itemgetter("age"))    # same as key=lambda u: u["age"]
+print(oldest["name"])                         # Meera
+```
+
+**Output:**
+
+```text
+['Meera', 'Asha']
+Meera
+```
+
+**Fact (why this program):** Lambdas are short throwaway functions for `filter()`, `sorted()` and `max()`. For a simple field lookup, `itemgetter("age")` does the same job as `lambda u: u["age"]`. A list comprehension is often clearer than `filter` with a lambda: `[u for u in users if u["active"]]`.
+
+</details>

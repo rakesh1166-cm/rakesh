@@ -16768,7 +16768,11 @@ print(rectangle.area(5))       # 50
 - `get_length(self)` has only `self`, so you pass nothing.
 - `area(self, width)` needs `width`, so you pass `5`. Python passes `rectangle` as `self`.
 
-**Developer example: passing a method as a callback**
+**Developer example: an email service**
+
+**Option 1: list outside the class**
+
+The list is a normal variable, created after the object. Your code collects the results.
 
 ```python
 class EmailService:
@@ -16779,25 +16783,52 @@ class EmailService:
         return f"{self.sender}: order {order_id} confirmed"
 
 
-class EventBus:
-    def __init__(self):
-        self.handlers = []
+email = EmailService("shop@example.com")
 
-    def subscribe(self, handler):
-        self.handlers.append(handler)
+confirmations = []                                   # outside the class: a normal variable
+confirmations.append(email.send_confirmation(101))
+confirmations.append(email.send_confirmation(102))
 
-    def publish(self, order_id):
-        return [handler(order_id) for handler in self.handlers]
+print(confirmations)
+# ['shop@example.com: order 101 confirmed', 'shop@example.com: order 102 confirmed']
+# Inside send_confirmation(), self is email.
+```
+
+**Option 2: list inside the class (in `__init__`)**
+
+The object keeps its own list. The method adds to it, so your code only calls the method after creating the object.
+
+```python
+class EmailService:
+    def __init__(self, sender):
+        self.sender = sender
+        self.confirmations = []          # in __init__: each service gets its own list
+
+    def send_confirmation(self, order_id):
+        message = f"{self.sender}: order {order_id} confirmed"
+        self.confirmations.append(message)
+        return message
 
 
 email = EmailService("shop@example.com")
-bus = EventBus()
-bus.subscribe(email.send_confirmation)   # no brackets: pass the method, don't call it
 
-print(bus.publish(101))   # ['shop@example.com: order 101 confirmed']
+email.send_confirmation(101)
+email.send_confirmation(102)
+
+print(email.confirmations)
+# ['shop@example.com: order 101 confirmed', 'shop@example.com: order 102 confirmed']
+# Inside send_confirmation(), self is email.
 ```
 
-`email.send_confirmation` is a bound method: it already remembers `self` (the `email` object). The event bus calls it with only `order_id`, and Python fills in `self`. Button click handlers and `threading.Thread(target=worker.run)` work the same way.
+| | Option 1: outside the class | Option 2: in `__init__` |
+|---|---|---|
+| Where the list lives | A normal variable in your code | On the object: `email.confirmations` |
+| Who adds to it | Your code calls `confirmations.append(...)` | The method calls `self.confirmations.append(...)` |
+| Use it when | You only need the results here, once | The object should remember its own history |
+
+Don't put the list in the class body (`confirmations = []` directly under `class EmailService:`). That is **one shared list** for every `EmailService` object (see E10), so a second service would see the first one's messages.
+
+`send_confirmation(self, order_id)` has two parameters, but you pass only `order_id` (`101`). Python passes `email` as `self` for you, so the method can read `self.sender`.
 
 **Real-life example:** When you order at your usual cafe, the staff already know who you are (`self`). You only tell them what's new, like the size of your coffee (`width`).
 
@@ -17321,7 +17352,7 @@ for vehicle in (Car(), Bike()):
 
 If it isn't truly is-a, use has-a (composition) instead: a car **has an** engine, but a car isn't an engine.
 
-**Developer example: payment methods at checkout**
+**Developer example: payment methods**
 
 ```python
 class PaymentMethod:
@@ -17339,15 +17370,14 @@ class UpiPayment(PaymentMethod):
         return f"Collected Rs.{amount} via UPI"
 
 
-def checkout(method: PaymentMethod, amount):
-    return method.pay(amount)               # works for every kind of payment
+card = CardPayment()
+upi = UpiPayment()
 
-
-print(checkout(CardPayment(), 499))   # Charged Rs.499 to card
-print(checkout(UpiPayment(), 499))    # Collected Rs.499 via UPI
+print(card.pay(499))  # Charged Rs.499 to card
+print(upi.pay(499))   # Collected Rs.499 via UPI
 ```
 
-Card and UPI **are** payment methods, so `checkout()` works with any of them. Adding wallet payments later only needs a new class, with no change to `checkout()`.
+Card and UPI **are** payment methods, so both have the same `pay()` method, and each one does it its own way. `PaymentMethod.pay()` raises `NotImplementedError` to force every child class to write its own `pay()`. Adding wallet payments later only needs a new `WalletPayment(PaymentMethod)` class.
 
 **Real-life example:** A car is a vehicle and a bike is a vehicle, so both can start and stop. Traffic rules for vehicles apply to both, without writing separate rules.
 
