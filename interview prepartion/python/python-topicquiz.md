@@ -17488,24 +17488,76 @@ except NotEnoughBalance as error:
 
 You catch a low-level error and raise a clearer one, while keeping the original as the cause. The user sees a simple message, and developers can still find the real reason. The original is stored in `__cause__`.
 
-```python
-class ConfigError(Exception):
-    pass
+**Code example 1: easy to understand**
 
-def read_epochs(text):
+```python
+def read_age(text):
     try:
         return int(text)
-    except ValueError as error:
-        raise ConfigError("epochs must be a number") from error
+    except ValueError as original_error:
+        raise ValueError("Age must be a whole number.") from original_error
 
-try:
-    read_epochs("ten")
-except ConfigError as error:
-    print(error)                        # epochs must be a number
-    print(type(error.__cause__).__name__)  # ValueError
+read_age("abc")
 ```
 
+Output:
+
+```
+Traceback (most recent call last):
+  File "main.py", line 3, in read_age
+ValueError: invalid literal for int() with base 10: 'abc'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "main.py", line 7, in <module>
+  File "main.py", line 5, in read_age
+ValueError: Age must be a whole number.
+```
+
+- `int("abc")` raises the original error: `ValueError: invalid literal for int() with base 10: 'abc'`.
+- `read_age()` raises a new error with a message specific to the age field: `ValueError: Age must be a whole number.`
+- `from original_error` links the two. The traceback shows both errors and says the first was the **direct cause** of the second.
+
+**Code example 2: what developers write every day**
+
+The database layer turns a database error into a clear business error. The API code only needs to know "user already exists", not SQL details, but the real database error is still kept for logs and debugging.
+
+```python
+import sqlite3
+
+class UserAlreadyExistsError(Exception):
+    pass
+
+db = sqlite3.connect(":memory:")
+db.execute("CREATE TABLE users (email TEXT UNIQUE)")
+
+def create_user(email):
+    try:
+        with db:
+            db.execute("INSERT INTO users (email) VALUES (?)", (email,))
+    except sqlite3.IntegrityError as db_error:
+        raise UserAlreadyExistsError(f"{email} is already registered") from db_error
+
+create_user("asha@example.com")
+
+try:
+    create_user("asha@example.com")          # same email again
+except UserAlreadyExistsError as error:
+    print(error)                  # asha@example.com is already registered
+    print(repr(error.__cause__))  # IntegrityError('UNIQUE constraint failed: users.email')
+```
+
+In a FastAPI app, the endpoint catches `UserAlreadyExistsError` and returns `409 Conflict` with a friendly message, while the log keeps the full chain. The same pattern is used to wrap HTTP client errors (`httpx.HTTPError` → `PaymentServiceError`), file errors (`FileNotFoundError` → `ConfigError`), and JSON errors (`json.JSONDecodeError` → `InvalidRequestError`).
+
 **Real-life example:** A shop tells you "Delivery delayed". Its records also keep the real cause: "truck broke down". You get a simple message, and the manager can still see what happened.
+
+**What the interviewer expects:**
+- `raise New from original` sets `New.__cause__` and shows "direct cause" in the traceback.
+- Without `from`, Python still links them through `__context__`, but says "During handling of the above exception, another exception occurred", which looks like a bug in the `except` block.
+- `raise ... from None` hides the original error (use only when it adds nothing).
+
+**Follow-ups:** What is the difference between `__cause__` and `__context__`? When would you use `from None`?
 
 </details>
 
@@ -17522,19 +17574,87 @@ They answer different questions, and they often work together.
 | Question it answers | What kind of error is it? | What caused this error? |
 | How you write it | `class MyError(Exception)` | `raise New() from error` |
 
+**Code example 1: easy to understand**
+
 ```python
-class PaymentError(Exception):    # custom exception
+class InvalidAgeError(ValueError):  # Custom exception type
     pass
 
-try:
+def parse_age(text):
     try:
-        1 / 0
-    except ZeroDivisionError as error:
-        raise PaymentError("Payment failed") from error    # chaining
-except PaymentError as error:
-    print(error)                           # Payment failed
-    print(type(error.__cause__).__name__)  # ZeroDivisionError
+        return int(text)
+    except ValueError as error:
+        raise InvalidAgeError("Age must be a whole number.") from error
+        #     ^ custom exception                            ^ chaining
 ```
+
+| Concept | What it does | Why developers use it |
+|---|---|---|
+| **Custom exception** | Defines `InvalidAgeError` as a specific error type. | The API can catch `InvalidAgeError` and return a `400` response with a message about the age field. |
+| **Exception chaining** | `from error` links `InvalidAgeError` to the `ValueError` raised by `int("abc")`. | When debugging, the traceback shows the original conversion failure as well as the application error. |
+
+You can also raise a custom exception by itself. For example, if `age < 0`, you can write `raise InvalidAgeError("Age cannot be negative.")`. That error comes directly from your validation rule, so there is no original error to chain.
+
+```python
+class InvalidAgeError(ValueError):
+    pass
+
+def parse_age(text):
+    try:
+        age = int(text)
+    except ValueError as error:
+        raise InvalidAgeError("Age must be a whole number.") from error  # custom + chaining
+    if age < 0:
+        raise InvalidAgeError("Age cannot be negative.")                 # custom only
+    return age
+
+for value in ["25", "abc", "-5"]:
+    try:
+        print(parse_age(value))
+    except InvalidAgeError as error:
+        print(error, "| cause:", repr(error.__cause__))
+
+# 25
+# Age must be a whole number. | cause: ValueError("invalid literal for int() with base 10: 'abc'")
+# Age cannot be negative. | cause: None
+```
+
+**Code example 2: what developers write every day**
+
+A payment service uses one family of custom exceptions. A business rule failure is raised by itself. A network failure from the bank is chained, so the real cause is kept for logs.
+
+```python
+class PaymentError(Exception):                 # base custom exception
+    pass
+
+class InsufficientBalanceError(PaymentError):  # business rule failed
+    pass
+
+class PaymentGatewayError(PaymentError):       # outside service failed
+    pass
+
+def call_gateway(amount):
+    raise ConnectionError("Connection to bank timed out")   # simulate bank outage
+
+def pay(balance, amount):
+    if amount > balance:
+        raise InsufficientBalanceError(f"Balance {balance} is less than {amount}.")  # custom only
+    try:
+        return call_gateway(amount)
+    except ConnectionError as error:
+        raise PaymentGatewayError("Payment service is down. Try again later.") from error  # custom + chaining
+
+for balance, amount in [(100, 500), (1000, 500)]:
+    try:
+        pay(balance, amount)
+    except PaymentError as error:
+        print(type(error).__name__, "-", error, "| cause:", repr(error.__cause__))
+
+# InsufficientBalanceError - Balance 100 is less than 500. | cause: None
+# PaymentGatewayError - Payment service is down. Try again later. | cause: ConnectionError('Connection to bank timed out')
+```
+
+In a FastAPI app, the endpoint maps `InsufficientBalanceError` to `400 Bad Request` and `PaymentGatewayError` to `503 Service Unavailable`. Catching the base `PaymentError` handles both in one place.
 
 **Real-life example:** "Delivery delayed" is the custom name for the problem. Noting "because the truck broke down" is the chaining: it links the problem to its cause.
 
@@ -17839,7 +17959,88 @@ Use `with` when a ready-made context manager exists. Use `finally` for one-off c
 
 ### Asyncio
 
-**E39.** How do `async` and `await` work in Python?
+**E39.** What is the difference between `async` and `await`?
+
+<details>
+<summary>Answer</summary>
+
+`async` and `await` are a team, but they do different jobs:
+
+| | `async` | `await` |
+|---|---|---|
+| What it does | Marks a function as one that can pause (a coroutine) | Pauses here until the result is ready, and lets other tasks run meanwhile |
+| Where you write it | Before `def`: `async def` | Inside an `async def` function only |
+| Calling it alone | Calling an `async` function does **not** run it. It just gives back a coroutine object | `await` is what actually runs the coroutine and gives you its result |
+| Think of it as | "This job may have to wait" | "Wait for this job here" |
+
+In short: `async` **defines** a function that can wait. `await` **does** the waiting.
+
+**Code example 1: easy to understand**
+
+```python
+import asyncio
+
+async def make_tea():           # async: this function can pause
+    print("Boiling water...")
+    await asyncio.sleep(1)      # await: wait 1 second without blocking
+    return "Tea is ready"
+
+async def main():
+    result = make_tea()         # no await: nothing runs yet
+    print(result)               # <coroutine object make_tea at ...>
+
+    result = await make_tea()   # with await: the function runs
+    print(result)               # Tea is ready
+
+asyncio.run(main())
+# <coroutine object make_tea at 0x...>
+# Boiling water...
+# Tea is ready
+```
+
+Without `await`, you only get a coroutine object, and Python warns "coroutine was never awaited". With `await`, the function runs and you get the real result.
+
+**Code example 2: what developers write every day** (needs `httpx`: `pip install httpx`)
+
+Call several APIs at the same time instead of one after another:
+
+```python
+import asyncio
+import httpx
+
+async def fetch_user(client, user_id):
+    response = await client.get(f"https://jsonplaceholder.typicode.com/users/{user_id}")
+    response.raise_for_status()
+    return response.json()["name"]
+
+async def main():
+    async with httpx.AsyncClient(timeout=10) as client:
+        names = await asyncio.gather(
+            fetch_user(client, 1),
+            fetch_user(client, 2),
+            fetch_user(client, 3),
+        )
+    print(names)
+
+asyncio.run(main())
+# ['Leanne Graham', 'Ervin Howell', 'Clementine Bauch']
+```
+
+All three requests wait for the network together, so the total time is about one request, not three. You see the same pattern in FastAPI (`async def` endpoints), database drivers, and LLM API calls.
+
+**Real-life example:** You order food on an app. Placing the order is `async`: you know the food will take time. Checking "Is my food here?" at the door is `await`: you wait for that result. While the food is on its way, you don't stand at the door; you watch TV or finish work. That's the waiting time used well.
+
+**What the interviewer expects:**
+- `async def` creates a coroutine function; calling it returns a coroutine and does not run it.
+- `await` runs a coroutine (or any awaitable) and pauses until it finishes, giving control back to the event loop.
+- `await` works only inside `async def` (except in the asyncio REPL or Jupyter).
+- Good for I/O-bound work (network, database, files), not CPU-heavy work.
+
+**Follow-ups:** What happens if you forget `await`? Why does `time.sleep()` inside an `async` function block everything? What is the difference between `await` one by one and `asyncio.gather()`?
+
+</details>
+
+**E40.** How do `async` and `await` work in Python?
 
 <details>
 <summary>Answer</summary>
