@@ -97,6 +97,235 @@ Expert trainers aren't magic. Most of what you see comes from preparation and ha
 
 **Whiteboard practice:** once a week, write 2–3 programs on paper with a pen (no editor and no autocomplete), explaining out loud as you go. Then type them in and run them. This is the closest practice to a whiteboard interview.
 
+### Skeleton patterns
+
+Most programs in this file are built from a few patterns. Learn the skeleton, then fill in the details. Every skeleton below runs as it is.
+
+**1. Class and object creation**
+
+```python
+class ClassName:
+    def __init__(self, value):
+        self.value = value            # store the data
+
+    def method(self):
+        pass                          # fill in: use self.value
+
+
+obj = ClassName("data")               # create the object
+obj.method()                          # call a method
+```
+
+Used in: Programs 1, 3, 9, 11, 14, 25, 26, 27, 30
+
+**2. Inheritance with `super()`**
+
+```python
+class Parent:
+    def __init__(self, name):
+        self.name = name
+
+
+class Child(Parent):
+    def __init__(self, name, extra):
+        super().__init__(name)        # parent stores its part
+        self.extra = extra            # child stores its own part
+
+    def method(self):
+        pass                          # fill in: child's own behaviour
+```
+
+Used in: Programs 4–8, 13, 15, 21, 29, 39
+
+**3. Class method (another way to create an object)**
+
+```python
+class ClassName:
+    def __init__(self, a, b):
+        self.a = a
+        self.b = b
+
+    @classmethod
+    def from_dict(cls, data):
+        return cls(data["a"], data["b"])    # builds and returns a new object
+
+    @staticmethod
+    def helper(x):
+        return x                            # fill in: needs no self or cls
+```
+
+Used in: Programs 17, 19, 24, 35, 36, 37
+
+**4. Validate, then raise**
+
+```python
+class ClassName:
+    def __init__(self, value):
+        if not value:                                 # fill in: the rule
+            raise ValueError("value is required")     # stop with a clear message
+        self.value = value
+```
+
+Used in: Programs 24, 34
+
+**5. Exception handling: `try` / `except` / `else` / `finally`**
+
+```python
+try:
+    result = 10 / 2                   # risky code
+except ZeroDivisionError as error:
+    print("Error:", error)            # runs only if it fails
+else:
+    print("Result:", result)          # runs only if it works
+finally:
+    print("Done")                     # always runs: cleanup
+```
+
+**6. Custom exception and chaining**
+
+```python
+class AppError(Exception):
+    pass                              # uses Exception's __init__
+
+
+def do_work(text):
+    try:
+        return int(text)              # low-level step that may fail
+    except ValueError as error:
+        raise AppError("clear message for the app") from error   # keep the cause
+
+
+try:
+    do_work("abc")
+except AppError as error:
+    print(error, "| cause:", repr(error.__cause__))
+```
+
+Used in: Programs 29, 33
+
+**7. Decorator**
+
+```python
+from functools import wraps
+
+
+def my_decorator(function):
+    @wraps(function)                  # keeps the original name
+    def wrapper(*args, **kwargs):
+        # fill in: work before the call
+        result = function(*args, **kwargs)
+        # fill in: work after the call
+        return result
+    return wrapper
+
+
+@my_decorator
+def greet(name):
+    return f"Hello, {name}"
+
+
+print(greet("Asha"))
+```
+
+**8. Decorator that takes an argument**
+
+```python
+from functools import wraps
+
+
+def repeat(times):                    # outer: takes the argument
+    def decorator(function):          # middle: takes the function
+        @wraps(function)
+        def wrapper(*args, **kwargs):     # inner: runs on every call
+            for _ in range(times):
+                result = function(*args, **kwargs)
+            return result
+        return wrapper
+    return decorator
+
+
+@repeat(times=3)
+def ping():
+    print("ping")
+
+
+ping()
+```
+
+**9. Context manager (`with`)**
+
+```python
+class Resource:
+    def __enter__(self):
+        print("setup")                # fill in: open, connect, lock
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        print("cleanup")              # fill in: close, disconnect, unlock
+        return False                  # False: don't hide errors
+
+
+with Resource() as resource:
+    print("working")
+```
+
+**10. Generator**
+
+```python
+def generate(items):
+    for item in items:
+        if item:                      # fill in: the condition
+            yield item                # hand out one value, then pause
+
+
+for value in generate(["a", "", "b"]):
+    print(value)
+```
+
+**11. Dataclass with validation**
+
+```python
+from dataclasses import dataclass, field
+
+
+@dataclass
+class Record:
+    name: str
+    score: int = 0
+    tags: list = field(default_factory=list)   # safe default for a list
+
+    def __post_init__(self):
+        if self.score < 0:                     # fill in: the rule
+            raise ValueError("score cannot be negative")
+
+
+print(Record("Asha", 90))
+```
+
+**12. Mixin**
+
+```python
+class FeatureMixin:
+    def feature(self):
+        return f"feature for {self.name}"     # small extra ability
+
+
+class Base:
+    def __init__(self, name):
+        self.name = name
+
+
+class MyClass(FeatureMixin, Base):            # mixin goes first
+    pass
+
+
+print(MyClass("Asha").feature())
+```
+
+Used in: Programs 22, 40
+
+**How to use these:** when you read a Task, first ask "which pattern is this?" Write that skeleton, run it, then fill in the details one method at a time.
+
 ### Tips to make fewer mistakes
 
 **While planning**
