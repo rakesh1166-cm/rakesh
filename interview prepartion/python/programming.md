@@ -889,3 +889,122 @@ A
 **Fact (why this program):** Python follows the MRO `D → B → C → A`, and each class runs **once**. `super()` in `B` goes to `C`, not straight to `A`.
 
 </details>
+
+## Program 24
+
+**Task:** Write a Python program that creates a database configuration from either direct inputs or an environment settings dictionary. Create a `DatabaseConfig` class that stores `host` and `port`, and rejects a port outside `1`–`65535`. Add a class method `from_env(env)` that reads `DB_HOST` (default `"localhost"`) and `DB_PORT` (default `"5432"`) from a dictionary. Build one config from `{"DB_HOST": "db.internal", "DB_PORT": "5432"}`, one from an empty dictionary, and try to create one directly with port `99999`.
+
+*From E1: Can `__init__()` return a value such as an integer, or must it return `None`?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Create a `DatabaseConfig` class.
+2. In `__init__`, take `host` and `port`.
+3. Check that `port` is between 1 and 65535.
+4. If it isn't, raise `ValueError("Invalid port: <port>")`.
+5. If it is, store `host` and `port` on the object.
+6. Add a class method `from_env(env)`.
+7. In `from_env`, read `DB_HOST` from `env`, or use `"localhost"`.
+8. Read `DB_PORT` from `env`, or use `"5432"`, and convert it to `int`.
+9. Return a new object with `cls(host, port)`, which runs the same validation.
+10. Build a config from the environment dictionary and print it.
+11. Build a config from an empty dictionary and print the defaults.
+12. Try `DatabaseConfig("db.internal", 99999)` and print the error.
+
+**Program flow**
+
+```text
+from_env({"DB_HOST": "db.internal", "DB_PORT": "5432"})
+  ├─ DB_HOST found → host = "db.internal"
+  ├─ DB_PORT found → port = int("5432") = 5432
+  └─ cls(host, port) → __init__
+        └─ 1 <= 5432 <= 65535? YES → store values → print "db.internal 5432"
+
+from_env({})
+  ├─ DB_HOST missing → host = "localhost"
+  ├─ DB_PORT missing → port = int("5432") = 5432
+  └─ cls(host, port) → __init__
+        └─ 1 <= 5432 <= 65535? YES → store values → print "localhost 5432"
+
+DatabaseConfig("db.internal", 99999)       (direct input)
+  └─ __init__
+        └─ 1 <= 99999 <= 65535? NO → raise ValueError
+              └─ except block → print "Invalid port: 99999"
+```
+
+**Pseudocode**
+
+```text
+CLASS DatabaseConfig
+    FUNCTION init(host, port)
+        IF port < 1 OR port > 65535 THEN
+            RAISE ValueError "Invalid port: " + port
+        ELSE
+            SET self.host = host
+            SET self.port = port
+        END IF
+    END FUNCTION
+
+    CLASS METHOD from_env(env)
+        IF "DB_HOST" is in env THEN host = env["DB_HOST"] ELSE host = "localhost"
+        IF "DB_PORT" is in env THEN port = env["DB_PORT"] ELSE port = "5432"
+        CONVERT port to integer
+        RETURN new DatabaseConfig(host, port)      // validation runs again here
+    END METHOD
+END CLASS
+
+config = DatabaseConfig.from_env({DB_HOST: "db.internal", DB_PORT: "5432"})
+PRINT config.host, config.port                    // db.internal 5432
+
+default = DatabaseConfig.from_env({})
+PRINT default.host, default.port                  // localhost 5432
+
+TRY
+    DatabaseConfig("db.internal", 99999)
+CATCH ValueError AS error
+    PRINT error                                   // Invalid port: 99999
+END TRY
+```
+
+**Code**
+
+```python
+class DatabaseConfig:
+    def __init__(self, host, port):
+        if not 1 <= port <= 65535:
+            raise ValueError(f"Invalid port: {port}")   # report problems by raising, not returning
+        self.host = host
+        self.port = port
+
+    @classmethod
+    def from_env(cls, env):
+        # Need to build and return an object in a special way? Use a class method.
+        return cls(env.get("DB_HOST", "localhost"), int(env.get("DB_PORT", "5432")))
+
+
+config = DatabaseConfig.from_env({"DB_HOST": "db.internal", "DB_PORT": "5432"})
+print(config.host, config.port)   # db.internal 5432
+
+default = DatabaseConfig.from_env({})
+print(default.host, default.port)   # localhost 5432
+
+try:
+    DatabaseConfig("db.internal", 99999)
+except ValueError as error:
+    print(error)   # Invalid port: 99999
+```
+
+**Output:**
+
+```text
+db.internal 5432
+localhost 5432
+Invalid port: 99999
+```
+
+**Fact (why this program):** `__init__` must return `None`, so it reports bad input by **raising** an error, not by returning an error code. When you need to build and return an object in a special way, such as from environment settings, use a class method. It calls `cls(...)`, so `__init__` still validates the port.
+
+</details>
