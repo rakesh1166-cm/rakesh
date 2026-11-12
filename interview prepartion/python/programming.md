@@ -448,6 +448,98 @@ blue
 
 ### Program 2
 
+**Task:** Create a `Rectangle` class that stores a `length`. Add `get_length()`, which needs no arguments, and `area(width)`, which needs a width. Create a rectangle of length 10 and print its length and its area for width 5.
+
+*From E9: When calling a method on a Python class or object, how do you decide which arguments to pass and which ones Python supplies automatically?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Create a `Rectangle` class whose `__init__` stores `length`.
+2. `get_length()` returns `self.length` (no arguments).
+3. `area(width)` returns `self.length * width`.
+4. Create `Rectangle(10)`.
+5. Print `get_length()` and `area(5)`.
+
+**Program flow**
+
+```text
+rectangle.get_length() → Python passes self only       → 10
+rectangle.area(5)      → Python passes self, you pass 5 → 10 * 5 = 50
+```
+
+**Pseudocode**
+
+```text
+CLASS Rectangle:
+    init(length):     self.length = length
+    get_length():     RETURN self.length
+    area(width):      RETURN self.length * width
+
+rectangle = Rectangle(10)
+PRINT rectangle.get_length()    // 10
+PRINT rectangle.area(5)         // 50
+```
+
+**Code**
+
+```python
+class Rectangle:
+    def __init__(self, length):
+        self.length = length
+
+    def get_length(self):
+        return self.length
+
+    def area(self, width):
+        return self.length * width
+
+
+rectangle = Rectangle(10)
+
+print(rectangle.get_length())  # 10
+print(rectangle.area(5))       # 50
+```
+
+**Output:**
+
+```text
+10
+50
+```
+
+**Another way:** store the result in a local variable before returning it, and use different values.
+
+```python
+class Rectangle:
+    def __init__(self, length):
+        self.length = length
+
+    def area(self, width):
+        area = self.length * width    # local variable: exists only inside this method
+        return area
+
+
+first = Rectangle(30)
+print(first.area(50))  # 1500
+```
+
+**Output:**
+
+```text
+1500
+```
+
+`return self.length * width` and the two-line version give the same result. The extra variable makes the code easier to read and to debug, because you can `print(area)` before returning. `area` here is a local variable, not `self.area`, so it isn't stored on the object.
+
+**Fact (why this program):** Look at the method's parameters. Python supplies `self` automatically, so `get_length()` gets nothing and `area()` gets only `width`.
+
+</details>
+
+### Program 3
+
 **Task:** Create a `Student` class that stores a `name`. Add a method `same_as(other)` that returns `True` if `other` is the same object as `self`. Create a student `"Asha"` and check `first.same_as(first)`.
 
 *From E4: What do you mean by `self` and instance?*
@@ -505,7 +597,7 @@ True
 
 </details>
 
-### Program 3
+### Program 4
 
 **Task:** Show that a list written in the class body is shared by all objects, but a list created in `__init__` is not. Use a `Team` class with `members` (class level) and `tasks` (in `__init__`).
 
@@ -571,7 +663,7 @@ print(b.tasks)    # []: not shared
 
 </details>
 
-### Program 4
+### Program 5
 
 **Task:** Create a `BankAccount` class with `owner`, `balance`, and a `history` list. Add methods to read the balance, deposit, withdraw, change the owner, read the owner, and read the history. Start with `"Asha"` and 1000, then run each method once.
 
@@ -669,11 +761,13 @@ Ben
 
 </details>
 
+## Alternative-Single class with methods
+
 ## Single class: default arguments
 
 One class, no extra methods. Practise required and default `__init__` arguments.
 
-### Program 5
+### Program 6
 
 **Task:** Create a `Student` class with three attributes: `name`, `age`, and `city`. Require `name` and `age` when creating an object, and use `"Delhi"` as the default city.
 
@@ -738,11 +832,13 @@ Mumbai
 
 </details>
 
+## Alternative-Single class: default arguments
+
 ## Inheritance
 
 A parent and a child class, from simplest to hardest.
 
-### Program 6
+### Program 7
 
 **Task:** Create an `Animal` class with an `eat()` method. Create a `Dog` subclass of `Animal` with its own `bark()` method. Create a dog and call both methods.
 
@@ -805,7 +901,7 @@ woof
 
 </details>
 
-### Program 7
+### Program 8
 
 **Task:** Create a `Vehicle` class that stores a `brand`. Create a `Car` class that inherits from `Vehicle` and has **no** `__init__`. Create a car with brand `"Toyota"` and print its brand.
 
@@ -863,7 +959,7 @@ Toyota
 
 </details>
 
-### Program 8
+### Program 9
 
 **Task:** Create a `Vehicle` class that stores a `brand`. Create a `Truck` child class whose `__init__` takes `brand` and `load`, with `"10 tons"` as the default load. Create one truck without a load and one with `"20 tons"`.
 
@@ -931,7 +1027,9 @@ print(t2.load)  # 20 tons
 
 </details>
 
-### Program 9
+## Alternative-Inheritance
+
+### Program 10
 
 **Task:** Create a `Vehicle` class with `brand` and an optional `color` (default `"white"`). Create an `ElectricCar` child class that takes `battery` and forwards everything else to the parent using `*args, **kwargs`. Create a red Tesla with a 75 kWh battery.
 
@@ -1002,7 +1100,7 @@ print(ev.battery, ev.brand, ev.color)  # 75 kWh Tesla red
 
 The remaining programs, in their original order.
 
-### Program 10
+### Program 11
 
 **Task:** Create a `Vehicle` class that stores a `brand`. Create a `Car` child class whose `__init__` takes `brand` and `seats`, sends `brand` to the parent with `super()`, and stores `seats` itself. Create a Honda with 5 seats and print both values.
 
@@ -1067,7 +1165,7 @@ Honda 5
 
 </details>
 
-### Program 11
+### Program 12
 
 **Task:** Create a `Vehicle` class that stores a `brand`. Create a `Bike` child class whose `__init__` takes only `gears` and does **not** call `super()`. Create a bike with 21 gears and check whether it has a `brand`.
 
@@ -1132,7 +1230,7 @@ False
 
 </details>
 
-### Program 12
+### Program 13
 
 **Task:** Create a `Coffee` class with `name` and `size`, where `size` defaults to `"medium"`. Create a Latte without a size and a Mocha with `"large"`, and print both sizes.
 
@@ -1193,7 +1291,7 @@ large
 
 </details>
 
-### Program 13
+### Program 14
 
 **Task:** Create a `Team` class with a class-level list `members` and an instance list `tasks` created in `__init__`. Create two teams, add `"Asha"` to `a.members` and `"report"` to `a.tasks`, then print team `b`'s two lists.
 
@@ -1259,98 +1357,6 @@ print(b.tasks)    # []: not shared
 ```
 
 **Fact (why this program):** You add to an instance list with `append()`, like `a.tasks.append("report")`. Because `tasks` is created in `__init__`, only team `a` changes. `members` lives on the class, so `b` sees `"Asha"` too.
-
-</details>
-
-### Program 14
-
-**Task:** Create a `Rectangle` class that stores a `length`. Add `get_length()`, which needs no arguments, and `area(width)`, which needs a width. Create a rectangle of length 10 and print its length and its area for width 5.
-
-*From E9: When calling a method on a Python class or object, how do you decide which arguments to pass and which ones Python supplies automatically?*
-
-<details>
-<summary>Answer</summary>
-
-**Steps**
-
-1. Create a `Rectangle` class whose `__init__` stores `length`.
-2. `get_length()` returns `self.length` (no arguments).
-3. `area(width)` returns `self.length * width`.
-4. Create `Rectangle(10)`.
-5. Print `get_length()` and `area(5)`.
-
-**Program flow**
-
-```text
-rectangle.get_length() → Python passes self only       → 10
-rectangle.area(5)      → Python passes self, you pass 5 → 10 * 5 = 50
-```
-
-**Pseudocode**
-
-```text
-CLASS Rectangle:
-    init(length):     self.length = length
-    get_length():     RETURN self.length
-    area(width):      RETURN self.length * width
-
-rectangle = Rectangle(10)
-PRINT rectangle.get_length()    // 10
-PRINT rectangle.area(5)         // 50
-```
-
-**Code**
-
-```python
-class Rectangle:
-    def __init__(self, length):
-        self.length = length
-
-    def get_length(self):
-        return self.length
-
-    def area(self, width):
-        return self.length * width
-
-
-rectangle = Rectangle(10)
-
-print(rectangle.get_length())  # 10
-print(rectangle.area(5))       # 50
-```
-
-**Output:**
-
-```text
-10
-50
-```
-
-**Another way:** store the result in a local variable before returning it, and use different values.
-
-```python
-class Rectangle:
-    def __init__(self, length):
-        self.length = length
-
-    def area(self, width):
-        area = self.length * width    # local variable: exists only inside this method
-        return area
-
-
-first = Rectangle(30)
-print(first.area(50))  # 1500
-```
-
-**Output:**
-
-```text
-1500
-```
-
-`return self.length * width` and the two-line version give the same result. The extra variable makes the code easier to read and to debug, because you can `print(area)` before returning. `area` here is a local variable, not `self.area`, so it isn't stored on the object.
-
-**Fact (why this program):** Look at the method's parameters. Python supplies `self` automatically, so `get_length()` gets nothing and `area()` gets only `width`.
 
 </details>
 
