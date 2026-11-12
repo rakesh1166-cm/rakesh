@@ -834,6 +834,67 @@ Mumbai
 
 ## Alternative-Single class: default arguments
 
+### Program 13
+
+**Task:** Create a `Coffee` class with `name` and `size`, where `size` defaults to `"medium"`. Create a Latte without a size and a Mocha with `"large"`, and print both sizes.
+
+*From E7: How do you set a default value for a parameter in Python's `__init__` method, and what happens when you pass a different value while creating an object?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Create a `Coffee` class.
+2. `__init__` takes `name` and `size` → default `"medium"`.
+3. Create `Coffee("Latte")` and `Coffee("Mocha", "large")`.
+4. Print both sizes.
+
+**Program flow**
+
+```text
+Coffee("Latte")          → size not passed → "medium"
+Coffee("Mocha", "large") → size passed     → "large"
+```
+
+**Pseudocode**
+
+```text
+CLASS Coffee:
+    init(name, size = "medium"):  store name, size
+
+c1 = Coffee("Latte")
+c2 = Coffee("Mocha", "large")
+PRINT c1.size    // medium
+PRINT c2.size    // large
+```
+
+**Code**
+
+```python
+class Coffee:
+    def __init__(self, name, size="medium"):
+        self.name = name
+        self.size = size
+
+c1 = Coffee("Latte")            # size not passed
+c2 = Coffee("Mocha", "large")   # size passed
+
+print(c1.size)  # medium: default used
+print(c2.size)  # large: default replaced
+```
+
+**Output:**
+
+```text
+medium
+large
+```
+
+**Fact (why this program):** A default is written with `=` in `__init__`. Leave it out and the default is used; pass a value and it replaces the default **for that object only**.
+
+</details>
+
 ## Inheritance
 
 A parent and a child class, from simplest to hardest.
@@ -954,6 +1015,27 @@ print(car.brand)  # Toyota
 ```text
 Toyota
 ```
+
+**Another way:** create the object and read its attribute in one line, without storing it in a variable.
+
+```python
+class Vehicle:
+    def __init__(self, brand):
+        self.brand = brand
+
+class Car(Vehicle):
+    pass
+
+print(Car("Toyota").brand)  # Toyota
+```
+
+**Output:**
+
+```text
+Toyota
+```
+
+`Car("Toyota")` creates the object, and `.brand` reads its attribute straight away. Use this for a quick one-time check. Store it in a variable (`car = Car("Toyota")`) when you'll use the object again.
 
 **Fact (why this program):** **Scenario 1:** the child has no `__init__`, so Python runs the parent's `__init__`. That's why you pass the **parent's** arguments (`brand`).
 
@@ -1165,132 +1247,6 @@ Honda 5
 
 The remaining programs, in their original order.
 
-### Program 12
-
-**Task:** Create a `Vehicle` class that stores a `brand`. Create a `Bike` child class whose `__init__` takes only `gears` and does **not** call `super()`. Create a bike with 21 gears and check whether it has a `brand`.
-
-*From E6, scenario 3: When creating an object of a child class in Python, how do you decide which arguments to pass?*
-
-<details>
-<summary>Answer</summary>
-
-**Steps**
-
-1. Create a `Vehicle` class whose `__init__` stores `brand`.
-2. Create `Bike(Vehicle)` whose `__init__` takes only `gears`.
-3. Store `gears`, and don't call `super()`.
-4. Create `Bike(21)`.
-5. Print `gears` and `hasattr(bike, "brand")`.
-
-**Program flow**
-
-```text
-Bike(21)                → Bike.__init__ only → gears = 21, parent init skipped
-bike.gears              →                    → 21
-hasattr(bike, "brand")  → brand never set    → False
-```
-
-**Pseudocode**
-
-```text
-CLASS Vehicle:
-    init(brand):  self.brand = brand
-CLASS Bike EXTENDS Vehicle:
-    init(gears):  self.gears = gears      // no parent init call
-
-bike = Bike(21)
-PRINT bike.gears                 // 21
-PRINT bike HAS "brand"?          // False
-```
-
-**Code**
-
-```python
-class Vehicle:
-    def __init__(self, brand):
-        self.brand = brand
-
-class Bike(Vehicle):
-    def __init__(self, gears):
-        self.gears = gears        # parent's __init__ never runs
-
-bike = Bike(21)
-print(bike.gears)                # 21
-print(hasattr(bike, "brand"))    # False: brand was never set
-```
-
-**Output:**
-
-```text
-21
-False
-```
-
-**Fact (why this program):** **Scenario 3:** the child's `__init__` replaces the parent's. Without `super().__init__()`, the parent's setup never runs, so `brand` is missing.
-
-</details>
-
-### Program 13
-
-**Task:** Create a `Coffee` class with `name` and `size`, where `size` defaults to `"medium"`. Create a Latte without a size and a Mocha with `"large"`, and print both sizes.
-
-*From E7: How do you set a default value for a parameter in Python's `__init__` method, and what happens when you pass a different value while creating an object?*
-
-<details>
-<summary>Answer</summary>
-
-**Steps**
-
-1. Create a `Coffee` class.
-2. `__init__` takes `name` and `size` → default `"medium"`.
-3. Create `Coffee("Latte")` and `Coffee("Mocha", "large")`.
-4. Print both sizes.
-
-**Program flow**
-
-```text
-Coffee("Latte")          → size not passed → "medium"
-Coffee("Mocha", "large") → size passed     → "large"
-```
-
-**Pseudocode**
-
-```text
-CLASS Coffee:
-    init(name, size = "medium"):  store name, size
-
-c1 = Coffee("Latte")
-c2 = Coffee("Mocha", "large")
-PRINT c1.size    // medium
-PRINT c2.size    // large
-```
-
-**Code**
-
-```python
-class Coffee:
-    def __init__(self, name, size="medium"):
-        self.name = name
-        self.size = size
-
-c1 = Coffee("Latte")            # size not passed
-c2 = Coffee("Mocha", "large")   # size passed
-
-print(c1.size)  # medium: default used
-print(c2.size)  # large: default replaced
-```
-
-**Output:**
-
-```text
-medium
-large
-```
-
-**Fact (why this program):** A default is written with `=` in `__init__`. Leave it out and the default is used; pass a value and it replaces the default **for that object only**.
-
-</details>
-
 ### Program 14
 
 **Task:** Create a `Team` class with a class-level list `members` and an instance list `tasks` created in `__init__`. Create two teams, add `"Asha"` to `a.members` and `"report"` to `a.tasks`, then print team `b`'s two lists.
@@ -1357,62 +1313,6 @@ print(b.tasks)    # []: not shared
 ```
 
 **Fact (why this program):** You add to an instance list with `append()`, like `a.tasks.append("report")`. Because `tasks` is created in `__init__`, only team `a` changes. `members` lives on the class, so `b` sees `"Asha"` too.
-
-</details>
-
-### Program 15
-
-**Task:** Create a `Parent` class that stores a `name`. Create a `Child` class that inherits from `Parent` and has no `__init__` (use `pass`). Create a child named `"Asha"` and print its name.
-
-*From E11: Can a child class use its parent class's `__init__()` if it doesn't define its own?*
-
-<details>
-<summary>Answer</summary>
-
-**Steps**
-
-1. Create a `Parent` class whose `__init__` stores `name`.
-2. Create `Child(Parent)` with no `__init__` (`pass`).
-3. Create `Child("Asha")` → the parent's `__init__` runs.
-4. Print `name`.
-
-**Program flow**
-
-```text
-Child("Asha") → Child has no __init__ → Parent.__init__ runs → name = "Asha"
-.name         →                                              → "Asha"
-```
-
-**Pseudocode**
-
-```text
-CLASS Parent:
-    init(name):  self.name = name
-CLASS Child EXTENDS Parent:  (nothing)
-
-PRINT Child("Asha").name    // Asha
-```
-
-**Code**
-
-```python
-class Parent:
-    def __init__(self, name):
-        self.name = name
-
-class Child(Parent):
-    pass
-
-print(Child("Asha").name)  # Asha
-```
-
-**Output:**
-
-```text
-Asha
-```
-
-**Fact (why this program):** If a child doesn't define `__init__`, Python uses the parent's automatically. If the child writes its own, call `super().__init__()` to keep the parent's setup.
 
 </details>
 
