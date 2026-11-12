@@ -1027,8 +1027,6 @@ print(t2.load)  # 20 tons
 
 </details>
 
-## Alternative-Inheritance
-
 ### Program 10
 
 **Task:** Create a `Vehicle` class with `brand` and an optional `color` (default `"white"`). Create an `ElectricCar` child class that takes `battery` and forwards everything else to the parent using `*args, **kwargs`. Create a red Tesla with a 75 kWh battery.
@@ -1096,9 +1094,7 @@ print(ev.battery, ev.brand, ev.color)  # 75 kWh Tesla red
 
 </details>
 
-## More programs
-
-The remaining programs, in their original order.
+## Alternative-Inheritance
 
 ### Program 11
 
@@ -1164,6 +1160,10 @@ Honda 5
 **Fact (why this program):** **Scenario 2:** the child has its own `__init__` and calls `super().__init__()`. You pass the **child's** arguments; the child hands the parent its part.
 
 </details>
+
+## More programs
+
+The remaining programs, in their original order.
 
 ### Program 12
 
