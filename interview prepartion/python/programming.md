@@ -326,6 +326,8 @@ Used in: Programs 22, 40
 
 **How to use these:** when you read a Task, first ask "which pattern is this?" Write that skeleton, run it, then fill in the details one method at a time.
 
+When you're comfortable with the programs, move on to the bigger [20 Project Skeletons](#20-project-skeletons) at the end of this file.
+
 ### Tips to make fewer mistakes
 
 **While planning**
@@ -374,7 +376,11 @@ Used in: Programs 22, 40
 
 ---
 
-## Program 1
+## Single class with methods
+
+One class, no inheritance. Each program adds methods that read or change the object.
+
+### Program 1
 
 **Task:** Create a `Car` class that stores a `color`. Add a `show()` method that returns the color. Create a red car and a blue car, and print each car's color using `show()`.
 
@@ -440,7 +446,7 @@ blue
 
 </details>
 
-## Program 2
+### Program 2
 
 **Task:** Create a `Student` class that stores a `name`. Add a method `same_as(other)` that returns `True` if `other` is the same object as `self`. Create a student `"Asha"` and check `first.same_as(first)`.
 
@@ -499,593 +505,7 @@ True
 
 </details>
 
-## Program 3
-
-**Task:** Create a `Student` class with three attributes: `name`, `age`, and `city`. Require `name` and `age` when creating an object, and use `"Delhi"` as the default city.
-
-*From E5: When creating an object in Python, how do you know which arguments to pass to the class?*
-
-<details>
-<summary>Answer</summary>
-
-**Steps**
-
-1. Create a `Student` class.
-2. `__init__` takes `name`, `age` (required) and `city` → default `"Delhi"`.
-3. Store all three on `self`.
-4. Create `a` without a city and `b` with `"Mumbai"`.
-5. Print both cities.
-
-**Program flow**
-
-```text
-Student("Asha", 21)            → city not passed → default "Delhi"
-Student("Ravi", 22, "Mumbai")  → city passed     → "Mumbai"
-print(a.city), print(b.city)   →                 → "Delhi", "Mumbai"
-```
-
-**Pseudocode**
-
-```text
-CLASS Student:
-    init(name, age, city = "Delhi"):
-        store name, age, city
-
-a = Student("Asha", 21)
-b = Student("Ravi", 22, "Mumbai")
-PRINT a.city    // Delhi
-PRINT b.city    // Mumbai
-```
-
-**Code**
-
-```python
-class Student:
-    def __init__(self, name, age, city="Delhi"):
-        self.name = name
-        self.age = age
-        self.city = city
-
-a = Student("Asha", 21)            # name and age are required
-b = Student("Ravi", 22, "Mumbai")  # city is optional
-
-print(a.city)  # Delhi: default used
-print(b.city)  # Mumbai: default replaced
-```
-
-**Output:**
-
-```text
-Delhi
-Mumbai
-```
-
-**Fact (why this program):** You pass the arguments that `__init__` asks for: required ones always, default ones only if you want to change them. Python passes `self` for you.
-
-</details>
-
-## Program 4
-
-**Task:** Create a `Vehicle` class that stores a `brand`. Create a `Car` class that inherits from `Vehicle` and has **no** `__init__`. Create a car with brand `"Toyota"` and print its brand.
-
-*From E6, scenario 1: When creating an object of a child class in Python, how do you decide which arguments to pass?*
-
-<details>
-<summary>Answer</summary>
-
-**Steps**
-
-1. Create a `Vehicle` class whose `__init__` stores `brand`.
-2. Create `Car(Vehicle)` with no `__init__` (`pass`).
-3. Create `Car("Toyota")` → the parent's `__init__` runs.
-4. Print `car.brand`.
-
-**Program flow**
-
-```text
-Car("Toyota")  → Car has no __init__ → Vehicle.__init__ runs → brand = "Toyota"
-car.brand      →                                             → "Toyota"
-```
-
-**Pseudocode**
-
-```text
-CLASS Vehicle:
-    init(brand):  self.brand = brand
-CLASS Car EXTENDS Vehicle:  (nothing)
-
-car = Car("Toyota")     // uses Vehicle's init
-PRINT car.brand         // Toyota
-```
-
-**Code**
-
-```python
-class Vehicle:
-    def __init__(self, brand):
-        self.brand = brand
-
-class Car(Vehicle):
-    pass
-
-car = Car("Toyota")        # Vehicle needs brand
-print(car.brand)  # Toyota
-```
-
-**Output:**
-
-```text
-Toyota
-```
-
-**Fact (why this program):** **Scenario 1:** the child has no `__init__`, so Python runs the parent's `__init__`. That's why you pass the **parent's** arguments (`brand`).
-
-</details>
-
-## Program 5
-
-**Task:** Create a `Vehicle` class that stores a `brand`. Create a `Car` child class whose `__init__` takes `brand` and `seats`, sends `brand` to the parent with `super()`, and stores `seats` itself. Create a Honda with 5 seats and print both values.
-
-*From E6, scenario 2: When creating an object of a child class in Python, how do you decide which arguments to pass?*
-
-<details>
-<summary>Answer</summary>
-
-**Steps**
-
-1. Create a `Vehicle` class whose `__init__` stores `brand`.
-2. Create `Car(Vehicle)` whose `__init__` takes `brand` and `seats`.
-3. Send `brand` to the parent with `super().__init__(brand)`.
-4. Store `seats` in the child.
-5. Create `Car("Honda", 5)` and print both values.
-
-**Program flow**
-
-```text
-Car("Honda", 5) → Car.__init__ → super().__init__("Honda") → brand = "Honda"
-                               → self.seats = 5
-print           →                                          → "Honda 5"
-```
-
-**Pseudocode**
-
-```text
-CLASS Vehicle:
-    init(brand):  self.brand = brand
-CLASS Car EXTENDS Vehicle:
-    init(brand, seats):
-        CALL parent init(brand)
-        self.seats = seats
-
-car = Car("Honda", 5)
-PRINT car.brand, car.seats    // Honda 5
-```
-
-**Code**
-
-```python
-class Vehicle:
-    def __init__(self, brand):
-        self.brand = brand
-
-class Car(Vehicle):
-    def __init__(self, brand, seats):
-        super().__init__(brand)   # parent sets brand
-        self.seats = seats        # child sets seats
-
-car = Car("Honda", 5)
-print(car.brand, car.seats)  # Honda 5
-```
-
-**Output:**
-
-```text
-Honda 5
-```
-
-**Fact (why this program):** **Scenario 2:** the child has its own `__init__` and calls `super().__init__()`. You pass the **child's** arguments; the child hands the parent its part.
-
-</details>
-
-## Program 6
-
-**Task:** Create a `Vehicle` class that stores a `brand`. Create a `Bike` child class whose `__init__` takes only `gears` and does **not** call `super()`. Create a bike with 21 gears and check whether it has a `brand`.
-
-*From E6, scenario 3: When creating an object of a child class in Python, how do you decide which arguments to pass?*
-
-<details>
-<summary>Answer</summary>
-
-**Steps**
-
-1. Create a `Vehicle` class whose `__init__` stores `brand`.
-2. Create `Bike(Vehicle)` whose `__init__` takes only `gears`.
-3. Store `gears`, and don't call `super()`.
-4. Create `Bike(21)`.
-5. Print `gears` and `hasattr(bike, "brand")`.
-
-**Program flow**
-
-```text
-Bike(21)                → Bike.__init__ only → gears = 21, parent init skipped
-bike.gears              →                    → 21
-hasattr(bike, "brand")  → brand never set    → False
-```
-
-**Pseudocode**
-
-```text
-CLASS Vehicle:
-    init(brand):  self.brand = brand
-CLASS Bike EXTENDS Vehicle:
-    init(gears):  self.gears = gears      // no parent init call
-
-bike = Bike(21)
-PRINT bike.gears                 // 21
-PRINT bike HAS "brand"?          // False
-```
-
-**Code**
-
-```python
-class Vehicle:
-    def __init__(self, brand):
-        self.brand = brand
-
-class Bike(Vehicle):
-    def __init__(self, gears):
-        self.gears = gears        # parent's __init__ never runs
-
-bike = Bike(21)
-print(bike.gears)                # 21
-print(hasattr(bike, "brand"))    # False: brand was never set
-```
-
-**Output:**
-
-```text
-21
-False
-```
-
-**Fact (why this program):** **Scenario 3:** the child's `__init__` replaces the parent's. Without `super().__init__()`, the parent's setup never runs, so `brand` is missing.
-
-</details>
-
-## Program 7
-
-**Task:** Create a `Vehicle` class that stores a `brand`. Create a `Truck` child class whose `__init__` takes `brand` and `load`, with `"10 tons"` as the default load. Create one truck without a load and one with `"20 tons"`.
-
-*From E6, scenario 4: When creating an object of a child class in Python, how do you decide which arguments to pass?*
-
-<details>
-<summary>Answer</summary>
-
-**Steps**
-
-1. Create a `Vehicle` class whose `__init__` stores `brand`.
-2. Create `Truck(Vehicle)` whose `__init__` takes `brand` and `load` → default `"10 tons"`.
-3. Send `brand` to the parent with `super()`, and store `load`.
-4. Create `t1` without a load and `t2` with `"20 tons"`.
-5. Print both loads.
-
-**Program flow**
-
-```text
-Truck("Tata")             → load not passed → default "10 tons"
-Truck("Volvo", "20 tons") → load passed     → "20 tons"
-print loads               →                 → "10 tons", "20 tons"
-```
-
-**Pseudocode**
-
-```text
-CLASS Truck EXTENDS Vehicle:
-    init(brand, load = "10 tons"):
-        CALL parent init(brand)
-        self.load = load
-
-t1 = Truck("Tata")
-t2 = Truck("Volvo", "20 tons")
-PRINT t1.load    // 10 tons
-PRINT t2.load    // 20 tons
-```
-
-**Code**
-
-```python
-class Vehicle:
-    def __init__(self, brand):
-        self.brand = brand
-
-class Truck(Vehicle):
-    def __init__(self, brand, load="10 tons"):
-        super().__init__(brand)
-        self.load = load
-
-t1 = Truck("Tata")               # load uses the default
-t2 = Truck("Volvo", "20 tons")   # load replaced
-print(t1.load)  # 10 tons
-print(t2.load)  # 20 tons
-```
-
-**Output:**
-
-```text
-10 tons
-20 tons
-```
-
-**Fact (why this program):** **Scenario 4:** default values in the child's `__init__` are optional. Pass only the required ones, or pass a new value to replace the default.
-
-</details>
-
-## Program 8
-
-**Task:** Create a `Vehicle` class with `brand` and an optional `color` (default `"white"`). Create an `ElectricCar` child class that takes `battery` and forwards everything else to the parent using `*args, **kwargs`. Create a red Tesla with a 75 kWh battery.
-
-*From E6, scenario 5: When creating an object of a child class in Python, how do you decide which arguments to pass?*
-
-<details>
-<summary>Answer</summary>
-
-**Steps**
-
-1. Create a `Vehicle` class whose `__init__` stores `brand` and `color` → default `"white"`.
-2. Create `ElectricCar(Vehicle)` whose `__init__` takes `battery, *args, **kwargs`.
-3. Forward `*args, **kwargs` to the parent with `super()`.
-4. Store `battery`.
-5. Create `ElectricCar("75 kWh", "Tesla", color="red")` and print all three values.
-
-**Program flow**
-
-```text
-ElectricCar("75 kWh", "Tesla", color="red")
-  → battery = "75 kWh", args = ("Tesla",), kwargs = {"color": "red"}
-  → super().__init__("Tesla", color="red") → brand = "Tesla", color = "red"
-print → "75 kWh Tesla red"
-```
-
-**Pseudocode**
-
-```text
-CLASS Vehicle:
-    init(brand, color = "white"):  store brand, color
-CLASS ElectricCar EXTENDS Vehicle:
-    init(battery, rest of arguments):
-        CALL parent init(rest of arguments)
-        self.battery = battery
-
-ev = ElectricCar("75 kWh", "Tesla", color = "red")
-PRINT ev.battery, ev.brand, ev.color    // 75 kWh Tesla red
-```
-
-**Code**
-
-```python
-class Vehicle:
-    def __init__(self, brand, color="white"):
-        self.brand = brand
-        self.color = color
-
-class ElectricCar(Vehicle):
-    def __init__(self, battery, *args, **kwargs):
-        super().__init__(*args, **kwargs)   # rest goes to the parent
-        self.battery = battery
-
-ev = ElectricCar("75 kWh", "Tesla", color="red")
-print(ev.battery, ev.brand, ev.color)  # 75 kWh Tesla red
-```
-
-**Output:**
-
-```text
-75 kWh Tesla red
-```
-
-**Fact (why this program):** **Scenario 5:** `*args, **kwargs` lets the child take its own argument and forward the rest to the parent, so you pass the parent's arguments plus the child's extra one.
-
-</details>
-
-## Program 9
-
-**Task:** Create a `Coffee` class with `name` and `size`, where `size` defaults to `"medium"`. Create a Latte without a size and a Mocha with `"large"`, and print both sizes.
-
-*From E7: How do you set a default value for a parameter in Python's `__init__` method, and what happens when you pass a different value while creating an object?*
-
-<details>
-<summary>Answer</summary>
-
-**Steps**
-
-1. Create a `Coffee` class.
-2. `__init__` takes `name` and `size` → default `"medium"`.
-3. Create `Coffee("Latte")` and `Coffee("Mocha", "large")`.
-4. Print both sizes.
-
-**Program flow**
-
-```text
-Coffee("Latte")          → size not passed → "medium"
-Coffee("Mocha", "large") → size passed     → "large"
-```
-
-**Pseudocode**
-
-```text
-CLASS Coffee:
-    init(name, size = "medium"):  store name, size
-
-c1 = Coffee("Latte")
-c2 = Coffee("Mocha", "large")
-PRINT c1.size    // medium
-PRINT c2.size    // large
-```
-
-**Code**
-
-```python
-class Coffee:
-    def __init__(self, name, size="medium"):
-        self.name = name
-        self.size = size
-
-c1 = Coffee("Latte")            # size not passed
-c2 = Coffee("Mocha", "large")   # size passed
-
-print(c1.size)  # medium: default used
-print(c2.size)  # large: default replaced
-```
-
-**Output:**
-
-```text
-medium
-large
-```
-
-**Fact (why this program):** A default is written with `=` in `__init__`. Leave it out and the default is used; pass a value and it replaces the default **for that object only**.
-
-</details>
-
-## Program 10
-
-**Task:** Create a `Team` class with a class-level list `members` and an instance list `tasks` created in `__init__`. Create two teams, add `"Asha"` to `a.members` and `"report"` to `a.tasks`, then print team `b`'s two lists.
-
-*From E8: How do you add an element to a list stored on an instance of a Python class?*
-
-<details>
-<summary>Answer</summary>
-
-**Steps**
-
-1. Create a `Team` class with a class-level list `members = []`.
-2. In `__init__`, create `self.tasks = []`.
-3. Create teams `a` and `b`.
-4. Append `"Asha"` to `a.members` and `"report"` to `a.tasks`.
-5. Print `b.members` and `b.tasks`.
-
-**Program flow**
-
-```text
-a.members.append("Asha")  → members is on the class → shared by a and b
-a.tasks.append("report")  → tasks is on a only      → b.tasks unchanged
-print(b.members)          →                         → ['Asha']
-print(b.tasks)            →                         → []
-```
-
-**Pseudocode**
-
-```text
-CLASS Team:
-    members = []                // one list for the class
-    init():  self.tasks = []    // new list for each object
-
-a = Team();  b = Team()
-ADD "Asha" TO a.members
-ADD "report" TO a.tasks
-PRINT b.members    // ['Asha']
-PRINT b.tasks      // []
-```
-
-**Code**
-
-```python
-class Team:
-    members = []              # shared by all
-
-    def __init__(self):
-        self.tasks = []       # separate for each object
-
-a = Team()
-b = Team()
-a.members.append("Asha")
-a.tasks.append("report")
-
-print(b.members)  # ['Asha']: shared
-print(b.tasks)    # []: not shared
-```
-
-**Output:**
-
-```text
-['Asha']
-[]
-```
-
-**Fact (why this program):** You add to an instance list with `append()`, like `a.tasks.append("report")`. Because `tasks` is created in `__init__`, only team `a` changes. `members` lives on the class, so `b` sees `"Asha"` too.
-
-</details>
-
-## Program 11
-
-**Task:** Create a `Rectangle` class that stores a `length`. Add `get_length()`, which needs no arguments, and `area(width)`, which needs a width. Create a rectangle of length 10 and print its length and its area for width 5.
-
-*From E9: When calling a method on a Python class or object, how do you decide which arguments to pass and which ones Python supplies automatically?*
-
-<details>
-<summary>Answer</summary>
-
-**Steps**
-
-1. Create a `Rectangle` class whose `__init__` stores `length`.
-2. `get_length()` returns `self.length` (no arguments).
-3. `area(width)` returns `self.length * width`.
-4. Create `Rectangle(10)`.
-5. Print `get_length()` and `area(5)`.
-
-**Program flow**
-
-```text
-rectangle.get_length() → Python passes self only       → 10
-rectangle.area(5)      → Python passes self, you pass 5 → 10 * 5 = 50
-```
-
-**Pseudocode**
-
-```text
-CLASS Rectangle:
-    init(length):     self.length = length
-    get_length():     RETURN self.length
-    area(width):      RETURN self.length * width
-
-rectangle = Rectangle(10)
-PRINT rectangle.get_length()    // 10
-PRINT rectangle.area(5)         // 50
-```
-
-**Code**
-
-```python
-class Rectangle:
-    def __init__(self, length):
-        self.length = length
-
-    def get_length(self):
-        return self.length
-
-    def area(self, width):
-        return self.length * width
-
-
-rectangle = Rectangle(10)
-
-print(rectangle.get_length())  # 10
-print(rectangle.area(5))       # 50
-```
-
-**Output:**
-
-```text
-10
-50
-```
-
-**Fact (why this program):** Look at the method's parameters. Python supplies `self` automatically, so `get_length()` gets nothing and `area()` gets only `width`.
-
-</details>
-
-## Program 12
+### Program 3
 
 **Task:** Show that a list written in the class body is shared by all objects, but a list created in `__init__` is not. Use a `Team` class with `members` (class level) and `tasks` (in `__init__`).
 
@@ -1151,63 +571,7 @@ print(b.tasks)    # []: not shared
 
 </details>
 
-## Program 13
-
-**Task:** Create a `Parent` class that stores a `name`. Create a `Child` class that inherits from `Parent` and has no `__init__` (use `pass`). Create a child named `"Asha"` and print its name.
-
-*From E11: Can a child class use its parent class's `__init__()` if it doesn't define its own?*
-
-<details>
-<summary>Answer</summary>
-
-**Steps**
-
-1. Create a `Parent` class whose `__init__` stores `name`.
-2. Create `Child(Parent)` with no `__init__` (`pass`).
-3. Create `Child("Asha")` → the parent's `__init__` runs.
-4. Print `name`.
-
-**Program flow**
-
-```text
-Child("Asha") → Child has no __init__ → Parent.__init__ runs → name = "Asha"
-.name         →                                              → "Asha"
-```
-
-**Pseudocode**
-
-```text
-CLASS Parent:
-    init(name):  self.name = name
-CLASS Child EXTENDS Parent:  (nothing)
-
-PRINT Child("Asha").name    // Asha
-```
-
-**Code**
-
-```python
-class Parent:
-    def __init__(self, name):
-        self.name = name
-
-class Child(Parent):
-    pass
-
-print(Child("Asha").name)  # Asha
-```
-
-**Output:**
-
-```text
-Asha
-```
-
-**Fact (why this program):** If a child doesn't define `__init__`, Python uses the parent's automatically. If the child writes its own, call `super().__init__()` to keep the parent's setup.
-
-</details>
-
-## Program 14
+### Program 4
 
 **Task:** Create a `BankAccount` class with `owner`, `balance`, and a `history` list. Add methods to read the balance, deposit, withdraw, change the owner, read the owner, and read the history. Start with `"Asha"` and 1000, then run each method once.
 
@@ -1305,7 +669,80 @@ Ben
 
 </details>
 
-## Program 15
+## Single class: default arguments
+
+One class, no extra methods. Practise required and default `__init__` arguments.
+
+### Program 5
+
+**Task:** Create a `Student` class with three attributes: `name`, `age`, and `city`. Require `name` and `age` when creating an object, and use `"Delhi"` as the default city.
+
+*From E5: When creating an object in Python, how do you know which arguments to pass to the class?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Create a `Student` class.
+2. `__init__` takes `name`, `age` (required) and `city` → default `"Delhi"`.
+3. Store all three on `self`.
+4. Create `a` without a city and `b` with `"Mumbai"`.
+5. Print both cities.
+
+**Program flow**
+
+```text
+Student("Asha", 21)            → city not passed → default "Delhi"
+Student("Ravi", 22, "Mumbai")  → city passed     → "Mumbai"
+print(a.city), print(b.city)   →                 → "Delhi", "Mumbai"
+```
+
+**Pseudocode**
+
+```text
+CLASS Student:
+    init(name, age, city = "Delhi"):
+        store name, age, city
+
+a = Student("Asha", 21)
+b = Student("Ravi", 22, "Mumbai")
+PRINT a.city    // Delhi
+PRINT b.city    // Mumbai
+```
+
+**Code**
+
+```python
+class Student:
+    def __init__(self, name, age, city="Delhi"):
+        self.name = name
+        self.age = age
+        self.city = city
+
+a = Student("Asha", 21)            # name and age are required
+b = Student("Ravi", 22, "Mumbai")  # city is optional
+
+print(a.city)  # Delhi: default used
+print(b.city)  # Mumbai: default replaced
+```
+
+**Output:**
+
+```text
+Delhi
+Mumbai
+```
+
+**Fact (why this program):** You pass the arguments that `__init__` asks for: required ones always, default ones only if you want to change them. Python passes `self` for you.
+
+</details>
+
+## Inheritance
+
+A parent and a child class, from simplest to hardest.
+
+### Program 6
 
 **Task:** Create an `Animal` class with an `eat()` method. Create a `Dog` subclass of `Animal` with its own `bark()` method. Create a dog and call both methods.
 
@@ -1368,7 +805,612 @@ woof
 
 </details>
 
-## Program 16
+### Program 7
+
+**Task:** Create a `Vehicle` class that stores a `brand`. Create a `Car` class that inherits from `Vehicle` and has **no** `__init__`. Create a car with brand `"Toyota"` and print its brand.
+
+*From E6, scenario 1: When creating an object of a child class in Python, how do you decide which arguments to pass?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Create a `Vehicle` class whose `__init__` stores `brand`.
+2. Create `Car(Vehicle)` with no `__init__` (`pass`).
+3. Create `Car("Toyota")` → the parent's `__init__` runs.
+4. Print `car.brand`.
+
+**Program flow**
+
+```text
+Car("Toyota")  → Car has no __init__ → Vehicle.__init__ runs → brand = "Toyota"
+car.brand      →                                             → "Toyota"
+```
+
+**Pseudocode**
+
+```text
+CLASS Vehicle:
+    init(brand):  self.brand = brand
+CLASS Car EXTENDS Vehicle:  (nothing)
+
+car = Car("Toyota")     // uses Vehicle's init
+PRINT car.brand         // Toyota
+```
+
+**Code**
+
+```python
+class Vehicle:
+    def __init__(self, brand):
+        self.brand = brand
+
+class Car(Vehicle):
+    pass
+
+car = Car("Toyota")        # Vehicle needs brand
+print(car.brand)  # Toyota
+```
+
+**Output:**
+
+```text
+Toyota
+```
+
+**Fact (why this program):** **Scenario 1:** the child has no `__init__`, so Python runs the parent's `__init__`. That's why you pass the **parent's** arguments (`brand`).
+
+</details>
+
+### Program 8
+
+**Task:** Create a `Vehicle` class that stores a `brand`. Create a `Truck` child class whose `__init__` takes `brand` and `load`, with `"10 tons"` as the default load. Create one truck without a load and one with `"20 tons"`.
+
+*From E6, scenario 4: When creating an object of a child class in Python, how do you decide which arguments to pass?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Create a `Vehicle` class whose `__init__` stores `brand`.
+2. Create `Truck(Vehicle)` whose `__init__` takes `brand` and `load` → default `"10 tons"`.
+3. Send `brand` to the parent with `super()`, and store `load`.
+4. Create `t1` without a load and `t2` with `"20 tons"`.
+5. Print both loads.
+
+**Program flow**
+
+```text
+Truck("Tata")             → load not passed → default "10 tons"
+Truck("Volvo", "20 tons") → load passed     → "20 tons"
+print loads               →                 → "10 tons", "20 tons"
+```
+
+**Pseudocode**
+
+```text
+CLASS Truck EXTENDS Vehicle:
+    init(brand, load = "10 tons"):
+        CALL parent init(brand)
+        self.load = load
+
+t1 = Truck("Tata")
+t2 = Truck("Volvo", "20 tons")
+PRINT t1.load    // 10 tons
+PRINT t2.load    // 20 tons
+```
+
+**Code**
+
+```python
+class Vehicle:
+    def __init__(self, brand):
+        self.brand = brand
+
+class Truck(Vehicle):
+    def __init__(self, brand, load="10 tons"):
+        super().__init__(brand)
+        self.load = load
+
+t1 = Truck("Tata")               # load uses the default
+t2 = Truck("Volvo", "20 tons")   # load replaced
+print(t1.load)  # 10 tons
+print(t2.load)  # 20 tons
+```
+
+**Output:**
+
+```text
+10 tons
+20 tons
+```
+
+**Fact (why this program):** **Scenario 4:** default values in the child's `__init__` are optional. Pass only the required ones, or pass a new value to replace the default.
+
+</details>
+
+### Program 9
+
+**Task:** Create a `Vehicle` class with `brand` and an optional `color` (default `"white"`). Create an `ElectricCar` child class that takes `battery` and forwards everything else to the parent using `*args, **kwargs`. Create a red Tesla with a 75 kWh battery.
+
+*From E6, scenario 5: When creating an object of a child class in Python, how do you decide which arguments to pass?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Create a `Vehicle` class whose `__init__` stores `brand` and `color` → default `"white"`.
+2. Create `ElectricCar(Vehicle)` whose `__init__` takes `battery, *args, **kwargs`.
+3. Forward `*args, **kwargs` to the parent with `super()`.
+4. Store `battery`.
+5. Create `ElectricCar("75 kWh", "Tesla", color="red")` and print all three values.
+
+**Program flow**
+
+```text
+ElectricCar("75 kWh", "Tesla", color="red")
+  → battery = "75 kWh", args = ("Tesla",), kwargs = {"color": "red"}
+  → super().__init__("Tesla", color="red") → brand = "Tesla", color = "red"
+print → "75 kWh Tesla red"
+```
+
+**Pseudocode**
+
+```text
+CLASS Vehicle:
+    init(brand, color = "white"):  store brand, color
+CLASS ElectricCar EXTENDS Vehicle:
+    init(battery, rest of arguments):
+        CALL parent init(rest of arguments)
+        self.battery = battery
+
+ev = ElectricCar("75 kWh", "Tesla", color = "red")
+PRINT ev.battery, ev.brand, ev.color    // 75 kWh Tesla red
+```
+
+**Code**
+
+```python
+class Vehicle:
+    def __init__(self, brand, color="white"):
+        self.brand = brand
+        self.color = color
+
+class ElectricCar(Vehicle):
+    def __init__(self, battery, *args, **kwargs):
+        super().__init__(*args, **kwargs)   # rest goes to the parent
+        self.battery = battery
+
+ev = ElectricCar("75 kWh", "Tesla", color="red")
+print(ev.battery, ev.brand, ev.color)  # 75 kWh Tesla red
+```
+
+**Output:**
+
+```text
+75 kWh Tesla red
+```
+
+**Fact (why this program):** **Scenario 5:** `*args, **kwargs` lets the child take its own argument and forward the rest to the parent, so you pass the parent's arguments plus the child's extra one.
+
+</details>
+
+## More programs
+
+The remaining programs, in their original order.
+
+### Program 10
+
+**Task:** Create a `Vehicle` class that stores a `brand`. Create a `Car` child class whose `__init__` takes `brand` and `seats`, sends `brand` to the parent with `super()`, and stores `seats` itself. Create a Honda with 5 seats and print both values.
+
+*From E6, scenario 2: When creating an object of a child class in Python, how do you decide which arguments to pass?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Create a `Vehicle` class whose `__init__` stores `brand`.
+2. Create `Car(Vehicle)` whose `__init__` takes `brand` and `seats`.
+3. Send `brand` to the parent with `super().__init__(brand)`.
+4. Store `seats` in the child.
+5. Create `Car("Honda", 5)` and print both values.
+
+**Program flow**
+
+```text
+Car("Honda", 5) → Car.__init__ → super().__init__("Honda") → brand = "Honda"
+                               → self.seats = 5
+print           →                                          → "Honda 5"
+```
+
+**Pseudocode**
+
+```text
+CLASS Vehicle:
+    init(brand):  self.brand = brand
+CLASS Car EXTENDS Vehicle:
+    init(brand, seats):
+        CALL parent init(brand)
+        self.seats = seats
+
+car = Car("Honda", 5)
+PRINT car.brand, car.seats    // Honda 5
+```
+
+**Code**
+
+```python
+class Vehicle:
+    def __init__(self, brand):
+        self.brand = brand
+
+class Car(Vehicle):
+    def __init__(self, brand, seats):
+        super().__init__(brand)   # parent sets brand
+        self.seats = seats        # child sets seats
+
+car = Car("Honda", 5)
+print(car.brand, car.seats)  # Honda 5
+```
+
+**Output:**
+
+```text
+Honda 5
+```
+
+**Fact (why this program):** **Scenario 2:** the child has its own `__init__` and calls `super().__init__()`. You pass the **child's** arguments; the child hands the parent its part.
+
+</details>
+
+### Program 11
+
+**Task:** Create a `Vehicle` class that stores a `brand`. Create a `Bike` child class whose `__init__` takes only `gears` and does **not** call `super()`. Create a bike with 21 gears and check whether it has a `brand`.
+
+*From E6, scenario 3: When creating an object of a child class in Python, how do you decide which arguments to pass?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Create a `Vehicle` class whose `__init__` stores `brand`.
+2. Create `Bike(Vehicle)` whose `__init__` takes only `gears`.
+3. Store `gears`, and don't call `super()`.
+4. Create `Bike(21)`.
+5. Print `gears` and `hasattr(bike, "brand")`.
+
+**Program flow**
+
+```text
+Bike(21)                → Bike.__init__ only → gears = 21, parent init skipped
+bike.gears              →                    → 21
+hasattr(bike, "brand")  → brand never set    → False
+```
+
+**Pseudocode**
+
+```text
+CLASS Vehicle:
+    init(brand):  self.brand = brand
+CLASS Bike EXTENDS Vehicle:
+    init(gears):  self.gears = gears      // no parent init call
+
+bike = Bike(21)
+PRINT bike.gears                 // 21
+PRINT bike HAS "brand"?          // False
+```
+
+**Code**
+
+```python
+class Vehicle:
+    def __init__(self, brand):
+        self.brand = brand
+
+class Bike(Vehicle):
+    def __init__(self, gears):
+        self.gears = gears        # parent's __init__ never runs
+
+bike = Bike(21)
+print(bike.gears)                # 21
+print(hasattr(bike, "brand"))    # False: brand was never set
+```
+
+**Output:**
+
+```text
+21
+False
+```
+
+**Fact (why this program):** **Scenario 3:** the child's `__init__` replaces the parent's. Without `super().__init__()`, the parent's setup never runs, so `brand` is missing.
+
+</details>
+
+### Program 12
+
+**Task:** Create a `Coffee` class with `name` and `size`, where `size` defaults to `"medium"`. Create a Latte without a size and a Mocha with `"large"`, and print both sizes.
+
+*From E7: How do you set a default value for a parameter in Python's `__init__` method, and what happens when you pass a different value while creating an object?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Create a `Coffee` class.
+2. `__init__` takes `name` and `size` → default `"medium"`.
+3. Create `Coffee("Latte")` and `Coffee("Mocha", "large")`.
+4. Print both sizes.
+
+**Program flow**
+
+```text
+Coffee("Latte")          → size not passed → "medium"
+Coffee("Mocha", "large") → size passed     → "large"
+```
+
+**Pseudocode**
+
+```text
+CLASS Coffee:
+    init(name, size = "medium"):  store name, size
+
+c1 = Coffee("Latte")
+c2 = Coffee("Mocha", "large")
+PRINT c1.size    // medium
+PRINT c2.size    // large
+```
+
+**Code**
+
+```python
+class Coffee:
+    def __init__(self, name, size="medium"):
+        self.name = name
+        self.size = size
+
+c1 = Coffee("Latte")            # size not passed
+c2 = Coffee("Mocha", "large")   # size passed
+
+print(c1.size)  # medium: default used
+print(c2.size)  # large: default replaced
+```
+
+**Output:**
+
+```text
+medium
+large
+```
+
+**Fact (why this program):** A default is written with `=` in `__init__`. Leave it out and the default is used; pass a value and it replaces the default **for that object only**.
+
+</details>
+
+### Program 13
+
+**Task:** Create a `Team` class with a class-level list `members` and an instance list `tasks` created in `__init__`. Create two teams, add `"Asha"` to `a.members` and `"report"` to `a.tasks`, then print team `b`'s two lists.
+
+*From E8: How do you add an element to a list stored on an instance of a Python class?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Create a `Team` class with a class-level list `members = []`.
+2. In `__init__`, create `self.tasks = []`.
+3. Create teams `a` and `b`.
+4. Append `"Asha"` to `a.members` and `"report"` to `a.tasks`.
+5. Print `b.members` and `b.tasks`.
+
+**Program flow**
+
+```text
+a.members.append("Asha")  → members is on the class → shared by a and b
+a.tasks.append("report")  → tasks is on a only      → b.tasks unchanged
+print(b.members)          →                         → ['Asha']
+print(b.tasks)            →                         → []
+```
+
+**Pseudocode**
+
+```text
+CLASS Team:
+    members = []                // one list for the class
+    init():  self.tasks = []    // new list for each object
+
+a = Team();  b = Team()
+ADD "Asha" TO a.members
+ADD "report" TO a.tasks
+PRINT b.members    // ['Asha']
+PRINT b.tasks      // []
+```
+
+**Code**
+
+```python
+class Team:
+    members = []              # shared by all
+
+    def __init__(self):
+        self.tasks = []       # separate for each object
+
+a = Team()
+b = Team()
+a.members.append("Asha")
+a.tasks.append("report")
+
+print(b.members)  # ['Asha']: shared
+print(b.tasks)    # []: not shared
+```
+
+**Output:**
+
+```text
+['Asha']
+[]
+```
+
+**Fact (why this program):** You add to an instance list with `append()`, like `a.tasks.append("report")`. Because `tasks` is created in `__init__`, only team `a` changes. `members` lives on the class, so `b` sees `"Asha"` too.
+
+</details>
+
+### Program 14
+
+**Task:** Create a `Rectangle` class that stores a `length`. Add `get_length()`, which needs no arguments, and `area(width)`, which needs a width. Create a rectangle of length 10 and print its length and its area for width 5.
+
+*From E9: When calling a method on a Python class or object, how do you decide which arguments to pass and which ones Python supplies automatically?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Create a `Rectangle` class whose `__init__` stores `length`.
+2. `get_length()` returns `self.length` (no arguments).
+3. `area(width)` returns `self.length * width`.
+4. Create `Rectangle(10)`.
+5. Print `get_length()` and `area(5)`.
+
+**Program flow**
+
+```text
+rectangle.get_length() → Python passes self only       → 10
+rectangle.area(5)      → Python passes self, you pass 5 → 10 * 5 = 50
+```
+
+**Pseudocode**
+
+```text
+CLASS Rectangle:
+    init(length):     self.length = length
+    get_length():     RETURN self.length
+    area(width):      RETURN self.length * width
+
+rectangle = Rectangle(10)
+PRINT rectangle.get_length()    // 10
+PRINT rectangle.area(5)         // 50
+```
+
+**Code**
+
+```python
+class Rectangle:
+    def __init__(self, length):
+        self.length = length
+
+    def get_length(self):
+        return self.length
+
+    def area(self, width):
+        return self.length * width
+
+
+rectangle = Rectangle(10)
+
+print(rectangle.get_length())  # 10
+print(rectangle.area(5))       # 50
+```
+
+**Output:**
+
+```text
+10
+50
+```
+
+**Another way:** store the result in a local variable before returning it, and use different values.
+
+```python
+class Rectangle:
+    def __init__(self, length):
+        self.length = length
+
+    def area(self, width):
+        area = self.length * width    # local variable: exists only inside this method
+        return area
+
+
+first = Rectangle(30)
+print(first.area(50))  # 1500
+```
+
+**Output:**
+
+```text
+1500
+```
+
+`return self.length * width` and the two-line version give the same result. The extra variable makes the code easier to read and to debug, because you can `print(area)` before returning. `area` here is a local variable, not `self.area`, so it isn't stored on the object.
+
+**Fact (why this program):** Look at the method's parameters. Python supplies `self` automatically, so `get_length()` gets nothing and `area()` gets only `width`.
+
+</details>
+
+### Program 15
+
+**Task:** Create a `Parent` class that stores a `name`. Create a `Child` class that inherits from `Parent` and has no `__init__` (use `pass`). Create a child named `"Asha"` and print its name.
+
+*From E11: Can a child class use its parent class's `__init__()` if it doesn't define its own?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Create a `Parent` class whose `__init__` stores `name`.
+2. Create `Child(Parent)` with no `__init__` (`pass`).
+3. Create `Child("Asha")` → the parent's `__init__` runs.
+4. Print `name`.
+
+**Program flow**
+
+```text
+Child("Asha") → Child has no __init__ → Parent.__init__ runs → name = "Asha"
+.name         →                                              → "Asha"
+```
+
+**Pseudocode**
+
+```text
+CLASS Parent:
+    init(name):  self.name = name
+CLASS Child EXTENDS Parent:  (nothing)
+
+PRINT Child("Asha").name    // Asha
+```
+
+**Code**
+
+```python
+class Parent:
+    def __init__(self, name):
+        self.name = name
+
+class Child(Parent):
+    pass
+
+print(Child("Asha").name)  # Asha
+```
+
+**Output:**
+
+```text
+Asha
+```
+
+**Fact (why this program):** If a child doesn't define `__init__`, Python uses the parent's automatically. If the child writes its own, call `super().__init__()` to keep the parent's setup.
+
+</details>
+
+### Program 16
 
 **Task:** Create a `Greeter` class with `hello()` and a method `twice()` that calls `hello()` through `self`. Create a `Loud` child that calls the parent's `hello()` with `super()` and returns it in capitals. Call `hello` in six different ways.
 
@@ -1449,7 +1491,7 @@ HELLO
 
 </details>
 
-## Program 17
+### Program 17
 
 **Task:** Create a `Pizza` class with a class attribute `size_unit = "inch"`. Add an instance method `describe()`, a class method `large()` that returns a 12-inch pizza, and a static method `is_valid(size)` that checks the size is positive.
 
@@ -1527,7 +1569,7 @@ False
 
 </details>
 
-## Program 18
+### Program 18
 
 **Task:** Create a `Student` class with a class attribute `school = "City School"`. Add a class method `rename_school(name)`. Create two students, rename the school once, and print both students' school.
 
@@ -1593,7 +1635,7 @@ Green School
 
 </details>
 
-## Program 19
+### Program 19
 
 **Task:** Create a `User` class that stores a `name`. Add a class method `from_dict(data)` that creates a user from a dict. Create an `Admin` subclass and call `Admin.from_dict({"name": "Asha"})`. Print the type of the object you get.
 
@@ -1655,7 +1697,7 @@ Admin
 
 </details>
 
-## Program 20
+### Program 20
 
 **Task:** Create a `Vehicle` class with a `start()` method. Create `Car` and `Bike` subclasses with no code of their own. Loop over a car and a bike and call `start()` on each.
 
@@ -1719,7 +1761,7 @@ started
 
 </details>
 
-## Program 21
+### Program 21
 
 **Task:** Create a `Parent` class with a class attribute `role`, an `__init__` that stores `name`, a `show()` method, and a class method `create()`. Create a `Child` class that uses every form of `super()`: parent setup, parent method, the old `super(Child, self)` style, parent class attribute, and parent class method.
 
@@ -1820,7 +1862,7 @@ new
 
 </details>
 
-## Program 22
+### Program 22
 
 **Task:** Create a `LogMixin` whose `save()` adds `"log, "` before the parent's `save()`. Create two unrelated classes, `Model` and `Report`, each with its own `save()`. Mix the logger into both and print the MRO of one.
 
@@ -1900,7 +1942,7 @@ log, report saved
 
 </details>
 
-## Program 23
+### Program 23
 
 **Task:** Create the diamond: `A` at the top, `B` and `C` both inheriting from `A`, and `D` inheriting from `B` and `C`. Each `show()` prints its class name and calls `super().show()`. Call `D().show()`.
 
@@ -1979,7 +2021,7 @@ A
 
 </details>
 
-## Program 24
+### Program 24
 
 **Task:** Write a Python program that creates a database configuration from either direct inputs or an environment settings dictionary. Create a `DatabaseConfig` class that stores `host` and `port`. Reject an empty host and a port outside `1`–`65535`. Add a class method `from_env(env)` that reads `DB_HOST` (default `"localhost"`) and `DB_PORT` (default `"5432"`) from a dictionary. Build one config from `{"DB_HOST": "db.internal", "DB_PORT": "5432"}` and one from an empty dictionary. Then try to create one directly with an empty host, and one with port `99999`.
 
@@ -2070,7 +2112,7 @@ Invalid port: 99999
 
 </details>
 
-## Program 25
+### Program 25
 
 **Task:** Create a `User` class that stores `first` and `last`. Add a `full_name()` method that returns both names joined by a space. Create users `"Asha Patel"` and `"Ravi Kumar"`, print each full name, then call `full_name()` through the class by passing `asha` yourself.
 
@@ -2144,7 +2186,7 @@ Asha Patel
 
 </details>
 
-## Program 26
+### Program 26
 
 **Task:** Create an `ApiClient` class that stores a `base_url` and a `token`. Add a `build_request(path)` method that returns a dict with the full `url` and an `Authorization` header. Create a payments client and an emails client, and print the URL each one builds.
 
@@ -2221,7 +2263,7 @@ https://mail.example.com/send
 
 </details>
 
-## Program 27
+### Program 27
 
 **Task:** Create an `AdmissionForm` class that stores `name`, `age`, and `city`. Add an `update(city)` method that changes the city and an `export()` method that returns all three values as text. Create forms for Ram and Sita, update only Ram's city to `"Mumbai"`, and export both forms.
 
@@ -2300,7 +2342,7 @@ Sita, 22, Pune
 
 </details>
 
-## Program 28
+### Program 28
 
 **Task:** Create an `HttpClient` class whose `__init__` takes a required `base_url`, optional `timeout` (default `10`) and `retries` (default `3`), and a keyword-only `verify_ssl` (default `True`). Print the class's signature with `inspect.signature()`. Then create a client that changes only the timeout to `30`, and print its timeout and retries.
 
@@ -2377,7 +2419,7 @@ print(client.timeout, client.retries)   # 30 3
 
 </details>
 
-## Program 29
+### Program 29
 
 **Task:** Create an `APIError` exception whose `__init__` takes a `message` and a `status_code`, passes the message to `Exception` with `super()`, and stores the status code. Create a `NotFoundError` child whose `__init__` takes `resource` and `resource_id`, and builds the message and a `404` status code for the parent. Raise `NotFoundError("User", 7)`, catch it as `APIError`, and print the status code and message.
 
@@ -2456,7 +2498,7 @@ except APIError as error:
 
 </details>
 
-## Program 30
+### Program 30
 
 **Task:** Create a `ShoppingCart` class that stores a `user` and its own empty `items` list. Add an `add_item(name, price, qty=1)` method that appends an item dict, and a `total()` method that returns the sum of `price * qty`. Create a cart for Asha, add a keyboard (1500) and two mice (500 each), then print the number of items and the total.
 
@@ -2543,7 +2585,7 @@ print(cart.total())      # 2500
 
 </details>
 
-## Program 31
+### Program 31
 
 **Task:** Create an `EmailService` class that stores a `sender`. Add a `send_confirmation(order_id)` method that returns a confirmation message. Create a service for `"shop@example.com"`, then collect the confirmations for orders 101 and 102 in a list **outside** the class, and print the list.
 
@@ -2616,7 +2658,7 @@ print(confirmations)
 
 </details>
 
-## Program 32
+### Program 32
 
 **Task:** Change `EmailService` so each object keeps its **own** `confirmations` list, created in `__init__`. `send_confirmation(order_id)` should build the message, add it to `self.confirmations`, and return it. Send confirmations for orders 101 and 102, then print `email.confirmations`.
 
@@ -2694,7 +2736,7 @@ print(email.confirmations)
 
 </details>
 
-## Program 33
+### Program 33
 
 **Task:** Create a custom exception `OrderNotFound` that inherits from `Exception` and has no `__init__` (use `pass`). Create it with the message `"Order 4521 not found"`, then print the error and its `args`.
 
@@ -2751,7 +2793,7 @@ Order 4521 not found
 
 </details>
 
-## Program 34
+### Program 34
 
 **Task:** Create an `Order` class that stores an `order_id` and starts with `status = "created"`. Add `pay()`, which works only when the status is `"created"`, and `ship()`, which works only when the status is `"paid"`. Each raises a `ValueError` otherwise. Pay and ship order 4521 and print its status. Then try to ship order 4522 without paying, and print the error.
 
@@ -2850,7 +2892,7 @@ Cannot ship an order that is created
 
 </details>
 
-## Program 35
+### Program 35
 
 **Task:** Create an `Order` class with a class attribute `TAX_RATE = 0.18` that stores an `order_id` and an `amount`. Add a static method `calculate_tax(amount, rate)`, an instance method `total()` that adds the tax to the amount, and a class method `from_json(text)` that builds an order from a JSON string. Build an order from `'{"id": 7, "amount": 1000}'`, print its id and total, then call `calculate_tax(500, 0.05)` directly.
 
@@ -2942,7 +2984,7 @@ print(Order.calculate_tax(500, 0.05))       # 25.0
 
 </details>
 
-## Program 36
+### Program 36
 
 **Task:** Create an `ApiClient` class with a class attribute `base_url = "https://api.example.com"`, an `__init__` that stores a `name`, and a `url(path)` method that returns `base_url + path`. Add a class method `use_environment(env)` that changes `base_url` to `"https://<env>.api.example.com"`. Create a users client and an orders client, switch to `"staging"` with one call, and print both URLs.
 
@@ -3022,7 +3064,7 @@ https://staging.api.example.com/list
 
 </details>
 
-## Program 37
+### Program 37
 
 **Task:** Create a `Settings` class that stores `debug` and `db_url`. Add two class methods: `from_json(text)`, which builds settings from a JSON string, and `from_env(env)`, which builds them from an environment dictionary (`DEBUG` is `"1"` for on). Build one settings object from each, and print their values. Then call `date.fromisoformat("2026-11-11")` to see the same idea in the standard library.
 
@@ -3114,7 +3156,7 @@ False postgres://prod
 
 </details>
 
-## Program 38
+### Program 38
 
 **Task:** Create a `PaymentMethod` base class whose `pay(amount)` raises `NotImplementedError`. Create `CardPayment` and `UpiPayment` child classes, each with its own `pay(amount)` message. Create one of each and pay 499 with both.
 
@@ -3193,7 +3235,7 @@ Collected Rs.499 via UPI
 
 </details>
 
-## Program 39
+### Program 39
 
 **Task:** Create a `BaseModel` class whose `__init__` stores any keyword fields in `self.fields`, and whose `save()` returns `"INSERT <fields>"`. Create an `Article` child whose `__init__` takes a `title` and sends it to the parent with `super()`. Override `save()` so it first adds a `slug` (the title in lowercase, with spaces turned into `-`) and then calls the parent's `save()`. Save an article titled `"Hello World"`.
 
@@ -3270,7 +3312,7 @@ INSERT {'title': 'Hello World', 'slug': 'hello-world'}
 
 </details>
 
-## Program 40
+### Program 40
 
 **Task:** Create a `BaseHandler` whose `handle(request)` prints `"BaseHandler: send response"`. Create `AuthMixin` and `LoggingMixin`, both inheriting from `BaseHandler`. Each prints its own step and then calls `super().handle(request)`. Create `OrderHandler(AuthMixin, LoggingMixin)` with no code, handle one request, and print its MRO.
 
@@ -3366,7 +3408,7 @@ BaseHandler: send response
 
 </details>
 
-## Program 41
+### Program 41
 
 **Task:** Sort the list `["banana", "fig", "apple"]` from shortest word to longest, using a `lambda` as the `key` for `sorted()`.
 
@@ -3415,7 +3457,7 @@ print(sorted(words, key=lambda word: len(word)))
 
 </details>
 
-## Program 42
+### Program 42
 
 **Task:** Given a list of user dicts (`name`, `age`, `active`), keep only the active users with `filter()` and a lambda, then sort them by age, oldest first, and print their names. Then find the oldest user overall with `max()` and `itemgetter("age")`, and print the name.
 
@@ -3490,3 +3532,179 @@ Meera
 **Fact (why this program):** Lambdas are short throwaway functions for `filter()`, `sorted()` and `max()`. For a simple field lookup, `itemgetter("age")` does the same job as `lambda u: u["age"]`. A list comprehension is often clearer than `filter` with a lambda: `[u for u in users if u["active"]]`.
 
 </details>
+======================================
+
+
+---
+
+## 20 Project Skeletons
+
+These are bigger practice projects. Each one combines the patterns above: a class (usually with a parent), attributes, 8 methods, validation, custom exceptions, and a decorator. Build them from a blank file after you're comfortable with the programs.
+
+### 1. Car (`Car` inherits `Vehicle`)
+
+- **Attributes:** `brand`, `registration_number`, `color`, `speed`, `fuel_level`, `engine_on`, `odometer_km`
+- **8 methods:** `show()`, `start()`, `stop()`, `accelerate(amount)`, `brake(amount)`, `refuel(litres)`, `repaint(color)`, `drive(km)`
+- **Validation:** Require positive amounts for acceleration, braking, refuelling, and distance. Keep speed and fuel within their limits.
+- **Exceptions:** `ValueError` for invalid amounts, `EngineOffError` when trying to drive with the engine off, `InsufficientFuelError` when there is too little fuel.
+- **Decorator:** `@property` on `is_moving`, computed from `speed > 0`.
+
+### 2. Student form (`StudentForm` inherits `Form`)
+
+- **Attributes:** `form_id`, `student_name`, `age`, `height_cm`, `marks`, `status`, `submitted_at`
+- **8 methods:** `fill_details(name, age, height_cm)`, `fill_marks(subject, score)`, `remove_marks(subject)`, `calculate_average()`, `validate()`, `preview()`, `save()`, `submit()`
+- **Validation:** Require a name, positive age and height, and marks from 0 to 100. Require at least one subject before submission.
+- **Exceptions:** `ValueError` for invalid input, `IncompleteFormError` when required details are missing, `FormAlreadySubmittedError` on a second submission.
+- **Decorator:** Custom `@draft_only` on `fill_details()` and `fill_marks()` to block edits after submission.
+
+### 3. Dog (`Dog` inherits `Animal`)
+
+- **Attributes:** `name`, `age`, `size`, `breed`, `energy`, `is_sleeping`, `tricks`
+- **8 methods:** `bark()`, `eat(food)`, `sleep()`, `wake_up()`, `walk(minutes)`, `play(minutes)`, `learn_trick(name)`, `perform_trick(name)`
+- **Validation:** Allow `small`, `medium`, or `large` for size. Keep energy between 0 and 100 and require positive activity duration.
+- **Exceptions:** `ValueError` for invalid size or duration, `DogSleepingError` when trying to play while asleep, `UnknownTrickError` for an unlearned trick.
+- **Decorator:** `@abstractmethod` on `Animal.eat()` if you make `Animal` an abstract base class. Implement `eat()` in `Dog`.
+
+### 4. Savings account (`SavingsAccount` inherits `BankAccount`)
+
+- **Attributes:** `account_number`, `holder_name`, `balance`, `interest_rate`, `is_frozen`, `transactions`
+- **8 methods:** `deposit(amount)`, `withdraw(amount)`, `transfer_to(account, amount)`, `calculate_interest()`, `apply_interest()`, `show_statement()`, `freeze()`, `unfreeze()`
+- **Validation:** Require positive transaction amounts. Verify that a transfer can succeed before changing either balance.
+- **Exceptions:** `ValueError` for invalid amounts, `InsufficientBalanceError` for an overdraft, `AccountFrozenError` when a frozen account tries to move money.
+- **Decorator:** Custom `@active_account` on `deposit()`, `withdraw()`, and `transfer_to()`.
+
+### 5. Library book (`LibraryBook` inherits `LibraryItem`)
+
+- **Attributes:** `item_id`, `title`, `author`, `isbn`, `borrower_id`, `due_date`, `reserved_by`
+- **8 methods:** `show_details()`, `borrow(member_id, due_date)`, `return_book()`, `renew(new_due_date)`, `reserve(member_id)`, `cancel_reservation(member_id)`, `calculate_late_fee(as_of_date)`, `update_title(title)`
+- **Validation:** Require a title and a future due date for a new loan. Block renewal if another member holds the reservation.
+- **Exceptions:** `BookUnavailableError` for borrowing an unavailable book, `BookNotBorrowedError` for returning a book without an active loan.
+- **Decorator:** `@property` on `is_borrowed`, computed from `borrower_id`.
+
+### 6. Shopping cart (`ShoppingCart`)
+
+- **Attributes:** `cart_id`, `customer_id`, `items`, `coupon_code`, `discount_percent`, `status`
+- **8 methods:** `add_item(product, qty)`, `remove_item(product_id)`, `update_quantity(product_id, qty)`, `apply_coupon(code)`, `remove_coupon()`, `calculate_total()`, `clear()`, `checkout()`
+- **Validation:** Require positive whole-number quantities and an eligible coupon. Recheck stock at checkout.
+- **Exceptions:** `ValueError` for invalid quantities, `InvalidCouponError`, `EmptyCartError`, `OutOfStockError`.
+- **Decorator:** `@property` on `item_count`, computed by summing the quantities.
+
+### 7. Salaried employee (`SalariedEmployee` inherits `Employee`)
+
+- **Attributes:** `employee_id`, `name`, `department`, `monthly_salary`, `bonus`, `leave_balance`, `employment_status`
+- **8 methods:** `show_profile()`, `calculate_gross_pay()`, `add_bonus(amount)`, `give_raise(percent)`, `request_leave(days)`, `restore_leave(days)`, `change_department(name)`, `deactivate()`
+- **Validation:** Require nonnegative salary, positive bonus and raise amounts, and enough leave for each request.
+- **Exceptions:** `ValueError` for invalid amounts, `InsufficientLeaveError`, `InactiveEmployeeError`.
+- **Decorator:** Custom `@active_employee` on `request_leave()` and `change_department()`.
+
+### 8. Restaurant order (`RestaurantOrder` inherits `Order`)
+
+- **Attributes:** `order_id`, `table_number`, `items`, `special_instructions`, `status`, `tax_rate`
+- **8 methods:** `add_dish(dish, qty)`, `remove_dish(dish_id)`, `add_instruction(text)`, `calculate_total()`, `send_to_kitchen()`, `mark_ready()`, `serve()`, `cancel()`
+- **Validation:** Require a positive table number and quantity. Require at least one dish before sending the order. Follow the sequence draft → cooking → ready → served.
+- **Exceptions:** `EmptyOrderError`, `InvalidOrderStatusError`.
+- **Decorator:** Custom `@draft_only` on `add_dish()` and `remove_dish()` to prevent edits after the kitchen receives the order.
+
+### 9. Hotel booking (`HotelBooking` inherits `Booking`)
+
+- **Attributes:** `booking_id`, `guest_name`, `room_number`, `check_in_date`, `check_out_date`, `nightly_rate`, `status`
+- **8 methods:** `check_availability()`, `calculate_price()`, `confirm()`, `reschedule(start, end)`, `change_room(room_number)`, `check_in()`, `check_out()`, `cancel()`
+- **Validation:** Require checkout after check-in. Check room availability before confirming or changing dates.
+- **Exceptions:** `ValueError` for invalid dates, `RoomUnavailableError`, `InvalidBookingStatusError`.
+- **Decorator:** `@property` on `nights`, computed from the two dates.
+
+### 10. Video lesson (`VideoLesson` inherits `Lesson`)
+
+- **Attributes:** `lesson_id`, `title`, `duration_seconds`, `position_seconds`, `is_playing`, `notes`, `completed`
+- **8 methods:** `play()`, `pause()`, `resume()`, `seek(second)`, `restart()`, `add_note(text)`, `remove_note(index)`, `mark_complete()`
+- **Validation:** Require positive duration, a seek position within the video, and nonempty notes.
+- **Exceptions:** `ValueError` for an invalid seek position, `IndexError` for an invalid note index, `LessonNotStartedError` when pausing before playback starts.
+- **Decorator:** `@property` on `progress_percent`, computed from position and duration.
+
+### 11. Split AC (`SplitAC` inherits `Appliance`)
+
+- **Attributes:** `brand`, `model`, `power_on`, `temperature_c`, `mode`, `fan_speed`, `timer_minutes`, `filter_hours`
+- **8 methods:** `turn_on()`, `turn_off()`, `set_temperature(celsius)`, `set_mode(mode)`, `set_fan_speed(speed)`, `set_timer(minutes)`, `cancel_timer()`, `reset_filter_counter()`
+- **Validation:** For this prototype, allow temperatures from 16 to 30°C, known modes, and positive timer durations.
+- **Exceptions:** `ValueError` for invalid settings, `ApplianceOffError` when changing settings that require power.
+- **Decorator:** Custom `@requires_power` on `set_temperature()`, `set_mode()`, and `set_timer()`.
+
+### 12. Doctor appointment (`DoctorAppointment` inherits `Appointment`)
+
+- **Attributes:** `appointment_id`, `patient_id`, `doctor_id`, `starts_at`, `duration_minutes`, `reason`, `status`
+- **8 methods:** `schedule()`, `confirm()`, `reschedule(starts_at)`, `check_in()`, `start_consultation()`, `complete()`, `cancel()`, `summary()`
+- **Validation:** Require a future time when scheduling, positive duration, and an available doctor slot. Require patient check-in before starting.
+- **Exceptions:** `ValueError` for invalid time or duration, `SlotUnavailableError`, `InvalidAppointmentStatusError`.
+- **Decorator:** `@property` on `ends_at`, computed from the start time and duration.
+
+### 13. Courier parcel (`CourierParcel` inherits `Shipment`)
+
+- **Attributes:** `tracking_id`, `sender`, `recipient`, `weight_kg`, `destination`, `status`, `tracking_events`
+- **8 methods:** `calculate_shipping_cost()`, `pack()`, `dispatch()`, `update_location(location)`, `mark_out_for_delivery()`, `mark_delivered()`, `mark_returned()`, `show_tracking()`
+- **Validation:** Require positive weight and a destination. Check status before each transition and record successful updates in the tracking history.
+- **Exceptions:** `ValueError` for invalid weight or destination, `InvalidShipmentStatusError`.
+- **Decorator:** `@classmethod` on `from_dict(cls, data)` to construct a parcel from a saved record.
+
+### 14. Inventory product (`InventoryProduct` inherits `Product`)
+
+- **Attributes:** `sku`, `name`, `unit_price`, `stock`, `reserved_qty`, `reorder_level`, `is_discontinued`
+- **8 methods:** `add_stock(qty)`, `reserve_stock(qty)`, `release_stock(qty)`, `fulfill_reservation(qty)`, `change_price(price)`, `needs_reorder()`, `discontinue()`, `stock_report()`
+- **Validation:** Require whole-number stock counts. Keep `reserved_qty` between zero and stock. Fulfilling a reservation reduces both counts.
+- **Exceptions:** `ValueError` for invalid quantity or price, `InsufficientStockError`, `ProductDiscontinuedError` for a new reservation on a discontinued product.
+- **Decorator:** `@property` on `available_stock`, computed as `stock - reserved_qty`.
+
+### 15. Support ticket (`SupportTicket`)
+
+- **Attributes:** `ticket_id`, `subject`, `description`, `priority`, `status`, `assignee`, `comments`
+- **8 methods:** `assign(agent)`, `unassign()`, `change_priority(priority)`, `add_comment(text)`, `start_work()`, `resolve()`, `reopen()`, `close()`
+- **Validation:** Allow known priorities, require a nonempty comment, and require an assignee before work starts.
+- **Exceptions:** `ValueError` for an invalid priority or blank comment, `TicketUnassignedError`, `InvalidTicketStatusError`.
+- **Decorator:** `@staticmethod` on `is_valid_priority(priority)` because the check only uses the supplied value.
+
+### 16. Discount coupon (`PercentageCoupon` inherits `Coupon`)
+
+- **Attributes:** `code`, `percent_off`, `min_order_amount`, `expires_at`, `usage_limit`, `used_count`, `is_active`
+- **8 methods:** `activate()`, `deactivate()`, `extend_expiry(date)`, `update_limit(limit)`, `check_eligibility(order_total, as_of)`, `calculate_discount(order_total, as_of)`, `redeem(order_total, as_of)`, `show_details()`
+- **Validation:** Require a percentage greater than 0 and at most 100. Require a valid expiry date, enough order value, and remaining uses.
+- **Exceptions:** `ValueError` for invalid configuration, `CouponExpiredError`, `CouponUsageLimitError`, `CouponMinimumOrderError`.
+- **Decorator:** `@property` on `remaining_uses`. Let `calculate_discount()` preview the amount and `redeem()` increase `used_count`.
+
+### 17. Quiz attempt (`QuizAttempt` inherits `AssessmentAttempt`)
+
+- **Attributes:** `attempt_id`, `student_id`, `questions`, `answers`, `started_at`, `submitted_at`, `status`
+- **8 methods:** `start()`, `show_question(question_id)`, `answer(question_id, option)`, `change_answer(question_id, option)`, `clear_answer(question_id)`, `submit()`, `calculate_score()`, `review()`
+- **Validation:** Require a known question and a valid option. Allow answers to change only during an active attempt.
+- **Exceptions:** `UnknownQuestionError`, `ValueError` for an invalid option, `InvalidAttemptStatusError`.
+- **Decorator:** Custom `@attempt_in_progress` on `answer()`, `change_answer()`, and `clear_answer()`.
+
+### 18. Draft invoice (`Invoice` inherits `BillingDocument`)
+
+- **Attributes:** `invoice_number`, `customer_name`, `line_items`, `tax_rate`, `discount_amount`, `status`, `paid_amount`
+- **8 methods:** `add_item(description, qty, unit_price)`, `remove_item(item_id)`, `apply_discount(amount)`, `calculate_subtotal()`, `calculate_total()`, `issue()`, `record_payment(amount)`, `void()`
+- **Validation:** Require positive quantities, nonnegative prices, and a discount within the subtotal. Require a positive payment that does not exceed the outstanding balance.
+- **Exceptions:** `ValueError` for invalid amounts, `EmptyInvoiceError`, `InvalidInvoiceStatusError`, `OverpaymentError`.
+- **Decorator:** `@property` on `balance_due`, computed as total minus payments.
+
+### 19. Email notification (`EmailNotification` inherits `Notification`)
+
+- **Attributes:** `notification_id`, `recipient`, `subject`, `body`, `status`, `attempt_count`, `last_error`
+- **8 methods:** `set_recipient(address)`, `set_subject(subject)`, `set_body(body)`, `validate()`, `queue()`, `send()`, `retry()`, `cancel()`
+- **Validation:** Require a valid-looking address, a subject, and a body before queueing. Retry only after a failed send and within the attempt limit.
+- **Exceptions:** `InvalidRecipientError`, `IncompleteNotificationError`, `DeliveryError`, `RetryLimitError`.
+- **Decorator:** `@abstractmethod` on `Notification.send()` if email, SMS, and push subclasses each implement their own delivery method.
+
+### 20. Digital wallet (`DigitalWallet` inherits `PaymentAccount`)
+
+- **Attributes:** `wallet_id`, `owner_id`, `balance`, `currency`, `daily_limit`, `transactions`, `is_locked`
+- **8 methods:** `add_money(amount)`, `pay(merchant, amount)`, `send_money(wallet, amount)`, `refund(transaction_id)`, `lock()`, `unlock()`, `show_transactions()`, `calculate_daily_spend()`
+- **Validation:** Require positive amounts and matching currencies for transfers. Check the balance and daily spending limit before paying. Allow each eligible transaction to be refunded once.
+- **Exceptions:** `ValueError` for invalid amounts, `WalletLockedError`, `InsufficientBalanceError`, `DailyLimitExceededError`, `InvalidRefundError`.
+- **Decorator:** Custom `@unlocked_wallet` on `pay()` and `send_money()`.
+
+### How to turn any skeleton into a program
+
+1. Write the base class if one is listed. Put shared attributes in its `__init__()`.
+2. Write the child class and call `super().__init__()` for the shared attributes. Give each instance its own list or dictionary for data such as marks, items, or transactions.
+3. Implement one method that reads state, such as `show()`, and one that changes state, such as `repaint()`.
+4. Add validation before changing state. Start with `ValueError`, then define a custom exception for a business rule you want callers to handle separately.
+5. Create two objects and change only one. Print both to verify that each object keeps its own state. Then try one invalid action and catch its exception.
