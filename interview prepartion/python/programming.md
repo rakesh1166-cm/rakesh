@@ -3455,6 +3455,137 @@ These are bigger practice projects. Each one combines the patterns above: a clas
 - **Exceptions:** `ValueError` for invalid amounts, `EngineOffError` when trying to drive with the engine off, `InsufficientFuelError` when there is too little fuel.
 - **Decorator:** `@property` on `is_moving`, computed from `speed > 0`.
 
+**Program:** Write a Python program to create a `Vehicle` class with the attributes `brand`, `registration_number`, and `color`. Create a `Car` class that inherits from `Vehicle` and adds `speed`, `fuel_level`, `engine_on`, and `odometer_km`. A new car starts with zero speed, zero fuel, zero kilometres on the odometer, and its engine off.
+
+Implement these eight methods in `Car`:
+
+1. `show()` returns the car's details for printing.
+2. `start()` turns the engine on.
+3. `stop()` sets the speed to zero and turns the engine off.
+4. `accelerate(amount)` increases the speed up to 180 km/h while the engine is on.
+5. `brake(amount)` reduces the speed, with a minimum of 0 km/h.
+6. `refuel(litres)` adds fuel up to the 50-litre tank capacity.
+7. `repaint(color)` changes the car's color.
+8. `drive(km)` adds the travelled distance to the odometer and deducts fuel at a rate of 15 km per litre.
+
+Raise `ValueError` for non-positive or non-finite amounts, `EngineOffError` when attempting to accelerate or drive with the engine off, and `InsufficientFuelError` when there is too little fuel for the trip. Define `is_moving` as a `@property` that returns `True` when the speed is greater than zero.
+
+Create a white Tata car with registration number `JH01AB1234`. Add 10 litres of fuel, start the engine, accelerate by 40 km/h, and print whether the car is moving. Then drive 30 km, brake by 15 km/h, repaint the car blue, and print its updated details. Finally, stop the car and print whether it is still moving.
+
+<details>
+<summary>Answer</summary>
+
+```python
+class EngineOffError(Exception):
+    pass
+
+
+class InsufficientFuelError(Exception):
+    pass
+
+
+class Vehicle:
+    def __init__(self, brand, registration_number, color):
+        self.brand = brand
+        self.registration_number = registration_number
+        self.color = color
+
+
+class Car(Vehicle):
+    MAX_SPEED = 180           # km/h
+    TANK_CAPACITY = 50        # litres
+    FUEL_EFFICIENCY = 15      # km per litre
+
+    def __init__(self, brand, registration_number, color):
+        super().__init__(brand, registration_number, color)
+        self.speed = 0
+        self.fuel_level = 0
+        self.engine_on = False
+        self.odometer_km = 0
+
+    @property
+    def is_moving(self):
+        return self.speed > 0
+
+    def show(self):
+        engine_status = "on" if self.engine_on else "off"
+        return (
+            f"{self.brand} ({self.registration_number}), {self.color} | "
+            f"Speed: {self.speed} km/h | Fuel: {self.fuel_level:.2f} L | "
+            f"Engine: {engine_status} | Odometer: {self.odometer_km} km"
+        )
+
+    def start(self):
+        self.engine_on = True
+
+    def stop(self):
+        self.speed = 0
+        self.engine_on = False
+
+    def accelerate(self, amount):
+        if not 0 < amount < float("inf"):
+            raise ValueError("Acceleration must be a positive, finite number.")
+        if not self.engine_on:
+            raise EngineOffError("Start the engine before accelerating.")
+
+        self.speed = min(self.speed + amount, self.MAX_SPEED)
+
+    def brake(self, amount):
+        if not 0 < amount < float("inf"):
+            raise ValueError("Braking amount must be a positive, finite number.")
+
+        self.speed = max(self.speed - amount, 0)
+
+    def refuel(self, litres):
+        if not 0 < litres < float("inf"):
+            raise ValueError("Fuel amount must be a positive, finite number.")
+
+        self.fuel_level = min(self.fuel_level + litres, self.TANK_CAPACITY)
+
+    def repaint(self, color):
+        self.color = color
+
+    def drive(self, km):
+        if not 0 < km < float("inf"):
+            raise ValueError("Distance must be a positive, finite number.")
+        if not self.engine_on:
+            raise EngineOffError("Start the engine before driving.")
+
+        fuel_needed = km / self.FUEL_EFFICIENCY
+        if fuel_needed > self.fuel_level:
+            raise InsufficientFuelError("There is too little fuel for this trip.")
+
+        self.fuel_level -= fuel_needed
+        self.odometer_km += km
+
+
+car = Car("Tata", "JH01AB1234", "White")
+
+car.refuel(10)
+car.start()
+car.accelerate(40)
+print(car.is_moving)  # True
+
+car.drive(30)         # Uses 2 litres and adds 30 km to the odometer
+car.brake(15)         # Reduces speed from 40 to 25 km/h
+car.repaint("Blue")
+print(car.show())
+# Tata (JH01AB1234), Blue | Speed: 25 km/h | Fuel: 8.00 L | Engine: on | Odometer: 30 km
+
+car.stop()
+print(car.is_moving)  # False
+```
+
+**Output:**
+
+```text
+True
+Tata (JH01AB1234), Blue | Speed: 25 km/h | Fuel: 8.00 L | Engine: on | Odometer: 30 km
+False
+```
+
+</details>
+
 ### 2. Student form (`StudentForm` inherits `Form`)
 
 - **Attributes:** `form_id`, `student_name`, `age`, `height_cm`, `marks`, `status`, `submitted_at`
