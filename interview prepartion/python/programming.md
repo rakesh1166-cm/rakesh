@@ -3594,6 +3594,162 @@ False
 - **Exceptions:** `ValueError` for invalid input, `IncompleteFormError` when required details are missing, `FormAlreadySubmittedError` on a second submission.
 - **Decorator:** Custom `@draft_only` on `fill_details()` and `fill_marks()` to block edits after submission.
 
+**Program:** Write a Python program to create a `Form` class with the attributes `form_id`, `status`, and `submitted_at`. Create a `StudentForm` class that inherits from `Form` and adds `student_name`, `age`, `height_cm`, and `marks` (a dictionary of subject to score). A new form starts as a `"draft"` with a blank name, zero age and height, no marks, and no submission time.
+
+Implement these eight methods in `StudentForm`:
+
+1. `fill_details(name, age, height_cm)` stores the student's name, age, and height.
+2. `fill_marks(subject, score)` adds or updates the score for a subject, from 0 to 100.
+3. `remove_marks(subject)` deletes the score for a subject.
+4. `calculate_average()` returns the average score, or 0 when there are no marks.
+5. `validate()` checks that the name, age, height, and at least one subject are filled in.
+6. `preview()` returns the form's details for printing.
+7. `save()` returns the form data as a dictionary, like a saved draft record.
+8. `submit()` validates the form, sets the status to `"submitted"`, and records the submission time (it takes an optional `submitted_at` so the output stays fixed).
+
+Raise `ValueError` for a blank name, a non-positive age or height, a score outside 0 to 100, or removing a subject that has no marks. Raise `IncompleteFormError` from `validate()` when required details are missing, and `FormAlreadySubmittedError` on a second submission. Define a custom `@draft_only` decorator with `functools.wraps` and apply it to `fill_details()` and `fill_marks()` so a submitted form cannot be edited.
+
+Create form `F-101` for Ananya Sharma, aged 16 and 158 cm tall. Add marks for Maths (92), Science (85), and Hindi (60), then remove Hindi and print the average. Print the marks from the saved record. Submit the form on 14 November 2026 at 10:30, then print the preview and the submission time. Finally, try to add English marks to the submitted form, and catch and print the `FormAlreadySubmittedError`.
+
+<details>
+<summary>Answer</summary>
+
+```python
+from datetime import datetime
+from functools import wraps
+
+
+class IncompleteFormError(Exception):
+    pass
+
+
+class FormAlreadySubmittedError(Exception):
+    pass
+
+
+def draft_only(method):
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        if self.status == "submitted":
+            raise FormAlreadySubmittedError("A submitted form cannot be edited.")
+        return method(self, *args, **kwargs)
+    return wrapper
+
+
+class Form:
+    def __init__(self, form_id):
+        self.form_id = form_id
+        self.status = "draft"
+        self.submitted_at = None
+
+
+class StudentForm(Form):
+    MIN_SCORE = 0
+    MAX_SCORE = 100
+
+    def __init__(self, form_id):
+        super().__init__(form_id)
+        self.student_name = ""
+        self.age = 0
+        self.height_cm = 0
+        self.marks = {}
+
+    @draft_only
+    def fill_details(self, name, age, height_cm):
+        if not name.strip():
+            raise ValueError("Name cannot be blank.")
+        if age <= 0 or height_cm <= 0:
+            raise ValueError("Age and height must be positive.")
+
+        self.student_name = name.strip()
+        self.age = age
+        self.height_cm = height_cm
+
+    @draft_only
+    def fill_marks(self, subject, score):
+        if not self.MIN_SCORE <= score <= self.MAX_SCORE:
+            raise ValueError("Score must be between 0 and 100.")
+
+        self.marks[subject] = score
+
+    def remove_marks(self, subject):
+        if subject not in self.marks:
+            raise ValueError(f"No marks found for {subject}.")
+
+        del self.marks[subject]
+
+    def calculate_average(self):
+        if not self.marks:
+            return 0
+        return sum(self.marks.values()) / len(self.marks)
+
+    def validate(self):
+        if not self.student_name or self.age <= 0 or self.height_cm <= 0:
+            raise IncompleteFormError("Fill in name, age, and height.")
+        if not self.marks:
+            raise IncompleteFormError("Add marks for at least one subject.")
+        return True
+
+    def preview(self):
+        return (
+            f"Form {self.form_id} [{self.status}] | {self.student_name}, "
+            f"{self.age} yrs, {self.height_cm} cm | Marks: {self.marks} | "
+            f"Average: {self.calculate_average():.2f}"
+        )
+
+    def save(self):
+        return {
+            "form_id": self.form_id,
+            "student_name": self.student_name,
+            "age": self.age,
+            "height_cm": self.height_cm,
+            "marks": dict(self.marks),
+            "status": self.status,
+        }
+
+    def submit(self, submitted_at=None):
+        if self.status == "submitted":
+            raise FormAlreadySubmittedError("This form is already submitted.")
+        self.validate()
+
+        self.status = "submitted"
+        self.submitted_at = submitted_at or datetime.now()
+
+
+form = StudentForm("F-101")
+
+form.fill_details("Ananya Sharma", 16, 158)
+form.fill_marks("Maths", 92)
+form.fill_marks("Science", 85)
+form.fill_marks("Hindi", 60)
+form.remove_marks("Hindi")
+print(form.calculate_average())  # 88.5
+
+print(form.save()["marks"])      # {'Maths': 92, 'Science': 85}
+
+form.submit(datetime(2026, 11, 14, 10, 30))
+print(form.preview())
+# Form F-101 [submitted] | Ananya Sharma, 16 yrs, 158 cm | Marks: {'Maths': 92, 'Science': 85} | Average: 88.50
+print(form.submitted_at)         # 2026-11-14 10:30:00
+
+try:
+    form.fill_marks("English", 78)
+except FormAlreadySubmittedError as error:
+    print(type(error).__name__, "-", error)
+```
+
+**Output:**
+
+```text
+88.5
+{'Maths': 92, 'Science': 85}
+Form F-101 [submitted] | Ananya Sharma, 16 yrs, 158 cm | Marks: {'Maths': 92, 'Science': 85} | Average: 88.50
+2026-11-14 10:30:00
+FormAlreadySubmittedError - A submitted form cannot be edited.
+```
+
+</details>
+
 ### 3. Dog (`Dog` inherits `Animal`)
 
 - **Attributes:** `name`, `age`, `size`, `breed`, `energy`, `is_sleeping`, `tricks`
@@ -3601,6 +3757,141 @@ False
 - **Validation:** Allow `small`, `medium`, or `large` for size. Keep energy between 0 and 100 and require positive activity duration.
 - **Exceptions:** `ValueError` for invalid size or duration, `DogSleepingError` when trying to play while asleep, `UnknownTrickError` for an unlearned trick.
 - **Decorator:** `@abstractmethod` on `Animal.eat()` if you make `Animal` an abstract base class. Implement `eat()` in `Dog`.
+
+**Program:** Write a Python program to create an abstract `Animal` class (using `abc.ABC`) with the attributes `name`, `age`, and `size`, where size must be `small`, `medium`, or `large`. Create a `Dog` class that inherits from `Animal` and adds `breed`, `energy`, `is_sleeping`, and `tricks` (a list). A new dog starts with 50 energy, awake, and with no tricks.
+
+Implement these eight methods in `Dog`:
+
+1. `bark()` returns the dog's bark as a string.
+2. `eat(food)` adds 20 energy, up to a maximum of 100.
+3. `sleep()` puts the dog to sleep.
+4. `wake_up()` wakes the dog and restores its energy to 100.
+5. `walk(minutes)` uses 1 energy per minute, with a minimum of 0.
+6. `play(minutes)` uses 2 energy per minute, with a minimum of 0.
+7. `learn_trick(name)` adds a trick if the dog does not know it yet.
+8. `perform_trick(name)` returns a message for a trick the dog has learned.
+
+Raise `ValueError` for an unknown size or a non-positive duration, `DogSleepingError` when trying to walk or play while the dog is asleep, and `UnknownTrickError` for a trick the dog has not learned. Mark `Animal.eat()` with `@abstractmethod` so every animal must implement its own `eat()`, and implement it in `Dog`.
+
+Create a medium-sized, 3-year-old Indian Pariah dog named Bruno. Print his bark and feed him chicken rice. Walk him for 30 minutes, play for 10 minutes, and print his energy. Teach him "sit" and "shake hands", then print the result of performing "sit". Put him to sleep, wake him up, and print his energy and tricks. Finally, put him to sleep again, try to play for 15 minutes, and catch and print the `DogSleepingError`.
+
+<details>
+<summary>Answer</summary>
+
+```python
+from abc import ABC, abstractmethod
+
+
+class DogSleepingError(Exception):
+    pass
+
+
+class UnknownTrickError(Exception):
+    pass
+
+
+class Animal(ABC):
+    SIZES = ("small", "medium", "large")
+
+    def __init__(self, name, age, size):
+        if size not in self.SIZES:
+            raise ValueError(f"Size must be one of {self.SIZES}.")
+
+        self.name = name
+        self.age = age
+        self.size = size
+
+    @abstractmethod
+    def eat(self, food):
+        pass
+
+
+class Dog(Animal):
+    MAX_ENERGY = 100
+    MEAL_ENERGY = 20          # energy gained per meal
+    WALK_COST = 1             # energy per minute of walking
+    PLAY_COST = 2             # energy per minute of playing
+
+    def __init__(self, name, age, size, breed):
+        super().__init__(name, age, size)
+        self.breed = breed
+        self.energy = 50
+        self.is_sleeping = False
+        self.tricks = []
+
+    def bark(self):
+        return f"{self.name} says Woof!"
+
+    def eat(self, food):
+        self.energy = min(self.energy + self.MEAL_ENERGY, self.MAX_ENERGY)
+        return f"{self.name} ate {food}."
+
+    def sleep(self):
+        self.is_sleeping = True
+
+    def wake_up(self):
+        self.is_sleeping = False
+        self.energy = self.MAX_ENERGY
+
+    def walk(self, minutes):
+        self._use_energy(minutes, self.WALK_COST)
+
+    def play(self, minutes):
+        self._use_energy(minutes, self.PLAY_COST)
+
+    def learn_trick(self, name):
+        if name not in self.tricks:
+            self.tricks.append(name)
+
+    def perform_trick(self, name):
+        if name not in self.tricks:
+            raise UnknownTrickError(f"{self.name} has not learned '{name}'.")
+        return f"{self.name} performs {name}!"
+
+    def _use_energy(self, minutes, cost_per_minute):
+        if minutes <= 0:
+            raise ValueError("Duration must be a positive number of minutes.")
+        if self.is_sleeping:
+            raise DogSleepingError(f"{self.name} is asleep. Wake him up first.")
+
+        self.energy = max(self.energy - minutes * cost_per_minute, 0)
+
+
+dog = Dog("Bruno", 3, "medium", "Indian Pariah")
+
+print(dog.bark())                 # Bruno says Woof!
+print(dog.eat("chicken rice"))    # Bruno ate chicken rice.
+dog.walk(30)                      # Energy 70 -> 40
+dog.play(10)                      # Energy 40 -> 20
+print(dog.energy)                 # 20
+
+dog.learn_trick("sit")
+dog.learn_trick("shake hands")
+print(dog.perform_trick("sit"))   # Bruno performs sit!
+
+dog.sleep()
+dog.wake_up()
+print(dog.energy, dog.tricks)     # 100 ['sit', 'shake hands']
+
+dog.sleep()
+try:
+    dog.play(15)
+except DogSleepingError as error:
+    print(type(error).__name__, "-", error)
+```
+
+**Output:**
+
+```text
+Bruno says Woof!
+Bruno ate chicken rice.
+20
+Bruno performs sit!
+100 ['sit', 'shake hands']
+DogSleepingError - Bruno is asleep. Wake him up first.
+```
+
+</details>
 
 ### 4. Savings account (`SavingsAccount` inherits `BankAccount`)
 
@@ -3610,6 +3901,153 @@ False
 - **Exceptions:** `ValueError` for invalid amounts, `InsufficientBalanceError` for an overdraft, `AccountFrozenError` when a frozen account tries to move money.
 - **Decorator:** Custom `@active_account` on `deposit()`, `withdraw()`, and `transfer_to()`.
 
+**Program:** Write a Python program to create a `BankAccount` class with the attributes `account_number`, `holder_name`, `balance`, and `transactions` (a list). Create a `SavingsAccount` class that inherits from `BankAccount` and adds `interest_rate` (4% a year by default) and `is_frozen`. A new account starts with the given opening balance, no transactions, and not frozen.
+
+Implement these eight methods in `SavingsAccount`:
+
+1. `deposit(amount)` adds money to the balance.
+2. `withdraw(amount)` takes money out if the balance is enough.
+3. `transfer_to(account, amount)` moves money to another account after checking that the transfer can succeed.
+4. `calculate_interest()` returns one year's interest on the current balance, rounded to 2 decimal places.
+5. `apply_interest()` adds that interest to the balance.
+6. `show_statement()` returns every transaction with the balance after it.
+7. `freeze()` blocks money movement on the account.
+8. `unfreeze()` allows money movement again.
+
+Raise `ValueError` for non-positive or non-finite amounts, `InsufficientBalanceError` when a withdrawal or transfer is larger than the balance, and `AccountFrozenError` when a frozen account tries to move money or a transfer targets a frozen account. Define a custom `@active_account` decorator with `functools.wraps` and apply it to `deposit()`, `withdraw()`, and `transfer_to()`.
+
+Open account `SB1001` for Ravi Kumar with Rs. 10,000 and account `SB1002` for Meena Iyer with Rs. 2,000. Ravi deposits Rs. 5,000, withdraws Rs. 3,000, and transfers Rs. 2,000 to Meena. Print Ravi's yearly interest, apply it, and print his statement and Meena's balance. Finally, freeze Meena's account, try to withdraw Rs. 500 from it, and catch and print the `AccountFrozenError`.
+
+<details>
+<summary>Answer</summary>
+
+```python
+from functools import wraps
+
+
+class InsufficientBalanceError(Exception):
+    pass
+
+
+class AccountFrozenError(Exception):
+    pass
+
+
+def active_account(method):
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        if self.is_frozen:
+            raise AccountFrozenError(f"Account {self.account_number} is frozen.")
+        return method(self, *args, **kwargs)
+    return wrapper
+
+
+class BankAccount:
+    def __init__(self, account_number, holder_name, balance=0):
+        self.account_number = account_number
+        self.holder_name = holder_name
+        self.balance = balance
+        self.transactions = []
+
+
+class SavingsAccount(BankAccount):
+    def __init__(self, account_number, holder_name, balance=0, interest_rate=4.0):
+        super().__init__(account_number, holder_name, balance)
+        self.interest_rate = interest_rate      # percent per year
+        self.is_frozen = False
+
+    @active_account
+    def deposit(self, amount):
+        self._check_amount(amount)
+        self.balance += amount
+        self.transactions.append(("Deposit", amount, self.balance))
+
+    @active_account
+    def withdraw(self, amount):
+        self._check_amount(amount)
+        if amount > self.balance:
+            raise InsufficientBalanceError("Balance is too low for this withdrawal.")
+
+        self.balance -= amount
+        self.transactions.append(("Withdraw", amount, self.balance))
+
+    @active_account
+    def transfer_to(self, account, amount):
+        self._check_amount(amount)
+        if account.is_frozen:
+            raise AccountFrozenError(f"Account {account.account_number} is frozen.")
+        if amount > self.balance:
+            raise InsufficientBalanceError("Balance is too low for this transfer.")
+
+        self.balance -= amount
+        account.balance += amount
+        self.transactions.append((f"Transfer to {account.account_number}", amount, self.balance))
+        account.transactions.append((f"Transfer from {self.account_number}", amount, account.balance))
+
+    def calculate_interest(self):
+        return round(self.balance * self.interest_rate / 100, 2)
+
+    def apply_interest(self):
+        interest = self.calculate_interest()
+        self.balance += interest
+        self.transactions.append(("Interest", interest, self.balance))
+
+    def show_statement(self):
+        lines = [f"Statement for {self.holder_name} ({self.account_number})"]
+        for kind, amount, balance in self.transactions:
+            lines.append(f"{kind}: Rs. {amount:.2f} | Balance: Rs. {balance:.2f}")
+        return "\n".join(lines)
+
+    def freeze(self):
+        self.is_frozen = True
+
+    def unfreeze(self):
+        self.is_frozen = False
+
+    @staticmethod
+    def _check_amount(amount):
+        if not 0 < amount < float("inf"):
+            raise ValueError("Amount must be a positive, finite number.")
+
+
+ravi = SavingsAccount("SB1001", "Ravi Kumar", 10000)
+meena = SavingsAccount("SB1002", "Meena Iyer", 2000)
+
+ravi.deposit(5000)
+ravi.withdraw(3000)
+ravi.transfer_to(meena, 2000)
+print(ravi.calculate_interest())  # 400.0
+ravi.apply_interest()
+print(ravi.show_statement())
+# Statement for Ravi Kumar (SB1001)
+# Deposit: Rs. 5000.00 | Balance: Rs. 15000.00
+# Withdraw: Rs. 3000.00 | Balance: Rs. 12000.00
+# Transfer to SB1002: Rs. 2000.00 | Balance: Rs. 10000.00
+# Interest: Rs. 400.00 | Balance: Rs. 10400.00
+print(meena.balance)              # 4000
+
+meena.freeze()
+try:
+    meena.withdraw(500)
+except AccountFrozenError as error:
+    print(type(error).__name__, "-", error)
+```
+
+**Output:**
+
+```text
+400.0
+Statement for Ravi Kumar (SB1001)
+Deposit: Rs. 5000.00 | Balance: Rs. 15000.00
+Withdraw: Rs. 3000.00 | Balance: Rs. 12000.00
+Transfer to SB1002: Rs. 2000.00 | Balance: Rs. 10000.00
+Interest: Rs. 400.00 | Balance: Rs. 10400.00
+4000
+AccountFrozenError - Account SB1002 is frozen.
+```
+
+</details>
+
 ### 5. Library book (`LibraryBook` inherits `LibraryItem`)
 
 - **Attributes:** `item_id`, `title`, `author`, `isbn`, `borrower_id`, `due_date`, `reserved_by`
@@ -3617,6 +4055,155 @@ False
 - **Validation:** Require a title and a future due date for a new loan. Block renewal if another member holds the reservation.
 - **Exceptions:** `BookUnavailableError` for borrowing an unavailable book, `BookNotBorrowedError` for returning a book without an active loan.
 - **Decorator:** `@property` on `is_borrowed`, computed from `borrower_id`.
+
+**Program:** Write a Python program to create a `LibraryItem` class with the attributes `item_id` and `title`, where the title cannot be blank. Create a `LibraryBook` class that inherits from `LibraryItem` and adds `author`, `isbn`, `borrower_id`, `due_date`, and `reserved_by`. A new book starts with no borrower, no due date, and no reservation.
+
+Implement these eight methods in `LibraryBook`:
+
+1. `show_details()` returns the book's details, loan status, and reservation for printing.
+2. `borrow(member_id, due_date)` lends the book to a member until the due date (it takes an optional `today` so the output stays fixed).
+3. `return_book()` ends the current loan.
+4. `renew(new_due_date)` moves the due date later.
+5. `reserve(member_id)` lets another member reserve the book.
+6. `cancel_reservation(member_id)` removes that member's reservation.
+7. `calculate_late_fee(as_of_date)` returns Rs. 5 for each day past the due date.
+8. `update_title(title)` changes the book's title.
+
+Raise `ValueError` for a blank title, a due date that is not in the future, a renewal date that is not after the current due date, or an invalid reservation change. Raise `BookUnavailableError` when borrowing a book that is on loan or reserved by someone else, reserving a book that is already reserved, or renewing a book that another member has reserved. Raise `BookNotBorrowedError` when returning or renewing a book that is not on loan. Define `is_borrowed` as a `@property` that returns `True` when the book has a borrower.
+
+Create book `B-501`, *Wings of Fire* by A. P. J. Abdul Kalam. On 14 November 2026, member `M101` borrows it until 28 November 2026. Print whether it is borrowed, renew it until 5 December 2026, and let member `M205` reserve it. Print the late fee as of 8 December 2026, change the title to *Wings of Fire: An Autobiography*, and print the book's details. Finally, try to renew the book again for `M101`, and catch and print the `BookUnavailableError`.
+
+<details>
+<summary>Answer</summary>
+
+```python
+from datetime import date
+
+
+class BookUnavailableError(Exception):
+    pass
+
+
+class BookNotBorrowedError(Exception):
+    pass
+
+
+class LibraryItem:
+    def __init__(self, item_id, title):
+        if not title.strip():
+            raise ValueError("Title cannot be blank.")
+
+        self.item_id = item_id
+        self.title = title.strip()
+
+
+class LibraryBook(LibraryItem):
+    LATE_FEE_PER_DAY = 5      # rupees
+
+    def __init__(self, item_id, title, author, isbn):
+        super().__init__(item_id, title)
+        self.author = author
+        self.isbn = isbn
+        self.borrower_id = None
+        self.due_date = None
+        self.reserved_by = None
+
+    @property
+    def is_borrowed(self):
+        return self.borrower_id is not None
+
+    def show_details(self):
+        status = f"borrowed by {self.borrower_id}, due {self.due_date}" if self.is_borrowed else "available"
+        reserved = self.reserved_by or "none"
+        return (
+            f"{self.item_id}: {self.title} by {self.author} (ISBN {self.isbn}) | "
+            f"Status: {status} | Reserved by: {reserved}"
+        )
+
+    def borrow(self, member_id, due_date, today=None):
+        today = today or date.today()
+        if self.is_borrowed:
+            raise BookUnavailableError("This book is already on loan.")
+        if self.reserved_by and self.reserved_by != member_id:
+            raise BookUnavailableError(f"This book is reserved by {self.reserved_by}.")
+        if due_date <= today:
+            raise ValueError("Due date must be in the future.")
+
+        self.borrower_id = member_id
+        self.due_date = due_date
+        if self.reserved_by == member_id:
+            self.reserved_by = None
+
+    def return_book(self):
+        if not self.is_borrowed:
+            raise BookNotBorrowedError("This book is not on loan.")
+
+        self.borrower_id = None
+        self.due_date = None
+
+    def renew(self, new_due_date):
+        if not self.is_borrowed:
+            raise BookNotBorrowedError("Only a borrowed book can be renewed.")
+        if self.reserved_by and self.reserved_by != self.borrower_id:
+            raise BookUnavailableError(f"Cannot renew: reserved by {self.reserved_by}.")
+        if new_due_date <= self.due_date:
+            raise ValueError("New due date must be after the current one.")
+
+        self.due_date = new_due_date
+
+    def reserve(self, member_id):
+        if self.reserved_by:
+            raise BookUnavailableError(f"Already reserved by {self.reserved_by}.")
+        if member_id == self.borrower_id:
+            raise ValueError("The current borrower cannot reserve this book.")
+
+        self.reserved_by = member_id
+
+    def cancel_reservation(self, member_id):
+        if self.reserved_by != member_id:
+            raise ValueError(f"{member_id} has no reservation on this book.")
+
+        self.reserved_by = None
+
+    def calculate_late_fee(self, as_of_date):
+        if not self.is_borrowed or as_of_date <= self.due_date:
+            return 0
+        return (as_of_date - self.due_date).days * self.LATE_FEE_PER_DAY
+
+    def update_title(self, title):
+        if not title.strip():
+            raise ValueError("Title cannot be blank.")
+
+        self.title = title.strip()
+
+
+book = LibraryBook("B-501", "Wings of Fire", "A. P. J. Abdul Kalam", "9788173711466")
+
+book.borrow("M101", date(2026, 11, 28), today=date(2026, 11, 14))
+print(book.is_borrowed)                             # True
+book.renew(date(2026, 12, 5))
+book.reserve("M205")
+print(book.calculate_late_fee(date(2026, 12, 8)))   # 15
+book.update_title("Wings of Fire: An Autobiography")
+print(book.show_details())
+# B-501: Wings of Fire: An Autobiography by A. P. J. Abdul Kalam (ISBN 9788173711466) | Status: borrowed by M101, due 2026-12-05 | Reserved by: M205
+
+try:
+    book.renew(date(2026, 12, 12))
+except BookUnavailableError as error:
+    print(type(error).__name__, "-", error)
+```
+
+**Output:**
+
+```text
+True
+15
+B-501: Wings of Fire: An Autobiography by A. P. J. Abdul Kalam (ISBN 9788173711466) | Status: borrowed by M101, due 2026-12-05 | Reserved by: M205
+BookUnavailableError - Cannot renew: reserved by M205.
+```
+
+</details>
 
 ### 6. Shopping cart (`ShoppingCart`)
 
@@ -3626,6 +4213,155 @@ False
 - **Exceptions:** `ValueError` for invalid quantities, `InvalidCouponError`, `EmptyCartError`, `OutOfStockError`.
 - **Decorator:** `@property` on `item_count`, computed by summing the quantities.
 
+**Program:** Write a Python program to create a `ShoppingCart` class with the attributes `cart_id`, `customer_id`, `items` (a dictionary of product ID to product and quantity), `coupon_code`, `discount_percent`, and `status`. Each product is a dictionary with `id`, `name`, `price`, and `stock`. A new cart starts empty, with no coupon, 0% discount, and the status `"open"`. Two coupons exist: `SAVE10` gives 10% off orders of at least Rs. 1,000, and `FEST20` gives 20% off orders of at least Rs. 5,000.
+
+Implement these eight methods in `ShoppingCart`:
+
+1. `add_item(product, qty)` adds a product, or increases its quantity if it is already in the cart.
+2. `remove_item(product_id)` removes a product from the cart.
+3. `update_quantity(product_id, qty)` sets a new quantity for a product in the cart.
+4. `apply_coupon(code)` applies a known coupon when the order meets its minimum amount.
+5. `remove_coupon()` removes the coupon and its discount.
+6. `calculate_total()` returns the subtotal minus the coupon discount.
+7. `clear()` empties the cart and removes the coupon.
+8. `checkout()` rechecks stock, reduces each product's stock, sets the status to `"checked_out"`, and returns the total.
+
+Raise `ValueError` for a quantity that is not a positive whole number, `InvalidCouponError` for an unknown coupon or an order below the coupon's minimum, `EmptyCartError` when checking out an empty cart, and `OutOfStockError` when a quantity is more than the stock, both when adding items and again at checkout. Raise `KeyError` when removing or updating a product that is not in the cart. Define `item_count` as a `@property` that returns the sum of all quantities.
+
+Create cart `C-9001` for customer `CUST-42`. Add one 5 kg bag of basmati rice (Rs. 650), two 1 kg packs of toor dal (Rs. 180 each), and one litre of ghee (Rs. 620, 3 in stock). Apply coupon `SAVE10` and print the total. Change the dal quantity to 1, then print the item count and the new total. Finally, set the ghee stock to 0 as if another customer bought it, try to check out, and catch and print the `OutOfStockError`.
+
+<details>
+<summary>Answer</summary>
+
+```python
+class InvalidCouponError(Exception):
+    pass
+
+
+class EmptyCartError(Exception):
+    pass
+
+
+class OutOfStockError(Exception):
+    pass
+
+
+class ShoppingCart:
+    # code: (discount percent, minimum order in rupees)
+    COUPONS = {"SAVE10": (10, 1000), "FEST20": (20, 5000)}
+
+    def __init__(self, cart_id, customer_id):
+        self.cart_id = cart_id
+        self.customer_id = customer_id
+        self.items = {}               # product_id -> {"product": ..., "qty": ...}
+        self.coupon_code = None
+        self.discount_percent = 0
+        self.status = "open"
+
+    @property
+    def item_count(self):
+        return sum(entry["qty"] for entry in self.items.values())
+
+    def add_item(self, product, qty):
+        self._check_qty(qty)
+        current = self.items.get(product["id"], {"qty": 0})["qty"]
+        if current + qty > product["stock"]:
+            raise OutOfStockError(f"Only {product['stock']} of {product['name']} in stock.")
+
+        self.items[product["id"]] = {"product": product, "qty": current + qty}
+
+    def remove_item(self, product_id):
+        if product_id not in self.items:
+            raise KeyError(f"{product_id} is not in the cart.")
+
+        del self.items[product_id]
+
+    def update_quantity(self, product_id, qty):
+        self._check_qty(qty)
+        if product_id not in self.items:
+            raise KeyError(f"{product_id} is not in the cart.")
+        product = self.items[product_id]["product"]
+        if qty > product["stock"]:
+            raise OutOfStockError(f"Only {product['stock']} of {product['name']} in stock.")
+
+        self.items[product_id]["qty"] = qty
+
+    def apply_coupon(self, code):
+        if code not in self.COUPONS:
+            raise InvalidCouponError(f"{code} is not a valid coupon.")
+        percent, min_order = self.COUPONS[code]
+        if self._subtotal() < min_order:
+            raise InvalidCouponError(f"{code} needs an order of at least Rs. {min_order}.")
+
+        self.coupon_code = code
+        self.discount_percent = percent
+
+    def remove_coupon(self):
+        self.coupon_code = None
+        self.discount_percent = 0
+
+    def calculate_total(self):
+        return self._subtotal() * (100 - self.discount_percent) / 100
+
+    def clear(self):
+        self.items.clear()
+        self.remove_coupon()
+
+    def checkout(self):
+        if not self.items:
+            raise EmptyCartError("Add items before checking out.")
+        for entry in self.items.values():
+            if entry["qty"] > entry["product"]["stock"]:
+                raise OutOfStockError(f"{entry['product']['name']} is now out of stock.")
+
+        for entry in self.items.values():
+            entry["product"]["stock"] -= entry["qty"]
+        self.status = "checked_out"
+        return self.calculate_total()
+
+    def _subtotal(self):
+        return sum(e["product"]["price"] * e["qty"] for e in self.items.values())
+
+    @staticmethod
+    def _check_qty(qty):
+        if not isinstance(qty, int) or qty <= 0:
+            raise ValueError("Quantity must be a positive whole number.")
+
+
+rice = {"id": "P1", "name": "Basmati Rice 5 kg", "price": 650, "stock": 10}
+dal = {"id": "P2", "name": "Toor Dal 1 kg", "price": 180, "stock": 8}
+ghee = {"id": "P3", "name": "Ghee 1 L", "price": 620, "stock": 3}
+
+cart = ShoppingCart("C-9001", "CUST-42")
+
+cart.add_item(rice, 1)
+cart.add_item(dal, 2)
+cart.add_item(ghee, 1)
+cart.apply_coupon("SAVE10")
+print(cart.calculate_total())     # 1467.0
+
+cart.update_quantity("P2", 1)     # Subtotal 1450, 10% off
+print(cart.item_count)            # 3
+print(cart.calculate_total())     # 1305.0
+
+ghee["stock"] = 0                 # Another customer bought the last ghee
+try:
+    cart.checkout()
+except OutOfStockError as error:
+    print(type(error).__name__, "-", error)
+```
+
+**Output:**
+
+```text
+1467.0
+3
+1305.0
+OutOfStockError - Ghee 1 L is now out of stock.
+```
+
+</details>
+
 ### 7. Salaried employee (`SalariedEmployee` inherits `Employee`)
 
 - **Attributes:** `employee_id`, `name`, `department`, `monthly_salary`, `bonus`, `leave_balance`, `employment_status`
@@ -3633,6 +4369,148 @@ False
 - **Validation:** Require nonnegative salary, positive bonus and raise amounts, and enough leave for each request.
 - **Exceptions:** `ValueError` for invalid amounts, `InsufficientLeaveError`, `InactiveEmployeeError`.
 - **Decorator:** Custom `@active_employee` on `request_leave()` and `change_department()`.
+
+**Program:** Write a Python program to create an `Employee` class with the attributes `employee_id`, `name`, and `department`. Create a `SalariedEmployee` class that inherits from `Employee` and adds `monthly_salary`, `bonus`, `leave_balance`, and `employment_status`. A new employee starts with zero bonus, 24 days of leave, and the status `active`. The monthly salary must not be negative.
+
+Implement these eight methods in `SalariedEmployee`:
+
+1. `show_profile()` returns the employee's details for printing.
+2. `calculate_gross_pay()` returns the monthly salary plus the bonus.
+3. `add_bonus(amount)` adds to the bonus.
+4. `give_raise(percent)` increases the monthly salary by the given percentage.
+5. `request_leave(days)` deducts whole days from the leave balance.
+6. `restore_leave(days)` adds days back, up to the 24-day maximum.
+7. `change_department(name)` moves the employee to a new department.
+8. `deactivate()` sets the status to `inactive`.
+
+Raise `ValueError` for a negative salary, non-positive bonus or raise amounts, non-positive leave days, or an empty department name. Raise `InsufficientLeaveError` when the request is larger than the leave balance. Define a custom `@active_employee` decorator on `request_leave()` and `change_department()` that raises `InactiveEmployeeError` when the employee is no longer active.
+
+Create employee `E101`, Priya Sharma, in the Finance department with a monthly salary of Rs. 60,000. Add a bonus of Rs. 5,000, give a 10% raise, and print the gross pay. Then request 5 days of leave, restore 2 days, move her to Data Science, and print her profile. Finally, deactivate her, try to move her to Marketing, and print the error.
+
+<details>
+<summary>Answer</summary>
+
+```python
+from functools import wraps
+
+
+class InsufficientLeaveError(Exception):
+    pass
+
+
+class InactiveEmployeeError(Exception):
+    pass
+
+
+def active_employee(method):
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        if self.employment_status != "active":
+            raise InactiveEmployeeError(f"{self.name} is no longer an active employee.")
+        return method(self, *args, **kwargs)
+    return wrapper
+
+
+class Employee:
+    def __init__(self, employee_id, name, department):
+        self.employee_id = employee_id
+        self.name = name
+        self.department = department
+
+
+class SalariedEmployee(Employee):
+    MAX_LEAVE = 24            # days per year
+
+    def __init__(self, employee_id, name, department, monthly_salary):
+        if not 0 <= monthly_salary < float("inf"):
+            raise ValueError("Salary must be a nonnegative, finite number.")
+
+        super().__init__(employee_id, name, department)
+        self.monthly_salary = monthly_salary
+        self.bonus = 0
+        self.leave_balance = self.MAX_LEAVE
+        self.employment_status = "active"
+
+    def show_profile(self):
+        return (
+            f"{self.employee_id} {self.name}, {self.department} | "
+            f"Salary: Rs. {self.monthly_salary:,.2f} | Bonus: Rs. {self.bonus:,.2f} | "
+            f"Leave: {self.leave_balance} days | Status: {self.employment_status}"
+        )
+
+    def calculate_gross_pay(self):
+        return self.monthly_salary + self.bonus
+
+    def add_bonus(self, amount):
+        if not 0 < amount < float("inf"):
+            raise ValueError("Bonus must be a positive, finite number.")
+
+        self.bonus += amount
+
+    def give_raise(self, percent):
+        if not 0 < percent < float("inf"):
+            raise ValueError("Raise must be a positive, finite percentage.")
+
+        self.monthly_salary += self.monthly_salary * percent / 100
+
+    @active_employee
+    def request_leave(self, days):
+        if not isinstance(days, int) or days <= 0:
+            raise ValueError("Leave days must be a positive whole number.")
+        if days > self.leave_balance:
+            raise InsufficientLeaveError(
+                f"Only {self.leave_balance} leave days are left."
+            )
+
+        self.leave_balance -= days
+
+    def restore_leave(self, days):
+        if not isinstance(days, int) or days <= 0:
+            raise ValueError("Leave days must be a positive whole number.")
+
+        self.leave_balance = min(self.leave_balance + days, self.MAX_LEAVE)
+
+    @active_employee
+    def change_department(self, name):
+        if not name.strip():
+            raise ValueError("Department name cannot be empty.")
+
+        self.department = name.strip()
+
+    def deactivate(self):
+        self.employment_status = "inactive"
+
+
+employee = SalariedEmployee("E101", "Priya Sharma", "Finance", 60000)
+
+employee.add_bonus(5000)
+employee.give_raise(10)              # Salary goes from 60,000 to 66,000
+print(employee.calculate_gross_pay())  # 71000.0
+
+employee.request_leave(5)
+employee.restore_leave(2)            # Leave goes from 19 back to 21 days
+employee.change_department("Data Science")
+print(employee.show_profile())
+# E101 Priya Sharma, Data Science | Salary: Rs. 66,000.00 | Bonus: Rs. 5,000.00 | Leave: 21 days | Status: active
+
+employee.deactivate()
+
+try:
+    employee.change_department("Marketing")
+except InactiveEmployeeError as error:
+    print(type(error).__name__, "-", error)
+    # InactiveEmployeeError - Priya Sharma is no longer an active employee.
+```
+
+**Output:**
+
+```text
+71000.0
+E101 Priya Sharma, Data Science | Salary: Rs. 66,000.00 | Bonus: Rs. 5,000.00 | Leave: 21 days | Status: active
+InactiveEmployeeError - Priya Sharma is no longer an active employee.
+```
+
+</details>
 
 ### 8. Restaurant order (`RestaurantOrder` inherits `Order`)
 
@@ -3642,6 +4520,156 @@ False
 - **Exceptions:** `EmptyOrderError`, `InvalidOrderStatusError`.
 - **Decorator:** Custom `@draft_only` on `add_dish()` and `remove_dish()` to prevent edits after the kitchen receives the order.
 
+**Program:** Write a Python program to create an `Order` class with the attributes `order_id`, `items`, and `status`. Create a `RestaurantOrder` class that inherits from `Order` and adds `table_number`, `special_instructions`, and `tax_rate`. A new order starts with no items, no instructions, the status `draft`, and a 5% GST rate. Each dish is a dictionary with an `id`, `name`, and `price`.
+
+Implement these eight methods in `RestaurantOrder`:
+
+1. `add_dish(dish, qty)` adds a dish, or increases its quantity if it is already in the order.
+2. `remove_dish(dish_id)` removes a dish from the order.
+3. `add_instruction(text)` adds a special instruction for the kitchen.
+4. `calculate_total()` returns the subtotal plus tax.
+5. `send_to_kitchen()` moves the order from `draft` to `cooking`.
+6. `mark_ready()` moves the order from `cooking` to `ready`.
+7. `serve()` moves the order from `ready` to `served`.
+8. `cancel()` cancels a `draft` or `cooking` order.
+
+Raise `ValueError` for a non-positive table number or quantity, or an empty instruction, and `KeyError` for removing a dish that is not in the order. Raise `EmptyOrderError` when sending an order with no dishes, and `InvalidOrderStatusError` when a step is out of sequence. Define a custom `@draft_only` decorator on `add_dish()` and `remove_dish()` that raises `InvalidOrderStatusError` once the kitchen has the order.
+
+Create order `ORD-501` for table 7. Add one Paneer Butter Masala (Rs. 280), four Butter Naan (Rs. 50 each), and two Sweet Lassi (Rs. 90 each), then remove the lassi. Add the instruction "Less spicy" and print the total with tax. Send the order to the kitchen, mark it ready, serve it, and print its status and instructions. Finally, try to add a lassi to the served order and print the error.
+
+<details>
+<summary>Answer</summary>
+
+```python
+from functools import wraps
+
+
+class EmptyOrderError(Exception):
+    pass
+
+
+class InvalidOrderStatusError(Exception):
+    pass
+
+
+def draft_only(method):
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        if self.status != "draft":
+            raise InvalidOrderStatusError(
+                f"Order {self.order_id} is already '{self.status}' and cannot be edited."
+            )
+        return method(self, *args, **kwargs)
+    return wrapper
+
+
+class Order:
+    def __init__(self, order_id):
+        self.order_id = order_id
+        self.items = {}
+        self.status = "draft"
+
+
+class RestaurantOrder(Order):
+    TAX_RATE = 5              # percent GST
+
+    def __init__(self, order_id, table_number):
+        if not isinstance(table_number, int) or table_number <= 0:
+            raise ValueError("Table number must be a positive whole number.")
+
+        super().__init__(order_id)
+        self.table_number = table_number
+        self.special_instructions = []
+        self.tax_rate = self.TAX_RATE
+
+    @draft_only
+    def add_dish(self, dish, qty):
+        if not isinstance(qty, int) or qty <= 0:
+            raise ValueError("Quantity must be a positive whole number.")
+
+        if dish["id"] in self.items:
+            self.items[dish["id"]]["qty"] += qty
+        else:
+            self.items[dish["id"]] = {"name": dish["name"], "price": dish["price"], "qty": qty}
+
+    @draft_only
+    def remove_dish(self, dish_id):
+        if dish_id not in self.items:
+            raise KeyError(f"Dish {dish_id} is not in this order.")
+
+        del self.items[dish_id]
+
+    def add_instruction(self, text):
+        if not text.strip():
+            raise ValueError("Instruction cannot be empty.")
+
+        self.special_instructions.append(text.strip())
+
+    def calculate_total(self):
+        subtotal = sum(item["price"] * item["qty"] for item in self.items.values())
+        return round(subtotal * (1 + self.tax_rate / 100), 2)
+
+    def _move(self, expected, new_status):
+        if self.status != expected:
+            raise InvalidOrderStatusError(
+                f"Order must be '{expected}' to become '{new_status}', not '{self.status}'."
+            )
+        self.status = new_status
+
+    def send_to_kitchen(self):
+        if not self.items:
+            raise EmptyOrderError("Add at least one dish before sending the order.")
+
+        self._move("draft", "cooking")
+
+    def mark_ready(self):
+        self._move("cooking", "ready")
+
+    def serve(self):
+        self._move("ready", "served")
+
+    def cancel(self):
+        if self.status not in ("draft", "cooking"):
+            raise InvalidOrderStatusError(f"A '{self.status}' order cannot be cancelled.")
+
+        self.status = "cancelled"
+
+
+paneer = {"id": "D1", "name": "Paneer Butter Masala", "price": 280}
+naan = {"id": "D2", "name": "Butter Naan", "price": 50}
+lassi = {"id": "D3", "name": "Sweet Lassi", "price": 90}
+
+order = RestaurantOrder("ORD-501", 7)
+
+order.add_dish(paneer, 1)
+order.add_dish(naan, 4)
+order.add_dish(lassi, 2)
+order.remove_dish("D3")              # Removes the lassi
+order.add_instruction("Less spicy")
+print(order.calculate_total())       # 504.0  (480 + 5% GST)
+
+order.send_to_kitchen()
+order.mark_ready()
+order.serve()
+print(order.status, order.special_instructions)  # served ['Less spicy']
+
+try:
+    order.add_dish(lassi, 1)
+except InvalidOrderStatusError as error:
+    print(type(error).__name__, "-", error)
+    # InvalidOrderStatusError - Order ORD-501 is already 'served' and cannot be edited.
+```
+
+**Output:**
+
+```text
+504.0
+served ['Less spicy']
+InvalidOrderStatusError - Order ORD-501 is already 'served' and cannot be edited.
+```
+
+</details>
+
 ### 9. Hotel booking (`HotelBooking` inherits `Booking`)
 
 - **Attributes:** `booking_id`, `guest_name`, `room_number`, `check_in_date`, `check_out_date`, `nightly_rate`, `status`
@@ -3649,6 +4677,155 @@ False
 - **Validation:** Require checkout after check-in. Check room availability before confirming or changing dates.
 - **Exceptions:** `ValueError` for invalid dates, `RoomUnavailableError`, `InvalidBookingStatusError`.
 - **Decorator:** `@property` on `nights`, computed from the two dates.
+
+**Program:** Write a Python program to create a `Booking` class with the attributes `booking_id`, `guest_name`, and `status`. Create a `HotelBooking` class that inherits from `Booking` and adds `room_number`, `check_in_date`, `check_out_date`, and `nightly_rate`. A new booking starts with the status `pending`. Keep a class-level list of confirmed bookings so that each booking can check whether its room is free for its dates.
+
+Implement these eight methods in `HotelBooking`:
+
+1. `check_availability()` returns `True` if no other confirmed booking holds the same room on overlapping dates.
+2. `calculate_price()` returns the number of nights times the nightly rate.
+3. `confirm()` confirms a pending booking if the room is free.
+4. `reschedule(start, end)` changes the dates of a pending or confirmed booking if the room is free.
+5. `change_room(room_number)` moves a pending or confirmed booking to another free room.
+6. `check_in()` moves a confirmed booking to `checked_in`.
+7. `check_out()` moves a checked-in booking to `checked_out` and frees the room.
+8. `cancel()` cancels a pending or confirmed booking and frees the room.
+
+Raise `ValueError` when the check-out date is not after the check-in date, `RoomUnavailableError` when the room is already taken for those dates, and `InvalidBookingStatusError` when an action does not fit the current status. Define `nights` as a `@property` that returns the number of days between the two dates.
+
+Create booking `B1` for Ananya Iyer in room 101 from 20 to 23 December 2026, and booking `B2` for Rohit Verma in room 101 from 22 to 24 December 2026, both at Rs. 4,500 a night. Confirm `B1`, then print whether room 101 is available for `B2`. Move `B2` to room 102 and confirm it. Extend `B1` to check out on 24 December, and print its nights and price. Check `B1` in and out, then print both statuses. Finally, try to cancel `B1` and print the error.
+
+<details>
+<summary>Answer</summary>
+
+```python
+from datetime import date
+
+
+class RoomUnavailableError(Exception):
+    pass
+
+
+class InvalidBookingStatusError(Exception):
+    pass
+
+
+class Booking:
+    def __init__(self, booking_id, guest_name):
+        self.booking_id = booking_id
+        self.guest_name = guest_name
+        self.status = "pending"
+
+
+class HotelBooking(Booking):
+    confirmed_bookings = []   # shared by all bookings, to check room availability
+
+    def __init__(self, booking_id, guest_name, room_number, check_in_date,
+                 check_out_date, nightly_rate):
+        if check_out_date <= check_in_date:
+            raise ValueError("Check-out date must be after check-in date.")
+
+        super().__init__(booking_id, guest_name)
+        self.room_number = room_number
+        self.check_in_date = check_in_date
+        self.check_out_date = check_out_date
+        self.nightly_rate = nightly_rate
+
+    @property
+    def nights(self):
+        return (self.check_out_date - self.check_in_date).days
+
+    def _is_free(self, room, start, end):
+        for other in HotelBooking.confirmed_bookings:
+            if other is not self and other.room_number == room:
+                if start < other.check_out_date and other.check_in_date < end:
+                    return False
+        return True
+
+    def _require_status(self, *allowed):
+        if self.status not in allowed:
+            raise InvalidBookingStatusError(
+                f"Booking {self.booking_id} is '{self.status}'."
+            )
+
+    def check_availability(self):
+        return self._is_free(self.room_number, self.check_in_date, self.check_out_date)
+
+    def calculate_price(self):
+        return self.nights * self.nightly_rate
+
+    def confirm(self):
+        self._require_status("pending")
+        if not self.check_availability():
+            raise RoomUnavailableError(f"Room {self.room_number} is taken for these dates.")
+
+        self.status = "confirmed"
+        HotelBooking.confirmed_bookings.append(self)
+
+    def reschedule(self, start, end):
+        self._require_status("pending", "confirmed")
+        if end <= start:
+            raise ValueError("Check-out date must be after check-in date.")
+        if not self._is_free(self.room_number, start, end):
+            raise RoomUnavailableError(f"Room {self.room_number} is taken for these dates.")
+
+        self.check_in_date = start
+        self.check_out_date = end
+
+    def change_room(self, room_number):
+        self._require_status("pending", "confirmed")
+        if not self._is_free(room_number, self.check_in_date, self.check_out_date):
+            raise RoomUnavailableError(f"Room {room_number} is taken for these dates.")
+
+        self.room_number = room_number
+
+    def check_in(self):
+        self._require_status("confirmed")
+        self.status = "checked_in"
+
+    def check_out(self):
+        self._require_status("checked_in")
+        self.status = "checked_out"
+        HotelBooking.confirmed_bookings.remove(self)
+
+    def cancel(self):
+        self._require_status("pending", "confirmed")
+        if self in HotelBooking.confirmed_bookings:
+            HotelBooking.confirmed_bookings.remove(self)
+        self.status = "cancelled"
+
+
+first = HotelBooking("B1", "Ananya Iyer", 101, date(2026, 12, 20), date(2026, 12, 23), 4500)
+second = HotelBooking("B2", "Rohit Verma", 101, date(2026, 12, 22), date(2026, 12, 24), 4500)
+
+first.confirm()
+print(second.check_availability())   # False  (overlaps on 22 Dec)
+second.change_room(102)
+second.confirm()
+
+first.reschedule(date(2026, 12, 20), date(2026, 12, 24))
+print(first.nights, first.calculate_price())  # 4 18000
+
+first.check_in()
+first.check_out()
+print(first.status, second.status)   # checked_out confirmed
+
+try:
+    first.cancel()
+except InvalidBookingStatusError as error:
+    print(type(error).__name__, "-", error)  # InvalidBookingStatusError - Booking B1 is 'checked_out'.
+```
+
+**Output:**
+
+```text
+False
+4 18000
+checked_out confirmed
+InvalidBookingStatusError - Booking B1 is 'checked_out'.
+```
+
+</details>
 
 ### 10. Video lesson (`VideoLesson` inherits `Lesson`)
 
@@ -3658,6 +4835,138 @@ False
 - **Exceptions:** `ValueError` for an invalid seek position, `IndexError` for an invalid note index, `LessonNotStartedError` when pausing before playback starts.
 - **Decorator:** `@property` on `progress_percent`, computed from position and duration.
 
+**Program:** Write a Python program to create a `Lesson` class with the attributes `lesson_id`, `title`, and `duration_seconds`. Create a `VideoLesson` class that inherits from `Lesson` and adds `position_seconds`, `is_playing`, `notes`, and `completed`. A new video lesson starts at position 0, not playing, with no notes, and not completed. The duration must be a positive whole number of seconds.
+
+Implement these eight methods in `VideoLesson`:
+
+1. `play()` starts playback from the current position.
+2. `pause()` stops playback.
+3. `resume()` continues playback after a pause.
+4. `seek(second)` jumps to a position from 0 to the full duration.
+5. `restart()` goes back to 0 and starts playing.
+6. `add_note(text)` saves a note with the current timestamp, such as `[02:30] text`.
+7. `remove_note(index)` removes and returns the note at that index.
+8. `mark_complete()` moves to the end, stops playback, and marks the lesson as completed.
+
+Raise `ValueError` for a non-positive duration, a seek position outside the video, or an empty note. Raise `IndexError` for an invalid note index, and `LessonNotStartedError` when pausing before playback starts or resuming a lesson that was never played. Define `progress_percent` as a `@property` that returns the position as a percentage of the duration, rounded to one decimal place.
+
+Create lesson `L07`, "Python Decorators", which is 600 seconds long. Play it, seek to 150 seconds, add a note, pause, and print the progress. Resume, seek to 450 seconds, add two notes, remove the third note, and print the removed note and the remaining notes. Mark the lesson complete and print whether it is completed and its progress. Restart it and print the position and whether it is playing. Finally, try to seek to 720 seconds and print the error.
+
+<details>
+<summary>Answer</summary>
+
+```python
+class LessonNotStartedError(Exception):
+    pass
+
+
+class Lesson:
+    def __init__(self, lesson_id, title, duration_seconds):
+        if not isinstance(duration_seconds, int) or duration_seconds <= 0:
+            raise ValueError("Duration must be a positive whole number of seconds.")
+
+        self.lesson_id = lesson_id
+        self.title = title
+        self.duration_seconds = duration_seconds
+
+
+class VideoLesson(Lesson):
+    def __init__(self, lesson_id, title, duration_seconds):
+        super().__init__(lesson_id, title, duration_seconds)
+        self.position_seconds = 0
+        self.is_playing = False
+        self.notes = []
+        self.completed = False
+
+    @property
+    def progress_percent(self):
+        return round(self.position_seconds / self.duration_seconds * 100, 1)
+
+    def play(self):
+        self.is_playing = True
+
+    def pause(self):
+        if not self.is_playing:
+            raise LessonNotStartedError("Play the lesson before pausing it.")
+
+        self.is_playing = False
+
+    def resume(self):
+        if self.position_seconds == 0 and not self.is_playing:
+            raise LessonNotStartedError("There is nothing to resume yet.")
+
+        self.is_playing = True
+
+    def seek(self, second):
+        if not 0 <= second <= self.duration_seconds:
+            raise ValueError(f"Seek position must be from 0 to {self.duration_seconds} seconds.")
+
+        self.position_seconds = second
+
+    def restart(self):
+        self.position_seconds = 0
+        self.is_playing = True
+
+    def add_note(self, text):
+        if not text.strip():
+            raise ValueError("Note cannot be empty.")
+
+        minutes, seconds = divmod(self.position_seconds, 60)
+        self.notes.append(f"[{minutes:02d}:{seconds:02d}] {text.strip()}")
+
+    def remove_note(self, index):
+        if not 0 <= index < len(self.notes):
+            raise IndexError(f"There is no note at index {index}.")
+
+        return self.notes.pop(index)
+
+    def mark_complete(self):
+        self.position_seconds = self.duration_seconds
+        self.is_playing = False
+        self.completed = True
+
+
+lesson = VideoLesson("L07", "Python Decorators", 600)   # 10-minute video
+
+lesson.play()
+lesson.seek(150)
+lesson.add_note("wraps keeps the function name")
+lesson.pause()
+print(lesson.progress_percent)       # 25.0
+
+lesson.resume()
+lesson.seek(450)
+lesson.add_note("Decorators with arguments need three levels")
+lesson.add_note("Revise later")
+print(lesson.remove_note(2))         # [07:30] Revise later
+print(lesson.notes)
+# ['[02:30] wraps keeps the function name', '[07:30] Decorators with arguments need three levels']
+
+lesson.mark_complete()
+print(lesson.completed, lesson.progress_percent)  # True 100.0
+
+lesson.restart()
+print(lesson.position_seconds, lesson.is_playing)  # 0 True
+
+try:
+    lesson.seek(720)
+except ValueError as error:
+    print(type(error).__name__, "-", error)  # ValueError - Seek position must be from 0 to 600 seconds.
+```
+
+**Output:**
+
+```text
+25.0
+[07:30] Revise later
+['[02:30] wraps keeps the function name', '[07:30] Decorators with arguments need three levels']
+True 100.0
+0 True
+ValueError - Seek position must be from 0 to 600 seconds.
+```
+
+</details>
+
 ### 11. Split AC (`SplitAC` inherits `Appliance`)
 
 - **Attributes:** `brand`, `model`, `power_on`, `temperature_c`, `mode`, `fan_speed`, `timer_minutes`, `filter_hours`
@@ -3665,6 +4974,137 @@ False
 - **Validation:** For this prototype, allow temperatures from 16 to 30°C, known modes, and positive timer durations.
 - **Exceptions:** `ValueError` for invalid settings, `ApplianceOffError` when changing settings that require power.
 - **Decorator:** Custom `@requires_power` on `set_temperature()`, `set_mode()`, and `set_timer()`.
+
+**Program:** Write a Python program to create an `Appliance` class with the attributes `brand`, `model`, and `power_on`. Create a `SplitAC` class that inherits from `Appliance` and adds `temperature_c`, `mode`, `fan_speed`, `timer_minutes`, and `filter_hours`. A new AC starts switched off at 24°C, in `cool` mode, with `auto` fan speed and no timer. The filter hours can be passed in for a unit that is already in use, and default to 0.
+
+Implement these eight methods in `SplitAC`:
+
+1. `turn_on()` switches the AC on.
+2. `turn_off()` switches the AC off and clears the timer.
+3. `set_temperature(celsius)` sets a whole-number temperature from 16 to 30°C.
+4. `set_mode(mode)` sets the mode to `cool`, `dry`, `fan`, `heat`, or `auto`.
+5. `set_fan_speed(speed)` sets the fan to `low`, `medium`, `high`, or `auto`, even while the AC is off.
+6. `set_timer(minutes)` sets a timer from 1 to 720 minutes.
+7. `cancel_timer()` clears the timer.
+8. `reset_filter_counter()` sets the filter hours back to 0 after cleaning.
+
+Raise `ValueError` for a temperature, mode, fan speed, or timer outside the allowed values. Define a custom `@requires_power` decorator on `set_temperature()`, `set_mode()`, and `set_timer()` that raises `ApplianceOffError` when the AC is off.
+
+Create a Voltas `183V Vectra` AC that has run for 320 hours since its filter was last cleaned. Set the fan speed to high while it is off, then turn it on, set the temperature to 22°C, switch to `dry` mode, set a 90-minute timer, and print the settings. Cancel the timer, reset the filter counter, and print the timer and filter hours. Finally, turn the AC off, try to set the temperature to 18°C, and print the error.
+
+<details>
+<summary>Answer</summary>
+
+```python
+from functools import wraps
+
+
+class ApplianceOffError(Exception):
+    pass
+
+
+def requires_power(method):
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        if not self.power_on:
+            raise ApplianceOffError(f"Turn on the {self.brand} AC first.")
+        return method(self, *args, **kwargs)
+    return wrapper
+
+
+class Appliance:
+    def __init__(self, brand, model):
+        self.brand = brand
+        self.model = model
+        self.power_on = False
+
+
+class SplitAC(Appliance):
+    MIN_TEMP = 16             # °C
+    MAX_TEMP = 30             # °C
+    MAX_TIMER = 720           # minutes (12 hours)
+    MODES = ("cool", "dry", "fan", "heat", "auto")
+    FAN_SPEEDS = ("low", "medium", "high", "auto")
+
+    def __init__(self, brand, model, filter_hours=0):
+        super().__init__(brand, model)
+        self.temperature_c = 24
+        self.mode = "cool"
+        self.fan_speed = "auto"
+        self.timer_minutes = 0
+        self.filter_hours = filter_hours
+
+    def turn_on(self):
+        self.power_on = True
+
+    def turn_off(self):
+        self.power_on = False
+        self.timer_minutes = 0
+
+    @requires_power
+    def set_temperature(self, celsius):
+        if not isinstance(celsius, int) or not self.MIN_TEMP <= celsius <= self.MAX_TEMP:
+            raise ValueError(f"Temperature must be from {self.MIN_TEMP} to {self.MAX_TEMP}°C.")
+
+        self.temperature_c = celsius
+
+    @requires_power
+    def set_mode(self, mode):
+        if mode not in self.MODES:
+            raise ValueError(f"Mode must be one of {', '.join(self.MODES)}.")
+
+        self.mode = mode
+
+    def set_fan_speed(self, speed):
+        if speed not in self.FAN_SPEEDS:
+            raise ValueError(f"Fan speed must be one of {', '.join(self.FAN_SPEEDS)}.")
+
+        self.fan_speed = speed
+
+    @requires_power
+    def set_timer(self, minutes):
+        if not isinstance(minutes, int) or not 0 < minutes <= self.MAX_TIMER:
+            raise ValueError(f"Timer must be from 1 to {self.MAX_TIMER} minutes.")
+
+        self.timer_minutes = minutes
+
+    def cancel_timer(self):
+        self.timer_minutes = 0
+
+    def reset_filter_counter(self):
+        self.filter_hours = 0
+
+
+ac = SplitAC("Voltas", "183V Vectra", filter_hours=320)
+
+ac.set_fan_speed("high")             # Allowed while off
+ac.turn_on()
+ac.set_temperature(22)
+ac.set_mode("dry")
+ac.set_timer(90)
+print(ac.temperature_c, ac.mode, ac.fan_speed, ac.timer_minutes)  # 22 dry high 90
+
+ac.cancel_timer()
+ac.reset_filter_counter()
+print(ac.timer_minutes, ac.filter_hours)  # 0 0
+
+ac.turn_off()
+
+try:
+    ac.set_temperature(18)
+except ApplianceOffError as error:
+    print(type(error).__name__, "-", error)  # ApplianceOffError - Turn on the Voltas AC first.
+```
+
+**Output:**
+
+```text
+22 dry high 90
+0 0
+ApplianceOffError - Turn on the Voltas AC first.
+```
+
+</details>
 
 ### 12. Doctor appointment (`DoctorAppointment` inherits `Appointment`)
 
@@ -3674,6 +5114,169 @@ False
 - **Exceptions:** `ValueError` for invalid time or duration, `SlotUnavailableError`, `InvalidAppointmentStatusError`.
 - **Decorator:** `@property` on `ends_at`, computed from the start time and duration.
 
+**Program:** Write a Python program to create an `Appointment` class with the attributes `appointment_id`, `patient_id`, `doctor_id`, `starts_at`, `duration_minutes`, and `reason`. Create a `DoctorAppointment` class that inherits from `Appointment` and adds `status`. A new appointment starts with the status `new`, and its duration must be between 1 and 120 minutes. All appointments share one set of booked `(doctor_id, starts_at)` slots, so a doctor can't be booked twice at the same time.
+
+Implement these eight methods in `DoctorAppointment`:
+
+1. `schedule(now)` books the doctor's slot and sets the status to `scheduled`.
+2. `confirm()` changes a scheduled appointment to `confirmed`.
+3. `reschedule(starts_at, now)` books the new slot, frees the old one, and sets the status back to `scheduled`.
+4. `check_in()` marks a confirmed patient as `checked in`.
+5. `start_consultation()` starts the consultation after the patient has checked in.
+6. `complete()` marks the consultation as `completed`.
+7. `cancel()` cancels a scheduled, confirmed, or checked-in appointment and frees its slot.
+8. `summary()` returns the appointment's details for printing.
+
+Raise `ValueError` for a duration outside 1–120 minutes or a start time that is not after `now`, `SlotUnavailableError` when the doctor is already booked at that time, and `InvalidAppointmentStatusError` when a method is called in the wrong status. Define `ends_at` as a `@property` that returns the start time plus the duration.
+
+Use 14 Nov 2026, 9:00 AM as the current time. Create appointment `A101` for patient `P1001` with doctor `D201` on 20 Nov 2026 at 10:30 AM for 30 minutes (reason: Fever). Schedule and confirm it, and print its end time. Create appointment `A102` for patient `P1002` with the same doctor at the same time for 20 minutes (reason: Back pain), try to schedule it, and print the slot error. Reschedule `A101` to 21 Nov 2026 at 4:00 PM, then schedule `A102` in the freed slot. Take `A101` through confirm, check-in, consultation, and completion, and print its summary. Cancel `A102` and print its summary. Finally, try to check in the cancelled appointment and print the error.
+
+<details>
+<summary>Answer</summary>
+
+```python
+from datetime import datetime, timedelta
+
+
+class SlotUnavailableError(Exception):
+    pass
+
+
+class InvalidAppointmentStatusError(Exception):
+    pass
+
+
+class Appointment:
+    def __init__(self, appointment_id, patient_id, doctor_id, starts_at,
+                 duration_minutes, reason):
+        self.appointment_id = appointment_id
+        self.patient_id = patient_id
+        self.doctor_id = doctor_id
+        self.starts_at = starts_at
+        self.duration_minutes = duration_minutes
+        self.reason = reason
+
+
+class DoctorAppointment(Appointment):
+    MAX_DURATION = 120        # minutes
+    booked_slots = set()      # (doctor_id, starts_at) pairs shared by all bookings
+
+    def __init__(self, appointment_id, patient_id, doctor_id, starts_at,
+                 duration_minutes, reason):
+        if not 0 < duration_minutes <= self.MAX_DURATION:
+            raise ValueError("Duration must be between 1 and 120 minutes.")
+
+        super().__init__(appointment_id, patient_id, doctor_id, starts_at,
+                         duration_minutes, reason)
+        self.status = "new"
+
+    @property
+    def ends_at(self):
+        return self.starts_at + timedelta(minutes=self.duration_minutes)
+
+    def _require_status(self, *allowed):
+        if self.status not in allowed:
+            raise InvalidAppointmentStatusError(
+                f"Cannot do this while the appointment is {self.status}."
+            )
+
+    def _book(self, starts_at, now):
+        if starts_at <= now:
+            raise ValueError("Appointment time must be in the future.")
+        if (self.doctor_id, starts_at) in self.booked_slots:
+            raise SlotUnavailableError("The doctor is already booked at this time.")
+
+        self.booked_slots.add((self.doctor_id, starts_at))
+
+    def schedule(self, now):
+        self._require_status("new")
+        self._book(self.starts_at, now)
+        self.status = "scheduled"
+
+    def confirm(self):
+        self._require_status("scheduled")
+        self.status = "confirmed"
+
+    def reschedule(self, starts_at, now):
+        self._require_status("scheduled", "confirmed")
+        self._book(starts_at, now)
+        self.booked_slots.discard((self.doctor_id, self.starts_at))
+        self.starts_at = starts_at
+        self.status = "scheduled"
+
+    def check_in(self):
+        self._require_status("confirmed")
+        self.status = "checked in"
+
+    def start_consultation(self):
+        self._require_status("checked in")
+        self.status = "in consultation"
+
+    def complete(self):
+        self._require_status("in consultation")
+        self.status = "completed"
+
+    def cancel(self):
+        self._require_status("scheduled", "confirmed", "checked in")
+        self.booked_slots.discard((self.doctor_id, self.starts_at))
+        self.status = "cancelled"
+
+    def summary(self):
+        return (
+            f"{self.appointment_id} | Patient {self.patient_id} | "
+            f"Doctor {self.doctor_id} | "
+            f"{self.starts_at:%d %b %Y %H:%M}-{self.ends_at:%H:%M} | "
+            f"{self.reason} | {self.status}"
+        )
+
+
+now = datetime(2026, 11, 14, 9, 0)
+slot = datetime(2026, 11, 20, 10, 30)
+
+first = DoctorAppointment("A101", "P1001", "D201", slot, 30, "Fever")
+first.schedule(now)
+first.confirm()
+print(first.ends_at)  # 2026-11-20 11:00:00
+
+second = DoctorAppointment("A102", "P1002", "D201", slot, 20, "Back pain")
+try:
+    second.schedule(now)
+except SlotUnavailableError as error:
+    print(type(error).__name__, "-", error)
+    # SlotUnavailableError - The doctor is already booked at this time.
+
+first.reschedule(datetime(2026, 11, 21, 16, 0), now)
+second.schedule(now)   # The 20 Nov 10:30 slot is free again
+first.confirm()
+first.check_in()
+first.start_consultation()
+first.complete()
+print(first.summary())
+# A101 | Patient P1001 | Doctor D201 | 21 Nov 2026 16:00-16:30 | Fever | completed
+
+second.cancel()
+print(second.summary())
+# A102 | Patient P1002 | Doctor D201 | 20 Nov 2026 10:30-10:50 | Back pain | cancelled
+
+try:
+    second.check_in()
+except InvalidAppointmentStatusError as error:
+    print(type(error).__name__, "-", error)
+    # InvalidAppointmentStatusError - Cannot do this while the appointment is cancelled.
+```
+
+**Output:**
+
+```text
+2026-11-20 11:00:00
+SlotUnavailableError - The doctor is already booked at this time.
+A101 | Patient P1001 | Doctor D201 | 21 Nov 2026 16:00-16:30 | Fever | completed
+A102 | Patient P1002 | Doctor D201 | 20 Nov 2026 10:30-10:50 | Back pain | cancelled
+InvalidAppointmentStatusError - Cannot do this while the appointment is cancelled.
+```
+
+</details>
+
 ### 13. Courier parcel (`CourierParcel` inherits `Shipment`)
 
 - **Attributes:** `tracking_id`, `sender`, `recipient`, `weight_kg`, `destination`, `status`, `tracking_events`
@@ -3681,6 +5284,146 @@ False
 - **Validation:** Require positive weight and a destination. Check status before each transition and record successful updates in the tracking history.
 - **Exceptions:** `ValueError` for invalid weight or destination, `InvalidShipmentStatusError`.
 - **Decorator:** `@classmethod` on `from_dict(cls, data)` to construct a parcel from a saved record.
+
+**Program:** Write a Python program to create a `Shipment` class with the attributes `tracking_id`, `sender`, `recipient`, `weight_kg`, and `destination`. Create a `CourierParcel` class that inherits from `Shipment` and adds `status` and `tracking_events`. A new parcel starts with the status `booked` and a tracking history of `["Booked"]`.
+
+Implement these eight methods in `CourierParcel`:
+
+1. `calculate_shipping_cost()` returns Rs. 50 plus Rs. 40 per kg.
+2. `pack()` changes a booked parcel to `packed`.
+3. `dispatch()` changes a packed parcel to `dispatched`.
+4. `update_location(location)` records the parcel reaching a city and sets the status to `in transit`.
+5. `mark_out_for_delivery()` sets the status to `out for delivery` in the destination city.
+6. `mark_delivered()` changes a parcel that is out for delivery to `delivered`.
+7. `mark_returned()` returns a parcel that is dispatched, in transit, or out for delivery to the sender.
+8. `show_tracking()` returns the tracking ID, status, and full tracking history.
+
+Raise `ValueError` for a non-positive or non-finite weight, or a blank destination or location, and `InvalidShipmentStatusError` when a status change isn't allowed from the current status. Each successful change adds an event to `tracking_events`. Define `from_dict(cls, data)` as a `@classmethod` that rebuilds a parcel, including its status and tracking history, from a saved dictionary.
+
+Create parcel `TRK5001` from Rakesh to Priya, weighing 2.5 kg, going to Pune, and print its shipping cost. Pack and dispatch it, update its location to Nagpur, mark it out for delivery, mark it delivered, and print its tracking. Then rebuild parcel `TRK5002` (from Amit to Sneha, 1 kg, Jaipur) from a saved record whose status is `dispatched`, mark it returned, and print its tracking. Finally, try to mark the returned parcel as delivered and print the error.
+
+<details>
+<summary>Answer</summary>
+
+```python
+class InvalidShipmentStatusError(Exception):
+    pass
+
+
+class Shipment:
+    def __init__(self, tracking_id, sender, recipient, weight_kg, destination):
+        if not 0 < weight_kg < float("inf"):
+            raise ValueError("Weight must be a positive, finite number.")
+        if not destination.strip():
+            raise ValueError("Destination cannot be empty.")
+
+        self.tracking_id = tracking_id
+        self.sender = sender
+        self.recipient = recipient
+        self.weight_kg = weight_kg
+        self.destination = destination
+
+
+class CourierParcel(Shipment):
+    BASE_CHARGE = 50          # Rs.
+    RATE_PER_KG = 40          # Rs. per kg
+
+    def __init__(self, tracking_id, sender, recipient, weight_kg, destination):
+        super().__init__(tracking_id, sender, recipient, weight_kg, destination)
+        self.status = "booked"
+        self.tracking_events = ["Booked"]
+
+    @classmethod
+    def from_dict(cls, data):
+        parcel = cls(data["tracking_id"], data["sender"], data["recipient"],
+                     data["weight_kg"], data["destination"])
+        parcel.status = data.get("status", "booked")
+        parcel.tracking_events = list(data.get("tracking_events", ["Booked"]))
+        return parcel
+
+    def _move(self, allowed, new_status, event):
+        if self.status not in allowed:
+            raise InvalidShipmentStatusError(
+                f"Cannot change status from {self.status} to {new_status}."
+            )
+
+        self.status = new_status
+        self.tracking_events.append(event)
+
+    def calculate_shipping_cost(self):
+        return self.BASE_CHARGE + self.weight_kg * self.RATE_PER_KG
+
+    def pack(self):
+        self._move(("booked",), "packed", "Packed")
+
+    def dispatch(self):
+        self._move(("packed",), "dispatched", "Dispatched")
+
+    def update_location(self, location):
+        if not location.strip():
+            raise ValueError("Location cannot be empty.")
+
+        self._move(("dispatched", "in transit"), "in transit",
+                   f"Reached {location}")
+
+    def mark_out_for_delivery(self):
+        self._move(("dispatched", "in transit"), "out for delivery",
+                   f"Out for delivery in {self.destination}")
+
+    def mark_delivered(self):
+        self._move(("out for delivery",), "delivered", "Delivered")
+
+    def mark_returned(self):
+        self._move(("dispatched", "in transit", "out for delivery"), "returned",
+                   f"Returned to {self.sender}")
+
+    def show_tracking(self):
+        history = " -> ".join(self.tracking_events)
+        return f"{self.tracking_id} ({self.status}): {history}"
+
+
+parcel = CourierParcel("TRK5001", "Rakesh", "Priya", 2.5, "Pune")
+print(parcel.calculate_shipping_cost())  # 150.0
+
+parcel.pack()
+parcel.dispatch()
+parcel.update_location("Nagpur")
+parcel.mark_out_for_delivery()
+parcel.mark_delivered()
+print(parcel.show_tracking())
+# TRK5001 (delivered): Booked -> Packed -> Dispatched -> Reached Nagpur -> Out for delivery in Pune -> Delivered
+
+saved = {
+    "tracking_id": "TRK5002",
+    "sender": "Amit",
+    "recipient": "Sneha",
+    "weight_kg": 1,
+    "destination": "Jaipur",
+    "status": "dispatched",
+    "tracking_events": ["Booked", "Packed", "Dispatched"],
+}
+returned = CourierParcel.from_dict(saved)
+returned.mark_returned()
+print(returned.show_tracking())
+# TRK5002 (returned): Booked -> Packed -> Dispatched -> Returned to Amit
+
+try:
+    returned.mark_delivered()
+except InvalidShipmentStatusError as error:
+    print(type(error).__name__, "-", error)
+    # InvalidShipmentStatusError - Cannot change status from returned to delivered.
+```
+
+**Output:**
+
+```text
+150.0
+TRK5001 (delivered): Booked -> Packed -> Dispatched -> Reached Nagpur -> Out for delivery in Pune -> Delivered
+TRK5002 (returned): Booked -> Packed -> Dispatched -> Returned to Amit
+InvalidShipmentStatusError - Cannot change status from returned to delivered.
+```
+
+</details>
 
 ### 14. Inventory product (`InventoryProduct` inherits `Product`)
 
@@ -3690,6 +5433,152 @@ False
 - **Exceptions:** `ValueError` for invalid quantity or price, `InsufficientStockError`, `ProductDiscontinuedError` for a new reservation on a discontinued product.
 - **Decorator:** `@property` on `available_stock`, computed as `stock - reserved_qty`.
 
+**Program:** Write a Python program to create a `Product` class with the attributes `sku`, `name`, and `unit_price`. Create an `InventoryProduct` class that inherits from `Product` and adds `stock`, `reserved_qty`, `reorder_level`, and `is_discontinued`. A new product starts with zero stock, zero reserved units, a reorder level of 10 (unless given), and is not discontinued.
+
+Implement these eight methods in `InventoryProduct`:
+
+1. `add_stock(qty)` adds units to the stock.
+2. `reserve_stock(qty)` reserves units from the available stock.
+3. `release_stock(qty)` returns reserved units to the available stock.
+4. `fulfill_reservation(qty)` ships reserved units, reducing both the stock and the reserved quantity.
+5. `change_price(price)` sets a new price above Rs. 0 and up to Rs. 1,000,000.
+6. `needs_reorder()` returns `True` when the available stock is at or below the reorder level (never for a discontinued product).
+7. `discontinue()` marks the product as discontinued.
+8. `stock_report()` returns the product's stock details for printing.
+
+Raise `ValueError` for quantities that aren't positive whole numbers or for an invalid price, `InsufficientStockError` when reserving more than is available or fulfilling more than is reserved, and `ProductDiscontinuedError` for a new reservation on a discontinued product. Define `available_stock` as a `@property` that returns `stock - reserved_qty`.
+
+Create product `SKU-1042`, an Electric Kettle priced at Rs. 1,299 with a reorder level of 5. Add 20 units, reserve 8, and print the available stock. Release 2 reserved units, fulfil 5, change the price to Rs. 1,199, and reserve 10 more. Print whether the product needs a reorder, and print its stock report. Finally, discontinue the product, try to reserve 1 more unit, and print the error.
+
+<details>
+<summary>Answer</summary>
+
+```python
+class InsufficientStockError(Exception):
+    pass
+
+
+class ProductDiscontinuedError(Exception):
+    pass
+
+
+class Product:
+    def __init__(self, sku, name, unit_price):
+        self.sku = sku
+        self.name = name
+        self.unit_price = unit_price
+
+
+class InventoryProduct(Product):
+    MAX_PRICE = 1_000_000     # Rs.
+
+    def __init__(self, sku, name, unit_price, reorder_level=10):
+        super().__init__(sku, name, unit_price)
+        self.change_price(unit_price)
+        self.stock = 0
+        self.reserved_qty = 0
+        self.reorder_level = self._check_qty(reorder_level, allow_zero=True)
+        self.is_discontinued = False
+
+    @property
+    def available_stock(self):
+        return self.stock - self.reserved_qty
+
+    @staticmethod
+    def _check_qty(qty, allow_zero=False):
+        if not isinstance(qty, int) or isinstance(qty, bool):
+            raise ValueError("Quantity must be a whole number.")
+        if qty < 0 or (qty == 0 and not allow_zero):
+            raise ValueError("Quantity must be positive.")
+        return qty
+
+    def add_stock(self, qty):
+        self.stock += self._check_qty(qty)
+
+    def reserve_stock(self, qty):
+        self._check_qty(qty)
+        if self.is_discontinued:
+            raise ProductDiscontinuedError(f"{self.name} is discontinued.")
+        if qty > self.available_stock:
+            raise InsufficientStockError(
+                f"Only {self.available_stock} units are available."
+            )
+
+        self.reserved_qty += qty
+
+    def release_stock(self, qty):
+        self._check_qty(qty)
+        if qty > self.reserved_qty:
+            raise ValueError("Cannot release more than the reserved quantity.")
+
+        self.reserved_qty -= qty
+
+    def fulfill_reservation(self, qty):
+        self._check_qty(qty)
+        if qty > self.reserved_qty:
+            raise InsufficientStockError(
+                f"Only {self.reserved_qty} units are reserved."
+            )
+
+        self.reserved_qty -= qty
+        self.stock -= qty
+
+    def change_price(self, price):
+        if not 0 < price <= self.MAX_PRICE:
+            raise ValueError("Price must be between Rs. 0 and Rs. 1,000,000.")
+
+        self.unit_price = price
+
+    def needs_reorder(self):
+        if self.is_discontinued:
+            return False
+        return self.available_stock <= self.reorder_level
+
+    def discontinue(self):
+        self.is_discontinued = True
+
+    def stock_report(self):
+        return (
+            f"{self.sku} {self.name} @ Rs. {self.unit_price} | "
+            f"Stock: {self.stock} | Reserved: {self.reserved_qty} | "
+            f"Available: {self.available_stock} | "
+            f"Discontinued: {self.is_discontinued}"
+        )
+
+
+kettle = InventoryProduct("SKU-1042", "Electric Kettle", 1299, reorder_level=5)
+
+kettle.add_stock(20)
+kettle.reserve_stock(8)
+print(kettle.available_stock)   # 12
+
+kettle.release_stock(2)         # Reserved drops from 8 to 6
+kettle.fulfill_reservation(5)   # Stock 20 -> 15, reserved 6 -> 1
+kettle.change_price(1199)
+kettle.reserve_stock(10)        # Reserved 1 -> 11, available 4
+print(kettle.needs_reorder())   # True
+print(kettle.stock_report())
+# SKU-1042 Electric Kettle @ Rs. 1199 | Stock: 15 | Reserved: 11 | Available: 4 | Discontinued: False
+
+kettle.discontinue()
+try:
+    kettle.reserve_stock(1)
+except ProductDiscontinuedError as error:
+    print(type(error).__name__, "-", error)
+    # ProductDiscontinuedError - Electric Kettle is discontinued.
+```
+
+**Output:**
+
+```text
+12
+True
+SKU-1042 Electric Kettle @ Rs. 1199 | Stock: 15 | Reserved: 11 | Available: 4 | Discontinued: False
+ProductDiscontinuedError - Electric Kettle is discontinued.
+```
+
+</details>
+
 ### 15. Support ticket (`SupportTicket`)
 
 - **Attributes:** `ticket_id`, `subject`, `description`, `priority`, `status`, `assignee`, `comments`
@@ -3697,6 +5586,144 @@ False
 - **Validation:** Allow known priorities, require a nonempty comment, and require an assignee before work starts.
 - **Exceptions:** `ValueError` for an invalid priority or blank comment, `TicketUnassignedError`, `InvalidTicketStatusError`.
 - **Decorator:** `@staticmethod` on `is_valid_priority(priority)` because the check only uses the supplied value.
+
+**Program:** Write a Python program to create a `SupportTicket` class with the attributes `ticket_id`, `subject`, `description`, `priority`, `status`, `assignee`, and `comments`. The allowed priorities are `low`, `medium`, `high`, and `urgent`. A new ticket starts with `medium` priority (unless given), the status `open`, no assignee, and no comments.
+
+Implement these eight methods in `SupportTicket`:
+
+1. `assign(agent)` assigns an open or in-progress ticket to a support agent.
+2. `unassign()` removes the agent from an open ticket.
+3. `change_priority(priority)` changes the ticket's priority.
+4. `add_comment(text)` adds a comment to the ticket.
+5. `start_work()` changes an open, assigned ticket to `in progress`.
+6. `resolve()` changes an in-progress ticket to `resolved`.
+7. `reopen()` changes a resolved or closed ticket back to `open`.
+8. `close()` changes a resolved ticket to `closed`.
+
+Raise `ValueError` for an unknown priority or a blank comment, `TicketUnassignedError` when starting work on a ticket with no assignee, and `InvalidTicketStatusError` when a method is called in the wrong status. Define `is_valid_priority(priority)` as a `@staticmethod`, because the check only uses the supplied value.
+
+Create ticket `TCK-301` with the subject "UPI payment failed" and the description "Rs. 2,499 debited but order not placed." Try to start work before it is assigned and print the error. Assign it to Kavya, raise its priority to `high`, add a comment, start work, add a second comment, resolve it, and print its status, priority, and assignee. Then reopen it, start work again, resolve and close it, and print its status and comment count. Print whether `critical` is a valid priority. Finally, try to add a blank comment and print the error.
+
+<details>
+<summary>Answer</summary>
+
+```python
+class TicketUnassignedError(Exception):
+    pass
+
+
+class InvalidTicketStatusError(Exception):
+    pass
+
+
+class SupportTicket:
+    PRIORITIES = ("low", "medium", "high", "urgent")
+
+    def __init__(self, ticket_id, subject, description, priority="medium"):
+        if not self.is_valid_priority(priority):
+            raise ValueError(f"Priority must be one of {self.PRIORITIES}.")
+
+        self.ticket_id = ticket_id
+        self.subject = subject
+        self.description = description
+        self.priority = priority
+        self.status = "open"
+        self.assignee = None
+        self.comments = []
+
+    @staticmethod
+    def is_valid_priority(priority):
+        return priority in SupportTicket.PRIORITIES
+
+    def _require_status(self, *allowed):
+        if self.status not in allowed:
+            raise InvalidTicketStatusError(
+                f"Cannot do this while the ticket is {self.status}."
+            )
+
+    def assign(self, agent):
+        self._require_status("open", "in progress")
+        self.assignee = agent
+
+    def unassign(self):
+        self._require_status("open")
+        self.assignee = None
+
+    def change_priority(self, priority):
+        if not self.is_valid_priority(priority):
+            raise ValueError(f"Priority must be one of {self.PRIORITIES}.")
+
+        self.priority = priority
+
+    def add_comment(self, text):
+        if not text.strip():
+            raise ValueError("Comment cannot be blank.")
+
+        self.comments.append(text.strip())
+
+    def start_work(self):
+        self._require_status("open")
+        if self.assignee is None:
+            raise TicketUnassignedError("Assign the ticket before starting work.")
+
+        self.status = "in progress"
+
+    def resolve(self):
+        self._require_status("in progress")
+        self.status = "resolved"
+
+    def reopen(self):
+        self._require_status("resolved", "closed")
+        self.status = "open"
+
+    def close(self):
+        self._require_status("resolved")
+        self.status = "closed"
+
+
+ticket = SupportTicket("TCK-301", "UPI payment failed",
+                       "Rs. 2,499 debited but order not placed.")
+
+try:
+    ticket.start_work()
+except TicketUnassignedError as error:
+    print(type(error).__name__, "-", error)
+    # TicketUnassignedError - Assign the ticket before starting work.
+
+ticket.assign("Kavya")
+ticket.change_priority("high")
+ticket.add_comment("Checking the payment gateway logs.")
+ticket.start_work()
+ticket.add_comment("Refund started for the customer.")
+ticket.resolve()
+print(ticket.status, "|", ticket.priority, "|", ticket.assignee)
+# resolved | high | Kavya
+
+ticket.reopen()                 # Customer says the refund has not arrived
+ticket.start_work()
+ticket.resolve()
+ticket.close()
+print(ticket.status, "|", len(ticket.comments), "comments")  # closed | 2 comments
+print(SupportTicket.is_valid_priority("critical"))           # False
+
+try:
+    ticket.add_comment("   ")
+except ValueError as error:
+    print(type(error).__name__, "-", error)
+    # ValueError - Comment cannot be blank.
+```
+
+**Output:**
+
+```text
+TicketUnassignedError - Assign the ticket before starting work.
+resolved | high | Kavya
+closed | 2 comments
+False
+ValueError - Comment cannot be blank.
+```
+
+</details>
 
 ### 16. Discount coupon (`PercentageCoupon` inherits `Coupon`)
 
@@ -3706,6 +5733,152 @@ False
 - **Exceptions:** `ValueError` for invalid configuration, `CouponExpiredError`, `CouponUsageLimitError`, `CouponMinimumOrderError`.
 - **Decorator:** `@property` on `remaining_uses`. Let `calculate_discount()` preview the amount and `redeem()` increase `used_count`.
 
+**Program:** Write a Python program to create a `Coupon` class with the attributes `code`, `expires_at`, `usage_limit`, `used_count`, and `is_active`. Create a `PercentageCoupon` class that inherits from `Coupon` and adds `percent_off` and `min_order_amount`. A new coupon starts active with zero uses. The percentage must be above 0 and at most 100, the minimum order cannot be negative, and the usage limit must be a positive whole number.
+
+Implement these eight methods in `PercentageCoupon`:
+
+1. `activate()` makes the coupon usable.
+2. `deactivate()` turns the coupon off.
+3. `extend_expiry(date)` moves the expiry to a later date.
+4. `update_limit(limit)` changes the usage limit, but never below the uses so far.
+5. `check_eligibility(order_total, as_of)` returns `True` if the coupon can be used on that order and date, and raises an error otherwise.
+6. `calculate_discount(order_total, as_of)` returns the discount amount without using the coupon.
+7. `redeem(order_total, as_of)` uses the coupon once and returns the amount to pay.
+8. `show_details()` returns the coupon's details for printing.
+
+Raise `ValueError` for an invalid percentage, limit, expiry, or order total, or for an inactive coupon, `CouponExpiredError` when the date is after the expiry, `CouponUsageLimitError` when no uses are left, and `CouponMinimumOrderError` when the order is below the minimum. Define `remaining_uses` as a `@property` that returns `usage_limit - used_count`.
+
+Create a coupon `DIWALI20` for 20% off orders of Rs. 500 or more, valid until 30 November 2026 for 2 uses. On 14 November 2026, preview the discount on an Rs. 800 order, then redeem it on an Rs. 1,500 order and print the remaining uses. Raise the limit to 3, extend the expiry to 15 December 2026, redeem it on an Rs. 2,000 order on 10 December, and print the coupon's details. Finally, try to redeem it on an Rs. 300 order and print the error.
+
+<details>
+<summary>Answer</summary>
+
+```python
+from datetime import date
+
+
+class CouponExpiredError(Exception):
+    pass
+
+
+class CouponUsageLimitError(Exception):
+    pass
+
+
+class CouponMinimumOrderError(Exception):
+    pass
+
+
+class Coupon:
+    def __init__(self, code, expires_at, usage_limit):
+        self.code = code
+        self.expires_at = expires_at
+        self.usage_limit = usage_limit
+        self.used_count = 0
+        self.is_active = True
+
+
+class PercentageCoupon(Coupon):
+    MAX_PERCENT = 100
+
+    def __init__(self, code, percent_off, min_order_amount, expires_at, usage_limit):
+        if not 0 < percent_off <= self.MAX_PERCENT:
+            raise ValueError("Percent off must be above 0 and at most 100.")
+        if min_order_amount < 0:
+            raise ValueError("Minimum order amount cannot be negative.")
+        if not isinstance(usage_limit, int) or usage_limit <= 0:
+            raise ValueError("Usage limit must be a positive whole number.")
+
+        super().__init__(code, expires_at, usage_limit)
+        self.percent_off = percent_off
+        self.min_order_amount = min_order_amount
+
+    @property
+    def remaining_uses(self):
+        return self.usage_limit - self.used_count
+
+    def activate(self):
+        self.is_active = True
+
+    def deactivate(self):
+        self.is_active = False
+
+    def extend_expiry(self, new_date):
+        if new_date <= self.expires_at:
+            raise ValueError("New expiry must be after the current expiry.")
+
+        self.expires_at = new_date
+
+    def update_limit(self, limit):
+        if not isinstance(limit, int) or limit < self.used_count or limit <= 0:
+            raise ValueError("Limit must be a positive whole number, not below uses so far.")
+
+        self.usage_limit = limit
+
+    def check_eligibility(self, order_total, as_of):
+        if not 0 < order_total < float("inf"):
+            raise ValueError("Order total must be a positive, finite number.")
+        if not self.is_active:
+            raise ValueError(f"Coupon {self.code} is not active.")
+        if as_of > self.expires_at:
+            raise CouponExpiredError(f"Coupon {self.code} expired on {self.expires_at}.")
+        if self.remaining_uses == 0:
+            raise CouponUsageLimitError(f"Coupon {self.code} has no uses left.")
+        if order_total < self.min_order_amount:
+            raise CouponMinimumOrderError(
+                f"Order must be at least Rs. {self.min_order_amount} to use {self.code}."
+            )
+        return True
+
+    def calculate_discount(self, order_total, as_of):
+        self.check_eligibility(order_total, as_of)
+        return round(order_total * self.percent_off / 100, 2)
+
+    def redeem(self, order_total, as_of):
+        discount = self.calculate_discount(order_total, as_of)
+        self.used_count += 1
+        return order_total - discount
+
+    def show_details(self):
+        status = "active" if self.is_active else "inactive"
+        return (
+            f"{self.code}: {self.percent_off}% off on Rs. {self.min_order_amount}+ | "
+            f"Expires: {self.expires_at} | Uses left: {self.remaining_uses} | {status}"
+        )
+
+
+coupon = PercentageCoupon("DIWALI20", 20, 500, date(2026, 11, 30), 2)
+
+print(coupon.calculate_discount(800, date(2026, 11, 14)))  # 160.0
+print(coupon.redeem(1500, date(2026, 11, 14)))             # 1200.0
+print(coupon.remaining_uses)                               # 1
+
+coupon.update_limit(3)
+coupon.extend_expiry(date(2026, 12, 15))
+print(coupon.redeem(2000, date(2026, 12, 10)))             # 1600.0
+print(coupon.show_details())
+# DIWALI20: 20% off on Rs. 500+ | Expires: 2026-12-15 | Uses left: 1 | active
+
+try:
+    coupon.redeem(300, date(2026, 12, 12))
+except CouponMinimumOrderError as error:
+    print(type(error).__name__, "-", error)
+    # CouponMinimumOrderError - Order must be at least Rs. 500 to use DIWALI20.
+```
+
+**Output:**
+
+```text
+160.0
+1200.0
+1
+1600.0
+DIWALI20: 20% off on Rs. 500+ | Expires: 2026-12-15 | Uses left: 1 | active
+CouponMinimumOrderError - Order must be at least Rs. 500 to use DIWALI20.
+```
+
+</details>
+
 ### 17. Quiz attempt (`QuizAttempt` inherits `AssessmentAttempt`)
 
 - **Attributes:** `attempt_id`, `student_id`, `questions`, `answers`, `started_at`, `submitted_at`, `status`
@@ -3713,6 +5886,176 @@ False
 - **Validation:** Require a known question and a valid option. Allow answers to change only during an active attempt.
 - **Exceptions:** `UnknownQuestionError`, `ValueError` for an invalid option, `InvalidAttemptStatusError`.
 - **Decorator:** Custom `@attempt_in_progress` on `answer()`, `change_answer()`, and `clear_answer()`.
+
+**Program:** Write a Python program to create an `AssessmentAttempt` class with the attributes `attempt_id`, `student_id`, `started_at`, `submitted_at`, and `status`. Create a `QuizAttempt` class that inherits from `AssessmentAttempt` and adds `questions` and `answers`. Store each question as `question_id: (text, options, correct_option)`, where options are lettered `A`, `B`, `C`. A new attempt starts with status `not_started`, no times, and no answers.
+
+Implement these eight methods in `QuizAttempt`:
+
+1. `start(started_at)` records the start time and sets the status to `in_progress`.
+2. `show_question(question_id)` returns the question text with its options.
+3. `answer(question_id, option)` saves an answer for a question that has none yet.
+4. `change_answer(question_id, option)` replaces an existing answer.
+5. `clear_answer(question_id)` removes an answer.
+6. `submit(submitted_at)` records the submit time and sets the status to `submitted`.
+7. `calculate_score()` returns the number of correct answers after submission.
+8. `review()` returns each question with the given answer, the correct answer, and the result.
+
+Raise `UnknownQuestionError` for a question that is not in the quiz, `ValueError` for an option that the question does not have, and `InvalidAttemptStatusError` when an action does not fit the current status. Write a custom `@attempt_in_progress` decorator with `functools.wraps` and apply it to `answer()`, `change_answer()`, and `clear_answer()` so answers can change only while the attempt is in progress. Pass the start and submit times in as arguments so the output stays the same on every run.
+
+Create a 3-question Python quiz for student Priya (`S-1042`). Start the attempt at 10:00 on 14 November 2026 and print the first question. Answer Q1 correctly, answer Q2 wrongly and then change it to the right option, answer Q3 and then clear it. Submit at 10:20, print the score out of 3, and print the review. Finally, try to answer Q3 after submission and print the error.
+
+<details>
+<summary>Answer</summary>
+
+```python
+from datetime import datetime
+from functools import wraps
+
+
+class UnknownQuestionError(Exception):
+    pass
+
+
+class InvalidAttemptStatusError(Exception):
+    pass
+
+
+def attempt_in_progress(method):
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        if self.status != "in_progress":
+            raise InvalidAttemptStatusError(
+                f"Answers can change only during an active attempt (status: {self.status})."
+            )
+        return method(self, *args, **kwargs)
+    return wrapper
+
+
+class AssessmentAttempt:
+    def __init__(self, attempt_id, student_id):
+        self.attempt_id = attempt_id
+        self.student_id = student_id
+        self.started_at = None
+        self.submitted_at = None
+        self.status = "not_started"
+
+
+class QuizAttempt(AssessmentAttempt):
+    OPTIONS = ("A", "B", "C", "D")
+
+    def __init__(self, attempt_id, student_id, questions):
+        super().__init__(attempt_id, student_id)
+        self.questions = questions    # {question_id: (text, {option: choice}, correct)}
+        self.answers = {}
+
+    def _check(self, question_id, option=None):
+        if question_id not in self.questions:
+            raise UnknownQuestionError(f"Question {question_id} does not exist.")
+        if option is not None and option not in self.questions[question_id][1]:
+            raise ValueError(f"Option {option} is not valid for {question_id}.")
+
+    def start(self, started_at):
+        if self.status != "not_started":
+            raise InvalidAttemptStatusError("This attempt has already started.")
+
+        self.started_at = started_at
+        self.status = "in_progress"
+
+    def show_question(self, question_id):
+        self._check(question_id)
+        text, choices, _ = self.questions[question_id]
+        options = "  ".join(f"{key}) {value}" for key, value in choices.items())
+        return f"{question_id}. {text}  {options}"
+
+    @attempt_in_progress
+    def answer(self, question_id, option):
+        self._check(question_id, option)
+        if question_id in self.answers:
+            raise ValueError(f"{question_id} is already answered. Use change_answer().")
+
+        self.answers[question_id] = option
+
+    @attempt_in_progress
+    def change_answer(self, question_id, option):
+        self._check(question_id, option)
+        if question_id not in self.answers:
+            raise ValueError(f"{question_id} has no answer to change.")
+
+        self.answers[question_id] = option
+
+    @attempt_in_progress
+    def clear_answer(self, question_id):
+        self._check(question_id)
+        self.answers.pop(question_id, None)
+
+    def submit(self, submitted_at):
+        if self.status != "in_progress":
+            raise InvalidAttemptStatusError("Only an active attempt can be submitted.")
+
+        self.submitted_at = submitted_at
+        self.status = "submitted"
+
+    def calculate_score(self):
+        if self.status != "submitted":
+            raise InvalidAttemptStatusError("Submit the attempt before scoring it.")
+
+        return sum(
+            1 for question_id, (_, _, correct) in self.questions.items()
+            if self.answers.get(question_id) == correct
+        )
+
+    def review(self):
+        lines = []
+        for question_id, (_, _, correct) in self.questions.items():
+            given = self.answers.get(question_id, "-")
+            result = "correct" if given == correct else "wrong"
+            lines.append(f"{question_id}: you {given}, answer {correct} ({result})")
+        return "\n".join(lines)
+
+
+questions = {
+    "Q1": ("len('hello')?", {"A": "4", "B": "5", "C": "6"}, "B"),
+    "Q2": ("Type of 3 / 2?", {"A": "int", "B": "float", "C": "str"}, "B"),
+    "Q3": ("Immutable type?", {"A": "list", "B": "dict", "C": "tuple"}, "C"),
+}
+attempt = QuizAttempt("ATT-501", "S-1042", questions)
+
+attempt.start(datetime(2026, 11, 14, 10, 0))
+print(attempt.show_question("Q1"))
+# Q1. len('hello')?  A) 4  B) 5  C) 6
+
+attempt.answer("Q1", "B")
+attempt.answer("Q2", "A")
+attempt.change_answer("Q2", "B")   # Fixes Q2
+attempt.answer("Q3", "A")
+attempt.clear_answer("Q3")         # Leaves Q3 blank
+attempt.submit(datetime(2026, 11, 14, 10, 20))
+
+print(attempt.calculate_score(), "/", len(questions))  # 2 / 3
+print(attempt.review())
+# Q1: you B, answer B (correct)
+# Q2: you B, answer B (correct)
+# Q3: you -, answer C (wrong)
+
+try:
+    attempt.answer("Q3", "C")
+except InvalidAttemptStatusError as error:
+    print(type(error).__name__, "-", error)
+    # InvalidAttemptStatusError - Answers can change only during an active attempt (status: submitted).
+```
+
+**Output:**
+
+```text
+Q1. len('hello')?  A) 4  B) 5  C) 6
+2 / 3
+Q1: you B, answer B (correct)
+Q2: you B, answer B (correct)
+Q3: you -, answer C (wrong)
+InvalidAttemptStatusError - Answers can change only during an active attempt (status: submitted).
+```
+
+</details>
 
 ### 18. Draft invoice (`Invoice` inherits `BillingDocument`)
 
@@ -3722,6 +6065,158 @@ False
 - **Exceptions:** `ValueError` for invalid amounts, `EmptyInvoiceError`, `InvalidInvoiceStatusError`, `OverpaymentError`.
 - **Decorator:** `@property` on `balance_due`, computed as total minus payments.
 
+**Program:** Write a Python program to create a `BillingDocument` class with the attributes `invoice_number`, `customer_name`, and `status`. Create an `Invoice` class that inherits from `BillingDocument` and adds `line_items`, `tax_rate`, `discount_amount`, and `paid_amount`. A new invoice starts as a `draft` with no items, no discount, no payments, and an 18% GST tax rate. The total is the subtotal minus the discount, plus tax.
+
+Implement these eight methods in `Invoice`:
+
+1. `add_item(description, qty, unit_price)` adds a line item to a draft invoice and returns its item ID.
+2. `remove_item(item_id)` removes a line item from a draft invoice.
+3. `apply_discount(amount)` sets a discount between 0 and the subtotal.
+4. `calculate_subtotal()` returns the sum of quantity times unit price for all items.
+5. `calculate_total()` returns the subtotal after discount, with tax added.
+6. `issue()` changes the status from `draft` to `issued`.
+7. `record_payment(amount)` adds a payment to an issued invoice and marks it `paid` when nothing is left to pay.
+8. `void()` cancels an invoice that has no payments.
+
+Raise `ValueError` for a non-positive quantity, a negative price, a discount outside the subtotal, or a non-positive payment, `EmptyInvoiceError` when issuing an invoice with no items, `InvalidInvoiceStatusError` when an action does not fit the current status, and `OverpaymentError` when a payment exceeds the balance due. Define `balance_due` as a `@property` that returns the total minus the payments.
+
+Create invoice `INV-1001` for Sharma Traders. Add 2 laptop stands at Rs. 1,500 each, 1 USB-C hub at Rs. 2,000, and 1 wireless mouse at Rs. 500, then remove the mouse and print the subtotal. Apply a discount of Rs. 500 and print the total. Issue the invoice, record a payment of Rs. 3,000, and print the balance due and status. Finally, try to record a payment of Rs. 5,000 and print the error.
+
+<details>
+<summary>Answer</summary>
+
+```python
+class EmptyInvoiceError(Exception):
+    pass
+
+
+class InvalidInvoiceStatusError(Exception):
+    pass
+
+
+class OverpaymentError(Exception):
+    pass
+
+
+class BillingDocument:
+    def __init__(self, invoice_number, customer_name):
+        self.invoice_number = invoice_number
+        self.customer_name = customer_name
+        self.status = "draft"
+
+
+class Invoice(BillingDocument):
+    GST_RATE = 0.18
+
+    def __init__(self, invoice_number, customer_name, tax_rate=GST_RATE):
+        super().__init__(invoice_number, customer_name)
+        self.line_items = {}    # {item_id: (description, qty, unit_price)}
+        self.tax_rate = tax_rate
+        self.discount_amount = 0
+        self.paid_amount = 0
+        self.next_item_id = 1
+
+    @property
+    def balance_due(self):
+        return round(self.calculate_total() - self.paid_amount, 2)
+
+    def _require_status(self, status, action):
+        if self.status != status:
+            raise InvalidInvoiceStatusError(f"Cannot {action} a {self.status} invoice.")
+
+    def add_item(self, description, qty, unit_price):
+        self._require_status("draft", "add items to")
+        if not isinstance(qty, int) or qty <= 0:
+            raise ValueError("Quantity must be a positive whole number.")
+        if not 0 <= unit_price < float("inf"):
+            raise ValueError("Unit price must be a nonnegative, finite number.")
+
+        item_id = self.next_item_id
+        self.line_items[item_id] = (description, qty, unit_price)
+        self.next_item_id += 1
+        return item_id
+
+    def remove_item(self, item_id):
+        self._require_status("draft", "remove items from")
+        if item_id not in self.line_items:
+            raise ValueError(f"Item {item_id} is not on this invoice.")
+
+        del self.line_items[item_id]
+
+    def apply_discount(self, amount):
+        self._require_status("draft", "discount")
+        if not 0 <= amount <= self.calculate_subtotal():
+            raise ValueError("Discount must be between 0 and the subtotal.")
+
+        self.discount_amount = amount
+
+    def calculate_subtotal(self):
+        return sum(qty * price for _, qty, price in self.line_items.values())
+
+    def calculate_total(self):
+        taxable = self.calculate_subtotal() - self.discount_amount
+        return round(taxable * (1 + self.tax_rate), 2)
+
+    def issue(self):
+        self._require_status("draft", "issue")
+        if not self.line_items:
+            raise EmptyInvoiceError("Add at least one item before issuing.")
+
+        self.status = "issued"
+
+    def record_payment(self, amount):
+        self._require_status("issued", "record a payment on")
+        if not 0 < amount < float("inf"):
+            raise ValueError("Payment must be a positive, finite number.")
+        if amount > self.balance_due:
+            raise OverpaymentError(
+                f"Payment of Rs. {amount} exceeds the balance of Rs. {self.balance_due}."
+            )
+
+        self.paid_amount += amount
+        if self.balance_due == 0:
+            self.status = "paid"
+
+    def void(self):
+        if self.status == "void" or self.paid_amount > 0:
+            raise InvalidInvoiceStatusError("Only an unpaid, active invoice can be voided.")
+
+        self.status = "void"
+
+
+invoice = Invoice("INV-1001", "Sharma Traders")
+
+invoice.add_item("Laptop stand", 2, 1500)
+invoice.add_item("USB-C hub", 1, 2000)
+mouse_id = invoice.add_item("Wireless mouse", 1, 500)
+invoice.remove_item(mouse_id)
+print(invoice.calculate_subtotal())  # 5000
+
+invoice.apply_discount(500)
+print(invoice.calculate_total())     # 5310.0  (4500 + 18% GST)
+
+invoice.issue()
+invoice.record_payment(3000)
+print(invoice.balance_due, invoice.status)  # 2310.0 issued
+
+try:
+    invoice.record_payment(5000)
+except OverpaymentError as error:
+    print(type(error).__name__, "-", error)
+    # OverpaymentError - Payment of Rs. 5000 exceeds the balance of Rs. 2310.0.
+```
+
+**Output:**
+
+```text
+5000
+5310.0
+2310.0 issued
+OverpaymentError - Payment of Rs. 5000 exceeds the balance of Rs. 2310.0.
+```
+
+</details>
+
 ### 19. Email notification (`EmailNotification` inherits `Notification`)
 
 - **Attributes:** `notification_id`, `recipient`, `subject`, `body`, `status`, `attempt_count`, `last_error`
@@ -3730,6 +6225,162 @@ False
 - **Exceptions:** `InvalidRecipientError`, `IncompleteNotificationError`, `DeliveryError`, `RetryLimitError`.
 - **Decorator:** `@abstractmethod` on `Notification.send()` if email, SMS, and push subclasses each implement their own delivery method.
 
+**Program:** Write a Python program to create an abstract `Notification` class with the attributes `notification_id`, `recipient`, `body`, `status`, `attempt_count`, and `last_error`. Create an `EmailNotification` class that inherits from `Notification` and adds `subject`. A new notification starts as a `draft` with an empty recipient, subject, and body, zero attempts, and no error. An email can be sent at most 3 times. To keep the program offline and predictable, pass `fail_times` to simulate a mail server that fails the first few sends.
+
+Implement these eight methods in `EmailNotification`:
+
+1. `set_recipient(address)` sets the email address after a basic format check.
+2. `set_subject(subject)` sets the subject.
+3. `set_body(body)` sets the message body.
+4. `validate()` returns `True` if the recipient, subject, and body are all present.
+5. `queue()` validates the email and sets the status to `queued`.
+6. `send()` sends a queued email, counts the attempt, and sets the status to `sent` or `failed`.
+7. `retry()` sends a failed email again if the attempt limit allows it.
+8. `cancel()` cancels an email that has not been sent.
+
+Raise `InvalidRecipientError` for a missing or badly formed address, `IncompleteNotificationError` when the subject or body is missing, `DeliveryError` when a send fails, and `RetryLimitError` when all 3 attempts are used. Raise `ValueError` when an action does not fit the current status. Use `abc.ABC` and mark `Notification.send()` with `@abstractmethod`, so email, SMS, and push subclasses must each implement their own delivery.
+
+Create email `N-701` to `anjali.verma@example.in` with the subject "Your order has shipped" and a short body about a parcel going to Pune, using a mail server that fails once. Queue it and send it, catching and printing the delivery error. Then retry it and print its status and attempt count. Finally, create a second email and try to set the recipient to `rahul.example.com`, printing the error.
+
+<details>
+<summary>Answer</summary>
+
+```python
+from abc import ABC, abstractmethod
+
+
+class InvalidRecipientError(Exception):
+    pass
+
+
+class IncompleteNotificationError(Exception):
+    pass
+
+
+class DeliveryError(Exception):
+    pass
+
+
+class RetryLimitError(Exception):
+    pass
+
+
+class Notification(ABC):
+    def __init__(self, notification_id):
+        self.notification_id = notification_id
+        self.recipient = ""
+        self.body = ""
+        self.status = "draft"
+        self.attempt_count = 0
+        self.last_error = None
+
+    @abstractmethod
+    def send(self):
+        pass
+
+
+class EmailNotification(Notification):
+    MAX_ATTEMPTS = 3
+
+    def __init__(self, notification_id, fail_times=0):
+        super().__init__(notification_id)
+        self.subject = ""
+        self.fail_times = fail_times    # Simulates a mail server that fails N times
+
+    def _require_editable(self):
+        if self.status not in ("draft", "failed"):
+            raise ValueError(f"Cannot edit a {self.status} email.")
+
+    def set_recipient(self, address):
+        self._require_editable()
+        name, _, domain = address.partition("@")
+        if not name or "." not in domain or " " in address:
+            raise InvalidRecipientError(f"'{address}' is not a valid email address.")
+
+        self.recipient = address
+
+    def set_subject(self, subject):
+        self._require_editable()
+        self.subject = subject.strip()
+
+    def set_body(self, body):
+        self._require_editable()
+        self.body = body.strip()
+
+    def validate(self):
+        if not self.recipient:
+            raise InvalidRecipientError("Recipient is missing.")
+        if not self.subject or not self.body:
+            raise IncompleteNotificationError("Subject and body are required.")
+        return True
+
+    def queue(self):
+        self._require_editable()
+        self.validate()
+        self.status = "queued"
+
+    def send(self):
+        if self.status != "queued":
+            raise ValueError("Queue the email before sending it.")
+
+        self.attempt_count += 1
+        if self.attempt_count <= self.fail_times:
+            self.status = "failed"
+            self.last_error = f"Mail server timeout on attempt {self.attempt_count}."
+            raise DeliveryError(self.last_error)
+
+        self.status = "sent"
+        self.last_error = None
+
+    def retry(self):
+        if self.status != "failed":
+            raise ValueError("Only a failed email can be retried.")
+        if self.attempt_count >= self.MAX_ATTEMPTS:
+            raise RetryLimitError(f"Gave up after {self.attempt_count} attempts.")
+
+        self.status = "queued"
+        self.send()
+
+    def cancel(self):
+        if self.status in ("sent", "cancelled"):
+            raise ValueError(f"Cannot cancel a {self.status} email.")
+
+        self.status = "cancelled"
+
+
+email = EmailNotification("N-701", fail_times=1)
+email.set_recipient("anjali.verma@example.in")
+email.set_subject("Your order has shipped")
+email.set_body("Your parcel will reach Pune by Monday.")
+email.queue()
+
+try:
+    email.send()
+except DeliveryError as error:
+    print("First try failed:", error)
+    # First try failed: Mail server timeout on attempt 1.
+
+email.retry()
+print(email.status, email.attempt_count)  # sent 2
+
+draft = EmailNotification("N-702")
+try:
+    draft.set_recipient("rahul.example.com")
+except InvalidRecipientError as error:
+    print(type(error).__name__, "-", error)
+    # InvalidRecipientError - 'rahul.example.com' is not a valid email address.
+```
+
+**Output:**
+
+```text
+First try failed: Mail server timeout on attempt 1.
+sent 2
+InvalidRecipientError - 'rahul.example.com' is not a valid email address.
+```
+
+</details>
+
 ### 20. Digital wallet (`DigitalWallet` inherits `PaymentAccount`)
 
 - **Attributes:** `wallet_id`, `owner_id`, `balance`, `currency`, `daily_limit`, `transactions`, `is_locked`
@@ -3737,6 +6388,185 @@ False
 - **Validation:** Require positive amounts and matching currencies for transfers. Check the balance and daily spending limit before paying. Allow each eligible transaction to be refunded once.
 - **Exceptions:** `ValueError` for invalid amounts, `WalletLockedError`, `InsufficientBalanceError`, `DailyLimitExceededError`, `InvalidRefundError`.
 - **Decorator:** Custom `@unlocked_wallet` on `pay()` and `send_money()`.
+
+**Program:** Write a Python program to create a `PaymentAccount` class with the attributes `wallet_id`, `owner_id`, `currency`, and `balance`. Create a `DigitalWallet` class that inherits from `PaymentAccount` and adds `daily_limit`, `transactions`, and `is_locked`. A new wallet starts unlocked in `INR` with a zero balance, no transactions, and a daily spending limit of Rs. 10,000. Each transaction stores an ID (`T1`, `T2`, ...), type, other party, amount, date, and whether it was refunded. Pass the date into each method that needs it so the output stays the same on every run.
+
+Implement these eight methods in `DigitalWallet`:
+
+1. `add_money(amount, on_date)` adds money from the bank.
+2. `pay(merchant, amount, on_date)` pays a merchant and returns the transaction ID.
+3. `send_money(wallet, amount, on_date)` moves money to another wallet with the same currency.
+4. `refund(transaction_id)` returns the money for a merchant payment, once.
+5. `lock()` locks the wallet.
+6. `unlock()` unlocks the wallet.
+7. `show_transactions()` returns all transactions for printing.
+8. `calculate_daily_spend(on_date)` returns the total paid and sent on a date, not counting refunded payments.
+
+Raise `ValueError` for non-positive or non-finite amounts and for a currency mismatch, `WalletLockedError` when a locked wallet tries to pay or send, `InsufficientBalanceError` when the balance is too low, `DailyLimitExceededError` when a payment would cross the daily limit, and `InvalidRefundError` for an unknown, non-payment, or already refunded transaction. Write a custom `@unlocked_wallet` decorator with `functools.wraps` and apply it to `pay()` and `send_money()`.
+
+Create wallets for Arjun (`W-101`) and Neha (`W-102`). On 14 November 2026, Arjun adds Rs. 8,000, pays Swiggy Rs. 450, pays BigBasket Rs. 2,500, and sends Rs. 1,000 to Neha. The BigBasket order is cancelled, so refund that payment. Print both balances, Arjun's spending for the day, and his transactions. Finally, lock Arjun's wallet, try to pay Zomato Rs. 300, and print the error.
+
+<details>
+<summary>Answer</summary>
+
+```python
+from datetime import date
+from functools import wraps
+
+
+class WalletLockedError(Exception):
+    pass
+
+
+class InsufficientBalanceError(Exception):
+    pass
+
+
+class DailyLimitExceededError(Exception):
+    pass
+
+
+class InvalidRefundError(Exception):
+    pass
+
+
+def unlocked_wallet(method):
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        if self.is_locked:
+            raise WalletLockedError(f"Wallet {self.wallet_id} is locked.")
+        return method(self, *args, **kwargs)
+    return wrapper
+
+
+class PaymentAccount:
+    def __init__(self, wallet_id, owner_id, currency):
+        self.wallet_id = wallet_id
+        self.owner_id = owner_id
+        self.currency = currency
+        self.balance = 0
+
+
+class DigitalWallet(PaymentAccount):
+    DEFAULT_DAILY_LIMIT = 10000
+
+    def __init__(self, wallet_id, owner_id, currency="INR", daily_limit=DEFAULT_DAILY_LIMIT):
+        super().__init__(wallet_id, owner_id, currency)
+        self.daily_limit = daily_limit
+        self.transactions = []
+        self.is_locked = False
+
+    def _record(self, kind, party, amount, on_date):
+        transaction = {
+            "id": f"T{len(self.transactions) + 1}", "type": kind, "party": party,
+            "amount": amount, "date": on_date, "refunded": False,
+        }
+        self.transactions.append(transaction)
+        return transaction["id"]
+
+    def _debit(self, kind, party, amount, on_date):
+        if not 0 < amount < float("inf"):
+            raise ValueError("Amount must be a positive, finite number.")
+        if amount > self.balance:
+            raise InsufficientBalanceError(f"Balance is only Rs. {self.balance}.")
+        if self.calculate_daily_spend(on_date) + amount > self.daily_limit:
+            raise DailyLimitExceededError(f"Daily limit of Rs. {self.daily_limit} reached.")
+
+        self.balance -= amount
+        return self._record(kind, party, amount, on_date)
+
+    def add_money(self, amount, on_date):
+        if not 0 < amount < float("inf"):
+            raise ValueError("Amount must be a positive, finite number.")
+
+        self.balance += amount
+        return self._record("add", "bank", amount, on_date)
+
+    @unlocked_wallet
+    def pay(self, merchant, amount, on_date):
+        return self._debit("pay", merchant, amount, on_date)
+
+    @unlocked_wallet
+    def send_money(self, wallet, amount, on_date):
+        if wallet.currency != self.currency:
+            raise ValueError("Both wallets must use the same currency.")
+
+        transaction_id = self._debit("send", wallet.owner_id, amount, on_date)
+        wallet.balance += amount
+        wallet._record("receive", self.owner_id, amount, on_date)
+        return transaction_id
+
+    def refund(self, transaction_id):
+        for transaction in self.transactions:
+            if transaction["id"] == transaction_id:
+                break
+        else:
+            raise InvalidRefundError(f"Transaction {transaction_id} does not exist.")
+        if transaction["type"] != "pay" or transaction["refunded"]:
+            raise InvalidRefundError(f"Transaction {transaction_id} cannot be refunded.")
+
+        transaction["refunded"] = True
+        self.balance += transaction["amount"]
+
+    def lock(self):
+        self.is_locked = True
+
+    def unlock(self):
+        self.is_locked = False
+
+    def show_transactions(self):
+        return "\n".join(
+            f"{t['id']} {t['date']} {t['type']:<7} {t['party']:<10} Rs. {t['amount']}"
+            + (" (refunded)" if t["refunded"] else "")
+            for t in self.transactions
+        )
+
+    def calculate_daily_spend(self, on_date):
+        return sum(
+            t["amount"] for t in self.transactions
+            if t["date"] == on_date and t["type"] in ("pay", "send") and not t["refunded"]
+        )
+
+
+arjun = DigitalWallet("W-101", "Arjun")
+neha = DigitalWallet("W-102", "Neha")
+today = date(2026, 11, 14)
+
+arjun.add_money(8000, today)
+arjun.pay("Swiggy", 450, today)
+grocery_id = arjun.pay("BigBasket", 2500, today)
+arjun.send_money(neha, 1000, today)
+arjun.refund(grocery_id)              # BigBasket order cancelled
+
+print(arjun.balance, neha.balance)    # 6550 1000
+print(arjun.calculate_daily_spend(today))  # 1450
+print(arjun.show_transactions())
+# T1 2026-11-14 add     bank       Rs. 8000
+# T2 2026-11-14 pay     Swiggy     Rs. 450
+# T3 2026-11-14 pay     BigBasket  Rs. 2500 (refunded)
+# T4 2026-11-14 send    Neha       Rs. 1000
+
+arjun.lock()
+try:
+    arjun.pay("Zomato", 300, today)
+except WalletLockedError as error:
+    print(type(error).__name__, "-", error)
+    # WalletLockedError - Wallet W-101 is locked.
+```
+
+**Output:**
+
+```text
+6550 1000
+1450
+T1 2026-11-14 add     bank       Rs. 8000
+T2 2026-11-14 pay     Swiggy     Rs. 450
+T3 2026-11-14 pay     BigBasket  Rs. 2500 (refunded)
+T4 2026-11-14 send    Neha       Rs. 1000
+WalletLockedError - Wallet W-101 is locked.
+```
+
+</details>
 
 ### How to turn any skeleton into a program
 

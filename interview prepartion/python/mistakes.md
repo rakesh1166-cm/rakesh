@@ -12,7 +12,8 @@ return self.balance+=withdraw_amount  ==wrong
 return self.balance+withdraw_amount==correct
 self.balance+=withdraw_amount  === correct
         return self.balance
-to read any data must use prefix get_methodname(self)        
+to read any data must use prefix get_methodname(self)  
+super().__init__(self.brand) ==wrong  super().__init__(brand)==correct     
 
 print(b) gives a NameError(name resolution)  in python == it comes under readable and concise syntax  features correct gives double quotes===>print("b),student.append("b)
 
