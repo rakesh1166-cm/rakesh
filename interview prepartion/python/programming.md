@@ -895,6 +895,222 @@ large
 
 </details>
 
+## Instance method, static method and class method
+
+Methods that get `self`, `cls`, or neither.
+
+### Program 17
+
+**Task:** Create a `Pizza` class with a class attribute `size_unit = "inch"`. Its `__init__` takes a `size` and stores it on the object. Add:
+
+- an instance method `describe()` that returns the size with the unit, such as `"8 inch"`
+- a class method `large()` that creates and returns a 12-inch pizza
+- a static method `is_valid(size)` that returns `True` if the size is positive, otherwise `False`
+
+Then print `Pizza(8).describe()`, the size of `Pizza.large()`, and `Pizza.is_valid(-1)`. Expected output: `8 inch`, `12`, `False`.
+
+*From E15: What is the difference between instance, class, and static methods?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Create a `Pizza` class with class attribute `size_unit = "inch"`.
+2. `__init__` stores `size`.
+3. Instance method `describe()` → `"<size> inch"`.
+4. Class method `large()` → `cls(12)`.
+5. Static method `is_valid(size)` → `size > 0`.
+6. Call all three.
+
+**Program flow**
+
+```text
+Pizza(8).describe()  → instance: uses self.size → "8 inch"
+Pizza.large().size   → class: cls(12)           → 12
+Pizza.is_valid(-1)   → static: -1 > 0?  NO      → False
+```
+
+**Pseudocode**
+
+```text
+CLASS Pizza:
+    size_unit = "inch"
+    init(size):              self.size = size
+    describe():              RETURN size + " " + size_unit
+    CLASS METHOD large():    RETURN new Pizza(12)
+    STATIC is_valid(size):   RETURN size > 0
+
+PRINT Pizza(8).describe()    // 8 inch
+PRINT Pizza.large().size     // 12
+PRINT Pizza.is_valid(-1)     // False
+```
+
+**Code**
+
+```python
+class Pizza:
+    size_unit = "inch"
+
+    def __init__(self, size):
+        self.size = size
+
+    def describe(self):
+        return f"{self.size} {self.size_unit}"
+
+    @classmethod
+    def large(cls):
+        return cls(12)
+
+    @staticmethod
+    def is_valid(size):
+        return size > 0
+
+print(Pizza(8).describe())    # 8 inch
+print(Pizza.large().size)     # 12
+print(Pizza.is_valid(-1))     # False
+```
+
+**Output:**
+
+```text
+8 inch
+12
+False
+```
+
+**Fact (why this program):** Instance methods get `self` (one object), class methods get `cls` (the class), and static methods get neither (a plain helper).
+
+</details>
+
+### Program 18
+
+**Task:** Create a `Student` class with a class attribute `school = "City School"`. Add a class method `rename_school(name)`. Create two students, rename the school once, and print both students' school.
+
+*From E16: Can a class method read and update attributes stored on the class?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Create a `Student` class with class attribute `school = "City School"`.
+2. Class method `rename_school(name)` → `cls.school = name`.
+3. Create `first` and `second`.
+4. Call `Student.rename_school("Green School")` once.
+5. Print both students' school.
+
+**Program flow**
+
+```text
+Student.rename_school("Green School") → cls.school changed → all objects see it
+first.school, second.school           →                    → "Green School", "Green School"
+```
+
+**Pseudocode**
+
+```text
+CLASS Student:
+    school = "City School"
+    CLASS METHOD rename_school(name):  cls.school = name
+
+first = Student();  second = Student()
+Student.rename_school("Green School")
+PRINT first.school     // Green School
+PRINT second.school    // Green School
+```
+
+**Code**
+
+```python
+class Student:
+    school = "City School"
+
+    @classmethod
+    def rename_school(cls, name):
+        cls.school = name
+
+first = Student()
+second = Student()
+Student.rename_school("Green School")
+
+print(first.school)   # Green School
+print(second.school)  # Green School
+```
+
+**Output:**
+
+```text
+Green School
+Green School
+```
+
+**Fact (why this program):** A class method receives `cls`, so it can change class attributes. One change is seen by **every** object.
+
+</details>
+
+### Program 19
+
+**Task:** Create a `User` class that stores a `name`. Add a class method `from_dict(data)` that creates a user from a dict. Create an `Admin` subclass and call `Admin.from_dict({"name": "Asha"})`. Print the type of the object you get.
+
+*From E17: Why use a class method if we have instance methods?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Create a `User` class whose `__init__` stores `name`.
+2. Class method `from_dict(data)` → `cls(data["name"])`.
+3. Create `Admin(User)` with no code (`pass`).
+4. Call `Admin.from_dict({"name": "Asha"})`.
+5. Print the type name.
+
+**Program flow**
+
+```text
+Admin.from_dict({"name": "Asha"}) → cls is Admin → Admin("Asha") → type "Admin"
+```
+
+**Pseudocode**
+
+```text
+CLASS User:
+    init(name):                     self.name = name
+    CLASS METHOD from_dict(data):   RETURN new cls(data["name"])
+CLASS Admin EXTENDS User:  (nothing)
+
+obj = Admin.from_dict({"name": "Asha"})
+PRINT type name of obj    // Admin
+```
+
+**Code**
+
+```python
+class User:
+    def __init__(self, name):
+        self.name = name
+
+    @classmethod
+    def from_dict(cls, data):
+        return cls(data["name"])
+
+class Admin(User):
+    pass
+
+print(type(Admin.from_dict({"name": "Asha"})).__name__)  # Admin
+```
+
+**Output:**
+
+```text
+Admin
+```
+
+**Fact (why this program):** A class method works without an object, so it's ideal for creating objects in another way. Because `cls` is whichever class called it, `Admin.from_dict` returns an `Admin`.
+
+</details>
+
 ## Inheritance
 
 A parent and a child class, from simplest to hardest.
@@ -1257,426 +1473,6 @@ print(ev.battery, ev.brand, ev.color)  # 75 kWh Tesla red
 
 </details>
 
-## Alternative-Inheritance
-
-### Program 11
-
-**Task:** Create a `Vehicle` class that stores a `brand`. Create a `Car` child class whose `__init__` takes `brand` and `seats`, sends `brand` to the parent with `super()`, and stores `seats` itself. Create a Honda with 5 seats and print both values.
-
-*From E6, scenario 2: When creating an object of a child class in Python, how do you decide which arguments to pass?*
-
-<details>
-<summary>Answer</summary>
-
-**Steps**
-
-1. Create a `Vehicle` class whose `__init__` stores `brand`.
-2. Create `Car(Vehicle)` whose `__init__` takes `brand` and `seats`.
-3. Send `brand` to the parent with `super().__init__(brand)`.
-4. Store `seats` in the child.
-5. Create `Car("Honda", 5)` and print both values.
-
-**Program flow**
-
-```text
-Car("Honda", 5) → Car.__init__ → super().__init__("Honda") → brand = "Honda"
-                               → self.seats = 5
-print           →                                          → "Honda 5"
-```
-
-**Pseudocode**
-
-```text
-CLASS Vehicle:
-    init(brand):  self.brand = brand
-CLASS Car EXTENDS Vehicle:
-    init(brand, seats):
-        CALL parent init(brand)
-        self.seats = seats
-
-car = Car("Honda", 5)
-PRINT car.brand, car.seats    // Honda 5
-```
-
-**Code**
-
-```python
-class Vehicle:
-    def __init__(self, brand):
-        self.brand = brand
-
-class Car(Vehicle):
-    def __init__(self, brand, seats):
-        super().__init__(brand)   # parent sets brand
-        self.seats = seats        # child sets seats
-
-car = Car("Honda", 5)
-print(car.brand, car.seats)  # Honda 5
-```
-
-**Output:**
-
-```text
-Honda 5
-```
-
-**Fact (why this program):** **Scenario 2:** the child has its own `__init__` and calls `super().__init__()`. You pass the **child's** arguments; the child hands the parent its part.
-
-</details>
-
-## Instance method, static method and class method
-
-Methods that get `self`, `cls`, or neither.
-
-### Program 17
-
-**Task:** Create a `Pizza` class with a class attribute `size_unit = "inch"`. Its `__init__` takes a `size` and stores it on the object. Add:
-
-- an instance method `describe()` that returns the size with the unit, such as `"8 inch"`
-- a class method `large()` that creates and returns a 12-inch pizza
-- a static method `is_valid(size)` that returns `True` if the size is positive, otherwise `False`
-
-Then print `Pizza(8).describe()`, the size of `Pizza.large()`, and `Pizza.is_valid(-1)`. Expected output: `8 inch`, `12`, `False`.
-
-*From E15: What is the difference between instance, class, and static methods?*
-
-<details>
-<summary>Answer</summary>
-
-**Steps**
-
-1. Create a `Pizza` class with class attribute `size_unit = "inch"`.
-2. `__init__` stores `size`.
-3. Instance method `describe()` → `"<size> inch"`.
-4. Class method `large()` → `cls(12)`.
-5. Static method `is_valid(size)` → `size > 0`.
-6. Call all three.
-
-**Program flow**
-
-```text
-Pizza(8).describe()  → instance: uses self.size → "8 inch"
-Pizza.large().size   → class: cls(12)           → 12
-Pizza.is_valid(-1)   → static: -1 > 0?  NO      → False
-```
-
-**Pseudocode**
-
-```text
-CLASS Pizza:
-    size_unit = "inch"
-    init(size):              self.size = size
-    describe():              RETURN size + " " + size_unit
-    CLASS METHOD large():    RETURN new Pizza(12)
-    STATIC is_valid(size):   RETURN size > 0
-
-PRINT Pizza(8).describe()    // 8 inch
-PRINT Pizza.large().size     // 12
-PRINT Pizza.is_valid(-1)     // False
-```
-
-**Code**
-
-```python
-class Pizza:
-    size_unit = "inch"
-
-    def __init__(self, size):
-        self.size = size
-
-    def describe(self):
-        return f"{self.size} {self.size_unit}"
-
-    @classmethod
-    def large(cls):
-        return cls(12)
-
-    @staticmethod
-    def is_valid(size):
-        return size > 0
-
-print(Pizza(8).describe())    # 8 inch
-print(Pizza.large().size)     # 12
-print(Pizza.is_valid(-1))     # False
-```
-
-**Output:**
-
-```text
-8 inch
-12
-False
-```
-
-**Fact (why this program):** Instance methods get `self` (one object), class methods get `cls` (the class), and static methods get neither (a plain helper).
-
-</details>
-
-### Program 18
-
-**Task:** Create a `Student` class with a class attribute `school = "City School"`. Add a class method `rename_school(name)`. Create two students, rename the school once, and print both students' school.
-
-*From E16: Can a class method read and update attributes stored on the class?*
-
-<details>
-<summary>Answer</summary>
-
-**Steps**
-
-1. Create a `Student` class with class attribute `school = "City School"`.
-2. Class method `rename_school(name)` → `cls.school = name`.
-3. Create `first` and `second`.
-4. Call `Student.rename_school("Green School")` once.
-5. Print both students' school.
-
-**Program flow**
-
-```text
-Student.rename_school("Green School") → cls.school changed → all objects see it
-first.school, second.school           →                    → "Green School", "Green School"
-```
-
-**Pseudocode**
-
-```text
-CLASS Student:
-    school = "City School"
-    CLASS METHOD rename_school(name):  cls.school = name
-
-first = Student();  second = Student()
-Student.rename_school("Green School")
-PRINT first.school     // Green School
-PRINT second.school    // Green School
-```
-
-**Code**
-
-```python
-class Student:
-    school = "City School"
-
-    @classmethod
-    def rename_school(cls, name):
-        cls.school = name
-
-first = Student()
-second = Student()
-Student.rename_school("Green School")
-
-print(first.school)   # Green School
-print(second.school)  # Green School
-```
-
-**Output:**
-
-```text
-Green School
-Green School
-```
-
-**Fact (why this program):** A class method receives `cls`, so it can change class attributes. One change is seen by **every** object.
-
-</details>
-
-### Program 19
-
-**Task:** Create a `User` class that stores a `name`. Add a class method `from_dict(data)` that creates a user from a dict. Create an `Admin` subclass and call `Admin.from_dict({"name": "Asha"})`. Print the type of the object you get.
-
-*From E17: Why use a class method if we have instance methods?*
-
-<details>
-<summary>Answer</summary>
-
-**Steps**
-
-1. Create a `User` class whose `__init__` stores `name`.
-2. Class method `from_dict(data)` → `cls(data["name"])`.
-3. Create `Admin(User)` with no code (`pass`).
-4. Call `Admin.from_dict({"name": "Asha"})`.
-5. Print the type name.
-
-**Program flow**
-
-```text
-Admin.from_dict({"name": "Asha"}) → cls is Admin → Admin("Asha") → type "Admin"
-```
-
-**Pseudocode**
-
-```text
-CLASS User:
-    init(name):                     self.name = name
-    CLASS METHOD from_dict(data):   RETURN new cls(data["name"])
-CLASS Admin EXTENDS User:  (nothing)
-
-obj = Admin.from_dict({"name": "Asha"})
-PRINT type name of obj    // Admin
-```
-
-**Code**
-
-```python
-class User:
-    def __init__(self, name):
-        self.name = name
-
-    @classmethod
-    def from_dict(cls, data):
-        return cls(data["name"])
-
-class Admin(User):
-    pass
-
-print(type(Admin.from_dict({"name": "Asha"})).__name__)  # Admin
-```
-
-**Output:**
-
-```text
-Admin
-```
-
-**Fact (why this program):** A class method works without an object, so it's ideal for creating objects in another way. Because `cls` is whichever class called it, `Admin.from_dict` returns an `Admin`.
-
-</details>
-
-## More programs
-
-The remaining programs, in their original order.
-
-### Program 14
-
-**Task:** Create a `Team` class with a class-level list `members` and an instance list `tasks` created in `__init__`. Create two teams, add `"Asha"` to `a.members` and `"report"` to `a.tasks`, then print team `b`'s two lists.
-
-*From E8: How do you add an element to a list stored on an instance of a Python class?*
-
-<details>
-<summary>Answer</summary>
-
-**Steps**
-
-1. Create a `Team` class with a class-level list `members = []`.
-2. In `__init__`, create `self.tasks = []`.
-3. Create teams `a` and `b`.
-4. Append `"Asha"` to `a.members` and `"report"` to `a.tasks`.
-5. Print `b.members` and `b.tasks`.
-
-**Program flow**
-
-```text
-a.members.append("Asha")  → members is on the class → shared by a and b
-a.tasks.append("report")  → tasks is on a only      → b.tasks unchanged
-print(b.members)          →                         → ['Asha']
-print(b.tasks)            →                         → []
-```
-
-**Pseudocode**
-
-```text
-CLASS Team:
-    members = []                // one list for the class
-    init():  self.tasks = []    // new list for each object
-
-a = Team();  b = Team()
-ADD "Asha" TO a.members
-ADD "report" TO a.tasks
-PRINT b.members    // ['Asha']
-PRINT b.tasks      // []
-```
-
-**Code**
-
-```python
-class Team:
-    members = []              # shared by all
-
-    def __init__(self):
-        self.tasks = []       # separate for each object
-
-a = Team()
-b = Team()
-a.members.append("Asha")
-a.tasks.append("report")
-
-print(b.members)  # ['Asha']: shared
-print(b.tasks)    # []: not shared
-```
-
-**Output:**
-
-```text
-['Asha']
-[]
-```
-
-**Fact (why this program):** You add to an instance list with `append()`, like `a.tasks.append("report")`. Because `tasks` is created in `__init__`, only team `a` changes. `members` lives on the class, so `b` sees `"Asha"` too.
-
-</details>
-
-### Program 20
-
-**Task:** Create a `Vehicle` class with a `start()` method. Create `Car` and `Bike` subclasses with no code of their own. Loop over a car and a bike and call `start()` on each.
-
-*From E18: Why use an is-a relationship?*
-
-<details>
-<summary>Answer</summary>
-
-**Steps**
-
-1. Create a `Vehicle` class with `start()` → `"started"`.
-2. Create `Car(Vehicle)` and `Bike(Vehicle)` with no code.
-3. Loop over `Car()` and `Bike()`.
-4. Call `start()` on each.
-
-**Program flow**
-
-```text
-for vehicle in (Car(), Bike()):
-  Car().start()  → not in Car  → Vehicle.start → "started"
-  Bike().start() → not in Bike → Vehicle.start → "started"
-```
-
-**Pseudocode**
-
-```text
-CLASS Vehicle:
-    start():  RETURN "started"
-CLASS Car EXTENDS Vehicle;  CLASS Bike EXTENDS Vehicle
-
-FOR EACH vehicle IN [Car(), Bike()]:
-    PRINT vehicle.start()    // started
-END FOR
-```
-
-**Code**
-
-```python
-class Vehicle:
-    def start(self):
-        return "started"
-
-class Car(Vehicle):
-    pass
-
-class Bike(Vehicle):
-    pass
-
-for vehicle in (Car(), Bike()):
-    print(vehicle.start())  # started (printed twice)
-```
-
-**Output:**
-
-```text
-started
-started
-```
-
-**Fact (why this program):** Use inheritance when the child **is a** kind of parent. Code written for `Vehicle` works for every child, without writing it again.
-
-</details>
-
 ### Program 21
 
 **Task:** Create a `Parent` class with a class attribute `role`, an `__init__` that stores `name`, a `show()` method, and a class method `create()`. Create a `Child` class that uses every form of `super()`: parent setup, parent method, the old `super(Child, self)` style, parent class attribute, and parent class method.
@@ -1777,6 +1573,77 @@ new
 **Fact (why this program):** `super()` reaches the parent's version of anything: `__init__`, a normal method, a class attribute, or a class method.
 
 </details>
+
+## Alternative-Inheritance
+
+### Program 11
+
+**Task:** Create a `Vehicle` class that stores a `brand`. Create a `Car` child class whose `__init__` takes `brand` and `seats`, sends `brand` to the parent with `super()`, and stores `seats` itself. Create a Honda with 5 seats and print both values.
+
+*From E6, scenario 2: When creating an object of a child class in Python, how do you decide which arguments to pass?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Create a `Vehicle` class whose `__init__` stores `brand`.
+2. Create `Car(Vehicle)` whose `__init__` takes `brand` and `seats`.
+3. Send `brand` to the parent with `super().__init__(brand)`.
+4. Store `seats` in the child.
+5. Create `Car("Honda", 5)` and print both values.
+
+**Program flow**
+
+```text
+Car("Honda", 5) → Car.__init__ → super().__init__("Honda") → brand = "Honda"
+                               → self.seats = 5
+print           →                                          → "Honda 5"
+```
+
+**Pseudocode**
+
+```text
+CLASS Vehicle:
+    init(brand):  self.brand = brand
+CLASS Car EXTENDS Vehicle:
+    init(brand, seats):
+        CALL parent init(brand)
+        self.seats = seats
+
+car = Car("Honda", 5)
+PRINT car.brand, car.seats    // Honda 5
+```
+
+**Code**
+
+```python
+class Vehicle:
+    def __init__(self, brand):
+        self.brand = brand
+
+class Car(Vehicle):
+    def __init__(self, brand, seats):
+        super().__init__(brand)   # parent sets brand
+        self.seats = seats        # child sets seats
+
+car = Car("Honda", 5)
+print(car.brand, car.seats)  # Honda 5
+```
+
+**Output:**
+
+```text
+Honda 5
+```
+
+**Fact (why this program):** **Scenario 2:** the child has its own `__init__` and calls `super().__init__()`. You pass the **child's** arguments; the child hands the parent its part.
+
+</details>
+
+## Multiple inheritance and MRO
+
+A class with more than one parent, and the order Python searches them (MRO).
 
 ### Program 22
 
@@ -1934,6 +1801,143 @@ A
 ```
 
 **Fact (why this program):** Python follows the MRO `D → B → C → A`, and each class runs **once**. `super()` in `B` goes to `C`, not straight to `A`.
+
+</details>
+
+## More programs
+
+The remaining programs, in their original order.
+
+### Program 14
+
+**Task:** Create a `Team` class with a class-level list `members` and an instance list `tasks` created in `__init__`. Create two teams, add `"Asha"` to `a.members` and `"report"` to `a.tasks`, then print team `b`'s two lists.
+
+*From E8: How do you add an element to a list stored on an instance of a Python class?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Create a `Team` class with a class-level list `members = []`.
+2. In `__init__`, create `self.tasks = []`.
+3. Create teams `a` and `b`.
+4. Append `"Asha"` to `a.members` and `"report"` to `a.tasks`.
+5. Print `b.members` and `b.tasks`.
+
+**Program flow**
+
+```text
+a.members.append("Asha")  → members is on the class → shared by a and b
+a.tasks.append("report")  → tasks is on a only      → b.tasks unchanged
+print(b.members)          →                         → ['Asha']
+print(b.tasks)            →                         → []
+```
+
+**Pseudocode**
+
+```text
+CLASS Team:
+    members = []                // one list for the class
+    init():  self.tasks = []    // new list for each object
+
+a = Team();  b = Team()
+ADD "Asha" TO a.members
+ADD "report" TO a.tasks
+PRINT b.members    // ['Asha']
+PRINT b.tasks      // []
+```
+
+**Code**
+
+```python
+class Team:
+    members = []              # shared by all
+
+    def __init__(self):
+        self.tasks = []       # separate for each object
+
+a = Team()
+b = Team()
+a.members.append("Asha")
+a.tasks.append("report")
+
+print(b.members)  # ['Asha']: shared
+print(b.tasks)    # []: not shared
+```
+
+**Output:**
+
+```text
+['Asha']
+[]
+```
+
+**Fact (why this program):** You add to an instance list with `append()`, like `a.tasks.append("report")`. Because `tasks` is created in `__init__`, only team `a` changes. `members` lives on the class, so `b` sees `"Asha"` too.
+
+</details>
+
+### Program 20
+
+**Task:** Create a `Vehicle` class with a `start()` method. Create `Car` and `Bike` subclasses with no code of their own. Loop over a car and a bike and call `start()` on each.
+
+*From E18: Why use an is-a relationship?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Create a `Vehicle` class with `start()` → `"started"`.
+2. Create `Car(Vehicle)` and `Bike(Vehicle)` with no code.
+3. Loop over `Car()` and `Bike()`.
+4. Call `start()` on each.
+
+**Program flow**
+
+```text
+for vehicle in (Car(), Bike()):
+  Car().start()  → not in Car  → Vehicle.start → "started"
+  Bike().start() → not in Bike → Vehicle.start → "started"
+```
+
+**Pseudocode**
+
+```text
+CLASS Vehicle:
+    start():  RETURN "started"
+CLASS Car EXTENDS Vehicle;  CLASS Bike EXTENDS Vehicle
+
+FOR EACH vehicle IN [Car(), Bike()]:
+    PRINT vehicle.start()    // started
+END FOR
+```
+
+**Code**
+
+```python
+class Vehicle:
+    def start(self):
+        return "started"
+
+class Car(Vehicle):
+    pass
+
+class Bike(Vehicle):
+    pass
+
+for vehicle in (Car(), Bike()):
+    print(vehicle.start())  # started (printed twice)
+```
+
+**Output:**
+
+```text
+started
+started
+```
+
+**Fact (why this program):** Use inheritance when the child **is a** kind of parent. Code written for `Vehicle` works for every child, without writing it again.
 
 </details>
 
