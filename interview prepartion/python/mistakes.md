@@ -1,24 +1,180 @@
 ========Mistakes===========
 
-in method must give return statement  or expression but in that expression varible already use in init
-any single method must take self as parameter
-in each fun and after class name give colon
-see indention class, fun ,object creation and print
-in same class any method always give self
-myname.same_as(myname)==return self is other
+1in parnt or child method must give return statement  or expression but in that otherwise print none expression varible already use in init
+2 any single method must take self as parameter
+2.1 if method u assign parameter any no must assign it like def __init__(self,brand,color="white"): must assign  self.brand=brand, self.color=color
+3.in each fun and after class name give colon
+4.see indention class, fun ,object creation and print
+5.in same class any method always give self
+6.myname.same_as(myname)==return self is other
 subclass= class child(parent):
-return can be followed by an expression, or used by itself to return None. A regular assignment (=) or augmented assignment (+=) is a statement, so it cannot follow return.
+7.return can be followed by an expression, or used by itself to return None. A regular assignment (=) or augmented assignment (+=) is a statement, so it cannot follow return.
 return self.balance+=withdraw_amount  ==wrong
 return self.balance+withdraw_amount==correct
 self.balance+=withdraw_amount  === correct
         return self.balance
-to read any data must use prefix get_methodname(self)  
-super().__init__(self.brand) ==wrong  super().__init__(brand)==correct     
+9.to read any data must use prefix get_methodname(self)  
+10.super().__init__(self.brand) ==wrong  super().__init__(brand)==correct  
+super().__init__(*args,**kargs)==correct 
+see syntax different way to call parent constructor see blog
+https://www.debug.school/rakeshdevcotocus_468/different-ways-to-call-a-parent-constructor-in-python-53ao 
+mostly used positional argument and forward argument
+11 How can a child class call its parent’s hello() method and return the result in uppercase?
+return super().hello().upper()
+12.how child or subclass use   parent class attribute
+return super().role
+how child /subclass class method  use parent class class method
+  def create(cls):
+        return super().create()
+13. def __init__(self,*args,load):
+t1 = Truck("Tata","10 tons")   ==wrong
+
+def __init__(self,*args,load):
+t1 = Truck("Tata", load="10 tons")==correct
+
+With def __init__(self, *args, load="10 tons"), load is keyword-only. Truck("Tata", "20 tons") puts both values into args. If you forward them with super().__init__(*args), Vehicle.__init__ raises TypeError because it expects only brand. Use Truck("Tata", load="20 tons").
 
 print(b) gives a NameError(name resolution)  in python == it comes under readable and concise syntax  features correct gives double quotes===>print("b),student.append("b)
-
 in  method we can declare varible like area but it is local to varible another method cannot use if u declare variable in init then it can shared by all methods
 
+14 How can a class method create and return an instance with a preset value?
+def large(cls):
+    return cls(12)
+15.How can a class method update a class attribute using a value passed to it?
+def rename_school(cls, name):
+        cls.school = name
+=================================CHEATSHEET==========================
+1 why any program output is None
+answer in fun not mention return keyword
+2.why do not give result 
+answer forget to give print statement
+3.def get_length(self):==>return self.length
+4.def same_as(self,other):==>return self is other.    wrong ==>return self.name is other
+5.ClassName.class_variable.append(value)==>Team.member.append("ram")==>print(Team.member) 
+
+===================================================================================
+1. Use return when the caller needs a result
+Q Question: Why does print(car.show()) display None when show() contains only self.brand
+A method in a parent or child class can just perform an action. If it finishes without returning a value, Python returns None. Use return when you want to pass a value back to the caller.
+def get_brand(self):    return self.brand
+print(car.get_brand())  # Toyota
+
+
+If you remove return and leave only self.brand, the outer print() displays None.
+2. Use self as the first parameter of an instance method
+Question: Why do I write def show(self) but call it as car.show()?
+Python passes the object automatically when you call an instance method. A class method normally uses cls, and a static method can have zero parameters.
+def show(self):    return self.brand
+car.show()  # Python passes car as self
+
+
+3. Save a parameter on self if the object needs it later
+Question: Why do I write self.brand = brand inside __init__ if another method needs to use brand?
+brand and color are constructor parameters. Assign them to self so other methods can access them.
+def __init__(self, brand, color="white"):   
+ self.brand = brand  
+ self.color = color
+
+
+4. Add a colon and check indentation
+Where do I put :, and how do I indent the class, its methods, object creation, and print()?
+Put : at the end of a class or def header. Indent methods inside the class and their statements inside the method. Put object creation and print() at the left margin when they belong outside the class.
+class Vehicle: 
+   def __init__(self, brand):    
+       self.brand = brand
+car = Vehicle("Toyota")
+print(car.brand)
+
+
+5. Use self. to call another instance method on the same object
+Question: How do I call get_brand() from show() using self.get_brand()?
+def get_brand(self): 
+   return self.brand
+   def show(self): 
+      return self.get_brand()
+
+
+6. Use is to check whether two references point to the same object
+Question: Why does car.same_as(car) return True when same_as() uses return self is other?
+def same_as(self, other): 
+   return self is other
+   car.same_as(car)  # True
+
+
+7. Put the parent class in parentheses to create a subclass
+Question: How do I declare Truck as a subclass of Vehicle?
+class Truck(Vehicle): 
+   pass
+
+
+Here, Truck inherits from Vehicle.
+8. Update a value first, then return it
+Question: Why is return self.balance += amount invalid, and how do I update and return the balance correctly?
+return can return an expression. A bare return returns None. Regular assignment (=) and augmented assignment (+=) are statements, so write them on their own line.
+return self.balance += amount  # SyntaxError
+
+
+return self.balance + amount   # Returns the sum without updating the balance
+
+
+For a withdrawal, subtract the amount and then return the updated balance.
+self.balance -= withdraw_amountreturn self.balance
+
+
+9. Read an attribute directly or use a getter if one is defined
+Question: Can I read car.brand directly, or do I need to define car.get_brand()?
+The get_ prefix is a naming convention. Both forms below work when brand and get_brand() exist.
+print(car.brand)
+print(car.get_brand())
+
+
+10. Pass the constructor parameter to super().__init__()
+Question: Why do I pass brand to super().__init__() before self.brand exists, and how can I forward arguments with *args and **kwargs?
+If the parent constructor creates self.brand, pass the local parameter brand. Reading self.brand before it exists raises AttributeError.
+def __init__(self, brand): 
+   super().__init__(brand)
+
+
+To forward arguments received by the child, unpack args and kwargs. The parent must accept the arguments you forward.
+def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+
+
+Different ways to call a parent constructor in Python
+11. Pass parameters after *args by name
+Question: With 
+def __init__(self, *args, load),
+why does Truck("Tata", "10 tons") fail while 
+Truck("Tata", load="10 tons") works?
+def __init__(self, *args, load):  
+  super().__init__(*args)   
+   self.load = load
+
+
+Call	                      What happens
+Truck("Tata", "10 tons")	Both values go into args. The required keyword-only load is missing, so Python raises TypeError.
+Truck("Tata", load="10 tons")	args holds ("Tata",) and load gets "10 tons".
+
+
+If you write load="10 tons" in the definition, load gets a default and stays keyword-only. Truck("Tata", "20 tons") still puts both values into args. Forwarding both to a parent constructor that accepts only brand raises TypeError.
+12. Use quotes for text and bare names for variables
+Question: Why can print(b) raise NameError while print("b") prints the letter b?
+print(b) asks Python to look up a variable named b. If Python cannot find it, you get NameError. This is name resolution.
+print("b")           # Prints the text b
+students = []s
+tudents.append("b") # Adds the text b to the list
+
+
+13. Use self. for data other instance methods need
+Question: What is the difference between length = 10 and self.length = 10 inside __init__, and which one can area() access?
+A variable assigned without self. inside a method is local to that method, even inside __init__. An attribute assigned with self. belongs to that object and can be read from its other instance methods.
+def __init__(self, length): 
+   self.length = length
+def area(self, width):  
+     result = self.length * width  # Local to this call    return result
+
+11. How can a child class call its parent’s hello() method and return the result in uppercase?
+return super().hello().upper()     
 
 ===========================tips===========================================
 1.first write class name  
@@ -30,6 +186,13 @@ in  method we can declare varible like area but it is local to varible another m
 7.for subclass or child class u can pass or child method also u can denote pass if u have not defind body 
 class Car(Vehicle):
       pass
+========================questions====================
+1.why in c and c++ and php not use self use this and pthon why introduce self
+2.in subclass method why icant pass self.varaiable ex.super().__init__(self.brand) ==wrong  super().__init__(brand)==correct
+3.in child/subclass method   pass *args,**kargs to call parent method it can use varible name also whats adavantage=super().__init__(*args,**kargs) like super().__init__(self.brand)
+4.def __init__(self,battrey,*args,**kargs): ==corrct ,def __init__(self,*args,**kargs,battrey):==wrong  arguments cannot follow var-keyword argument
+
+
 
 
 
@@ -128,6 +291,12 @@ greeter-
 loginmixin--
 
 ================================
+Single class with methods
+Single class: default arguments
+Inheritance==16
+instance method,staticmethod and classmethod==17,18,19
+simplify-21
+
 
 ===================Car Domain====================
 1.Create a Car class that stores a color. Add a show() method that returns the color. Create a red car and a blue car, and print each car's color using show().

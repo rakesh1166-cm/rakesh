@@ -1109,6 +1109,87 @@ print(t2.load)  # 20 tons
 
 </details>
 
+### Program 16
+
+**Task:** Create a `Greeter` class with `hello()` and a method `twice()` that calls `hello()` through `self`. Create a `Loud` child that calls the parent's `hello()` with `super()` and returns it in capitals. Call `hello` in six different ways.
+
+*From E14: What are the different ways to call a Python instance method after an object is created?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Create a `Greeter` class with `hello()` → `"hello"`.
+2. Add `twice()` → `self.hello() * 2`.
+3. Create `Loud(Greeter)` whose `hello()` returns `super().hello().upper()`.
+4. Call `hello` six ways: object, class, saved variable, `getattr`, `self`, `super()`.
+
+**Program flow**
+
+```text
+g.hello()              → normal call              → "hello"
+Greeter.hello(g)       → through the class        → "hello"
+say = g.hello; say()   → saved bound method       → "hello"
+getattr(g, "hello")()  → found by name            → "hello"
+g.twice()              → self.hello() * 2         → "hellohello"
+Loud().hello()         → super().hello().upper()  → "HELLO"
+```
+
+**Pseudocode**
+
+```text
+CLASS Greeter:
+    hello():  RETURN "hello"
+    twice():  RETURN self.hello() repeated 2 times
+CLASS Loud EXTENDS Greeter:
+    hello():  RETURN UPPERCASE(parent hello())
+
+g = Greeter()
+PRINT g.hello(), Greeter.hello(g), saved g.hello(), getattr(g, "hello")()   // hello x4
+PRINT g.twice()          // hellohello
+PRINT Loud().hello()     // HELLO
+```
+
+**Code**
+
+```python
+class Greeter:
+    def hello(self):
+        return "hello"
+
+    def twice(self):
+        return self.hello() * 2
+
+class Loud(Greeter):
+    def hello(self):
+        return super().hello().upper()
+
+g = Greeter()
+print(g.hello())               # hello
+print(Greeter.hello(g))        # hello
+say = g.hello
+print(say())                   # hello
+print(getattr(g, "hello")())   # hello
+print(g.twice())               # hellohello
+print(Loud().hello())          # HELLO
+```
+
+**Output:**
+
+```text
+hello
+hello
+hello
+hello
+hellohello
+HELLO
+```
+
+**Fact (why this program):** The same instance method can be called through the object, through the class, from a saved variable, by name with `getattr`, from inside the class with `self`, and from a child with `super()`.
+
+</details>
+
 ### Program 10
 
 **Task:** Create a `Vehicle` class with `brand` and an optional `color` (default `"white"`). Create an `ElectricCar` child class that takes `battery` and forwards everything else to the parent using `*args, **kwargs`. Create a red Tesla with a 75 kWh battery.
@@ -1243,163 +1324,19 @@ Honda 5
 
 </details>
 
-## More programs
+## Instance method, static method and class method
 
-The remaining programs, in their original order.
-
-### Program 14
-
-**Task:** Create a `Team` class with a class-level list `members` and an instance list `tasks` created in `__init__`. Create two teams, add `"Asha"` to `a.members` and `"report"` to `a.tasks`, then print team `b`'s two lists.
-
-*From E8: How do you add an element to a list stored on an instance of a Python class?*
-
-<details>
-<summary>Answer</summary>
-
-**Steps**
-
-1. Create a `Team` class with a class-level list `members = []`.
-2. In `__init__`, create `self.tasks = []`.
-3. Create teams `a` and `b`.
-4. Append `"Asha"` to `a.members` and `"report"` to `a.tasks`.
-5. Print `b.members` and `b.tasks`.
-
-**Program flow**
-
-```text
-a.members.append("Asha")  → members is on the class → shared by a and b
-a.tasks.append("report")  → tasks is on a only      → b.tasks unchanged
-print(b.members)          →                         → ['Asha']
-print(b.tasks)            →                         → []
-```
-
-**Pseudocode**
-
-```text
-CLASS Team:
-    members = []                // one list for the class
-    init():  self.tasks = []    // new list for each object
-
-a = Team();  b = Team()
-ADD "Asha" TO a.members
-ADD "report" TO a.tasks
-PRINT b.members    // ['Asha']
-PRINT b.tasks      // []
-```
-
-**Code**
-
-```python
-class Team:
-    members = []              # shared by all
-
-    def __init__(self):
-        self.tasks = []       # separate for each object
-
-a = Team()
-b = Team()
-a.members.append("Asha")
-a.tasks.append("report")
-
-print(b.members)  # ['Asha']: shared
-print(b.tasks)    # []: not shared
-```
-
-**Output:**
-
-```text
-['Asha']
-[]
-```
-
-**Fact (why this program):** You add to an instance list with `append()`, like `a.tasks.append("report")`. Because `tasks` is created in `__init__`, only team `a` changes. `members` lives on the class, so `b` sees `"Asha"` too.
-
-</details>
-
-### Program 16
-
-**Task:** Create a `Greeter` class with `hello()` and a method `twice()` that calls `hello()` through `self`. Create a `Loud` child that calls the parent's `hello()` with `super()` and returns it in capitals. Call `hello` in six different ways.
-
-*From E14: What are the different ways to call a Python instance method after an object is created?*
-
-<details>
-<summary>Answer</summary>
-
-**Steps**
-
-1. Create a `Greeter` class with `hello()` → `"hello"`.
-2. Add `twice()` → `self.hello() * 2`.
-3. Create `Loud(Greeter)` whose `hello()` returns `super().hello().upper()`.
-4. Call `hello` six ways: object, class, saved variable, `getattr`, `self`, `super()`.
-
-**Program flow**
-
-```text
-g.hello()              → normal call              → "hello"
-Greeter.hello(g)       → through the class        → "hello"
-say = g.hello; say()   → saved bound method       → "hello"
-getattr(g, "hello")()  → found by name            → "hello"
-g.twice()              → self.hello() * 2         → "hellohello"
-Loud().hello()         → super().hello().upper()  → "HELLO"
-```
-
-**Pseudocode**
-
-```text
-CLASS Greeter:
-    hello():  RETURN "hello"
-    twice():  RETURN self.hello() repeated 2 times
-CLASS Loud EXTENDS Greeter:
-    hello():  RETURN UPPERCASE(parent hello())
-
-g = Greeter()
-PRINT g.hello(), Greeter.hello(g), saved g.hello(), getattr(g, "hello")()   // hello x4
-PRINT g.twice()          // hellohello
-PRINT Loud().hello()     // HELLO
-```
-
-**Code**
-
-```python
-class Greeter:
-    def hello(self):
-        return "hello"
-
-    def twice(self):
-        return self.hello() * 2
-
-class Loud(Greeter):
-    def hello(self):
-        return super().hello().upper()
-
-g = Greeter()
-print(g.hello())               # hello
-print(Greeter.hello(g))        # hello
-say = g.hello
-print(say())                   # hello
-print(getattr(g, "hello")())   # hello
-print(g.twice())               # hellohello
-print(Loud().hello())          # HELLO
-```
-
-**Output:**
-
-```text
-hello
-hello
-hello
-hello
-hellohello
-HELLO
-```
-
-**Fact (why this program):** The same instance method can be called through the object, through the class, from a saved variable, by name with `getattr`, from inside the class with `self`, and from a child with `super()`.
-
-</details>
+Methods that get `self`, `cls`, or neither.
 
 ### Program 17
 
-**Task:** Create a `Pizza` class with a class attribute `size_unit = "inch"`. Add an instance method `describe()`, a class method `large()` that returns a 12-inch pizza, and a static method `is_valid(size)` that checks the size is positive.
+**Task:** Create a `Pizza` class with a class attribute `size_unit = "inch"`. Its `__init__` takes a `size` and stores it on the object. Add:
+
+- an instance method `describe()` that returns the size with the unit, such as `"8 inch"`
+- a class method `large()` that creates and returns a 12-inch pizza
+- a static method `is_valid(size)` that returns `True` if the size is positive, otherwise `False`
+
+Then print `Pizza(8).describe()`, the size of `Pizza.large()`, and `Pizza.is_valid(-1)`. Expected output: `8 inch`, `12`, `False`.
 
 *From E15: What is the difference between instance, class, and static methods?*
 
@@ -1600,6 +1537,79 @@ Admin
 ```
 
 **Fact (why this program):** A class method works without an object, so it's ideal for creating objects in another way. Because `cls` is whichever class called it, `Admin.from_dict` returns an `Admin`.
+
+</details>
+
+## More programs
+
+The remaining programs, in their original order.
+
+### Program 14
+
+**Task:** Create a `Team` class with a class-level list `members` and an instance list `tasks` created in `__init__`. Create two teams, add `"Asha"` to `a.members` and `"report"` to `a.tasks`, then print team `b`'s two lists.
+
+*From E8: How do you add an element to a list stored on an instance of a Python class?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Create a `Team` class with a class-level list `members = []`.
+2. In `__init__`, create `self.tasks = []`.
+3. Create teams `a` and `b`.
+4. Append `"Asha"` to `a.members` and `"report"` to `a.tasks`.
+5. Print `b.members` and `b.tasks`.
+
+**Program flow**
+
+```text
+a.members.append("Asha")  → members is on the class → shared by a and b
+a.tasks.append("report")  → tasks is on a only      → b.tasks unchanged
+print(b.members)          →                         → ['Asha']
+print(b.tasks)            →                         → []
+```
+
+**Pseudocode**
+
+```text
+CLASS Team:
+    members = []                // one list for the class
+    init():  self.tasks = []    // new list for each object
+
+a = Team();  b = Team()
+ADD "Asha" TO a.members
+ADD "report" TO a.tasks
+PRINT b.members    // ['Asha']
+PRINT b.tasks      // []
+```
+
+**Code**
+
+```python
+class Team:
+    members = []              # shared by all
+
+    def __init__(self):
+        self.tasks = []       # separate for each object
+
+a = Team()
+b = Team()
+a.members.append("Asha")
+a.tasks.append("report")
+
+print(b.members)  # ['Asha']: shared
+print(b.tasks)    # []: not shared
+```
+
+**Output:**
+
+```text
+['Asha']
+[]
+```
+
+**Fact (why this program):** You add to an instance list with `append()`, like `a.tasks.append("report")`. Because `tasks` is created in `__init__`, only team `a` changes. `members` lives on the class, so `b` sees `"Asha"` too.
 
 </details>
 
