@@ -191,6 +191,16 @@ class Car(Vehicle):
 2.in subclass method why icant pass self.varaiable ex.super().__init__(self.brand) ==wrong  super().__init__(brand)==correct
 3.in child/subclass method   pass *args,**kargs to call parent method it can use varible name also whats adavantage=super().__init__(*args,**kargs) like super().__init__(self.brand)
 4.def __init__(self,battrey,*args,**kargs): ==corrct ,def __init__(self,*args,**kargs,battrey):==wrong  arguments cannot follow var-keyword argument
+5.balance history show transaction record how much with draw and deposit. [400,-200]
+6.If a container should always start empty for each object, define it directly in __init__ using self, without adding it as a parameter. For example, self.history = [].
+for bankaccount=owner and balance first time when he open account
+deposit ==balance= balnce+amount
+withdraw= balance= balnce-amount
+def deposit(self,amount):=>self.history.append(amount)
+
+7.how to read variable using method calling   def get_balance(self):==> return self.balance 
+ print(account.get_balance()) or directly variable name  print(account.balance)
+
 
 
 

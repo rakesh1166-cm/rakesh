@@ -665,7 +665,7 @@ print(b.tasks)    # []: not shared
 
 ### Program 5
 
-**Task:** Create a `BankAccount` class with `owner`, `balance`, and a `history` list. Add methods to read the balance, deposit, withdraw, change the owner, read the owner, and read the history. Start with `"Asha"` and 1000, then run each method once.
+**Task:** Create a `BankAccount` class with `owner`, `balance`, a `history` **list**, and a `history_dictionary` **dict**. `deposit(person, amount)` and `withdraw(person, amount)` change the balance, add the amount to the list, and save it in the dict under the person's name (negative for a withdrawal). Add methods to read the balance, change the owner, read the owner, read the history list, and read the history dictionary. Start with `"Asha"` and 1000, Asha deposits 500, Raja withdraws 200, then change the owner to `"Ben"` and print everything.
 
 *From E12: How can you read and modify the state of an object created from a Python class? Show six different examples in a table with Task, Method Call, and Result columns.*
 
@@ -675,36 +675,47 @@ print(b.tasks)    # []: not shared
 **Steps**
 
 1. Create a `BankAccount` class.
-2. `__init__` stores `owner`, `balance` and `history = []`.
-3. `deposit(amount)` → add to balance and history.
-4. `withdraw(amount)` → subtract from balance, add `-amount` to history.
-5. Add getters for balance, owner and history, and `change_owner(name)`.
+2. `__init__` stores `owner`, `balance`, `history = []` and `history_dictionary = {}`.
+3. `deposit(person, amount)` → add to balance → `append(amount)` to the list → `history_dictionary[person] = amount`.
+4. `withdraw(person, amount)` → subtract from balance → `append(-amount)` → `history_dictionary[person] = -amount`.
+5. Add getters for balance, owner, history list and history dictionary, and `change_owner(name)`.
 6. Start with `"Asha"`, 1000 and call each method once.
 
 **Program flow**
 
 ```text
-BankAccount("Asha", 1000) → balance = 1000, history = []
-get_balance()             →                        → 1000
-deposit(500)              → balance = 1500         → history = [500]
-withdraw(200)             → balance = 1300         → history = [500, -200]
-change_owner("Ben")       → owner = "Ben"          → get_owner() = "Ben"
-get_history()             →                        → [500, -200]
+BankAccount("Asha", 1000) → balance = 1000 → history = [], history_dictionary = {}
+get_balance()             →                → 1000
+deposit("Asha", 500)      → balance = 1500 → history = [500],       dict = {'Asha': 500}
+withdraw("Raja", 200)     → balance = 1300 → history = [500, -200], dict = {'Asha': 500, 'Raja': -200}
+change_owner("Ben")       → owner = "Ben"  → get_owner() = "Ben"
+get_history()             →                → [500, -200]
+get_history_dictionary()  →                → {'Asha': 500, 'Raja': -200}
 ```
 
 **Pseudocode**
 
 ```text
 CLASS BankAccount:
-    init(owner, balance):   store owner, balance; history = []
-    deposit(amount):        balance += amount;  ADD amount TO history
-    withdraw(amount):       balance -= amount;  ADD -amount TO history
+    init(owner, balance):
+        store owner, balance
+        history = empty list
+        history_dictionary = empty dict
+    deposit(person, amount):
+        balance += amount
+        ADD amount TO END OF history
+        history_dictionary[person] = amount
+    withdraw(person, amount):
+        balance -= amount
+        ADD -amount TO END OF history
+        history_dictionary[person] = -amount
     change_owner(name):     owner = name
-    get_balance / get_owner / get_history:  RETURN the value
+    get_balance / get_owner / get_history / get_history_dictionary:  RETURN the value
 
 account = BankAccount("Asha", 1000)
-PRINT balance (1000) → deposit 500 → PRINT (1500) → withdraw 200 → PRINT (1300)
-change_owner("Ben") → PRINT owner (Ben) → PRINT history ([500, -200])
+PRINT balance (1000) → Asha deposits 500 → PRINT (1500) → Raja withdraws 200 → PRINT (1300)
+change_owner("Ben") → PRINT owner (Ben)
+PRINT history ([500, -200]) → PRINT history_dictionary ({'Asha': 500, 'Raja': -200})
 ```
 
 **Code**
@@ -714,18 +725,21 @@ class BankAccount:
     def __init__(self, owner, balance):
         self.owner = owner
         self.balance = balance
-        self.history = []
+        self.history = []               # list: keeps every amount, in order
+        self.history_dictionary = {}    # dict: one amount per person
 
     def get_balance(self):
         return self.balance
 
-    def deposit(self, amount):
+    def deposit(self, person, amount):
         self.balance += amount
-        self.history.append(amount)
+        self.history.append(amount)                 # add to a list: append()
+        self.history_dictionary[person] = amount    # add to a dict: dict[key] = value
 
-    def withdraw(self, amount):
+    def withdraw(self, person, amount):
         self.balance -= amount
         self.history.append(-amount)
+        self.history_dictionary[person] = -amount
 
     def change_owner(self, name):
         self.owner = name
@@ -736,15 +750,20 @@ class BankAccount:
     def get_history(self):
         return self.history
 
+    def get_history_dictionary(self):
+        return self.history_dictionary
+
+
 account = BankAccount("Asha", 1000)
-print(account.get_balance())   # 1000
-account.deposit(500)
-print(account.balance)         # 1500
-account.withdraw(200)
-print(account.balance)         # 1300
+print(account.get_balance())             # 1000
+account.deposit("Asha", 500)
+print(account.balance)                   # 1500
+account.withdraw("Raja", 200)
+print(account.balance)                   # 1300
 account.change_owner("Ben")
-print(account.get_owner())     # Ben
-print(account.get_history())   # [500, -200]
+print(account.get_owner())               # Ben
+print(account.get_history())             # [500, -200]
+print(account.get_history_dictionary())  # {'Asha': 500, 'Raja': -200}
 ```
 
 **Output:**
@@ -755,9 +774,22 @@ print(account.get_history())   # [500, -200]
 1300
 Ben
 [500, -200]
+{'Asha': 500, 'Raja': -200}
 ```
 
-**Fact (why this program):** An object's **state** is its data. You read it and change it through methods, and every change is stored on the object (`self.balance`, `self.history`).
+**List vs dictionary:**
+
+| | `history` (list) | `history_dictionary` (dict) |
+|---|---|---|
+| Create it in `__init__` | `self.history = []` | `self.history_dictionary = {}` |
+| Add an item | `self.history.append(amount)` | `self.history_dictionary[person] = amount` |
+| Stores | Every amount, in order | One amount per person (the key) |
+| Same person twice | Both amounts are kept | The new amount **replaces** the old one |
+| Read one item | By position: `history[0]` → `500` | By key: `history_dictionary["Raja"]` → `-200` |
+
+For example, if Asha deposits again, the list keeps both deposits, but the dict keeps only her latest one. Use a list when you need every entry, and a dict when you look things up by name.
+
+**Fact (why this program):** An object's **state** is its data. You read it and change it through methods, and every change is stored on the object (`self.balance`, `self.history`, `self.history_dictionary`). Create the list and dict in `__init__` so each account gets its own.
 
 </details>
 
