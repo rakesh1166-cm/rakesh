@@ -196,12 +196,18 @@ class Car(Vehicle):
 for bankaccount=owner and balance first time when he open account
 deposit ==balance= balnce+amount
 withdraw= balance= balnce-amount
-def deposit(self,amount):=>self.history.append(amount)
+syntax for appending in list==def deposit(self,amount):=>self.history.append(amount)
+syntax for appending in dictionary=def deposit(self, person, amount):  => self.history_dictionary[person] = amount
 
 7.how to read variable using method calling   def get_balance(self):==> return self.balance 
  print(account.get_balance()) or directly variable name  print(account.balance)
-
-
+8.syntax for setting default value= def __init__(self, name, age, city="Delhi"):
+9.size_unit is global not change ,but pizza size is always changing so size_unit is class varible but size is instance varible
+10.syntax to print class varible and instance varible together=return f"{self.size} {self.size_unit}"
+11 syntax to create new object usin classmethod that use classvarible==def large(cls):   return cls(12)
+12.syntax how to class method that updates a class variable 
+def rename_school(cls, name):===> cls.school = name
+13 how to use ststic method def is_valid(size):
 
 
 
