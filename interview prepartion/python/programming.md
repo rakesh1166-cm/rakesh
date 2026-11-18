@@ -2867,6 +2867,57 @@ Best: Random Forest
 
 **Fact (why this program):** `key=` tells `sorted()` and `max()` what to compare. `reverse=True` sorts from highest to lowest. `sorted()` returns a new list and leaves `models` unchanged.
 
+
+**Same program using a class**
+
+A `Model` class stores each model's `name` and `accuracy`. A `ModelBoard` class holds the list and has `sorted_by_accuracy()` and `best()` methods, which still use a `lambda` as the key.
+
+```python
+class Model:
+    def __init__(self, name, accuracy):
+        self.name = name
+        self.accuracy = accuracy
+
+
+class ModelBoard:
+    def __init__(self, models):
+        self.models = models
+
+    def sorted_by_accuracy(self):
+        # The lambda reads the attribute: model.accuracy
+        return sorted(self.models, key=lambda model: model.accuracy, reverse=True)
+
+    def best(self):
+        return max(self.models, key=lambda model: model.accuracy)
+
+
+board = ModelBoard([
+    Model("Random Forest", 0.91),
+    Model("Logistic Regression", 0.85),
+    Model("SVM", 0.88),
+])
+
+for model in board.sorted_by_accuracy():
+    print(model.name, model.accuracy)
+
+print("Best:", board.best().name)
+```
+
+**Output:**
+
+```text
+Random Forest 0.91
+SVM 0.88
+Logistic Regression 0.85
+Best: Random Forest
+```
+
+**Points to remember**
+
+- The lambda now reads an attribute (`model.accuracy`) instead of a dict key (`model["accuracy"]`).
+- `sorted()` and `max()` work the same on objects as on dicts. The `key` function decides what is compared.
+- Keeping the sorting inside `ModelBoard` means the rest of the code just calls `board.best()`.
+
 </details>
 
 ### Program 64
@@ -2945,6 +2996,48 @@ print(log_event("payment", "upi", user="asha", amount=500))
 ```
 
 **Fact (why this program):** `*args` packs extra **positional** arguments into a tuple, and `**kwargs` packs extra **keyword** arguments into a dict. The order in the definition is always: normal arguments, then `*args`, then `**kwargs`.
+
+
+**Same program using a class**
+
+A `Logger` class stores the app name in `__init__`. `log_event` becomes a method, and `*tags` and `**details` come after `self`.
+
+```python
+class Logger:
+    def __init__(self, app):
+        self.app = app
+
+    def log_event(self, event, *tags, **details):
+        line = f"{self.app} [{event.upper()}]"
+
+        if tags:                                   # tags is a tuple
+            line += " tags: " + ", ".join(tags)
+
+        if details:                                # details is a dict
+            pairs = [f"{key}={value}" for key, value in details.items()]
+            line += " | " + " ".join(pairs)
+
+        return line
+
+
+logger = Logger("shop")
+print(logger.log_event("login"))
+print(logger.log_event("login", "web", "mobile"))
+print(logger.log_event("payment", "upi", user="asha", amount=500))
+```
+
+**Output:**
+
+```text
+shop [LOGIN]
+shop [LOGIN] tags: web, mobile
+shop [PAYMENT] tags: upi | user=asha amount=500
+```
+
+**Points to remember**
+
+- `self` is always the first parameter, then the normal ones, then `*tags`, then `**details`.
+- The object remembers `app`, so every log line gets the prefix without passing it each time.
 
 </details>
 
@@ -3031,6 +3124,51 @@ Average: 59.2 | Passed: 2 | Failed: 3
 ```
 
 **Fact (why this program):** Default arguments make a function easy to call in the common case. Keyword arguments (`pass_mark=60`) make the call readable and let you skip or reorder optional values. `return a, b, c` really returns **one tuple**, which you can unpack into separate variables.
+
+
+**Same program using a class**
+
+A `ScoreReport` class stores the `scores` list once. `summarize()` becomes a method that keeps the same default arguments and still returns three values.
+
+```python
+class ScoreReport:
+    def __init__(self, scores):
+        self.scores = scores
+
+    def summarize(self, pass_mark=40, round_to=1):
+        average = round(sum(self.scores) / len(self.scores), round_to)
+        passed = sum(1 for score in self.scores if score >= pass_mark)
+        failed = len(self.scores) - passed
+        return average, passed, failed       # a tuple of 3 values
+
+
+report = ScoreReport([35, 72, 58, 90, 41])
+
+# Default pass mark (40)
+avg, passed, failed = report.summarize()
+print("Average:", avg, "| Passed:", passed, "| Failed:", failed)
+
+# Keyword arguments
+avg, passed, failed = report.summarize(round_to=2, pass_mark=60)
+print("Average:", avg, "| Passed:", passed, "| Failed:", failed)
+
+# Without unpacking you get one tuple
+print(report.summarize())
+```
+
+**Output:**
+
+```text
+Average: 59.2 | Passed: 4 | Failed: 1
+Average: 59.2 | Passed: 2 | Failed: 3
+(59.2, 4, 1)
+```
+
+**Points to remember**
+
+- The scores are saved on `self`, so you don't pass them on every call.
+- Default and keyword arguments work in methods exactly as in functions. They just come after `self`.
+- Returning `average, passed, failed` still gives a tuple you can unpack.
 
 </details>
 
@@ -3120,6 +3258,62 @@ data_science_team
 ```
 
 **Fact (why this program):** In Python, functions are **first-class objects**: you can store them in a list, pass them to another function, and return them from a function. A **closure** is an inner function that remembers variables from the outer function even after it has finished. Together they let you build flexible pipelines: adding a step means adding one function to the list.
+
+
+**Same program using a class**
+
+A `Replacer` class takes the place of the closure: it saves `old` and `new` on `self` and uses `__call__`, so the object can be called like a function. A `Pipeline` class holds the steps and runs them.
+
+```python
+class Replacer:
+    """A callable object: works like the closure make_replacer."""
+
+    def __init__(self, old, new):
+        self.old = old                   # saved on the object, not in a closure
+        self.new = new
+
+    def __call__(self, text):            # lets you call the object like a function
+        return text.replace(self.old, self.new)
+
+
+class Pipeline:
+    def __init__(self, steps):
+        self.steps = steps
+
+    def add_step(self, step):
+        self.steps.append(step)
+
+    def run(self, value):
+        for step in self.steps:
+            value = step(value)          # output of one step is input to the next
+        return value
+
+
+space_to_underscore = Replacer(" ", "_")
+pipeline = Pipeline([str.strip, str.lower, space_to_underscore])
+
+raw_names = ["  Asha Rao ", "RAVI KUMAR", " neha  "]
+print([pipeline.run(name) for name in raw_names])
+
+pipeline.add_step(Replacer("_", "-"))
+print([pipeline.run(name) for name in raw_names])
+
+print(space_to_underscore("data science team"))
+```
+
+**Output:**
+
+```text
+['asha_rao', 'ravi_kumar', 'neha']
+['asha-rao', 'ravi-kumar', 'neha']
+data_science_team
+```
+
+**Points to remember**
+
+- A closure remembers values in its enclosing scope, while a class remembers them as attributes. Both give you a callable.
+- `__call__` lets `Replacer` objects sit in the steps list next to plain functions like `str.strip`.
+- `add_step()` adds a step without changing `run()`.
 
 </details>
 
@@ -3668,6 +3862,46 @@ After the function
 
 **Fact (why this program):** A decorator adds extra work around a function without changing the function's code. `@greet_decorator` is the same as writing `say_hello = greet_decorator(say_hello)`.
 
+
+**Same program using a class**
+
+The decorator stays a plain function, and it is now used on a method, `say_hello(self)`, inside a `Greeter` class.
+
+```python
+def greet_decorator(function):
+    def wrapper(*args, **kwargs):        # *args also receives self
+        print("Before the function")
+        function(*args, **kwargs)
+        print("After the function")
+    return wrapper
+
+
+class Greeter:
+    def __init__(self, name):
+        self.name = name
+
+    @greet_decorator
+    def say_hello(self):
+        print(f"Hello, {self.name}!")
+
+
+greeter = Greeter("Asha")
+greeter.say_hello()
+```
+
+**Output:**
+
+```text
+Before the function
+Hello, Asha!
+After the function
+```
+
+**Points to remember**
+
+- The wrapper must accept `*args, **kwargs` (or `self`), because Python passes the object as the first argument.
+- A `wrapper()` with no parameters would fail on a method with a `TypeError` ("takes 0 positional arguments but 1 was given").
+
 </details>
 
 ### Program 47
@@ -3867,6 +4101,63 @@ Doc: Add two numbers.
 
 **Fact (why this program):** Using `*args, **kwargs` in the wrapper lets one decorator work on functions with any arguments. Without `@wraps`, `add.__name__` would be `"wrapper"` and the docstring would be lost, which breaks debugging, logs and tools like FastAPI that read function details.
 
+
+**Same program using a class**
+
+`add` and `apply_discount` become methods of a `Calculator` class. The `log_call` wrapper takes `self` first, so `args` shows only the real arguments.
+
+```python
+from functools import wraps
+
+
+def log_call(function):
+    @wraps(function)                          # keep the real name and docstring
+    def wrapper(self, *args, **kwargs):       # first argument is the object
+        print(f"Calling {function.__name__} args={args} kwargs={kwargs}")
+        result = function(self, *args, **kwargs)
+        print(f"{function.__name__} returned {result}")
+        return result
+    return wrapper
+
+
+class Calculator:
+    @log_call
+    def add(self, a, b):
+        """Add two numbers."""
+        return a + b
+
+    @log_call
+    def apply_discount(self, price, percent=10):
+        """Return the price after a percentage discount."""
+        return price - price * percent / 100
+
+
+calc = Calculator()
+print("Result:", calc.add(2, 3))
+print("Result:", calc.apply_discount(500, percent=20))
+print("Name:", Calculator.add.__name__)
+print("Doc:", Calculator.add.__doc__)
+```
+
+**Output:**
+
+```text
+Calling add args=(2, 3) kwargs={}
+add returned 5
+Result: 5
+Calling apply_discount args=(500,) kwargs={'percent': 20}
+apply_discount returned 400.0
+Result: 400.0
+Name: add
+Doc: Add two numbers.
+```
+
+**Points to remember**
+
+- Taking `self` separately keeps the object out of the printed `args`.
+- `@wraps` still keeps the name and docstring. Check them with `Calculator.add.__name__`.
+- The same decorator now works on any method in any class.
+
 </details>
 
 ### Program 72
@@ -3960,6 +4251,61 @@ Error: please log in
 ```
 
 **Fact (why this program):** A decorator can decide **whether** the function runs at all, not only add work before and after it. That is why authentication, permission checks and rate limiting are usually decorators: the rule lives in one place instead of being copied into every function.
+
+
+**Same program using a class**
+
+A `ShopSession` class stores the `user` on `self`. The `login_required` decorator checks `self.user`, so the methods no longer need a `user` argument.
+
+```python
+from functools import wraps
+
+
+def login_required(method):
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        if not self.user.get("logged_in"):
+            return "Error: please log in"      # stop: the real method never runs
+        return method(self, *args, **kwargs)
+    return wrapper
+
+
+class ShopSession:
+    def __init__(self, user):
+        self.user = user                       # the logged-in state lives on self
+
+    @login_required
+    def view_profile(self):
+        return f"Profile of {self.user['name']}"
+
+    @login_required
+    def place_order(self, item):
+        return f"{self.user['name']} ordered {item}"
+
+
+asha = ShopSession({"name": "Asha", "logged_in": True})
+guest = ShopSession({"name": "Guest", "logged_in": False})
+
+print(asha.view_profile())
+print(asha.place_order("Laptop"))
+print(guest.view_profile())
+print(guest.place_order("Phone"))
+```
+
+**Output:**
+
+```text
+Profile of Asha
+Asha ordered Laptop
+Error: please log in
+Error: please log in
+```
+
+**Points to remember**
+
+- The wrapper reads the login state from `self.user`. It doesn't need a `user` argument.
+- This is how frameworks guard view methods: the check sits in one place, outside the method body.
+- Return early from the wrapper and the real method never runs.
 
 </details>
 
@@ -4081,6 +4427,73 @@ Gave up: Service down
 
 **Fact (why this program):** A decorator that takes an argument needs **three levels**: `retry(times)` returns `decorator`, which returns `wrapper`. `@retry(times=3)` first **calls** `retry(3)`, and the result is the real decorator. Only catch the errors you expect (here `ConnectionError`). Retrying on every error would hide real bugs.
 
+
+**Same program using a class**
+
+`fetch_data` and `always_down` become methods of an `ApiClient` class. The call counter moves from a global dict to `self.calls`.
+
+```python
+from functools import wraps
+
+
+def retry(times=3):                           # outer: takes the argument
+    def decorator(method):                    # middle: takes the method
+        @wraps(method)
+        def wrapper(self, *args, **kwargs):   # inner: runs on every call
+            last_error = None
+            for attempt in range(1, times + 1):
+                try:
+                    return method(self, *args, **kwargs)
+                except ConnectionError as error:
+                    print(f"{method.__name__}: attempt {attempt} failed: {error}")
+                    last_error = error
+            raise last_error
+        return wrapper
+    return decorator
+
+
+class ApiClient:
+    def __init__(self):
+        self.calls = 0                        # counter lives on the object
+
+    @retry(times=3)
+    def fetch_data(self):
+        self.calls += 1
+        if self.calls < 3:
+            raise ConnectionError("Server busy")
+        return f"Data loaded on call {self.calls}"
+
+    @retry(times=2)
+    def always_down(self):
+        raise ConnectionError("Service down")
+
+
+client = ApiClient()
+print(client.fetch_data())
+
+try:
+    client.always_down()
+except ConnectionError as error:
+    print("Gave up:", error)
+```
+
+**Output:**
+
+```text
+fetch_data: attempt 1 failed: Server busy
+fetch_data: attempt 2 failed: Server busy
+Data loaded on call 3
+always_down: attempt 1 failed: Service down
+always_down: attempt 2 failed: Service down
+Gave up: Service down
+```
+
+**Points to remember**
+
+- It is still three levels: `retry(times)` returns `decorator`, which returns `wrapper`.
+- The wrapper takes `self` and passes it to the method on every retry.
+- State that used to be a global dict (`calls`) now belongs to the object (`self.calls`).
+
 </details>
 
 ## Generators
@@ -4161,6 +4574,51 @@ print(list(count_up_to(5)))   # [1, 2, 3, 4, 5]
 
 **Fact (why this program):** `yield` gives back one value and **pauses** the function. It remembers where it stopped, and the next `next()` continues from there.
 
+
+**Same program using a class**
+
+A `Counter` class stores the `limit` as an attribute. The generator becomes the method `count_up()`, and `__iter__` returns it so you can loop over the object or pass it to `list()` directly.
+
+```python
+class Counter:
+    """Counts from 1 up to a limit, one number at a time."""
+
+    def __init__(self, limit):
+        self.limit = limit
+
+    def count_up(self):
+        number = 1
+        while number <= self.limit:
+            yield number          # give one value, then pause here
+            number += 1           # continue from here on the next request
+
+    def __iter__(self):
+        return self.count_up()    # lets you loop over the object directly
+
+
+counter = Counter(3).count_up()
+print(next(counter))   # 1
+print(next(counter))   # 2
+print(next(counter))   # 3
+
+print(list(Counter(5)))   # [1, 2, 3, 4, 5]
+```
+
+**Output:**
+
+```text
+1
+2
+3
+[1, 2, 3, 4, 5]
+```
+
+**Points to remember**
+
+- A method can use `yield` just like a function. Calling `count_up()` gives a fresh generator each time.
+- `__iter__` returning a generator is the easiest way to make your own class loopable.
+- `next(Counter(3))` fails, because the object itself is not an iterator. Call `count_up()` first, or use `iter(Counter(3))`.
+
 </details>
 
 ### Program 49
@@ -4234,6 +4692,60 @@ True
 ```
 
 **Fact (why this program):** Use a **generator** for big data that you read once (large files, streams, batches), because it uses very little memory. Use a **list** when you need `len()`, indexing, sorting, or to loop more than once.
+
+
+**Same program using a class**
+
+A `Squares` class stores the `limit`. `as_list()` builds every value at once, and `as_generator()` uses `yield` to make values one by one.
+
+```python
+import sys
+
+
+class Squares:
+    """Builds the squares of 0 to limit - 1, as a list or as a generator."""
+
+    def __init__(self, limit):
+        self.limit = limit
+
+    def as_list(self):
+        return [n * n for n in range(self.limit)]   # all values stored now
+
+    def as_generator(self):
+        for n in range(self.limit):
+            yield n * n                             # values made one by one
+
+
+squares = Squares(1_000_000)
+squares_list = squares.as_list()
+squares_gen = squares.as_generator()
+
+print(sys.getsizeof(squares_list) > 1_000_000)     # True: millions of bytes
+print(sys.getsizeof(squares_gen) < 1_000)          # True: tiny
+
+print(sum(squares_gen))    # 333332833333500000
+print(sum(squares_gen))    # 0: this generator is used up
+
+print(sum(squares.as_generator()))   # call the method again for a fresh one
+print(squares_list[10])    # 100: a list allows indexing and reuse
+```
+
+**Output:**
+
+```text
+True
+True
+333332833333500000
+0
+333332833333500000
+100
+```
+
+**Points to remember**
+
+- The memory result is the same: the list is huge, the generator object is tiny.
+- A generator is still used up after one pass. The class helps here: call `as_generator()` again to get a fresh one.
+- Store the list if you need indexing or many passes. Use the generator for one pass over big data.
 
 </details>
 
@@ -4310,6 +4822,44 @@ generator
 | Ends the function | Pauses the function |
 | Gives one result | Gives many values, one at a time |
 | Local variables are lost | Local variables are kept between values |
+
+
+**Same program using a class**
+
+A `NumberSource` class has two methods: `get_with_return()` uses `return`, and `get_with_yield()` uses `yield`.
+
+```python
+class NumberSource:
+    """Gives back the numbers 1, 2, 3 in two different ways."""
+
+    def get_with_return(self):
+        return [1, 2, 3]        # gives everything at once, and the method ends
+
+    def get_with_yield(self):
+        yield 1                 # gives one value, then pauses
+        yield 2
+        yield 3
+
+
+source = NumberSource()
+print(source.get_with_return())                  # [1, 2, 3]
+print(type(source.get_with_yield()).__name__)    # generator: nothing has run yet
+print(list(source.get_with_yield()))             # [1, 2, 3]
+```
+
+**Output:**
+
+```text
+[1, 2, 3]
+generator
+[1, 2, 3]
+```
+
+**Points to remember**
+
+- `return` in a method still gives everything at once and ends the method.
+- Any method that contains `yield` becomes a generator method. Calling it runs no code until you ask for a value.
+- `self` is the only extra thing compared with the function version.
 
 </details>
 
@@ -4397,6 +4947,60 @@ Any more? []
 ```
 
 **Fact (why this program):** The "checking" lines show that a generator works **lazily**: it reads only as many lines as it needs to find the next error, then pauses. With a real file (`for line in open("app.log")`), memory use stays small even for a file of many gigabytes.
+
+
+**Same program using a class**
+
+A `LogReader` class stores the log lines as an attribute. The generator becomes the method `error_lines()`, which yields only the ERROR lines.
+
+```python
+class LogReader:
+    """Reads log lines lazily and hands back only the errors."""
+
+    def __init__(self, lines):
+        self.lines = lines
+
+    def error_lines(self):
+        for line in self.lines:
+            print("  checking:", line)
+            if line.startswith("ERROR"):
+                yield line          # hand back one error, then pause here
+
+
+log_lines = [
+    "INFO  Server started",
+    "ERROR Database not reachable",
+    "INFO  User logged in",
+    "ERROR Payment timeout",
+    "WARN  Disk 80% full",
+]
+
+reader = LogReader(log_lines)
+errors = reader.error_lines()     # nothing runs yet
+
+print("First error:", next(errors))
+print("Second error:", next(errors))
+print("Any more?", list(errors))
+```
+
+**Output:**
+
+```text
+  checking: INFO  Server started
+  checking: ERROR Database not reachable
+First error: ERROR Database not reachable
+  checking: INFO  User logged in
+  checking: ERROR Payment timeout
+Second error: ERROR Payment timeout
+  checking: WARN  Disk 80% full
+Any more? []
+```
+
+**Points to remember**
+
+- The lines live on the object (`self.lines`), so the method needs no argument.
+- The method is still lazy: each `next()` checks lines only until it finds the next error.
+- In real code, `self.lines` could be an open file. Looping over a file is lazy too.
 
 </details>
 
@@ -4493,6 +5097,61 @@ Batch of 1 -> ids [7]
 
 **Fact (why this program):** Each stage takes a generator and gives out another one, so records flow through **one at a time**, and at most one batch is in memory. The `if batch:` after the loop matters: without it, the last record (7) would be silently lost. Forgetting that leftover batch is a common bug.
 
+
+**Same program using a class**
+
+A `BatchSender` class stores `count` and `size`. Each pipeline stage becomes a method, and `run()` connects them.
+
+```python
+class BatchSender:
+    """A 3-stage pipeline: read records, group them, send each batch."""
+
+    def __init__(self, count, size):
+        self.count = count
+        self.size = size
+
+    def read_records(self):
+        for number in range(1, self.count + 1):
+            yield {"id": number}           # one record at a time
+
+    def in_batches(self, records):
+        batch = []
+        for record in records:
+            batch.append(record)
+            if len(batch) == self.size:
+                yield batch                # a full batch is ready
+                batch = []
+        if batch:
+            yield batch                    # the last, smaller batch
+
+    def send_to_api(self, batch):
+        ids = [record["id"] for record in batch]
+        return f"Batch of {len(batch)} -> ids {ids}"
+
+    def run(self):
+        records = self.read_records()          # stage 1: produce records
+        batches = self.in_batches(records)     # stage 2: group them
+        for batch in batches:                  # stage 3: use them
+            print(self.send_to_api(batch))
+
+
+BatchSender(count=7, size=3).run()
+```
+
+**Output:**
+
+```text
+Batch of 3 -> ids [1, 2, 3]
+Batch of 3 -> ids [4, 5, 6]
+Batch of 1 -> ids [7]
+```
+
+**Points to remember**
+
+- Settings like `size` live on the object, so the stage methods take fewer arguments.
+- The stages are still generators: only one batch is in memory at a time.
+- `run()` keeps the pipeline wiring in one place, which makes it easy to test or change one stage.
+
 </details>
 
 ## Exceptions
@@ -4577,6 +5236,46 @@ Done
 | `except` | Only if an error happens |
 | `else` | Only if **no** error happens |
 | `finally` | Always, at the end: cleanup |
+
+
+**Same program using a class**
+
+A `Calculator` class has a `divide()` method. The `try` / `except` / `else` / `finally` blocks work inside a method exactly as they do in a function.
+
+```python
+class Calculator:
+    """Divides two numbers and handles division by zero."""
+
+    def divide(self, a, b):
+        try:
+            result = a / b
+        except ZeroDivisionError:
+            print("Error: cannot divide by zero")
+        else:
+            print("Result:", result)
+        finally:
+            print("Done")
+
+
+calc = Calculator()
+calc.divide(10, 2)
+calc.divide(10, 0)
+```
+
+**Output:**
+
+```text
+Result: 5.0
+Done
+Error: cannot divide by zero
+Done
+```
+
+**Points to remember**
+
+- Exception handling is the same inside a method. Only `self` is added.
+- `else` runs only when there is no error. `finally` always runs.
+- In real classes, `finally` is where you close connections or release resources.
 
 </details>
 
@@ -4737,6 +5436,52 @@ Missing key 'discount', no discount
 ```
 
 **Fact (why this program):** One `try` can have several `except` blocks. Python checks them **from top to bottom** and runs only the first one that matches. Catch specific errors like `ValueError` and `KeyError` rather than a bare `except:`, so real bugs (such as a typo in a variable name) aren't hidden. For a missing dict key, `order.get("discount", 0)` is often simpler than catching `KeyError`.
+
+
+**Same program using a class**
+
+An `Order` class stores the order details. `get_discount(price_text)` becomes a method that reads the discount from `self.details`.
+
+```python
+class Order:
+    """An order that may or may not have a discount percentage."""
+
+    def __init__(self, details):
+        self.details = details            # e.g. {"discount": 10}
+
+    def get_discount(self, price_text):
+        try:
+            price = float(price_text)              # may raise ValueError
+            percent = self.details["discount"]     # may raise KeyError
+            return price - price * percent / 100
+        except ValueError:
+            print(f"Bad price {price_text!r}, using 0")
+            return 0.0
+        except KeyError as error:
+            print(f"Missing key {error}, no discount")
+            return float(price_text)
+
+
+print(Order({"discount": 10}).get_discount("500"))
+print(Order({"discount": 10}).get_discount("five hundred"))
+print(Order({}).get_discount("500"))
+```
+
+**Output:**
+
+```text
+450.0
+Bad price 'five hundred', using 0
+0.0
+Missing key 'discount', no discount
+500.0
+```
+
+**Points to remember**
+
+- The two `except` blocks are unchanged. Python picks the one that matches the error.
+- `self.details["discount"]` raises `KeyError` when the key is missing, just like a plain dict.
+- Keep the `try` block small. Only the lines that can fail should be inside it.
 
 </details>
 
@@ -5109,6 +5854,63 @@ Closed after reading? True
 
 **Fact (why this program):** Without `with`, you must call `file.close()` yourself, and if an error happens first, the file stays open (and written data may not be saved). `with open()` closes the file as soon as the block ends, **even after an error**. Always prefer it.
 
+
+**Same program using a class**
+
+A `NotesFile` class stores the file `path`. `save()` writes with `with open()`, `show()` reads it back, and `delete()` removes the file.
+
+```python
+import os
+import tempfile
+
+
+class NotesFile:
+    """Writes tasks to a text file and reads them back."""
+
+    def __init__(self, path):
+        self.path = path
+
+    def save(self, tasks):
+        with open(self.path, "w") as file:     # "w" = write (creates the file)
+            for task in tasks:
+                file.write(task + "\n")
+        print("Closed after writing?", file.closed)
+
+    def show(self):
+        with open(self.path) as file:          # default mode "r" = read
+            for line in file:
+                print("Task:", line.strip())
+        print("Closed after reading?", file.closed)
+
+    def delete(self):
+        os.remove(self.path)                   # clean up
+
+
+folder = tempfile.mkdtemp()                    # a fresh, empty folder
+notes = NotesFile(os.path.join(folder, "notes.txt"))
+
+notes.save(["Buy milk", "Call Ravi"])
+notes.show()
+
+notes.delete()
+os.rmdir(folder)
+```
+
+**Output:**
+
+```text
+Closed after writing? True
+Task: Buy milk
+Task: Call Ravi
+Closed after reading? True
+```
+
+**Points to remember**
+
+- `with open()` inside a method still closes the file automatically at the end of the block.
+- Storing the path on the object means every method uses the same file.
+- Don't keep a file open as an attribute between method calls. Open it with `with` inside each method.
+
 </details>
 
 ### Program 79
@@ -5200,6 +6002,57 @@ Error: Out of memory
 ```
 
 **Fact (why this program):** `@contextmanager` turns a generator into a context manager. The code **before** `yield` is the setup, and the code **after** it is the cleanup. The `try/finally` around `yield` is important: without it, an error inside the `with` block would skip the cleanup.
+
+
+**Same program using a class**
+
+A `Pipeline` class holds a job name. Its `step()` method is decorated with `@contextmanager`, so each object can open `with pipeline.step(...)` blocks.
+
+```python
+from contextlib import contextmanager
+
+
+class Pipeline:
+    def __init__(self, name):
+        self.name = name
+
+    @contextmanager
+    def step(self, step_name):
+        print(f"[start] {self.name}: {step_name}")    # runs like __enter__
+        try:
+            yield step_name.upper()                    # value given to "as"
+        finally:
+            print(f"[end] {self.name}: {step_name}")  # runs like __exit__, even after an error
+
+
+pipeline = Pipeline("ml-job")
+
+with pipeline.step("load data") as label:
+    print("Working on", label)
+
+try:
+    with pipeline.step("train model"):
+        raise RuntimeError("Out of memory")
+except RuntimeError as error:
+    print("Error:", error)
+```
+
+**Output:**
+
+```text
+[start] ml-job: load data
+Working on LOAD DATA
+[end] ml-job: load data
+[start] ml-job: train model
+[end] ml-job: train model
+Error: Out of memory
+```
+
+**Points to remember**
+
+- `@contextmanager` works on a method too: `self` comes first, then your own arguments.
+- The `try`/`finally` around `yield` is still what makes `[end]` print after an error.
+- Use `pipeline.step(...)` (on the object), not `Pipeline.step(...)`.
 
 </details>
 
@@ -5490,6 +6343,48 @@ Hello...
 
 **Fact (why this program):** Calling an `async def` function doesn't run its body. It returns a **coroutine** object, a paused task waiting to be started. It runs only when you `await` it or pass it to `asyncio.run()`. Forgetting `await` is the most common async bug, and Python warns `coroutine ... was never awaited`.
 
+
+**Same program using a class**
+
+A `Greeter` class stores a `name`, and `greet()` becomes an `async` method.
+
+```python
+import asyncio
+
+
+class Greeter:
+    def __init__(self, name):
+        self.name = name
+
+    async def greet(self):
+        print(f"Hello {self.name}...")
+        await asyncio.sleep(1)       # pause for 1 second without blocking
+        print("...World!")
+
+
+greeter = Greeter("Asha")
+
+result = greeter.greet()             # calling it does NOT run it
+print(type(result).__name__)         # coroutine
+result.close()                       # we won't use this one
+
+asyncio.run(greeter.greet())         # this really runs it
+```
+
+**Output:**
+
+```text
+coroutine
+Hello Asha...
+...World!
+```
+
+**Points to remember**
+
+- `greeter.greet()` without `await` still gives only a coroutine object. Nothing runs yet.
+- Pass the method call to `asyncio.run(greeter.greet())` to really run it.
+- Async methods get `self` like normal methods, so they can read `self.name`.
+
 </details>
 
 ### Program 55
@@ -5580,6 +6475,50 @@ Toasting bread...
 
 **Fact (why this program):** `async def` makes a function that can pause. `await` pauses it until the result is ready, and lets other tasks run meanwhile. Both waits happen at the same time, so the whole program takes about **1 second, not 2**. Use asyncio for waiting work like network calls, not heavy calculations.
 
+
+**Same program using a class**
+
+A `Kitchen` class has `make_tea()` and `make_toast()` as `async` methods, plus `breakfast()`, which runs both together.
+
+```python
+import asyncio
+
+
+class Kitchen:
+    async def make_tea(self):
+        print("Boiling water...")
+        await asyncio.sleep(1)       # wait here, and let other tasks run
+        return "Tea is ready"
+
+    async def make_toast(self):
+        print("Toasting bread...")
+        await asyncio.sleep(1)
+        return "Toast is ready"
+
+    async def breakfast(self):
+        # run both methods together
+        return await asyncio.gather(self.make_tea(), self.make_toast())
+
+
+kitchen = Kitchen()
+results = asyncio.run(kitchen.breakfast())
+print(results)
+```
+
+**Output:**
+
+```text
+Boiling water...
+Toasting bread...
+['Tea is ready', 'Toast is ready']
+```
+
+**Points to remember**
+
+- Inside the class, call the other methods as `self.make_tea()`, and pass them to `gather()`.
+- `asyncio.run(kitchen.breakfast())` returns what `breakfast()` returns, so you can print it outside.
+- It still takes about 1 second, not 2: the two waits overlap.
+
 </details>
 
 ### Program 83
@@ -5665,6 +6604,56 @@ Total time: 2 seconds
 ```
 
 **Fact (why this program):** With `gather()`, the total time is the time of the **slowest** call (2s), not the sum of all of them (4.5s). The results come back **in the order you passed the calls**, not the order they finished, so you can unpack them safely.
+
+
+**Same program using a class**
+
+An `ApiClient` class stores a `base_url`. `fetch()` is one async call, and `fetch_all()` runs many calls together with `gather()`.
+
+```python
+import asyncio
+import time
+
+
+class ApiClient:
+    def __init__(self, base_url):
+        self.base_url = base_url
+
+    async def fetch(self, api, seconds):
+        await asyncio.sleep(seconds)          # pretend network delay
+        return f"{self.base_url}/{api} done in {seconds}s"
+
+    async def fetch_all(self, calls):
+        return await asyncio.gather(*(self.fetch(api, s) for api, s in calls))
+
+
+async def main():
+    client = ApiClient("https://api.shop.com")
+    start = time.perf_counter()
+    results = await client.fetch_all([("users", 1), ("orders", 2), ("payments", 1.5)])
+    total = time.perf_counter() - start
+    for result in results:
+        print(result)
+    print("Total time:", round(total), "seconds")   # ~2, not 4.5
+
+
+asyncio.run(main())
+```
+
+**Output:**
+
+```text
+https://api.shop.com/users done in 1s
+https://api.shop.com/orders done in 2s
+https://api.shop.com/payments done in 1.5s
+Total time: 2 seconds
+```
+
+**Points to remember**
+
+- Shared settings like `base_url` live on `self`, so you don't pass them to every call.
+- `fetch_all()` must `await` the `gather()`, and its caller must `await client.fetch_all(...)`.
+- Total time is still the slowest call (~2s), not the sum (4.5s).
 
 </details>
 
@@ -5754,6 +6743,54 @@ Email status: sent
 ```
 
 **Fact (why this program):** `await some_coroutine()` waits right there, but `create_task()` **starts the work alongside** your code and gives you a handle to await later. The task only gets to run when your code reaches an `await` (asyncio switches tasks only at `await`). That's why "Sending email" prints after step 1. Keep a reference to the task, or it may be garbage-collected.
+
+
+**Same program using a class**
+
+A `RequestHandler` class has an async `send_email()` method, and a `handle()` method that starts the email in the background with `create_task()`.
+
+```python
+import asyncio
+
+
+class RequestHandler:
+    async def send_email(self, to):
+        print(f"Sending email to {to}...")
+        await asyncio.sleep(1)
+        print(f"Email sent to {to}")
+        return "sent"
+
+    async def handle(self, user_email):
+        task = asyncio.create_task(self.send_email(user_email))   # starts in background
+
+        for step in range(1, 4):
+            print("Handling request, step", step)
+            await asyncio.sleep(0.3)      # other work, lets the task run too
+
+        status = await task               # wait for the email to finish
+        print("Email status:", status)
+
+
+handler = RequestHandler()
+asyncio.run(handler.handle("asha@example.com"))
+```
+
+**Output:**
+
+```text
+Handling request, step 1
+Sending email to asha@example.com...
+Handling request, step 2
+Handling request, step 3
+Email sent to asha@example.com
+Email status: sent
+```
+
+**Points to remember**
+
+- Pass the method call to `create_task(self.send_email(...))`, not the method itself.
+- Keep the task in a variable and `await` it later, or you won't get its result.
+- The order of the output is the same as in the function version: the task starts at the first `await`.
 
 </details>
 
@@ -5851,6 +6888,63 @@ huge.zip took too long, cancelled
 ```
 
 **Fact (why this program):** A `Semaphore(2)` is a counter of free slots. `async with` takes a slot and gives it back when the block ends, so no more than 2 downloads ever run at once. `wait_for()` **cancels** a task that runs past its timeout and raises `TimeoutError`. Without timeouts, one slow server can hang your whole program.
+
+
+**Same program using a class**
+
+A `Downloader` class keeps the limit as an attribute (`self.limit`), so every `download()` call shares the same semaphore.
+
+```python
+import asyncio
+
+
+class Downloader:
+    def __init__(self, max_at_once):
+        self.max_at_once = max_at_once
+
+    async def download(self, name, seconds):
+        async with self.limit:                    # wait for a free slot
+            print(f"Start {name}")
+            await asyncio.sleep(seconds)
+            print(f"Done  {name}")
+            return name
+
+    async def download_all(self, files):
+        return await asyncio.gather(*(self.download(n, s) for n, s in files))
+
+    async def run(self):
+        self.limit = asyncio.Semaphore(self.max_at_once)   # create inside the running loop
+        files = [("a.pdf", 0.2), ("b.pdf", 0.4), ("c.pdf", 0.3)]
+        print("Downloaded:", await self.download_all(files))
+
+        try:
+            await asyncio.wait_for(self.download("huge.zip", 5), timeout=0.5)
+        except asyncio.TimeoutError:
+            print("huge.zip took too long, cancelled")
+
+
+asyncio.run(Downloader(max_at_once=2).run())
+```
+
+**Output:**
+
+```text
+Start a.pdf
+Start b.pdf
+Done  a.pdf
+Start c.pdf
+Done  b.pdf
+Done  c.pdf
+Downloaded: ['a.pdf', 'b.pdf', 'c.pdf']
+Start huge.zip
+huge.zip took too long, cancelled
+```
+
+**Points to remember**
+
+- Every download must share **one** semaphore, so it's stored on `self` and not created per call.
+- Create the semaphore inside the running event loop (in `run()`). That's the safe place for asyncio objects.
+- `wait_for(self.download(...), timeout=0.5)` cancels the slow download and raises `TimeoutError`.
 
 </details>
 
@@ -7425,6 +8519,37 @@ print(sorted(words, key=lambda word: len(word)))
 
 **Fact (why this program):** A lambda is a small one-line function with no name. It's ideal for a short `key=` like this. Here `key=len` would also work. For logic with several steps, error handling, or reuse, write a normal `def` function instead.
 
+
+**Same program using a class**
+
+A `WordList` class holds the words, and its `shortest_first()` method sorts them with a `lambda` key.
+
+```python
+class WordList:
+    def __init__(self, words):
+        self.words = words
+
+    def shortest_first(self):
+        return sorted(self.words, key=lambda word: len(word))
+
+
+fruits = WordList(["banana", "fig", "apple"])
+print(fruits.shortest_first())
+print(fruits.words)          # the original list is unchanged
+```
+
+**Output:**
+
+```text
+['fig', 'apple', 'banana']
+['banana', 'fig', 'apple']
+```
+
+**Points to remember**
+
+- `sorted()` returns a **new** list, so `self.words` stays unchanged.
+- The lambda gets one word at a time, and `len(word)` is the value used for sorting.
+
 </details>
 
 ### Program 42
@@ -7500,6 +8625,51 @@ Meera
 ```
 
 **Fact (why this program):** Lambdas are short throwaway functions for `filter()`, `sorted()` and `max()`. For a simple field lookup, `itemgetter("age")` does the same job as `lambda u: u["age"]`. A list comprehension is often clearer than `filter` with a lambda: `[u for u in users if u["active"]]`.
+
+
+**Same program using a class**
+
+A `UserStore` class holds the list of users. The filtering and sorting move into `active_by_age()`, and the `max()` logic moves into `oldest()`.
+
+```python
+from operator import itemgetter
+
+
+class UserStore:
+    def __init__(self, users):
+        self.users = users
+
+    def active_by_age(self):
+        active = filter(lambda u: u["active"], self.users)
+        by_age = sorted(active, key=lambda u: u["age"], reverse=True)
+        return [u["name"] for u in by_age]
+
+    def oldest(self):
+        return max(self.users, key=itemgetter("age"))["name"]   # same as key=lambda u: u["age"]
+
+
+store = UserStore([
+    {"name": "Asha", "age": 30, "active": True},
+    {"name": "Ravi", "age": 25, "active": False},
+    {"name": "Meera", "age": 35, "active": True},
+])
+
+print(store.active_by_age())     # ['Meera', 'Asha']
+print(store.oldest())            # Meera
+```
+
+**Output:**
+
+```text
+['Meera', 'Asha']
+Meera
+```
+
+**Points to remember**
+
+- The data lives on `self.users`, so every method works on the same list.
+- `filter()` gives back an iterator, and `sorted()` can take it directly. There's no need for `list()` first.
+- `itemgetter("age")` does the same as `lambda u: u["age"]`, and it's slightly faster.
 
 </details>
 ======================================
