@@ -876,6 +876,284 @@ Mumbai
 
 </details>
 
+### Program 56
+
+**Task:** Create a `Task` class with a `title` and an optional `tags` list. First write a `BadTask` that uses `tags=[]` as the default and show that two tasks share one list. Then fix it in `Task` with `tags=None`, so each task gets its own list.
+
+**Level:** 🟡 Medium
+
+*Developer use: any class or function that takes an optional list or dict (tags, headers, filters, settings) must use `None` as the default.*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. `BadTask.__init__(self, title, tags=[])` → store `tags`.
+2. Create two bad tasks, add `"urgent"` to the first, print the second's tags → it also has `"urgent"`.
+3. `Task.__init__(self, title, tags=None)` → if `tags` is `None`, make a new `[]`.
+4. Create two good tasks, add `"urgent"` to the first → the second stays empty.
+5. Pass your own list once to show it is still used.
+
+**Program flow**
+
+```text
+BadTask("Write tests")   → tags = the ONE default list  ┐ same list
+BadTask("Fix login")     → tags = the ONE default list  ┘
+a.tags.append("urgent")  → b.tags is ['urgent'] too
+
+Task("Write tests")      → tags None → new []  (x)
+Task("Fix login")        → tags None → new []  (y)
+x.tags.append("urgent")  → x: ['urgent'], y: []
+Task("Deploy", ["release"]) → your list is kept
+```
+
+**Pseudocode**
+
+```text
+CLASS BadTask:
+    INIT(title, tags = [])          // list made ONCE, when def runs
+        self.tags = tags
+
+CLASS Task:
+    INIT(title, tags = None)
+        IF tags IS None: self.tags = new empty list
+        ELSE:            self.tags = tags
+
+a, b = BadTask(...), BadTask(...)
+ADD "urgent" TO a.tags
+PRINT b.tags                // ['urgent']  (bug)
+
+x, y = Task(...), Task(...)
+ADD "urgent" TO x.tags
+PRINT x.tags, y.tags        // ['urgent'], []
+```
+
+**Code**
+
+```python
+class BadTask:
+    def __init__(self, title, tags=[]):      # one list, made once
+        self.title = title
+        self.tags = tags
+
+
+class Task:
+    def __init__(self, title, tags=None):    # None means "no list given"
+        self.title = title
+        self.tags = tags if tags is not None else []   # new list each time
+
+
+a = BadTask("Write tests")
+b = BadTask("Fix login")
+a.tags.append("urgent")
+print("Bad:", b.tags)            # b got a's tag!
+
+x = Task("Write tests")
+y = Task("Fix login")
+x.tags.append("urgent")
+print("Good x:", x.tags)
+print("Good y:", y.tags)
+
+z = Task("Deploy", ["release"])
+print("Given:", z.tags)
+```
+
+**Output:**
+
+```text
+Bad: ['urgent']
+Good x: ['urgent']
+Good y: []
+Given: ['release']
+```
+
+**Fact (why this program):** Python creates a default value **once**, when the `def` line runs, not on every call. A default `[]` or `{}` is therefore shared by every object. Use `None` and create the list inside `__init__`. This is one of the most common Python interview traps.
+
+</details>
+
+### Program 57
+
+**Task:** Create a `Notification` class with required `user` and `message`, and two defaults: `channel="email"` and `retries=3`. Create four notifications: one with both defaults, one that changes only `channel`, one that skips `channel` but changes `retries`, and one written fully with keyword arguments. Print each one and print the stored defaults.
+
+**Level:** 🟡 Medium
+
+*Developer use: service classes (email, SMS, push, HTTP calls) have many settings with sensible defaults; callers change only what they need using keyword arguments.*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. `__init__(self, user, message, channel="email", retries=3)` → store all four.
+2. `show()` → return one line with all values.
+3. Create `n1` with only the required values.
+4. Create `n2` with `channel="sms"` and `n3` with `retries=5` (keywords let you skip `channel`).
+5. Create `n4` with every value written as a keyword.
+6. Print each, then `Notification.__init__.__defaults__`.
+
+**Program flow**
+
+```text
+Notification("asha", "Order shipped")              → channel email, retries 3
+Notification("ravi", "OTP 4821", channel="sms")    → channel sms,   retries 3
+Notification("neha", "Payment failed", retries=5)  → channel email, retries 5
+Notification(user=..., message=..., channel="push", retries=0) → all given
+__init__.__defaults__                              → ('email', 3)
+```
+
+**Pseudocode**
+
+```text
+CLASS Notification:
+    INIT(user, message, channel = "email", retries = 3)
+        save all four
+    show(): RETURN "user | channel | retries=N | message"
+
+n1 = Notification("asha", "Order shipped")
+n2 = Notification("ravi", "OTP 4821", channel = "sms")
+n3 = Notification("neha", "Payment failed", retries = 5)
+n4 = Notification(user = "amit", message = "Welcome", channel = "push", retries = 0)
+
+FOR n IN n1, n2, n3, n4: PRINT n.show()
+PRINT defaults of __init__     // ('email', 3)
+```
+
+**Code**
+
+```python
+class Notification:
+    def __init__(self, user, message, channel="email", retries=3):
+        self.user = user
+        self.message = message
+        self.channel = channel
+        self.retries = retries
+
+    def show(self):
+        return f"{self.user} | {self.channel} | retries={self.retries} | {self.message}"
+
+
+n1 = Notification("asha", "Order shipped")                   # both defaults
+n2 = Notification("ravi", "OTP 4821", channel="sms")          # change one default
+n3 = Notification("neha", "Payment failed", retries=5)        # skip channel, change retries
+n4 = Notification(user="amit", message="Welcome", channel="push", retries=0)
+
+for n in (n1, n2, n3, n4):
+    print(n.show())
+
+print(Notification.__init__.__defaults__)   # the stored default values
+```
+
+**Output:**
+
+```text
+asha | email | retries=3 | Order shipped
+ravi | sms | retries=3 | OTP 4821
+neha | email | retries=5 | Payment failed
+amit | push | retries=0 | Welcome
+('email', 3)
+```
+
+**Fact (why this program):** Required arguments come first, defaults come after. Keyword arguments let the caller skip a default in the middle (`retries=5` without giving `channel`) and make the call easy to read. `retries=0` is a real value, so it is used, not replaced by the default.
+
+</details>
+
+### Program 58
+
+**Task:** Create a `DbConnection` class with class attributes `DEFAULT_PORT = 5432` and `DEFAULT_POOL_SIZE = 5`. Its `__init__` takes `host`, `port=None` and `pool_size=None`, and uses the class default when a value is `None`. Create a `MySqlConnection` child that only changes `DEFAULT_PORT` to `3306`. Show that a `pool_size` of `0` is kept, and why `or` would get it wrong.
+
+**Level:** 🔴 Difficult
+
+*Developer use: database clients, HTTP clients and SDKs keep defaults as class attributes so child classes or tests can change a default without rewriting `__init__`.*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Put `DEFAULT_PORT` and `DEFAULT_POOL_SIZE` on the class.
+2. In `__init__`, use `port if port is not None else self.DEFAULT_PORT` (same for pool size).
+3. `show()` → return the class name, host, port and pool size.
+4. `MySqlConnection(DbConnection)` → set only `DEFAULT_PORT = 3306`.
+5. Create connections with no port, a custom port, and `pool_size=0`.
+6. Compare `pool_size or 5` with `pool_size if pool_size is not None else 5`.
+
+**Program flow**
+
+```text
+DbConnection("db.local")         → port None → self.DEFAULT_PORT → 5432
+MySqlConnection("mysql.local")   → port None → self.DEFAULT_PORT → 3306 (child's value)
+DbConnection(..., port=6000)     → port given → 6000
+DbConnection(..., pool_size=0)   → 0 is not None → keep 0
+0 or 5                           → 0 is falsy → 5 (wrong)
+0 if 0 is not None else 5        → 0 (right)
+```
+
+**Pseudocode**
+
+```text
+CLASS DbConnection:
+    DEFAULT_PORT = 5432
+    DEFAULT_POOL_SIZE = 5
+    INIT(host, port = None, pool_size = None)
+        self.port      = port      IF port IS NOT None      ELSE self.DEFAULT_PORT
+        self.pool_size = pool_size IF pool_size IS NOT None ELSE self.DEFAULT_POOL_SIZE
+
+CLASS MySqlConnection EXTENDS DbConnection:
+    DEFAULT_PORT = 3306          // only the default changes
+
+PRINT DbConnection("db.local").show()          // :5432
+PRINT MySqlConnection("mysql.local").show()    // :3306
+PRINT DbConnection("test.local", pool_size = 0).show()   // pool=0
+```
+
+**Code**
+
+```python
+class DbConnection:
+    DEFAULT_PORT = 5432        # class-level defaults
+    DEFAULT_POOL_SIZE = 5
+
+    def __init__(self, host, port=None, pool_size=None):
+        # None means "use the class default"
+        self.host = host
+        self.port = port if port is not None else self.DEFAULT_PORT
+        self.pool_size = pool_size if pool_size is not None else self.DEFAULT_POOL_SIZE
+
+    def show(self):
+        return f"{type(self).__name__} {self.host}:{self.port} pool={self.pool_size}"
+
+
+class MySqlConnection(DbConnection):
+    DEFAULT_PORT = 3306        # child changes only the default
+
+
+print(DbConnection("db.local").show())
+print(MySqlConnection("mysql.local").show())
+print(DbConnection("db.local", port=6000).show())
+print(DbConnection("test.local", pool_size=0).show())   # 0 is kept
+
+# Why "is not None" and not "or":
+pool_size = 0
+print("with or:", pool_size or 5)     # 0 is falsy, so 5 wins (wrong)
+print("with is not None:", pool_size if pool_size is not None else 5)
+```
+
+**Output:**
+
+```text
+DbConnection db.local:5432 pool=5
+MySqlConnection mysql.local:3306 pool=5
+DbConnection db.local:6000 pool=5
+DbConnection test.local:5432 pool=0
+with or: 5
+with is not None: 0
+```
+
+**Fact (why this program):** `self.DEFAULT_PORT` looks up the attribute on the object's own class first, so a child class can change a default with one line. Use `is not None` to pick the default: `or` also replaces real values such as `0`, `""` and `False`.
+
+</details>
+
 ## Alternative-Single class: default arguments
 
 ### Program 13
@@ -1099,6 +1377,97 @@ Green School
 
 </details>
 
+### Program 59
+
+**Task:** Create a `User` class that stores a `name` and an `email`. Add a static method `is_valid_email(email)` that returns `True` when the email has an `@` and a `.` after it. Call it directly on the class, use it inside `__init__` to reject a bad email with `ValueError`, and catch that error.
+
+**Level:** 🟡 Medium
+
+*Developer use: static methods hold small helper checks (validate email, phone, PAN, slug) that belong to the class but don't need any object data.*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. `@staticmethod def is_valid_email(email)` → no `self`, no `cls`, just return the check.
+2. In `__init__`, call `User.is_valid_email(email)`; if it's `False`, raise `ValueError`.
+3. Call `User.is_valid_email(...)` with a good and a bad email, without creating a user.
+4. Create a valid user and print it.
+5. Try a bad email inside `try` and print the error.
+
+**Program flow**
+
+```text
+User.is_valid_email("asha@example.com") → has @ and "." after it → True
+User.is_valid_email("asha.example.com") → no @                    → False
+User("Asha", "asha@example.com")        → check passes → object created
+User("Ravi", "ravi@site")               → no "." after @ → raise ValueError
+except ValueError                       → "Error: Invalid email: ravi@site"
+```
+
+**Pseudocode**
+
+```text
+CLASS User:
+    INIT(name, email)
+        IF NOT User.is_valid_email(email): RAISE ValueError
+        save name and email
+
+    STATIC is_valid_email(email):          // no self, no cls
+        RETURN "@" IN email AND "." IN part after "@"
+
+PRINT User.is_valid_email("asha@example.com")   // True
+PRINT User.is_valid_email("asha.example.com")   // False
+user = User("Asha", "asha@example.com")
+TRY User("Ravi", "ravi@site")
+CATCH ValueError: PRINT error
+```
+
+**Code**
+
+```python
+class User:
+    def __init__(self, name, email):
+        if not User.is_valid_email(email):       # use the helper inside the class
+            raise ValueError(f"Invalid email: {email}")
+        self.name = name
+        self.email = email
+
+    @staticmethod
+    def is_valid_email(email):
+        # no self, no cls: just a check on the value
+        return "@" in email and "." in email.split("@")[-1]
+
+    def show(self):
+        return f"{self.name} <{self.email}>"
+
+
+print(User.is_valid_email("asha@example.com"))   # call without an object
+print(User.is_valid_email("asha.example.com"))
+
+user = User("Asha", "asha@example.com")
+print(user.show())
+
+try:
+    User("Ravi", "ravi@site")
+except ValueError as error:
+    print("Error:", error)
+```
+
+**Output:**
+
+```text
+True
+False
+Asha <asha@example.com>
+Error: Invalid email: ravi@site
+```
+
+**Fact (why this program):** A static method is a plain function kept inside the class because it belongs there. It gets no `self` or `cls`, so you can call it without an object, for example in a form check before you create the user.
+
+</details>
+
 ### Program 19
 
 **Task:** Create a `User` class that stores a `name`. Add a class method `from_dict(data)` that creates a user from a dict. Create an `Admin` subclass and call `Admin.from_dict({"name": "Asha"})`. Print the type of the object you get.
@@ -1160,6 +1529,114 @@ Admin
 ```
 
 **Fact (why this program):** A class method works without an object, so it's ideal for creating objects in another way. Because `cls` is whichever class called it, `Admin.from_dict` returns an `Admin`.
+
+</details>
+
+### Program 60
+
+**Task:** Create a `Product` class with `sku`, `name` and `price`, and a class counter `created`. Add a static method `parse_price(text)` that turns `"Rs. 1199"` into `1199.0`, and a class method `from_csv(line)` that builds a product from `"SKU1, Kettle, Rs. 1199"`. Create a `DigitalProduct` child, build one with `DigitalProduct.from_csv(...)`, and show that you get a `DigitalProduct` back and that the counter counts every product.
+
+**Level:** 🔴 Difficult
+
+*Developer use: importers that read CSV rows, JSON or API responses use a class method as an alternative constructor and a static method to clean each field.*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Class attribute `created = 0`; in `__init__`, do `Product.created += 1`.
+2. `@staticmethod parse_price(text)` → remove `"Rs."`, strip spaces, return a `float`.
+3. `@classmethod from_csv(cls, line)` → split on `,`, clean each part, return `cls(...)`.
+4. `DigitalProduct(Product)` → no code of its own.
+5. Create two products (one from CSV, one directly) and one digital product from CSV.
+6. Print each, both counters, and the type of the digital product.
+
+**Program flow**
+
+```text
+Product.from_csv("SKU1, Kettle, Rs. 1199")       → cls = Product        → Product(...)        → created 1
+Product("SKU2", "Mixer", 2499)                   → normal constructor   →                     → created 2
+DigitalProduct.from_csv("SKU3, Python eBook, …") → cls = DigitalProduct → DigitalProduct(...) → created 3
+DigitalProduct.created                           → not on child → reads Product.created → 3
+```
+
+**Pseudocode**
+
+```text
+CLASS Product:
+    created = 0
+    INIT(sku, name, price)
+        save the three values
+        Product.created = Product.created + 1
+
+    STATIC parse_price(text):  RETURN number from "Rs. 1199"
+    CLASS_METHOD from_csv(cls, line):
+        sku, name, price = SPLIT line BY ","
+        RETURN cls(clean sku, clean name, cls.parse_price(price))
+
+CLASS DigitalProduct EXTENDS Product: (nothing)
+
+p1 = Product.from_csv("SKU1, Kettle, Rs. 1199")
+p2 = Product("SKU2", "Mixer", 2499)
+d1 = DigitalProduct.from_csv("SKU3, Python eBook, Rs. 299")
+PRINT Product.created            // 3
+PRINT type of d1                 // DigitalProduct
+```
+
+**Code**
+
+```python
+class Product:
+    created = 0                      # one counter for all products
+
+    def __init__(self, sku, name, price):
+        self.sku = sku
+        self.name = name
+        self.price = price
+        Product.created += 1         # always update the Product counter
+
+    @staticmethod
+    def parse_price(text):
+        return float(text.replace("Rs.", "").strip())
+
+    @classmethod
+    def from_csv(cls, line):
+        sku, name, price = line.split(",")
+        return cls(sku.strip(), name.strip(), cls.parse_price(price))
+
+    def show(self):
+        return f"{type(self).__name__} {self.sku} {self.name} Rs. {self.price:.2f}"
+
+
+class DigitalProduct(Product):
+    pass
+
+
+p1 = Product.from_csv("SKU1, Kettle, Rs. 1199")
+p2 = Product("SKU2", "Mixer", 2499)
+d1 = DigitalProduct.from_csv("SKU3, Python eBook, Rs. 299")
+
+for item in (p1, p2, d1):
+    print(item.show())
+
+print("Product.created:", Product.created)
+print("DigitalProduct.created:", DigitalProduct.created)
+print("Type of d1:", type(d1).__name__)
+```
+
+**Output:**
+
+```text
+Product SKU1 Kettle Rs. 1199.00
+Product SKU2 Mixer Rs. 2499.00
+DigitalProduct SKU3 Python eBook Rs. 299.00
+Product.created: 3
+DigitalProduct.created: 3
+Type of d1: DigitalProduct
+```
+
+**Fact (why this program):** A class method gets `cls`, the class it was called on, so `return cls(...)` builds the right type: a child class gets a child object without new code. Use a static method for helpers that need neither `self` nor `cls`. Write `Product.created += 1`, not `self.created += 1`: the second creates a new attribute on the object and the class counter never changes.
 
 </details>
 
@@ -1711,6 +2188,81 @@ Honda 5
 
 A class with more than one parent, and the order Python searches them (MRO).
 
+### Program 61
+
+**Task:** Create a `Flyer` class with `fly()` and a `Swimmer` class with `swim()`. Create a `Duck` class that inherits from **both** and has no code of its own. Create a duck, call both methods, and print the names of the classes in `Duck.__mro__`.
+
+**Level:** 🟢 Simple
+
+*Developer use: small "mixin" classes add one skill each (logging, JSON export, permissions), and a class inherits several of them at once.*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. `class Flyer` → `fly()` returns `"I can fly"`.
+2. `class Swimmer` → `swim()` returns `"I can swim"`.
+3. `class Duck(Flyer, Swimmer): pass` → two parents.
+4. Create a duck and print `duck.fly()` and `duck.swim()`.
+5. Print the class names in `Duck.__mro__`.
+
+**Program flow**
+
+```text
+duck.fly()    → not in Duck → look in Flyer   → "I can fly"
+duck.swim()   → not in Duck → not in Flyer → look in Swimmer → "I can swim"
+Duck.__mro__  → Duck → Flyer → Swimmer → object   (search order)
+```
+
+**Pseudocode**
+
+```text
+CLASS Flyer:    fly():  RETURN "I can fly"
+CLASS Swimmer:  swim(): RETURN "I can swim"
+CLASS Duck EXTENDS Flyer, Swimmer: (nothing)
+
+duck = Duck()
+PRINT duck.fly()      // I can fly
+PRINT duck.swim()     // I can swim
+PRINT names in Duck's MRO   // ['Duck', 'Flyer', 'Swimmer', 'object']
+```
+
+**Code**
+
+```python
+class Flyer:
+    def fly(self):
+        return "I can fly"
+
+
+class Swimmer:
+    def swim(self):
+        return "I can swim"
+
+
+class Duck(Flyer, Swimmer):      # two parents
+    pass
+
+
+duck = Duck()
+print(duck.fly())     # from Flyer
+print(duck.swim())    # from Swimmer
+print([cls.__name__ for cls in Duck.__mro__])
+```
+
+**Output:**
+
+```text
+I can fly
+I can swim
+['Duck', 'Flyer', 'Swimmer', 'object']
+```
+
+**Fact (why this program):** With multiple inheritance, a class gets the methods of all its parents. Python looks for a method in the order shown by `__mro__` (Method Resolution Order): the class itself first, then the parents from left to right, then `object`.
+
+</details>
+
 ### Program 22
 
 **Task:** Create a `LogMixin` whose `save()` adds `"log, "` before the parent's `save()`. Create two unrelated classes, `Model` and `Report`, each with its own `save()`. Mix the logger into both and print the MRO of one.
@@ -1793,6 +2345,112 @@ log, report saved
 
 </details>
 
+### Program 62
+
+**Task:** Create a `Base` class whose `__init__(**kwargs)` raises `TypeError` if any unknown fields are left. Create `OwnerMixin` (takes `owner`, default `"system"`) and `TimestampMixin` (takes `created`, default `"2026-11-18"`). Each one takes its own field and passes the rest on with `super().__init__(**kwargs)`. Create `Document(OwnerMixin, TimestampMixin)` that takes a `title`. Build two documents, print the MRO, and show the error for an unknown field.
+
+**Level:** 🟡 Medium
+
+*Developer use: Django and DRF mixins, and model base classes, use this "cooperative `super()`" pattern so every parent's `__init__` runs exactly once.*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. `Base.__init__(self, **kwargs)` → if `kwargs` still has anything, raise `TypeError`.
+2. `OwnerMixin.__init__(self, owner="system", **kwargs)` → save `owner`, call `super().__init__(**kwargs)`.
+3. `TimestampMixin.__init__(self, created="2026-11-18", **kwargs)` → save `created`, pass the rest on.
+4. `Document.__init__(self, title, **kwargs)` → save `title`, pass the rest on.
+5. Create one document with all fields and one with only a title.
+6. Print the MRO, then try an unknown field `colour` and catch the error.
+
+**Program flow**
+
+```text
+Document("Invoice", owner="asha", created="2026-11-01")
+  Document.__init__        → takes title   → super() → OwnerMixin
+  OwnerMixin.__init__      → takes owner   → super() → TimestampMixin
+  TimestampMixin.__init__  → takes created → super() → Base
+  Base.__init__            → kwargs empty  → OK
+
+Document("Report", colour="red")
+  … every class passes colour on → Base: kwargs = {colour} → TypeError
+```
+
+**Pseudocode**
+
+```text
+CLASS Base:
+    INIT(**kwargs):  IF kwargs NOT empty: RAISE TypeError
+
+CLASS OwnerMixin EXTENDS Base:
+    INIT(owner = "system", **kwargs):  save owner;  CALL next INIT(**kwargs)
+
+CLASS TimestampMixin EXTENDS Base:
+    INIT(created = "2026-11-18", **kwargs):  save created;  CALL next INIT(**kwargs)
+
+CLASS Document EXTENDS OwnerMixin, TimestampMixin:
+    INIT(title, **kwargs):  save title;  CALL next INIT(**kwargs)
+
+PRINT Document("Invoice", owner = "asha", created = "2026-11-01").show()
+PRINT Document("Notes").show()
+TRY Document("Report", colour = "red")  CATCH TypeError: PRINT error
+```
+
+**Code**
+
+```python
+class Base:
+    def __init__(self, **kwargs):
+        if kwargs:
+            raise TypeError(f"Unknown fields: {list(kwargs)}")
+
+
+class OwnerMixin(Base):
+    def __init__(self, owner="system", **kwargs):
+        self.owner = owner               # take my field
+        super().__init__(**kwargs)       # pass the rest on
+
+
+class TimestampMixin(Base):
+    def __init__(self, created="2026-11-18", **kwargs):
+        self.created = created
+        super().__init__(**kwargs)
+
+
+class Document(OwnerMixin, TimestampMixin):
+    def __init__(self, title, **kwargs):
+        self.title = title
+        super().__init__(**kwargs)
+
+    def show(self):
+        return f"{self.title} | owner={self.owner} | created={self.created}"
+
+
+print(Document("Invoice", owner="asha", created="2026-11-01").show())
+print(Document("Notes").show())
+print([cls.__name__ for cls in Document.__mro__])
+
+try:
+    Document("Report", colour="red")
+except TypeError as error:
+    print("Error:", error)
+```
+
+**Output:**
+
+```text
+Invoice | owner=asha | created=2026-11-01
+Notes | owner=system | created=2026-11-18
+['Document', 'OwnerMixin', 'TimestampMixin', 'Base', 'object']
+Error: Unknown fields: ['colour']
+```
+
+**Fact (why this program):** `super()` doesn't mean "my parent". It means "the **next class in the MRO**". So `OwnerMixin`'s `super()` calls `TimestampMixin`, even though `OwnerMixin` doesn't know it exists. Each class takes only its own keyword arguments and passes the rest on, so every `__init__` runs once, and `Base` catches typos.
+
+</details>
+
 ### Program 23
 
 **Task:** Create the diamond: `A` at the top, `B` and `C` both inheriting from `A`, and `D` inheriting from `B` and `C`. Each `show()` prints its class name and calls `super().show()`. Call `D().show()`.
@@ -1871,6 +2529,125 @@ A
 ```
 
 **Fact (why this program):** Python follows the MRO `D → B → C → A`, and each class runs **once**. `super()` in `B` goes to `C`, not straight to `A`.
+
+</details>
+
+### Program 63
+
+**Task:** Create `JsonExportMixin` and `CsvExportMixin`, both with an `export()` method. Create `SalesReport(JsonExportMixin, CsvExportMixin)`. You expected CSV, but `export()` returns JSON. Debug it by printing the MRO and `SalesReport.export.__qualname__`, then fix it two ways: change the parent order, or call one mixin's method directly. Finally, show the `TypeError` Python raises for `class Broken(Base, Mixin)` when `Mixin` already inherits from `Base`.
+
+**Level:** 🔴 Difficult
+
+*Developer use: when a class with several mixins "calls the wrong method", developers check `__mro__` to see which parent wins, then fix the parent order.*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Two mixins, each with its own `export()`.
+2. `SalesReport(JsonExportMixin, CsvExportMixin)` → call `export()` → JSON (the bug).
+3. Print the MRO names and `SalesReport.export.__qualname__` → `JsonExportMixin.export`.
+4. Fix 1 → `CsvSalesReport(CsvExportMixin, JsonExportMixin)`, so CSV comes first.
+5. Fix 2 → call `JsonExportMixin.export(report)` directly when you want one specific version.
+6. Build `Broken(Base, Mixin)` with `type()` inside `try` and print the error on one line.
+
+**Program flow**
+
+```text
+report.export()          → MRO: SalesReport → JsonExportMixin → … → JSON wins (left parent first)
+__qualname__             → "JsonExportMixin.export"  (proof of who answered)
+CsvSalesReport.export()  → CsvExportMixin is first now → CSV
+JsonExportMixin.export(report) → call one class's method directly → JSON
+Broken(Base, Mixin)      → Base must come before Mixin, but Mixin must come before Base → TypeError
+```
+
+**Pseudocode**
+
+```text
+CLASS JsonExportMixin: export(): RETURN "JSON: " + data
+CLASS CsvExportMixin:  export(): RETURN "CSV: " + values joined by ","
+CLASS SalesReport EXTENDS JsonExportMixin, CsvExportMixin:  INIT(data)
+
+report = SalesReport({...})
+PRINT report.export()                    // JSON (not what we wanted)
+PRINT names in SalesReport's MRO         // Json comes before Csv
+PRINT which class owns export            // JsonExportMixin.export
+
+CLASS CsvSalesReport EXTENDS CsvExportMixin, JsonExportMixin:  INIT(data)
+PRINT CsvSalesReport(data).export()      // CSV
+PRINT JsonExportMixin.export(report)     // explicit choice
+
+CLASS Base; CLASS Mixin EXTENDS Base
+TRY make class Broken EXTENDS Base, Mixin
+CATCH TypeError: PRINT error             // no consistent MRO
+```
+
+**Code**
+
+```python
+class JsonExportMixin:
+    def export(self):
+        return f"JSON: {self.data}"
+
+
+class CsvExportMixin:
+    def export(self):
+        return f"CSV: {','.join(self.data.values())}"
+
+
+class SalesReport(JsonExportMixin, CsvExportMixin):
+    def __init__(self, data):
+        self.data = data
+
+
+report = SalesReport({"month": "Nov", "total": "52000"})
+
+# 1. Bug: we expected CSV, but got JSON
+print(report.export())
+
+# 2. Debug: who wins? Check the MRO
+print([cls.__name__ for cls in SalesReport.__mro__])
+print(SalesReport.export.__qualname__)
+
+
+# 3. Fix: put the mixin you want first, or be explicit
+class CsvSalesReport(CsvExportMixin, JsonExportMixin):
+    def __init__(self, data):
+        self.data = data
+
+
+print(CsvSalesReport(report.data).export())
+print(JsonExportMixin.export(report))      # explicit call
+
+
+# 4. An order Python refuses
+class Base:
+    pass
+
+
+class Mixin(Base):
+    pass
+
+
+try:
+    Broken = type("Broken", (Base, Mixin), {})   # same as class Broken(Base, Mixin)
+except TypeError as error:
+    print("Error:", " ".join(str(error).split()))   # message on one line
+```
+
+**Output:**
+
+```text
+JSON: {'month': 'Nov', 'total': '52000'}
+['SalesReport', 'JsonExportMixin', 'CsvExportMixin', 'object']
+JsonExportMixin.export
+CSV: Nov,52000
+JSON: {'month': 'Nov', 'total': '52000'}
+Error: Cannot create a consistent method resolution order (MRO) for bases Base, Mixin
+```
+
+**Fact (why this program):** When two parents have the same method, the one listed **first** (left) in the class line wins, because it comes earlier in the MRO. Put mixins on the left and the base class last. Python refuses an order that breaks its rules (a parent placed before its own child), and raises `TypeError` when the class is created.
 
 </details>
 
@@ -2092,9 +2869,343 @@ Best: Random Forest
 
 </details>
 
+### Program 64
+
+**Task:** Write a function `log_event(event, *tags, **details)` that builds one log line. `event` is required, `*tags` collects any number of extra words, and `**details` collects any number of `key=value` pairs. Call it three ways: with only an event, with tags, and with tags plus details.
+
+**Level:** 🟡 Medium
+
+*Developer use: logging helpers, API wrappers and utility functions that must accept a flexible number of arguments.*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Define `log_event(event, *tags, **details)`.
+2. `tags` arrives as a **tuple**, `details` arrives as a **dict**.
+3. Start the line with `[EVENT]` in capitals.
+4. If there are tags, add them joined by commas.
+5. If there are details, add each one as `key=value`.
+6. Return the line and print it.
+
+**Program flow**
+
+```text
+log_event("login")                          → tags=()              details={}                 → [LOGIN]
+log_event("login", "web", "mobile")         → tags=('web','mobile') details={}                 → [LOGIN] tags: web, mobile
+log_event("payment", "upi", user="asha",    → tags=('upi',)        details={'user':..,'amount':..}
+          amount=500)                                                                          → [PAYMENT] tags: upi | user=asha amount=500
+```
+
+**Pseudocode**
+
+```text
+FUNCTION log_event(event, *tags, **details):
+    line = "[" + UPPER(event) + "]"
+    IF tags is not empty:
+        line = line + " tags: " + JOIN tags WITH ", "
+    IF details is not empty:
+        pairs = "key=value" FOR EACH key, value IN details
+        line = line + " | " + JOIN pairs WITH " "
+    RETURN line
+
+PRINT log_event("login")
+PRINT log_event("login", "web", "mobile")
+PRINT log_event("payment", "upi", user="asha", amount=500)
+```
+
+**Code**
+
+```python
+def log_event(event, *tags, **details):
+    line = f"[{event.upper()}]"
+
+    if tags:                                   # tags is a tuple
+        line += " tags: " + ", ".join(tags)
+
+    if details:                                # details is a dict
+        pairs = [f"{key}={value}" for key, value in details.items()]
+        line += " | " + " ".join(pairs)
+
+    return line
+
+
+print(log_event("login"))
+print(log_event("login", "web", "mobile"))
+print(log_event("payment", "upi", user="asha", amount=500))
+```
+
+**Output:**
+
+```text
+[LOGIN]
+[LOGIN] tags: web, mobile
+[PAYMENT] tags: upi | user=asha amount=500
+```
+
+**Fact (why this program):** `*args` packs extra **positional** arguments into a tuple, and `**kwargs` packs extra **keyword** arguments into a dict. The order in the definition is always: normal arguments, then `*args`, then `**kwargs`.
+
+</details>
+
+### Program 65
+
+**Task:** Write `summarize_scores(scores, pass_mark=40, round_to=1)` that returns **three values**: the average (rounded), the number who passed, and the number who failed. Call it with the default pass mark, then with keyword arguments `pass_mark=60, round_to=2`. Unpack the three results into three variables.
+
+**Level:** 🟡 Medium
+
+*Developer use: report and statistics helpers that need sensible defaults but let the caller override them by name.*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Give `pass_mark` and `round_to` default values in the definition.
+2. Find the average with `sum(scores) / len(scores)` and round it.
+3. Count passed scores (score >= pass_mark). Failed = total − passed.
+4. Return all three with `return average, passed, failed` (this returns a tuple).
+5. Unpack: `avg, passed, failed = summarize_scores(...)`.
+
+**Program flow**
+
+```text
+scores = [35, 72, 58, 90, 41]
+
+summarize_scores(scores)                          → pass_mark=40, round_to=1
+    average = 296 / 5 = 59.2                      → passed = 4 (72, 58, 90, 41) → failed = 1
+    return (59.2, 4, 1)
+
+summarize_scores(scores, pass_mark=60, round_to=2)
+    average = 59.2                                → passed = 2 (72, 90)         → failed = 3
+    return (59.2, 2, 3)
+```
+
+**Pseudocode**
+
+```text
+FUNCTION summarize_scores(scores, pass_mark = 40, round_to = 1):
+    average = ROUND(SUM(scores) / COUNT(scores), round_to)
+    passed  = COUNT of score IN scores WHERE score >= pass_mark
+    failed  = COUNT(scores) - passed
+    RETURN average, passed, failed
+
+scores = [35, 72, 58, 90, 41]
+avg, passed, failed = summarize_scores(scores)
+PRINT avg, passed, failed                         // 59.2 4 1
+
+avg, passed, failed = summarize_scores(scores, pass_mark = 60, round_to = 2)
+PRINT avg, passed, failed                         // 59.2 2 3
+```
+
+**Code**
+
+```python
+def summarize_scores(scores, pass_mark=40, round_to=1):
+    average = round(sum(scores) / len(scores), round_to)
+    passed = sum(1 for score in scores if score >= pass_mark)
+    failed = len(scores) - passed
+    return average, passed, failed       # returns a tuple of 3 values
+
+
+scores = [35, 72, 58, 90, 41]
+
+# Default pass mark (40)
+avg, passed, failed = summarize_scores(scores)
+print("Average:", avg, "| Passed:", passed, "| Failed:", failed)
+
+# Keyword arguments: order doesn't matter, names make it clear
+avg, passed, failed = summarize_scores(scores, round_to=2, pass_mark=60)
+print("Average:", avg, "| Passed:", passed, "| Failed:", failed)
+
+# Without unpacking you get one tuple
+print(summarize_scores(scores))
+```
+
+**Output:**
+
+```text
+Average: 59.2 | Passed: 4 | Failed: 1
+Average: 59.2 | Passed: 2 | Failed: 3
+(59.2, 4, 1)
+```
+
+**Fact (why this program):** Default arguments make a function easy to call in the common case. Keyword arguments (`pass_mark=60`) make the call readable and let you skip or reorder optional values. `return a, b, c` really returns **one tuple**, which you can unpack into separate variables.
+
+</details>
+
+### Program 66
+
+**Task:** Clean a list of raw user names with a **pipeline of functions**. Write a closure `make_replacer(old, new)` that returns a function which replaces `old` with `new`. Put `str.strip`, `str.lower` and `make_replacer(" ", "_")` in a list called `steps`. Write `run_pipeline(value, steps)` that passes the value through each function in order, then use it on `["  Asha Rao ", "RAVI KUMAR", " neha  "]`.
+
+**Level:** 🔴 Difficult
+
+*Developer use: data-cleaning and text-preprocessing pipelines (ETL, NLP), where each step is a small function you can add, remove or reorder.*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. `make_replacer(old, new)` defines an inner function `replace(text)` and **returns it**. The inner function remembers `old` and `new` (a closure).
+2. Build `steps = [str.strip, str.lower, make_replacer(" ", "_")]`. Functions are objects, so they can sit in a list.
+3. `run_pipeline(value, steps)` loops over `steps` and does `value = step(value)`.
+4. Use a list comprehension to clean every name.
+
+**Program flow**
+
+```text
+make_replacer(" ", "_")  → returns replace()   → it remembers old=" ", new="_"
+
+"  Asha Rao "  → strip   → "Asha Rao"  → lower → "asha rao"   → replace → "asha_rao"
+"RAVI KUMAR"   → strip   → "RAVI KUMAR"→ lower → "ravi kumar" → replace → "ravi_kumar"
+" neha  "      → strip   → "neha"      → lower → "neha"       → replace → "neha"
+```
+
+**Pseudocode**
+
+```text
+FUNCTION make_replacer(old, new):
+    FUNCTION replace(text):
+        RETURN text with old replaced by new    // uses old, new from outside
+    RETURN replace                              // return the function itself
+
+FUNCTION run_pipeline(value, steps):
+    FOR EACH step IN steps:
+        value = step(value)
+    RETURN value
+
+steps = [strip, lower, make_replacer(" ", "_")]
+raw = ["  Asha Rao ", "RAVI KUMAR", " neha  "]
+clean = [run_pipeline(name, steps) FOR name IN raw]
+PRINT clean                     // ['asha_rao', 'ravi_kumar', 'neha']
+```
+
+**Code**
+
+```python
+def make_replacer(old, new):
+    def replace(text):
+        return text.replace(old, new)    # old and new come from the outer function
+    return replace                       # return the function, don't call it
+
+
+def run_pipeline(value, steps):
+    for step in steps:
+        value = step(value)              # output of one step is input to the next
+    return value
+
+
+space_to_underscore = make_replacer(" ", "_")
+steps = [str.strip, str.lower, space_to_underscore]
+
+raw_names = ["  Asha Rao ", "RAVI KUMAR", " neha  "]
+clean_names = [run_pipeline(name, steps) for name in raw_names]
+print(clean_names)
+
+# Add one more step without changing run_pipeline
+steps.append(make_replacer("_", "-"))
+print([run_pipeline(name, steps) for name in raw_names])
+
+# The closure still remembers old=" " and new="_"
+print(space_to_underscore("data science team"))
+```
+
+**Output:**
+
+```text
+['asha_rao', 'ravi_kumar', 'neha']
+['asha-rao', 'ravi-kumar', 'neha']
+data_science_team
+```
+
+**Fact (why this program):** In Python, functions are **first-class objects**: you can store them in a list, pass them to another function, and return them from a function. A **closure** is an inner function that remembers variables from the outer function even after it has finished. Together they let you build flexible pipelines: adding a step means adding one function to the list.
+
+</details>
+
 ## Dunder (magic) methods
 
 Special methods that Python calls for you when you use `print()`, `len()` or `+`.
+
+### Program 67
+
+**Task:** Create a `PlainBook` class with `title` and `author` but **no** `__str__`, and print one object. Then create a `Book` class with the same attributes **plus** `__str__`, which returns `"<title> by <author>"`, and print one object. Compare the two outputs.
+
+**Level:** 🟢 Simple
+
+*Developer use: every model class (User, Order, Product) gets a readable `__str__` so logs and print statements show useful text.*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. `PlainBook` → only `__init__` storing `title` and `author`.
+2. `Book` → same `__init__`, plus `__str__` returning a friendly string.
+3. Print a `PlainBook` → Python shows a default, unhelpful text.
+4. Print a `Book` → Python calls `__str__` and shows your text.
+
+**Program flow**
+
+```text
+print(plain_book)  → no __str__   → Python's default → <__main__.PlainBook object at 0x...>
+print(book)        → has __str__  → book.__str__()   → Wings of Fire by A. P. J. Abdul Kalam
+str(book)          → same method  → book.__str__()   → used in f-strings too
+```
+
+**Pseudocode**
+
+```text
+CLASS PlainBook:
+    __init__(title, author):  store title, author
+
+CLASS Book:
+    __init__(title, author):  store title, author
+    __str__():                RETURN title + " by " + author
+
+PRINT PlainBook("Wings of Fire", "A. P. J. Abdul Kalam")   // <__main__.PlainBook object at 0x...>
+PRINT Book("Wings of Fire", "A. P. J. Abdul Kalam")        // Wings of Fire by A. P. J. Abdul Kalam
+```
+
+**Code**
+
+```python
+class PlainBook:
+    def __init__(self, title, author):
+        self.title = title
+        self.author = author
+
+
+class Book:
+    def __init__(self, title, author):
+        self.title = title
+        self.author = author
+
+    def __str__(self):                       # print() and str() call this
+        return f"{self.title} by {self.author}"
+
+
+plain_book = PlainBook("Wings of Fire", "A. P. J. Abdul Kalam")
+book = Book("Wings of Fire", "A. P. J. Abdul Kalam")
+
+print(plain_book)                 # default text, not useful
+print(book)                       # uses __str__
+print(f"Reading: {book}")         # f-strings use __str__ too
+```
+
+**Output:**
+
+```text
+<__main__.PlainBook object at 0x000001F4A2B3C4D0>
+Wings of Fire by A. P. J. Abdul Kalam
+Reading: Wings of Fire by A. P. J. Abdul Kalam
+```
+
+(The `0x...` memory address is different on every run.)
+
+**Fact (why this program):** A dunder method is a method with **d**ouble **under**scores on both sides, like `__str__`. You don't call it yourself: `print(book)` calls `book.__str__()` for you. Without `__str__`, Python only shows the class name and a memory address.
+
+</details>
 
 ### Program 45
 
@@ -2175,6 +3286,306 @@ Cart with 3 items
 ```
 
 **Fact (why this program):** You never call dunder methods yourself. Python calls them for you: `print()` calls `__str__`, `len()` calls `__len__`, and `+` calls `__add__`.
+
+</details>
+
+### Program 68
+
+**Task:** Create a `Product` class with `name` and `price`. Add `__repr__` so a list of products prints nicely, `__eq__` so two products with the same name and price are equal, and `__lt__` so `sorted()` orders products by price. Sort three products, find the cheapest with `min()`, and compare two equal products with `==`.
+
+**Level:** 🟡 Medium
+
+*Developer use: comparing and sorting domain objects (products, tasks by priority, versions) without passing a `key=` every time.*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. `__repr__` → return `Product('Mouse', 499)` style text (used when printing lists).
+2. `__eq__(other)` → `True` when both `name` and `price` match.
+3. `__lt__(other)` → `self.price < other.price` (used by `sorted()`, `min()`, `<`).
+4. Create three products, sort them, and find the cheapest.
+5. Compare two separate objects that have the same data.
+
+**Program flow**
+
+```text
+sorted(products)        → Python calls a.__lt__(b) many times → ordered by price
+min(products)           → uses __lt__                           → Product('Mouse', 499)
+p1 == p2                → p1.__eq__(p2)  → same name and price  → True
+p1 is p2                → different objects in memory           → False
+print(list)             → each item's __repr__
+```
+
+**Pseudocode**
+
+```text
+CLASS Product:
+    __init__(name, price): store name, price
+    __repr__():   RETURN "Product('name', price)"
+    __eq__(other): RETURN name == other.name AND price == other.price
+    __lt__(other): RETURN price < other.price
+
+products = [Product("Keyboard", 1299), Product("Mouse", 499), Product("Monitor", 8999)]
+PRINT sorted(products)                 // by price, low to high
+PRINT min(products)                    // Mouse
+PRINT Product("Mouse", 499) == Product("Mouse", 499)   // True
+```
+
+**Code**
+
+```python
+class Product:
+    def __init__(self, name, price):
+        self.name = name
+        self.price = price
+
+    def __repr__(self):                       # used when printing lists
+        return f"Product({self.name!r}, {self.price})"
+
+    def __eq__(self, other):                  # used by ==
+        if not isinstance(other, Product):
+            return NotImplemented
+        return self.name == other.name and self.price == other.price
+
+    def __lt__(self, other):                  # used by <, sorted(), min()
+        return self.price < other.price
+
+
+products = [
+    Product("Keyboard", 1299),
+    Product("Mouse", 499),
+    Product("Monitor", 8999),
+]
+
+print(sorted(products))
+print("Cheapest:", min(products))
+print("Most expensive:", max(products))
+
+p1 = Product("Mouse", 499)
+p2 = Product("Mouse", 499)
+print("p1 == p2:", p1 == p2)     # same data
+print("p1 is p2:", p1 is p2)     # different objects
+```
+
+**Output:**
+
+```text
+[Product('Mouse', 499), Product('Keyboard', 1299), Product('Monitor', 8999)]
+Cheapest: Product('Mouse', 499)
+Most expensive: Product('Monitor', 8999)
+p1 == p2: True
+p1 is p2: False
+```
+
+**Fact (why this program):** `sorted()`, `min()` and `max()` only need `__lt__` to compare objects. Without `__eq__`, `==` checks whether both names point to the **same object**. `__repr__` is the developer view of an object, and it is what you see inside lists. `__str__` is the user view.
+
+</details>
+
+### Program 69
+
+**Task:** Create a `Money` class with `amount` and `currency`. Add `__add__` so `Money(100, "INR") + Money(50, "INR")` gives `Money(150, "INR")`, and raise `ValueError` when the currencies are different. Add `__radd__` so `sum()` works on a list of `Money` objects, and `__str__` to print `"INR 150.00"`.
+
+**Level:** 🟡 Medium
+
+*Developer use: value objects in billing and e-commerce code (money, distance, time) where `+` must follow business rules.*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. `__add__(other)` → check both currencies match, else raise `ValueError`.
+2. Return a **new** `Money` with the two amounts added (don't change either object).
+3. `sum()` starts with `0`, so it first does `0 + Money(...)`. Python then calls `Money.__radd__(0)`.
+4. `__radd__(other)` → if `other` is `0`, return `self`. Otherwise use `__add__`.
+5. `__str__` → format as `"INR 150.00"`.
+
+**Program flow**
+
+```text
+a + b                 → a.__add__(b)      → same currency → Money(150, "INR")
+sum([a, b, c])        → 0 + a             → int can't add Money → a.__radd__(0) → a
+                      → a + b → + c       → __add__ each time   → INR 350.00
+a + Money(10, "USD")  → a.__add__(...)    → different currency  → ValueError
+```
+
+**Pseudocode**
+
+```text
+CLASS Money:
+    __init__(amount, currency): store both
+    __add__(other):
+        IF currency != other.currency: RAISE ValueError
+        RETURN new Money(amount + other.amount, currency)
+    __radd__(other):
+        IF other == 0: RETURN self        // the start value of sum()
+        RETURN self + other
+    __str__(): RETURN currency + " " + amount with 2 decimals
+
+PRINT Money(100, "INR") + Money(50, "INR")       // INR 150.00
+PRINT sum([Money(100,"INR"), Money(50,"INR"), Money(200,"INR")])   // INR 350.00
+TRY  Money(100,"INR") + Money(10,"USD")  CATCH ValueError → PRINT message
+```
+
+**Code**
+
+```python
+class Money:
+    def __init__(self, amount, currency):
+        self.amount = amount
+        self.currency = currency
+
+    def __add__(self, other):                 # used by a + b
+        if self.currency != other.currency:
+            raise ValueError(f"Cannot add {self.currency} and {other.currency}")
+        return Money(self.amount + other.amount, self.currency)
+
+    def __radd__(self, other):                # used by 0 + a (inside sum())
+        if other == 0:
+            return self
+        return self.__add__(other)
+
+    def __str__(self):
+        return f"{self.currency} {self.amount:.2f}"
+
+
+a = Money(100, "INR")
+b = Money(50, "INR")
+c = Money(200, "INR")
+
+print(a + b)
+print("Total:", sum([a, b, c]))
+print("a is unchanged:", a)
+
+try:
+    print(a + Money(10, "USD"))
+except ValueError as error:
+    print("Error:", error)
+```
+
+**Output:**
+
+```text
+INR 150.00
+Total: INR 350.00
+a is unchanged: INR 100.00
+Error: Cannot add INR and USD
+```
+
+**Fact (why this program):** `a + b` calls `a.__add__(b)`. If the left side doesn't know how to add (like `0 + Money`), Python tries the **right** side's `__radd__`. That is why `sum()` needs `__radd__`. Returning a new object keeps `Money` safe to share, because nothing changes it later.
+
+</details>
+
+### Program 70
+
+**Task:** Create a `Playlist` class that stores a `name` and a list of `songs`. Make it behave like a built-in list: `len(playlist)` with `__len__`, `playlist[0]` and slicing `playlist[1:3]` with `__getitem__`, `for song in playlist` with `__iter__`, `"Kesariya" in playlist` with `__contains__`, and a clear `__repr__`.
+
+**Level:** 🔴 Difficult
+
+*Developer use: custom collection classes (query results, paginated API responses, datasets in PyTorch) that should work with `len()`, indexing, loops and `in`.*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. `__init__(name, songs)` → store the name and a **copy** of the songs list.
+2. `__len__` → return the number of songs.
+3. `__getitem__(index)` → return `self.songs[index]`. If `index` is a slice, return a **new Playlist**.
+4. `__iter__` → return `iter(self.songs)` so `for` loops work.
+5. `__contains__(song)` → case-insensitive check, so `"kesariya" in playlist` is `True`.
+6. `__repr__` → `Playlist('Road Trip', 4 songs)`.
+
+**Program flow**
+
+```text
+len(trip)              → trip.__len__()              → 4
+trip[0]                → trip.__getitem__(0)         → 'Kesariya'
+trip[-1]               → trip.__getitem__(-1)        → 'Ilahi'
+trip[1:3]              → __getitem__(slice(1, 3))    → new Playlist with 2 songs
+for song in trip       → trip.__iter__()             → each song in order
+"kesariya" in trip     → trip.__contains__("kesariya") → lower-case match → True
+```
+
+**Pseudocode**
+
+```text
+CLASS Playlist:
+    __init__(name, songs):  store name, COPY of songs
+    __len__():              RETURN COUNT(songs)
+    __getitem__(index):
+        IF index is a slice: RETURN new Playlist(name + " (part)", songs[index])
+        RETURN songs[index]
+    __iter__():             RETURN iterator over songs
+    __contains__(song):     RETURN LOWER(song) IN [LOWER(s) FOR s IN songs]
+    __repr__():             RETURN "Playlist('name', N songs)"
+
+trip = Playlist("Road Trip", ["Kesariya", "Safarnama", "Phir Se Ud Chala", "Ilahi"])
+PRINT len(trip), trip[0], trip[-1], trip[1:3]
+FOR song IN trip: PRINT song
+PRINT "kesariya" IN trip
+```
+
+**Code**
+
+```python
+class Playlist:
+    def __init__(self, name, songs):
+        self.name = name
+        self.songs = list(songs)              # copy, so outside changes don't affect us
+
+    def __len__(self):                        # len(playlist)
+        return len(self.songs)
+
+    def __getitem__(self, index):             # playlist[0], playlist[1:3]
+        if isinstance(index, slice):
+            return Playlist(f"{self.name} (part)", self.songs[index])
+        return self.songs[index]
+
+    def __iter__(self):                       # for song in playlist
+        return iter(self.songs)
+
+    def __contains__(self, song):             # "x" in playlist
+        return song.lower() in (s.lower() for s in self.songs)
+
+    def __repr__(self):
+        return f"Playlist({self.name!r}, {len(self)} songs)"
+
+
+trip = Playlist("Road Trip", ["Kesariya", "Safarnama", "Phir Se Ud Chala", "Ilahi"])
+
+print(trip)
+print("Songs:", len(trip))
+print("First:", trip[0], "| Last:", trip[-1])
+
+part = trip[1:3]
+print(part, "->", part.songs)
+
+for number, song in enumerate(trip, start=1):
+    print(number, song)
+
+print("kesariya" in trip)
+print("Tum Hi Ho" in trip)
+```
+
+**Output:**
+
+```text
+Playlist('Road Trip', 4 songs)
+Songs: 4
+First: Kesariya | Last: Ilahi
+Playlist('Road Trip (part)', 2 songs) -> ['Safarnama', 'Phir Se Ud Chala']
+1 Kesariya
+2 Safarnama
+3 Phir Se Ud Chala
+4 Ilahi
+True
+False
+```
+
+**Fact (why this program):** Python uses **protocols**: any object with `__len__` works with `len()`, any object with `__iter__` works in a `for` loop, and any object with `__contains__` works with `in`. You don't need to inherit from `list`. Implement the dunder methods and your class behaves like a built-in collection.
 
 </details>
 
@@ -2354,6 +3765,321 @@ City School
 | Returns | A wrapper function | Usually the same class |
 | Runs | Its wrapper runs **on every call** | Usually **once**, when the class is defined |
 | Example | `@lru_cache` | `@dataclass` |
+
+</details>
+
+### Program 71
+
+**Task:** Write a decorator `log_call` that prints the function name and its arguments before the call, and the returned value after it. Use `functools.wraps` so the decorated function keeps its real name and docstring. Apply it to `add(a, b)` and `apply_discount(price, percent=10)`, then print `add.__name__` and `add.__doc__`.
+
+**Level:** 🟡 Medium
+
+*Developer use: logging and debugging API handlers, service methods and ML training steps without editing each function.*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. `log_call(function)` defines `wrapper(*args, **kwargs)` so it works for **any** function.
+2. Inside `wrapper`: print the name and arguments, call the function, print the result, return it.
+3. Put `@wraps(function)` on `wrapper` to copy the name and docstring.
+4. Decorate `add` and `apply_discount` with `@log_call`.
+5. Print `add.__name__` and `add.__doc__` to check `wraps` worked.
+
+**Program flow**
+
+```text
+@log_call on add            → add = log_call(add) → add is now wrapper
+add(2, 3)                   → wrapper(2, 3)       → "Calling add args=(2, 3) kwargs={}"
+                            → real add(2, 3)      → 5 → "add returned 5" → returns 5
+apply_discount(500, percent=20)
+                            → wrapper(...)        → "Calling apply_discount args=(500,) kwargs={'percent': 20}"
+                            → real function       → 400.0 → "apply_discount returned 400.0"
+add.__name__                → copied by @wraps    → 'add' (not 'wrapper')
+```
+
+**Pseudocode**
+
+```text
+FUNCTION log_call(function):
+    FUNCTION wrapper(*args, **kwargs):          // keeps function's name via wraps
+        PRINT "Calling", function name, args, kwargs
+        result = function(*args, **kwargs)
+        PRINT function name, "returned", result
+        RETURN result
+    RETURN wrapper
+
+@log_call  FUNCTION add(a, b): RETURN a + b
+@log_call  FUNCTION apply_discount(price, percent = 10): RETURN price - price * percent / 100
+
+PRINT add(2, 3)
+PRINT apply_discount(500, percent = 20)
+PRINT add.__name__, add.__doc__
+```
+
+**Code**
+
+```python
+from functools import wraps
+
+
+def log_call(function):
+    @wraps(function)                          # keep the real name and docstring
+    def wrapper(*args, **kwargs):
+        print(f"Calling {function.__name__} args={args} kwargs={kwargs}")
+        result = function(*args, **kwargs)
+        print(f"{function.__name__} returned {result}")
+        return result
+    return wrapper
+
+
+@log_call
+def add(a, b):
+    """Add two numbers."""
+    return a + b
+
+
+@log_call
+def apply_discount(price, percent=10):
+    """Return the price after a percentage discount."""
+    return price - price * percent / 100
+
+
+print("Result:", add(2, 3))
+print("Result:", apply_discount(500, percent=20))
+print("Name:", add.__name__)
+print("Doc:", add.__doc__)
+```
+
+**Output:**
+
+```text
+Calling add args=(2, 3) kwargs={}
+add returned 5
+Result: 5
+Calling apply_discount args=(500,) kwargs={'percent': 20}
+apply_discount returned 400.0
+Result: 400.0
+Name: add
+Doc: Add two numbers.
+```
+
+**Fact (why this program):** Using `*args, **kwargs` in the wrapper lets one decorator work on functions with any arguments. Without `@wraps`, `add.__name__` would be `"wrapper"` and the docstring would be lost, which breaks debugging, logs and tools like FastAPI that read function details.
+
+</details>
+
+### Program 72
+
+**Task:** Write a decorator `login_required` for functions that take a `user` dict as their first argument. If `user["logged_in"]` is `False`, return `"Error: please log in"` and **don't** run the function. Otherwise run it. Apply it to `view_profile(user)` and `place_order(user, item)`, and call both with a logged-in and a logged-out user.
+
+**Level:** 🟡 Medium
+
+*Developer use: authentication checks in web apps (Flask `@login_required`, FastAPI dependencies) that guard many routes with one line.*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. `login_required(function)` defines `wrapper(user, *args, **kwargs)`.
+2. If `not user["logged_in"]` → return the error message **without** calling the function.
+3. Otherwise → `return function(user, *args, **kwargs)`.
+4. Decorate `view_profile` and `place_order`.
+5. Call both with `asha` (logged in) and `guest` (logged out).
+
+**Program flow**
+
+```text
+view_profile(asha)            → wrapper → asha logged in  → real function → "Profile of Asha"
+place_order(asha, "Laptop")   → wrapper → asha logged in  → real function → "Asha ordered Laptop"
+view_profile(guest)           → wrapper → guest NOT logged in → stop here → "Error: please log in"
+place_order(guest, "Phone")   → wrapper → guest NOT logged in → stop here → "Error: please log in"
+```
+
+**Pseudocode**
+
+```text
+FUNCTION login_required(function):
+    FUNCTION wrapper(user, *args, **kwargs):
+        IF user is not logged in:
+            RETURN "Error: please log in"       // function never runs
+        RETURN function(user, *args, **kwargs)
+    RETURN wrapper
+
+@login_required FUNCTION view_profile(user): RETURN "Profile of " + user.name
+@login_required FUNCTION place_order(user, item): RETURN user.name + " ordered " + item
+
+asha  = {name: "Asha",  logged_in: True}
+guest = {name: "Guest", logged_in: False}
+PRINT view_profile(asha), place_order(asha, "Laptop")
+PRINT view_profile(guest), place_order(guest, "Phone")
+```
+
+**Code**
+
+```python
+from functools import wraps
+
+
+def login_required(function):
+    @wraps(function)
+    def wrapper(user, *args, **kwargs):
+        if not user.get("logged_in"):
+            return "Error: please log in"      # stop: the real function never runs
+        return function(user, *args, **kwargs)
+    return wrapper
+
+
+@login_required
+def view_profile(user):
+    return f"Profile of {user['name']}"
+
+
+@login_required
+def place_order(user, item):
+    return f"{user['name']} ordered {item}"
+
+
+asha = {"name": "Asha", "logged_in": True}
+guest = {"name": "Guest", "logged_in": False}
+
+print(view_profile(asha))
+print(place_order(asha, "Laptop"))
+print(view_profile(guest))
+print(place_order(guest, "Phone"))
+```
+
+**Output:**
+
+```text
+Profile of Asha
+Asha ordered Laptop
+Error: please log in
+Error: please log in
+```
+
+**Fact (why this program):** A decorator can decide **whether** the function runs at all, not only add work before and after it. That is why authentication, permission checks and rate limiting are usually decorators: the rule lives in one place instead of being copied into every function.
+
+</details>
+
+### Program 73
+
+**Task:** Write a decorator **with an argument**, `retry(times=3)`, that calls a function again when it raises `ConnectionError`, up to `times` attempts. Print each failed attempt. If every attempt fails, raise the last error. Test it with `fetch_data()`, which fails twice and succeeds on the 3rd call, and with `always_down()`, which always fails.
+
+**Level:** 🔴 Difficult
+
+*Developer use: retrying flaky network calls, database connections and third-party API requests (libraries like `tenacity` work this way).*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. `retry(times)` is the **outer** function: it takes the argument and returns a decorator.
+2. `decorator(function)` is the **middle** function: it takes the function and returns `wrapper`.
+3. `wrapper(*args, **kwargs)` loops `for attempt in range(1, times + 1)`:
+   - try the function and **return** on success.
+   - on `ConnectionError`, print the attempt and remember the error.
+4. After the loop, `raise last_error`.
+5. `fetch_data()` uses a counter dict so it fails on calls 1 and 2 and succeeds on call 3.
+
+**Program flow**
+
+```text
+@retry(times=3)          → retry(3) returns decorator → decorator(fetch_data) returns wrapper
+
+fetch_data()             → attempt 1 → ConnectionError → "fetch_data: attempt 1 failed: Server busy"
+                         → attempt 2 → ConnectionError → "fetch_data: attempt 2 failed: Server busy"
+                         → attempt 3 → success         → "Data loaded on call 3"
+
+always_down()            → attempts 1, 2 → ConnectionError each time (times=2)
+                         → loop ends     → raise last error → caught outside → "Gave up: Service down"
+```
+
+**Pseudocode**
+
+```text
+FUNCTION retry(times):
+    FUNCTION decorator(function):
+        FUNCTION wrapper(*args, **kwargs):
+            FOR attempt FROM 1 TO times:
+                TRY
+                    RETURN function(*args, **kwargs)     // success: stop retrying
+                CATCH ConnectionError AS error
+                    PRINT "Attempt", attempt, "failed:", error
+                    last_error = error
+            RAISE last_error                             // all attempts failed
+        RETURN wrapper
+    RETURN decorator
+
+calls = {count: 0}
+@retry(times = 3) FUNCTION fetch_data():
+    calls.count = calls.count + 1
+    IF calls.count < 3: RAISE ConnectionError "Server busy"
+    RETURN "Data loaded on call " + calls.count
+
+@retry(times = 2) FUNCTION always_down(): RAISE ConnectionError "Service down"
+```
+
+**Code**
+
+```python
+from functools import wraps
+
+
+def retry(times=3):                           # outer: takes the argument
+    def decorator(function):                  # middle: takes the function
+        @wraps(function)
+        def wrapper(*args, **kwargs):         # inner: runs on every call
+            last_error = None
+            for attempt in range(1, times + 1):
+                try:
+                    return function(*args, **kwargs)
+                except ConnectionError as error:
+                    print(f"{function.__name__}: attempt {attempt} failed: {error}")
+                    last_error = error
+            raise last_error
+        return wrapper
+    return decorator
+
+
+calls = {"count": 0}
+
+
+@retry(times=3)
+def fetch_data():
+    calls["count"] += 1
+    if calls["count"] < 3:
+        raise ConnectionError("Server busy")
+    return f"Data loaded on call {calls['count']}"
+
+
+@retry(times=2)
+def always_down():
+    raise ConnectionError("Service down")
+
+
+print(fetch_data())
+
+try:
+    always_down()
+except ConnectionError as error:
+    print("Gave up:", error)
+```
+
+**Output:**
+
+```text
+fetch_data: attempt 1 failed: Server busy
+fetch_data: attempt 2 failed: Server busy
+Data loaded on call 3
+always_down: attempt 1 failed: Service down
+always_down: attempt 2 failed: Service down
+Gave up: Service down
+```
+
+**Fact (why this program):** A decorator that takes an argument needs **three levels**: `retry(times)` returns `decorator`, which returns `wrapper`. `@retry(times=3)` first **calls** `retry(3)`, and the result is the real decorator. Only catch the errors you expect (here `ConnectionError`). Retrying on every error would hide real bugs.
 
 </details>
 
@@ -2587,6 +4313,188 @@ generator
 
 </details>
 
+### Program 74
+
+**Task:** You have a list of log lines (pretend it's a big log file). Write a generator `error_lines(lines)` that checks one line at a time and yields only the lines that start with `"ERROR"`. Print a "checking" message for each line so you can see the generator works lazily. Get the first two errors with `next()`, then turn the rest into a list.
+
+**Level:** 🟡 Medium
+
+*Developer use: Scanning huge log files or CSV exports line by line without loading the whole file into memory.*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Store the log lines in a list (in real code this would be an open file).
+2. `error_lines(lines)` → loop over the lines and print `"checking: ..."` for each one.
+3. If a line starts with `"ERROR"`, `yield` it.
+4. Call `next()` twice, then `list()` on what's left.
+
+**Program flow**
+
+```text
+errors = error_lines(log_lines) → generator created, nothing checked yet
+next(errors)  → checks INFO, ERROR        → yields "ERROR Database not reachable" → pauses
+next(errors)  → checks INFO, ERROR        → yields "ERROR Payment timeout"        → pauses
+list(errors)  → checks WARN, end of lines → no more errors                        → []
+```
+
+**Pseudocode**
+
+```text
+log_lines = [5 log lines]
+
+GENERATOR error_lines(lines):
+    FOR EACH line IN lines:
+        PRINT "checking:", line
+        IF line starts with "ERROR":
+            YIELD line          // give it back, then pause
+
+errors = error_lines(log_lines)  // nothing runs yet
+PRINT next(errors)
+PRINT next(errors)
+PRINT list(errors)               // []
+```
+
+**Code**
+
+```python
+log_lines = [
+    "INFO  Server started",
+    "ERROR Database not reachable",
+    "INFO  User logged in",
+    "ERROR Payment timeout",
+    "WARN  Disk 80% full",
+]
+
+
+def error_lines(lines):
+    for line in lines:
+        print("  checking:", line)
+        if line.startswith("ERROR"):
+            yield line          # hand back one error, then pause here
+
+
+errors = error_lines(log_lines)   # nothing runs yet
+
+print("First error:", next(errors))
+print("Second error:", next(errors))
+print("Any more?", list(errors))
+```
+
+**Output:**
+
+```text
+  checking: INFO  Server started
+  checking: ERROR Database not reachable
+First error: ERROR Database not reachable
+  checking: INFO  User logged in
+  checking: ERROR Payment timeout
+Second error: ERROR Payment timeout
+  checking: WARN  Disk 80% full
+Any more? []
+```
+
+**Fact (why this program):** The "checking" lines show that a generator works **lazily**: it reads only as many lines as it needs to find the next error, then pauses. With a real file (`for line in open("app.log")`), memory use stays small even for a file of many gigabytes.
+
+</details>
+
+### Program 75
+
+**Task:** Build a 3-stage generator pipeline. `read_records(count)` yields records `{"id": 1}`, `{"id": 2}`, … one at a time. `in_batches(records, size)` groups them into lists of `size` records. `send_to_api(batch)` pretends to send one batch. Send 7 records in batches of 3.
+
+**Level:** 🔴 Difficult
+
+*Developer use: Sending database rows to an API, or inserting them into another database, in fixed-size batches to stay within rate and memory limits.*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. `read_records(count)` → `yield {"id": number}` for 1 to `count`.
+2. `in_batches(records, size)` → add each record to `batch`. When `batch` has `size` records, `yield` it and start a new empty list.
+3. After the loop, `yield` the last batch if it isn't empty.
+4. `send_to_api(batch)` → return a message with the batch size and ids.
+5. Connect the stages and loop over the batches.
+
+**Program flow**
+
+```text
+read_records(7) → 1, 2, 3, 4, 5, 6, 7 (one at a time)
+in_batches(…, 3)
+  1, 2, 3 → batch full     → yield [1, 2, 3]
+  4, 5, 6 → batch full     → yield [4, 5, 6]
+  7       → records end    → yield [7] (the smaller last batch)
+for batch → send_to_api(batch) → print each message
+```
+
+**Pseudocode**
+
+```text
+GENERATOR read_records(count):
+    FOR number FROM 1 TO count:  YIELD {"id": number}
+
+GENERATOR in_batches(records, size):
+    batch = []
+    FOR EACH record IN records:
+        ADD record TO batch
+        IF length of batch == size:
+            YIELD batch
+            batch = []
+    IF batch is not empty:  YIELD batch
+
+FUNCTION send_to_api(batch):
+    RETURN "Batch of <size> -> ids <ids>"
+
+FOR EACH batch IN in_batches(read_records(7), 3):
+    PRINT send_to_api(batch)
+```
+
+**Code**
+
+```python
+def read_records(count):
+    for number in range(1, count + 1):
+        yield {"id": number}           # one record at a time
+
+
+def in_batches(records, size):
+    batch = []
+    for record in records:
+        batch.append(record)
+        if len(batch) == size:
+            yield batch                # a full batch is ready
+            batch = []
+    if batch:
+        yield batch                    # the last, smaller batch
+
+
+def send_to_api(batch):
+    ids = [record["id"] for record in batch]
+    return f"Batch of {len(batch)} -> ids {ids}"
+
+
+records = read_records(7)                  # stage 1: produce records
+batches = in_batches(records, size=3)      # stage 2: group them
+
+for batch in batches:                      # stage 3: use them
+    print(send_to_api(batch))
+```
+
+**Output:**
+
+```text
+Batch of 3 -> ids [1, 2, 3]
+Batch of 3 -> ids [4, 5, 6]
+Batch of 1 -> ids [7]
+```
+
+**Fact (why this program):** Each stage takes a generator and gives out another one, so records flow through **one at a time**, and at most one batch is in memory. The `if batch:` after the loop matters: without it, the last record (7) would be silently lost. Forgetting that leftover batch is a common bug.
+
+</details>
+
 ## Exceptions
 
 Handling errors, creating your own, and keeping the original cause.
@@ -2750,6 +4658,88 @@ Error: Balance 1000 is less than 5000
 
 </details>
 
+### Program 76
+
+**Task:** Write `get_discount(order, price_text)`. It converts `price_text` to a number and applies the order's `"discount"` percentage. Use **two `except` blocks**: one for `ValueError` (the price isn't a number, so return `0.0`) and one for `KeyError` (the order has no `"discount"` key, so return the full price). Test it with a good order, a bad price, and an order without a discount.
+
+**Level:** 🟡 Medium
+
+*Developer use: Reading form fields, query parameters, or JSON payloads, where values may be missing or in the wrong format.*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Inside `try`: `price = float(price_text)`, then `percent = order["discount"]`.
+2. Return the discounted price.
+3. `except ValueError` → print a message and return `0.0`.
+4. `except KeyError as error` → print the missing key and return the full price.
+
+**Program flow**
+
+```text
+({"discount": 10}, "500")          → float OK, key OK     → 500 - 50 → 450.0
+({"discount": 10}, "five hundred") → float fails          → except ValueError → 0.0
+({}, "500")                        → float OK, key missing → except KeyError  → 500.0
+```
+
+**Pseudocode**
+
+```text
+FUNCTION get_discount(order, price_text):
+    TRY
+        price = convert price_text to number     // may fail: ValueError
+        percent = order["discount"]              // may fail: KeyError
+        RETURN price - price * percent / 100
+    CATCH ValueError
+        PRINT "Bad price ..., using 0"
+        RETURN 0.0
+    CATCH KeyError AS error
+        PRINT "Missing key ..., no discount"
+        RETURN price_text as number
+    END TRY
+
+PRINT get_discount({"discount": 10}, "500")           // 450.0
+PRINT get_discount({"discount": 10}, "five hundred")  // 0.0
+PRINT get_discount({}, "500")                         // 500.0
+```
+
+**Code**
+
+```python
+def get_discount(order, price_text):
+    try:
+        price = float(price_text)              # may raise ValueError
+        percent = order["discount"]            # may raise KeyError
+        return price - price * percent / 100
+    except ValueError:
+        print(f"Bad price {price_text!r}, using 0")
+        return 0.0
+    except KeyError as error:
+        print(f"Missing key {error}, no discount")
+        return float(price_text)
+
+
+print(get_discount({"discount": 10}, "500"))
+print(get_discount({"discount": 10}, "five hundred"))
+print(get_discount({}, "500"))
+```
+
+**Output:**
+
+```text
+450.0
+Bad price 'five hundred', using 0
+0.0
+Missing key 'discount', no discount
+500.0
+```
+
+**Fact (why this program):** One `try` can have several `except` blocks. Python checks them **from top to bottom** and runs only the first one that matches. Catch specific errors like `ValueError` and `KeyError` rather than a bare `except:`, so real bugs (such as a typo in a variable name) aren't hidden. For a missing dict key, `order.get("discount", 0)` is often simpler than catching `KeyError`.
+
+</details>
+
 ### Program 53
 
 **Task:** Create `InvalidAgeError`. Write `read_age(text)` that converts text to an integer. If `int()` fails with `ValueError`, raise `InvalidAgeError("Age must be a whole number")` **from** the original error. Read `"25"`, then try `"abc"` and print the error and its cause.
@@ -2833,6 +4823,111 @@ Cause: invalid literal for int() with base 10: 'abc'
 ```
 
 **Fact (why this program):** `raise New from original` gives the user a clear, simple error and keeps the real cause in `__cause__` for developers. The traceback shows both errors.
+
+</details>
+
+### Program 77
+
+**Task:** Build an exception **hierarchy** for a payment service: a base class `PaymentError`, and two children, `CardDeclined` and `InsufficientFunds`. `InsufficientFunds` stores `needed` and `available`. Write `pay(card, amount, balance)`, which raises the right error. Write `checkout()`, which catches `InsufficientFunds` with a warning, catches **any other** `PaymentError` with an error message, and always logs the attempt in `finally`.
+
+**Level:** 🔴 Difficult
+
+*Developer use: Payment gateways, API clients and service layers, which define one base error so callers can catch all of the library's errors in one place.*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. `class PaymentError(Exception)` → the base class.
+2. `class CardDeclined(PaymentError)` → `pass`.
+3. `class InsufficientFunds(PaymentError)` → `__init__(needed, available)`: build the message with `super().__init__()`, then store both values.
+4. `pay()` → raise `CardDeclined` for a `"blocked"` card, or `InsufficientFunds` if `amount > balance`. Otherwise return `"Paid Rs. <amount>"`.
+5. `checkout()` → `except InsufficientFunds` first, then `except PaymentError`, then `finally`.
+
+**Program flow**
+
+```text
+checkout("valid", 500, 1000)    → pay OK                → "OK: Paid Rs. 500"         → finally
+checkout("blocked", 500, 1000)  → raise CardDeclined    → caught by PaymentError     → finally
+checkout("valid", 1500, 1000)   → raise InsufficientFunds → caught by its own except → finally
+```
+
+**Pseudocode**
+
+```text
+CLASS PaymentError(Exception)
+CLASS CardDeclined(PaymentError)
+CLASS InsufficientFunds(PaymentError):
+    __init__(needed, available): message "Need Rs. X, have Rs. Y"; store both
+
+FUNCTION pay(card, amount, balance):
+    IF card == "blocked":  RAISE CardDeclined
+    IF amount > balance:   RAISE InsufficientFunds(amount, balance)
+    RETURN "Paid Rs. amount"
+
+FUNCTION checkout(card, amount, balance):
+    TRY        PRINT "OK:", pay(...)
+    CATCH InsufficientFunds AS e  → PRINT "[WARN] ... short by needed - available"
+    CATCH PaymentError AS e       → PRINT "[ERROR] ..."     // any other payment error
+    FINALLY    PRINT "Payment attempt logged"
+```
+
+**Code**
+
+```python
+class PaymentError(Exception):
+    """Base class for all payment problems."""
+
+
+class CardDeclined(PaymentError):
+    pass
+
+
+class InsufficientFunds(PaymentError):
+    def __init__(self, needed, available):
+        super().__init__(f"Need Rs. {needed}, have Rs. {available}")
+        self.needed = needed
+        self.available = available
+
+
+def pay(card, amount, balance):
+    if card == "blocked":
+        raise CardDeclined("Card is blocked by the bank")
+    if amount > balance:
+        raise InsufficientFunds(amount, balance)
+    return f"Paid Rs. {amount}"
+
+
+def checkout(card, amount, balance):
+    try:
+        print("OK:", pay(card, amount, balance))
+    except InsufficientFunds as error:
+        short = error.needed - error.available
+        print(f"[WARN] {type(error).__name__}: {error} (short by Rs. {short})")
+    except PaymentError as error:              # catches every other payment error
+        print(f"[ERROR] {type(error).__name__}: {error}")
+    finally:
+        print("Payment attempt logged")
+
+
+checkout("valid", 500, 1000)
+checkout("blocked", 500, 1000)
+checkout("valid", 1500, 1000)
+```
+
+**Output:**
+
+```text
+OK: Paid Rs. 500
+Payment attempt logged
+[ERROR] CardDeclined: Card is blocked by the bank
+Payment attempt logged
+[WARN] InsufficientFunds: Need Rs. 1500, have Rs. 1000 (short by Rs. 500)
+Payment attempt logged
+```
+
+**Fact (why this program):** `except PaymentError` also catches **every child class**, so new payment errors added later are handled automatically. Put the **more specific** `except` first: if `except PaymentError` came first, the `InsufficientFunds` block would never run. Storing extra data on the exception (`needed`, `available`) lets the caller react to it, not just print it.
 
 </details>
 
@@ -2932,9 +5027,470 @@ Error: Power cut
 
 </details>
 
+### Program 78
+
+**Task:** Use `with open()` to write two tasks to a file `notes.txt` in a temporary folder, then read the file back line by line. After each `with` block, print `file.closed` to show that Python closed the file for you.
+
+**Level:** 🟡 Medium
+
+*Developer use: Reading config files, writing reports, CSV exports and log files. `with open()` is the most-used context manager in Python.*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Make a temporary folder with `tempfile.mkdtemp()` and build the file path with `os.path.join()`.
+2. `with open(path, "w") as file:` → write two lines.
+3. Print `file.closed` → `True`.
+4. `with open(path) as file:` → loop over the lines and print each one.
+5. Print `file.closed` again, then delete the file and folder.
+
+**Program flow**
+
+```text
+with open(path, "w") → file opened  → write "Buy milk", "Call Ravi" → block ends → file closed
+file.closed          → True
+with open(path)      → file opened  → read line by line            → block ends → file closed
+file.closed          → True
+```
+
+**Pseudocode**
+
+```text
+folder = new temporary folder
+path = folder + "notes.txt"
+
+WITH open path FOR writing AS file:
+    WRITE "Buy milk"
+    WRITE "Call Ravi"
+PRINT file is closed?        // True
+
+WITH open path FOR reading AS file:
+    FOR EACH line IN file:  PRINT "Task:", line
+PRINT file is closed?        // True
+
+DELETE file and folder
+```
+
+**Code**
+
+```python
+import os
+import tempfile
+
+folder = tempfile.mkdtemp()                    # a fresh, empty folder
+path = os.path.join(folder, "notes.txt")
+
+with open(path, "w") as file:                  # "w" = write (creates the file)
+    file.write("Buy milk\n")
+    file.write("Call Ravi\n")
+
+print("Closed after writing?", file.closed)
+
+with open(path) as file:                       # default mode "r" = read
+    for line in file:
+        print("Task:", line.strip())
+
+print("Closed after reading?", file.closed)
+
+os.remove(path)                                # clean up
+os.rmdir(folder)
+```
+
+**Output:**
+
+```text
+Closed after writing? True
+Task: Buy milk
+Task: Call Ravi
+Closed after reading? True
+```
+
+**Fact (why this program):** Without `with`, you must call `file.close()` yourself, and if an error happens first, the file stays open (and written data may not be saved). `with open()` closes the file as soon as the block ends, **even after an error**. Always prefer it.
+
+</details>
+
+### Program 79
+
+**Task:** Write a context manager **without a class**, using `@contextmanager` from `contextlib`. `step(name)` prints `"[start] <name>"` before the block and `"[end] <name>"` after it, and gives the name in capitals to `as`. Use it once normally, and once with an error inside, to show that `"[end]"` still prints.
+
+**Level:** 🟡 Medium
+
+*Developer use: Quick setup/cleanup helpers, such as timing a code block, opening and closing a DB session, or changing directory and coming back, without writing a full class.*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Import `contextmanager` from `contextlib`.
+2. Decorate a generator function `step(name)` with `@contextmanager`.
+3. Before `yield` → print `[start]` (this acts like `__enter__`).
+4. `yield name.upper()` → this value goes to `as`.
+5. Put `[end]` in a `finally` block after `yield` (this acts like `__exit__`), so it runs even after an error.
+
+**Program flow**
+
+```text
+with step("load data") as label → code before yield → "[start] load data"
+                                → yield "LOAD DATA" → label = "LOAD DATA"
+  block                         → "Working on LOAD DATA"
+end of block                    → finally           → "[end] load data"
+
+with step("train model")        → "[start] train model"
+  raise RuntimeError            → finally still runs → "[end] train model"
+except outside                  → "Error: Out of memory"
+```
+
+**Pseudocode**
+
+```text
+@contextmanager
+GENERATOR step(name):
+    PRINT "[start]", name       // like __enter__
+    TRY
+        YIELD name in capitals  // value for "as"; the with-block runs here
+    FINALLY
+        PRINT "[end]", name     // like __exit__, always runs
+
+WITH step("load data") AS label:
+    PRINT "Working on", label
+
+TRY
+    WITH step("train model"):  RAISE RuntimeError "Out of memory"
+CATCH RuntimeError AS error
+    PRINT "Error:", error
+```
+
+**Code**
+
+```python
+from contextlib import contextmanager
+
+
+@contextmanager
+def step(name):
+    print(f"[start] {name}")         # runs like __enter__
+    try:
+        yield name.upper()           # value given to "as"
+    finally:
+        print(f"[end] {name}")       # runs like __exit__, even after an error
+
+
+with step("load data") as label:
+    print("Working on", label)
+
+try:
+    with step("train model"):
+        raise RuntimeError("Out of memory")
+except RuntimeError as error:
+    print("Error:", error)
+```
+
+**Output:**
+
+```text
+[start] load data
+Working on LOAD DATA
+[end] load data
+[start] train model
+[end] train model
+Error: Out of memory
+```
+
+**Fact (why this program):** `@contextmanager` turns a generator into a context manager. The code **before** `yield` is the setup, and the code **after** it is the cleanup. The `try/finally` around `yield` is important: without it, an error inside the `with` block would skip the cleanup.
+
+</details>
+
+### Program 80
+
+**Task:** Create a `Database` class that works like a transaction. Inside a `with db:` block, `insert(row)` adds rows to a `pending` list. In `__exit__`, if there was **no error**, commit the pending rows to `saved`. If there **was** an error, roll back (throw away the pending rows). Run one successful block and one that fails, then print the saved rows.
+
+**Level:** 🟡 Medium
+
+*Developer use: Database transactions in SQLAlchemy, Django and sqlite3 (`with connection:`), which commit on success and roll back on error automatically.*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. `__init__` → `saved = []` and `pending = []`.
+2. `__enter__` → print "Transaction started", clear `pending`, return `self`.
+3. `insert(row)` → append to `pending`.
+4. `__exit__` → if `exc_type is None`, add `pending` to `saved` and print "Commit". Otherwise print "Rollback" with the error.
+5. Clear `pending` and return `False`, so the error still reaches the caller.
+
+**Program flow**
+
+```text
+with db:  insert order-1, order-2 → no error → __exit__(None…) → Commit → saved = [order-1, order-2]
+with db:  insert order-3 → raise ValueError → __exit__(ValueError…) → Rollback → saved unchanged
+except ValueError outside → pass
+print saved → ['order-1', 'order-2']
+```
+
+**Pseudocode**
+
+```text
+CLASS Database:
+    __init__():   saved = [], pending = []
+    __enter__():  PRINT "Transaction started"; pending = []; RETURN self
+    insert(row):  ADD row TO pending
+    __exit__(exc_type, exc_value, traceback):
+        IF exc_type is None:  ADD pending TO saved; PRINT "Commit:", pending
+        ELSE:                 PRINT "Rollback:", pending, exc_value
+        pending = []
+        RETURN False          // don't hide the error
+
+WITH db:  insert "order-1"; insert "order-2"
+TRY
+    WITH db:  insert "order-3"; RAISE ValueError "Payment failed"
+CATCH ValueError:  do nothing
+PRINT db.saved
+```
+
+**Code**
+
+```python
+class Database:
+    def __init__(self):
+        self.saved = []              # rows that are really stored
+        self.pending = []            # rows waiting for commit
+
+    def __enter__(self):
+        print("Transaction started")
+        self.pending = []
+        return self
+
+    def insert(self, row):
+        self.pending.append(row)
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if exc_type is None:
+            self.saved.extend(self.pending)
+            print("Commit:", self.pending)
+        else:
+            print(f"Rollback: {self.pending} ({exc_value})")
+        self.pending = []
+        return False                 # don't hide the error
+
+
+db = Database()
+
+with db:
+    db.insert("order-1")
+    db.insert("order-2")
+
+try:
+    with db:
+        db.insert("order-3")
+        raise ValueError("Payment failed")
+except ValueError:
+    pass
+
+print("Saved rows:", db.saved)
+```
+
+**Output:**
+
+```text
+Transaction started
+Commit: ['order-1', 'order-2']
+Transaction started
+Rollback: ['order-3'] (Payment failed)
+Saved rows: ['order-1', 'order-2']
+```
+
+**Fact (why this program):** `__exit__` receives the error details. `exc_type` is `None` when the block finished normally, which is how the manager knows whether to **commit** or **roll back**. Because of this, the half-finished order (`order-3`) is never saved, which keeps the data consistent.
+
+</details>
+
+### Program 81
+
+**Task:** Create a `TempSetting` context manager that changes one value in a global `settings` dict inside the block and **always puts the old value back** afterwards. It also takes an optional `ignore` exception type: if that error happens inside the block, `__exit__` prints it and **suppresses** it by returning `True`. Any other error must still be raised.
+
+**Level:** 🔴 Difficult
+
+*Developer use: Tests that temporarily turn on debug mode or change an environment variable (like `unittest.mock.patch`), and `contextlib.suppress()` for ignoring one expected error.*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. `__init__(key, value, ignore=None)` → store all three.
+2. `__enter__` → save the old value in `self.old`, set the new value, return `settings`.
+3. `__exit__` → always restore `settings[key] = self.old` first.
+4. If an error happened and it is a subclass of `ignore`, print it and `return True` (suppress it).
+5. Otherwise `return False`, so the error continues.
+
+**Program flow**
+
+```text
+with TempSetting("debug", True)          → debug = True inside → restored to False after
+with TempSetting(..., ignore=KeyError)   → settings["missing"] raises KeyError
+                                         → __exit__: restore, KeyError matches → return True → error hidden
+                                         → program continues
+with TempSetting(..., ignore=KeyError)   → raise ValueError → restore, no match → return False
+except ValueError outside                → "Not ignored: Wrong value"
+```
+
+**Pseudocode**
+
+```text
+settings = {"debug": False}
+
+CLASS TempSetting:
+    __init__(key, value, ignore = None)
+    __enter__():
+        old = settings[key]
+        settings[key] = value
+        RETURN settings
+    __exit__(exc_type, exc_value, traceback):
+        settings[key] = old                     // always restore
+        IF an error happened AND it is the ignore type:
+            PRINT "Ignored:", exc_value
+            RETURN True                         // hide the error
+        RETURN False                            // let other errors continue
+```
+
+**Code**
+
+```python
+settings = {"debug": False}
+
+
+class TempSetting:
+    """Change one setting inside the block, then put it back."""
+
+    def __init__(self, key, value, ignore=None):
+        self.key = key
+        self.value = value
+        self.ignore = ignore         # an exception type to swallow
+
+    def __enter__(self):
+        self.old = settings[self.key]
+        settings[self.key] = self.value
+        return settings
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        settings[self.key] = self.old            # always restore
+        if exc_type and self.ignore and issubclass(exc_type, self.ignore):
+            print("Ignored:", exc_value)
+            return True                          # True = hide this error
+        return False
+
+
+with TempSetting("debug", True) as current:
+    print("Inside:", current)
+print("After:", settings)
+
+with TempSetting("debug", True, ignore=KeyError):
+    print("Looking up a missing key...")
+    settings["missing"]
+print("Program continues:", settings)
+
+try:
+    with TempSetting("debug", True, ignore=KeyError):
+        raise ValueError("Wrong value")
+except ValueError as error:
+    print("Not ignored:", error, settings)
+```
+
+**Output:**
+
+```text
+Inside: {'debug': True}
+After: {'debug': False}
+Looking up a missing key...
+Ignored: 'missing'
+Program continues: {'debug': False}
+Not ignored: Wrong value {'debug': False}
+```
+
+**Fact (why this program):** The return value of `__exit__` decides what happens to an error: `True` **swallows** it, and `False` (or `None`) lets it continue. Only suppress errors you expect, as `contextlib.suppress(KeyError)` does. Restoring the old value **before** that check means the setting is put back in every case.
+
+</details>
+
 ## Asyncio
 
 Running waiting tasks at the same time with `async` and `await`.
+
+### Program 82
+
+**Task:** Write the simplest async program: an `async def greet()` that prints `"Hello..."`, waits 1 second with `await asyncio.sleep(1)`, then prints `"...World!"`. First call `greet()` without running it and print the type of what you get back. Then run it properly with `asyncio.run()`.
+
+**Level:** 🟢 Simple
+
+*Developer use: The starting point of every async app. FastAPI endpoints, async database drivers and HTTP clients like `httpx` are all `async def` functions.*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. `import asyncio`.
+2. `async def greet()` → print, `await asyncio.sleep(1)`, print.
+3. `result = greet()` → this only creates a **coroutine object**. Print its type, then `close()` it.
+4. `asyncio.run(greet())` → this actually runs it.
+
+**Program flow**
+
+```text
+greet()               → creates a coroutine object, runs nothing → "coroutine"
+asyncio.run(greet())  → starts the event loop → "Hello..."
+                      → await sleep(1)        → pauses 1 second
+                      → resumes               → "...World!"
+```
+
+**Pseudocode**
+
+```text
+IMPORT asyncio
+
+ASYNC FUNCTION greet():
+    PRINT "Hello..."
+    AWAIT sleep 1 second      // pause here
+    PRINT "...World!"
+
+result = greet()              // does NOT run; just a coroutine object
+PRINT type of result          // coroutine
+
+RUN greet()                   // really runs it
+```
+
+**Code**
+
+```python
+import asyncio
+
+
+async def greet():
+    print("Hello...")
+    await asyncio.sleep(1)       # pause for 1 second without blocking
+    print("...World!")
+
+
+result = greet()                 # calling it does NOT run it
+print(type(result).__name__)     # coroutine
+result.close()                   # we won't use this one
+
+asyncio.run(greet())             # this really runs it
+```
+
+**Output:**
+
+```text
+coroutine
+Hello...
+...World!
+```
+
+**Fact (why this program):** Calling an `async def` function doesn't run its body. It returns a **coroutine** object, a paused task waiting to be started. It runs only when you `await` it or pass it to `asyncio.run()`. Forgetting `await` is the most common async bug, and Python warns `coroutine ... was never awaited`.
+
+</details>
 
 ### Program 55
 
@@ -3023,6 +5579,278 @@ Toasting bread...
 ```
 
 **Fact (why this program):** `async def` makes a function that can pause. `await` pauses it until the result is ready, and lets other tasks run meanwhile. Both waits happen at the same time, so the whole program takes about **1 second, not 2**. Use asyncio for waiting work like network calls, not heavy calculations.
+
+</details>
+
+### Program 83
+
+**Task:** Write `async def fetch(api, seconds)` that pretends to call an API by sleeping for `seconds`, then returns `"<api> done in <seconds>s"`. Call three APIs (`users` 1s, `orders` 2s, `payments` 1.5s) together with `asyncio.gather()`. Print each result and the total time, rounded to whole seconds.
+
+**Level:** 🟡 Medium
+
+*Developer use: A dashboard or backend endpoint that calls several microservices or APIs at once, instead of one after another.*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. `fetch(api, seconds)` → `await asyncio.sleep(seconds)`, then return the message.
+2. In `main()`, note the start time with `time.perf_counter()`.
+3. `await asyncio.gather(...)` with the three `fetch()` calls.
+4. Print each result, then the rounded total time.
+
+**Program flow**
+
+```text
+gather starts all 3 at once:
+  users    → sleeps 1s
+  orders   → sleeps 2s     ← the longest
+  payments → sleeps 1.5s
+all done after ~2s  → results in the same order as passed in
+total time          → 2 seconds (not 1 + 2 + 1.5 = 4.5)
+```
+
+**Pseudocode**
+
+```text
+ASYNC FUNCTION fetch(api, seconds):
+    AWAIT sleep seconds
+    RETURN "<api> done in <seconds>s"
+
+ASYNC FUNCTION main():
+    start = now
+    results = AWAIT run together fetch("users",1), fetch("orders",2), fetch("payments",1.5)
+    FOR EACH result:  PRINT result
+    PRINT "Total time:", round(now - start)    // 2
+
+RUN main()
+```
+
+**Code**
+
+```python
+import asyncio
+import time
+
+
+async def fetch(api, seconds):
+    await asyncio.sleep(seconds)          # pretend network delay
+    return f"{api} done in {seconds}s"
+
+
+async def main():
+    start = time.perf_counter()
+    results = await asyncio.gather(
+        fetch("users", 1),
+        fetch("orders", 2),
+        fetch("payments", 1.5),
+    )
+    total = time.perf_counter() - start
+    for result in results:
+        print(result)
+    print("Total time:", round(total), "seconds")   # ~2, not 4.5
+
+
+asyncio.run(main())
+```
+
+**Output:**
+
+```text
+users done in 1s
+orders done in 2s
+payments done in 1.5s
+Total time: 2 seconds
+```
+
+**Fact (why this program):** With `gather()`, the total time is the time of the **slowest** call (2s), not the sum of all of them (4.5s). The results come back **in the order you passed the calls**, not the order they finished, so you can unpack them safely.
+
+</details>
+
+### Program 84
+
+**Task:** Use `asyncio.create_task()` to start `send_email()` (which takes 1 second) **in the background**. While the email is sending, keep handling a request in three short steps of 0.3 seconds. At the end, `await` the task and print its status.
+
+**Level:** 🟡 Medium
+
+*Developer use: Starting slow work (sending emails, writing audit logs, warming a cache) in the background while the main code keeps going.*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. `send_email(to)` → print "Sending...", `await asyncio.sleep(1)`, print "Email sent", return `"sent"`.
+2. In `main()`, `task = asyncio.create_task(send_email(...))` → schedules it to start.
+3. Loop 3 times: print a step, then `await asyncio.sleep(0.3)` (this gives the task a chance to run).
+4. `status = await task` → wait for it to finish, then print the status.
+
+**Program flow**
+
+```text
+create_task(...)  → task scheduled, not started yet
+step 1            → print → await sleep(0.3) → the event loop starts the task → "Sending email..."
+step 2 (0.3s)     → print
+step 3 (0.6s)     → print
+await task (0.9s) → the email is still sleeping → wait
+1.0s              → "Email sent to ..." → status = "sent"
+```
+
+**Pseudocode**
+
+```text
+ASYNC FUNCTION send_email(to):
+    PRINT "Sending email to", to
+    AWAIT sleep 1
+    PRINT "Email sent to", to
+    RETURN "sent"
+
+ASYNC FUNCTION main():
+    task = START IN BACKGROUND send_email("asha@example.com")
+    FOR step FROM 1 TO 3:
+        PRINT "Handling request, step", step
+        AWAIT sleep 0.3
+    status = AWAIT task
+    PRINT "Email status:", status
+```
+
+**Code**
+
+```python
+import asyncio
+
+
+async def send_email(to):
+    print(f"Sending email to {to}...")
+    await asyncio.sleep(1)
+    print(f"Email sent to {to}")
+    return "sent"
+
+
+async def main():
+    task = asyncio.create_task(send_email("asha@example.com"))   # starts in background
+
+    for step in range(1, 4):
+        print("Handling request, step", step)
+        await asyncio.sleep(0.3)      # other work, lets the task run too
+
+    status = await task               # wait for the email to finish
+    print("Email status:", status)
+
+
+asyncio.run(main())
+```
+
+**Output:**
+
+```text
+Handling request, step 1
+Sending email to asha@example.com...
+Handling request, step 2
+Handling request, step 3
+Email sent to asha@example.com
+Email status: sent
+```
+
+**Fact (why this program):** `await some_coroutine()` waits right there, but `create_task()` **starts the work alongside** your code and gives you a handle to await later. The task only gets to run when your code reaches an `await` (asyncio switches tasks only at `await`). That's why "Sending email" prints after step 1. Keep a reference to the task, or it may be garbage-collected.
+
+</details>
+
+### Program 85
+
+**Task:** Download 3 files with a **limit of 2 at a time**, using `asyncio.Semaphore(2)`. Each `download(name, seconds, limit)` waits for a free slot with `async with limit:`, then prints when it starts and finishes. Then try to download `huge.zip` (5 seconds) with `asyncio.wait_for(..., timeout=0.5)`, and handle the timeout.
+
+**Level:** 🔴 Difficult
+
+*Developer use: Web scrapers and API clients that limit how many requests run at once (to respect rate limits) and cancel requests that take too long.*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. `download()` → `async with limit:` (wait for a slot), print "Start", sleep, print "Done", return the name.
+2. In `main()`, `limit = asyncio.Semaphore(2)`.
+3. `gather()` the three downloads: a.pdf 0.2s, b.pdf 0.4s, c.pdf 0.3s.
+4. `await asyncio.wait_for(download("huge.zip", 5, limit), timeout=0.5)` inside `try`.
+5. `except asyncio.TimeoutError` → print a cancelled message.
+
+**Program flow**
+
+```text
+Semaphore(2) → 2 free slots
+0.0s  Start a.pdf (slot 1), Start b.pdf (slot 2), c.pdf waits
+0.2s  Done a.pdf → slot free → Start c.pdf
+0.4s  Done b.pdf
+0.5s  Done c.pdf → Downloaded: ['a.pdf', 'b.pdf', 'c.pdf']
+huge.zip: Start → still sleeping at 0.5s → wait_for cancels it → TimeoutError
+```
+
+**Pseudocode**
+
+```text
+ASYNC FUNCTION download(name, seconds, limit):
+    ASYNC WITH limit:           // wait for a free slot
+        PRINT "Start", name
+        AWAIT sleep seconds
+        PRINT "Done ", name
+        RETURN name
+
+ASYNC FUNCTION main():
+    limit = Semaphore(2)
+    results = AWAIT run together download(a.pdf), download(b.pdf), download(c.pdf)
+    PRINT "Downloaded:", results
+    TRY
+        AWAIT download("huge.zip", 5) WITH TIMEOUT 0.5 seconds
+    CATCH TimeoutError
+        PRINT "huge.zip took too long, cancelled"
+```
+
+**Code**
+
+```python
+import asyncio
+
+
+async def download(name, seconds, limit):
+    async with limit:                         # wait for a free slot
+        print(f"Start {name}")
+        await asyncio.sleep(seconds)
+        print(f"Done  {name}")
+        return name
+
+
+async def main():
+    limit = asyncio.Semaphore(2)              # at most 2 downloads at once
+    files = [("a.pdf", 0.2), ("b.pdf", 0.4), ("c.pdf", 0.3)]
+    results = await asyncio.gather(*(download(n, s, limit) for n, s in files))
+    print("Downloaded:", results)
+
+    try:
+        await asyncio.wait_for(download("huge.zip", 5, limit), timeout=0.5)
+    except asyncio.TimeoutError:
+        print("huge.zip took too long, cancelled")
+
+
+asyncio.run(main())
+```
+
+**Output:**
+
+```text
+Start a.pdf
+Start b.pdf
+Done  a.pdf
+Start c.pdf
+Done  b.pdf
+Done  c.pdf
+Downloaded: ['a.pdf', 'b.pdf', 'c.pdf']
+Start huge.zip
+huge.zip took too long, cancelled
+```
+
+**Fact (why this program):** A `Semaphore(2)` is a counter of free slots. `async with` takes a slot and gives it back when the block ends, so no more than 2 downloads ever run at once. `wait_for()` **cancels** a task that runs past its timeout and raises `TimeoutError`. Without timeouts, one slow server can hang your whole program.
 
 </details>
 
