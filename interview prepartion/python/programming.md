@@ -384,6 +384,8 @@ One class, no inheritance. Each program adds methods that read or change the obj
 
 **Task:** Create a `Car` class that stores a `color`. Add a `show()` method that returns the color. Create a red car and a blue car, and print each car's color using `show()`.
 
+**Level:** 🟢 Simple
+
 *From E3: What is an instance of a class, and which instance does `self` refer to inside a method?*
 
 <details>
@@ -449,6 +451,8 @@ blue
 ### Program 2
 
 **Task:** Create a `Rectangle` class that stores a `length`. Add `get_length()`, which needs no arguments, and `area(width)`, which needs a width. Create a rectangle of length 10 and print its length and its area for width 5.
+
+**Level:** 🟢 Simple
 
 *From E9: When calling a method on a Python class or object, how do you decide which arguments to pass and which ones Python supplies automatically?*
 
@@ -542,6 +546,8 @@ print(first.area(50))  # 1500
 
 **Task:** Create a `Student` class that stores a `name`. Add a method `same_as(other)` that returns `True` if `other` is the same object as `self`. Create a student `"Asha"` and check `first.same_as(first)`.
 
+**Level:** 🟡 Medium
+
 *From E4: What do you mean by `self` and instance?*
 
 <details>
@@ -600,6 +606,8 @@ True
 ### Program 4
 
 **Task:** Show that a list written in the class body is shared by all objects, but a list created in `__init__` is not. Use a `Team` class with `members` (class level) and `tasks` (in `__init__`).
+
+**Level:** 🟡 Medium
 
 *From E10: Is a mutable class attribute shared?*
 
@@ -666,6 +674,8 @@ print(b.tasks)    # []: not shared
 ### Program 5
 
 **Task:** Create a `BankAccount` class with `owner`, `balance`, a `history` **list**, and a `history_dictionary` **dict**. `deposit(person, amount)` and `withdraw(person, amount)` change the balance, add the amount to the list, and save it in the dict under the person's name (negative for a withdrawal). Add methods to read the balance, change the owner, read the owner, read the history list, and read the history dictionary. Start with `"Asha"` and 1000, Asha deposits 500, Raja withdraws 200, then change the owner to `"Ben"` and print everything.
+
+**Level:** 🔴 Difficult
 
 *From E12: How can you read and modify the state of an object created from a Python class? Show six different examples in a table with Task, Method Call, and Result columns.*
 
@@ -803,6 +813,8 @@ One class, no extra methods. Practise required and default `__init__` arguments.
 
 **Task:** Create a `Student` class with three attributes: `name`, `age`, and `city`. Require `name` and `age` when creating an object, and use `"Delhi"` as the default city.
 
+**Level:** 🟢 Simple
+
 *From E5: When creating an object in Python, how do you know which arguments to pass to the class?*
 
 <details>
@@ -869,6 +881,8 @@ Mumbai
 ### Program 13
 
 **Task:** Create a `Coffee` class with `name` and `size`, where `size` defaults to `"medium"`. Create a Latte without a size and a Mocha with `"large"`, and print both sizes.
+
+**Level:** 🟢 Simple
 
 *From E7: How do you set a default value for a parameter in Python's `__init__` method, and what happens when you pass a different value while creating an object?*
 
@@ -940,6 +954,8 @@ Methods that get `self`, `cls`, or neither.
 - a static method `is_valid(size)` that returns `True` if the size is positive, otherwise `False`
 
 Then print `Pizza(8).describe()`, the size of `Pizza.large()`, and `Pizza.is_valid(-1)`. Expected output: `8 inch`, `12`, `False`.
+
+**Level:** 🟢 Simple
 
 *From E15: What is the difference between instance, class, and static methods?*
 
@@ -1019,6 +1035,8 @@ False
 
 **Task:** Create a `Student` class with a class attribute `school = "City School"`. Add a class method `rename_school(name)`. Create two students, rename the school once, and print both students' school.
 
+**Level:** 🟡 Medium
+
 *From E16: Can a class method read and update attributes stored on the class?*
 
 <details>
@@ -1084,6 +1102,8 @@ Green School
 ### Program 19
 
 **Task:** Create a `User` class that stores a `name`. Add a class method `from_dict(data)` that creates a user from a dict. Create an `Admin` subclass and call `Admin.from_dict({"name": "Asha"})`. Print the type of the object you get.
+
+**Level:** 🔴 Difficult
 
 *From E17: Why use a class method if we have instance methods?*
 
@@ -1151,6 +1171,8 @@ A parent and a child class, from simplest to hardest.
 
 **Task:** Create an `Animal` class with an `eat()` method. Create a `Dog` subclass of `Animal` with its own `bark()` method. Create a dog and call both methods.
 
+**Level:** 🟢 Simple
+
 *From E13: How do you declare a subclass in Python? Show the syntax and where to put the parent class name.*
 
 <details>
@@ -1213,6 +1235,8 @@ woof
 ### Program 8
 
 **Task:** Create a `Vehicle` class that stores a `brand`. Create a `Car` class that inherits from `Vehicle` and has **no** `__init__`. Create a car with brand `"Toyota"` and print its brand.
+
+**Level:** 🟢 Simple
 
 *From E6, scenario 1: When creating an object of a child class in Python, how do you decide which arguments to pass?*
 
@@ -1293,6 +1317,8 @@ Toyota
 
 **Task:** Create a `Vehicle` class that stores a `brand`. Create a `Truck` child class whose `__init__` takes `brand` and `load`, with `"10 tons"` as the default load. Create one truck without a load and one with `"20 tons"`.
 
+**Level:** 🟡 Medium
+
 *From E6, scenario 4: When creating an object of a child class in Python, how do you decide which arguments to pass?*
 
 <details>
@@ -1360,6 +1386,8 @@ print(t2.load)  # 20 tons
 ### Program 16
 
 **Task:** Create a `Greeter` class with `hello()` and a method `twice()` that calls `hello()` through `self`. Create a `Loud` child that calls the parent's `hello()` with `super()` and returns it in capitals. Call `hello` in six different ways.
+
+**Level:** 🟡 Medium
 
 *From E14: What are the different ways to call a Python instance method after an object is created?*
 
@@ -1442,6 +1470,8 @@ HELLO
 
 **Task:** Create a `Vehicle` class with `brand` and an optional `color` (default `"white"`). Create an `ElectricCar` child class that takes `battery` and forwards everything else to the parent using `*args, **kwargs`. Create a red Tesla with a 75 kWh battery.
 
+**Level:** 🟡 Medium
+
 *From E6, scenario 5: When creating an object of a child class in Python, how do you decide which arguments to pass?*
 
 <details>
@@ -1508,6 +1538,8 @@ print(ev.battery, ev.brand, ev.color)  # 75 kWh Tesla red
 ### Program 21
 
 **Task:** Create a `Parent` class with a class attribute `role`, an `__init__` that stores `name`, a `show()` method, and a class method `create()`. Create a `Child` class that uses every form of `super()`: parent setup, parent method, the old `super(Child, self)` style, parent class attribute, and parent class method.
+
+**Level:** 🔴 Difficult
 
 *From E19: What are the different forms of `super()`?*
 
@@ -1612,6 +1644,8 @@ new
 
 **Task:** Create a `Vehicle` class that stores a `brand`. Create a `Car` child class whose `__init__` takes `brand` and `seats`, sends `brand` to the parent with `super()`, and stores `seats` itself. Create a Honda with 5 seats and print both values.
 
+**Level:** 🟡 Medium
+
 *From E6, scenario 2: When creating an object of a child class in Python, how do you decide which arguments to pass?*
 
 <details>
@@ -1680,6 +1714,8 @@ A class with more than one parent, and the order Python searches them (MRO).
 ### Program 22
 
 **Task:** Create a `LogMixin` whose `save()` adds `"log, "` before the parent's `save()`. Create two unrelated classes, `Model` and `Report`, each with its own `save()`. Mix the logger into both and print the MRO of one.
+
+**Level:** 🟡 Medium
 
 *From E20: What is multiple inheritance and MRO? When are mixins used?*
 
@@ -1760,6 +1796,8 @@ log, report saved
 ### Program 23
 
 **Task:** Create the diamond: `A` at the top, `B` and `C` both inheriting from `A`, and `D` inheriting from `B` and `C`. Each `show()` prints its class name and calls `super().show()`. Call `D().show()`.
+
+**Level:** 🔴 Difficult
 
 *From E21: What is the diamond inheritance problem?*
 
@@ -1844,6 +1882,8 @@ Built-in, user-defined and anonymous functions, and using a `lambda` as a sortin
 
 **Task:** Show the three types of functions in Python: a **built-in** function (use `len()` and `max()` on `[4, 9, 1]`), a **user-defined** function `add(a, b)` written with `def`, and an **anonymous** function (a `lambda`) that squares a number.
 
+**Level:** 🟢 Simple
+
 *From E22: What is a lambda function, and when should you avoid it?*
 
 <details>
@@ -1910,11 +1950,79 @@ print(square(4))         # 16
 
 **Fact (why this program):** Built-in functions are ready to use. User-defined functions are written with `def` and have a name. A lambda is a one-line function with no name, best for short jobs like a sorting key.
 
+**Same program using a class inside a class**
+
+An outer class `FunctionTypes` groups three inner (nested) classes, one for each type of function. You reach an inner class through the outer one: `FunctionTypes.BuiltIn`.
+
+```text
+FunctionTypes                 → outer class (a container)
+├── BuiltIn     → show()      → uses len() and max()
+├── UserDefined → add(a, b)   → your own def
+└── Anonymous   → square      → a lambda stored on the class
+```
+
+```python
+class FunctionTypes:
+    """Outer class: groups the three types of functions."""
+
+    class BuiltIn:
+        """Inner class 1: built-in functions."""
+
+        def show(self, numbers):
+            print("Length:", len(numbers))   # built-in len()
+            print("Largest:", max(numbers))  # built-in max()
+
+    class UserDefined:
+        """Inner class 2: a function you write with def."""
+
+        def add(self, a, b):
+            return a + b
+
+    class Anonymous:
+        """Inner class 3: a lambda (no name of its own)."""
+
+        square = staticmethod(lambda x: x * x)
+
+    def run_all(self):
+        # The outer class creates objects of its inner classes
+        self.BuiltIn().show([4, 9, 1])
+        print("Add:", self.UserDefined().add(2, 3))
+        print("Square:", self.Anonymous.square(4))
+
+
+# Use everything through the outer class
+demo = FunctionTypes()
+demo.run_all()
+
+# Or use one inner class directly
+adder = FunctionTypes.UserDefined()
+print("Direct add:", adder.add(10, 20))
+```
+
+**Output:**
+
+```text
+Length: 3
+Largest: 9
+Add: 5
+Square: 16
+Direct add: 30
+```
+
+**Points to remember**
+
+- An inner class is written inside the outer class body. You reach it as `Outer.Inner` or `self.Inner`.
+- An inner class object doesn't get the outer object automatically. Pass it in yourself if you need it.
+- `staticmethod(lambda ...)` stops Python from passing `self` to the lambda, so `square(4)` gets only `4`.
+- Use nested classes to **group** small helper classes that only make sense inside the outer class. If the inner class is big or used elsewhere, write it as a normal top-level class.
+
 </details>
 
 ### Program 44
 
 **Task:** You have three ML models with their accuracy. Sort them from highest to lowest accuracy using `sorted()` with a `lambda`, print each one, then find the best model with `max()`.
+
+**Level:** 🟡 Medium
 
 *From E23: How do you find the best model and sort by several fields using a lambda function?*
 
@@ -1991,6 +2099,8 @@ Special methods that Python calls for you when you use `print()`, `len()` or `+`
 ### Program 45
 
 **Task:** Create a `Cart` class that stores a list of items. Add `__str__` so `print(cart)` shows `"Cart with N items"`, `__len__` so `len(cart)` works, and `__add__` so `cart1 + cart2` makes a new cart with all the items.
+
+**Level:** 🟡 Medium
 
 *From E26: What are dunder/magic methods? Give examples.*
 
@@ -2076,6 +2186,8 @@ A decorator adds extra work around a function or class without changing its code
 
 **Task:** Write a decorator `greet_decorator` that prints `"Before the function"` before and `"After the function"` after the function it wraps. Use it on `say_hello()`, which prints `"Hello!"`.
 
+**Level:** 🟢 Simple
+
 *From E24: What is a decorator, and how do you write one?*
 
 <details>
@@ -2150,6 +2262,8 @@ After the function
 ### Program 47
 
 **Task:** Write a **function decorator** `shout` that makes a greeting function return its text in capitals. Then write a **class decorator** `add_school` that adds `school = "City School"` to a `Student` class.
+
+**Level:** 🟡 Medium
 
 *From E25: What is the difference between a function decorator and a class decorator?*
 
@@ -2251,6 +2365,8 @@ Functions that give values one at a time with `yield`.
 
 **Task:** Write a generator `count_up_to(limit)` that gives the numbers from 1 to `limit`, one at a time, using `yield`. Get the first three values with `next()`, then turn a new generator into a list.
 
+**Level:** 🟢 Simple
+
 *From E29: What is a generator, and how does `yield` work?*
 
 <details>
@@ -2325,6 +2441,8 @@ print(list(count_up_to(5)))   # [1, 2, 3, 4, 5]
 
 **Task:** Build the squares of 0 to 999,999 two ways: as a list and as a generator. Compare their memory size, add up the generator's values, and show that a generator can only be used once.
 
+**Level:** 🟡 Medium
+
 *From E30: When would you use a generator instead of a list?*
 
 <details>
@@ -2396,6 +2514,8 @@ True
 ### Program 50
 
 **Task:** Write `get_with_return()`, which returns `[1, 2, 3]`, and `get_with_yield()`, which yields 1, 2 and 3. Print what each one gives back, and turn the generator into a list.
+
+**Level:** 🟡 Medium
 
 *From E31: What is the difference between `return` and `yield`?*
 
@@ -2474,6 +2594,8 @@ Handling errors, creating your own, and keeping the original cause.
 ### Program 51
 
 **Task:** Write `divide(a, b)` that divides two numbers. Use `try` for the division, `except ZeroDivisionError` to print an error, `else` to print the result, and `finally` to print `"Done"`. Call it with `(10, 2)` and `(10, 0)`.
+
+**Level:** 🟢 Simple
 
 *From E32: How do `try`, `except`, `else`, and `finally` work?*
 
@@ -2554,6 +2676,8 @@ Done
 
 **Task:** Create a custom exception `InsufficientBalanceError`. Write `withdraw(balance, amount)` that raises it when the amount is more than the balance, and otherwise returns the new balance. Withdraw 300 from 1000, then try to withdraw 5000 and catch the error.
 
+**Level:** 🟡 Medium
+
 *From E33: How do you create and raise custom exceptions?*
 
 <details>
@@ -2629,6 +2753,8 @@ Error: Balance 1000 is less than 5000
 ### Program 53
 
 **Task:** Create `InvalidAgeError`. Write `read_age(text)` that converts text to an integer. If `int()` fails with `ValueError`, raise `InvalidAgeError("Age must be a whole number")` **from** the original error. Read `"25"`, then try `"abc"` and print the error and its cause.
+
+**Level:** 🔴 Difficult
 
 *From E34: What is exception chaining using `raise ... from ...`?*
 
@@ -2717,6 +2843,8 @@ Setup and cleanup with `with`, `__enter__` and `__exit__`.
 ### Program 54
 
 **Task:** Create a `Lights` class that prints `"Lights on"` when a `with` block starts and `"Lights off"` when it ends. Use it once normally, and once with an error inside the block, to show that `"Lights off"` still prints.
+
+**Level:** 🟢 Simple
 
 *From E36: What is a context manager, and how does `with` work?*
 
@@ -2811,6 +2939,8 @@ Running waiting tasks at the same time with `async` and `await`.
 ### Program 55
 
 **Task:** Write two `async` functions, `make_tea()` and `make_toast()`. Each prints a starting message, waits 1 second with `await asyncio.sleep(1)`, and returns a "ready" message. Run both together with `asyncio.gather()` and print the results.
+
+**Level:** 🟡 Medium
 
 *From E40: How do `async` and `await` work in Python?*
 
