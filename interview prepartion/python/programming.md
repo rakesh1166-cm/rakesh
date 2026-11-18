@@ -1836,6 +1836,1066 @@ A
 
 </details>
 
+## Functions
+
+Built-in, user-defined and anonymous functions, and using a `lambda` as a sorting key.
+
+### Program 43
+
+**Task:** Show the three types of functions in Python: a **built-in** function (use `len()` and `max()` on `[4, 9, 1]`), a **user-defined** function `add(a, b)` written with `def`, and an **anonymous** function (a `lambda`) that squares a number.
+
+*From E22: What is a lambda function, and when should you avoid it?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Built-in → call `len()` and `max()` on `[4, 9, 1]`.
+2. User-defined → write `def add(a, b)` and call `add(2, 3)`.
+3. Anonymous → write `square = lambda x: x * x` and call `square(4)`.
+
+**Program flow**
+
+```text
+len([4, 9, 1])  → built-in        → 3
+max([4, 9, 1])  → built-in        → 9
+add(2, 3)       → your def        → 5
+square(4)       → lambda, no name → 16
+```
+
+**Pseudocode**
+
+```text
+numbers = [4, 9, 1]
+PRINT length of numbers     // 3
+PRINT largest of numbers    // 9
+
+FUNCTION add(a, b):  RETURN a + b
+PRINT add(2, 3)             // 5
+
+square = FUNCTION(x): RETURN x * x     // no name of its own
+PRINT square(4)             // 16
+```
+
+**Code**
+
+```python
+# 1. Built-in function: comes with Python
+numbers = [4, 9, 1]
+print(len(numbers))      # 3
+print(max(numbers))      # 9
+
+
+# 2. User-defined function: you write it with def
+def add(a, b):
+    return a + b
+
+
+print(add(2, 3))         # 5
+
+# 3. Anonymous function: a lambda has no name
+square = lambda x: x * x
+print(square(4))         # 16
+```
+
+**Output:**
+
+```text
+3
+9
+5
+16
+```
+
+**Fact (why this program):** Built-in functions are ready to use. User-defined functions are written with `def` and have a name. A lambda is a one-line function with no name, best for short jobs like a sorting key.
+
+</details>
+
+### Program 44
+
+**Task:** You have three ML models with their accuracy. Sort them from highest to lowest accuracy using `sorted()` with a `lambda`, print each one, then find the best model with `max()`.
+
+*From E23: How do you find the best model and sort by several fields using a lambda function?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Store the models as a list of dicts with `name` and `accuracy`.
+2. `sorted(..., key=lambda model: model["accuracy"], reverse=True)` → highest first.
+3. Print each model.
+4. `max(..., key=...)` → the best model.
+
+**Program flow**
+
+```text
+key for each model → 0.91, 0.85, 0.88
+sorted, reverse    → 0.91, 0.88, 0.85 → Random Forest, SVM, Logistic Regression
+max by accuracy    → 0.91             → "Best: Random Forest"
+```
+
+**Pseudocode**
+
+```text
+models = [Random Forest 0.91, Logistic Regression 0.85, SVM 0.88]
+
+by_accuracy = models SORTED BY accuracy, highest first
+FOR EACH model IN by_accuracy:
+    PRINT model.name, model.accuracy
+END FOR
+
+best = model WITH highest accuracy
+PRINT "Best:", best.name    // Best: Random Forest
+```
+
+**Code**
+
+```python
+models = [
+    {"name": "Random Forest", "accuracy": 0.91},
+    {"name": "Logistic Regression", "accuracy": 0.85},
+    {"name": "SVM", "accuracy": 0.88},
+]
+
+by_accuracy = sorted(models, key=lambda model: model["accuracy"], reverse=True)
+
+for model in by_accuracy:
+    print(model["name"], model["accuracy"])
+# Random Forest 0.91
+# SVM 0.88
+# Logistic Regression 0.85
+
+best = max(models, key=lambda model: model["accuracy"])
+print("Best:", best["name"])   # Best: Random Forest
+```
+
+**Output:**
+
+```text
+Random Forest 0.91
+SVM 0.88
+Logistic Regression 0.85
+Best: Random Forest
+```
+
+**Fact (why this program):** `key=` tells `sorted()` and `max()` what to compare. `reverse=True` sorts from highest to lowest. `sorted()` returns a new list and leaves `models` unchanged.
+
+</details>
+
+## Dunder (magic) methods
+
+Special methods that Python calls for you when you use `print()`, `len()` or `+`.
+
+### Program 45
+
+**Task:** Create a `Cart` class that stores a list of items. Add `__str__` so `print(cart)` shows `"Cart with N items"`, `__len__` so `len(cart)` works, and `__add__` so `cart1 + cart2` makes a new cart with all the items.
+
+*From E26: What are dunder/magic methods? Give examples.*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. `__init__` stores `items`.
+2. `__str__` → return `"Cart with <count> items"`.
+3. `__len__` → return the number of items.
+4. `__add__` → return a new `Cart` with both lists joined.
+5. Create two carts, print one, its length, and the two added together.
+
+**Program flow**
+
+```text
+print(cart1)    → Python calls cart1.__str__()       → "Cart with 2 items"
+len(cart1)      → Python calls cart1.__len__()       → 2
+cart1 + cart2   → Python calls cart1.__add__(cart2)  → new Cart with 3 items
+print(both)     → both.__str__()                     → "Cart with 3 items"
+```
+
+**Pseudocode**
+
+```text
+CLASS Cart:
+    init(items):      self.items = items
+    __str__():        RETURN "Cart with " + count of items + " items"
+    __len__():        RETURN count of items
+    __add__(other):   RETURN new Cart(self.items + other.items)
+
+cart1 = Cart(["pen", "book"]);  cart2 = Cart(["bag"])
+PRINT cart1           // Cart with 2 items
+PRINT len(cart1)      // 2
+PRINT cart1 + cart2   // Cart with 3 items
+```
+
+**Code**
+
+```python
+class Cart:
+    def __init__(self, items):
+        self.items = items
+
+    def __str__(self):              # used by print(cart)
+        return f"Cart with {len(self.items)} items"
+
+    def __len__(self):              # used by len(cart)
+        return len(self.items)
+
+    def __add__(self, other):       # used by cart1 + cart2
+        return Cart(self.items + other.items)
+
+
+cart1 = Cart(["pen", "book"])
+cart2 = Cart(["bag"])
+
+print(cart1)               # Cart with 2 items
+print(len(cart1))          # 2
+
+both = cart1 + cart2
+print(both)                # Cart with 3 items
+```
+
+**Output:**
+
+```text
+Cart with 2 items
+2
+Cart with 3 items
+```
+
+**Fact (why this program):** You never call dunder methods yourself. Python calls them for you: `print()` calls `__str__`, `len()` calls `__len__`, and `+` calls `__add__`.
+
+</details>
+
+## Decorators
+
+A decorator adds extra work around a function or class without changing its code.
+
+### Program 46
+
+**Task:** Write a decorator `greet_decorator` that prints `"Before the function"` before and `"After the function"` after the function it wraps. Use it on `say_hello()`, which prints `"Hello!"`.
+
+*From E24: What is a decorator, and how do you write one?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. `greet_decorator(function)` defines an inner `wrapper()`.
+2. `wrapper()` prints "Before…", calls `function()`, then prints "After…".
+3. Return `wrapper`.
+4. Put `@greet_decorator` above `say_hello()` and call it.
+
+**Program flow**
+
+```text
+@greet_decorator      → say_hello = greet_decorator(say_hello) → say_hello is now wrapper
+say_hello()           → wrapper runs  → "Before the function"
+                      → original runs → "Hello!"
+                      → wrapper ends  → "After the function"
+```
+
+**Pseudocode**
+
+```text
+FUNCTION greet_decorator(function):
+    FUNCTION wrapper():
+        PRINT "Before the function"
+        CALL function()
+        PRINT "After the function"
+    RETURN wrapper
+
+@greet_decorator
+FUNCTION say_hello():  PRINT "Hello!"
+
+say_hello()    // Before the function, Hello!, After the function
+```
+
+**Code**
+
+```python
+def greet_decorator(function):
+    def wrapper():
+        print("Before the function")
+        function()
+        print("After the function")
+    return wrapper
+
+
+@greet_decorator
+def say_hello():
+    print("Hello!")
+
+
+say_hello()
+# Before the function
+# Hello!
+# After the function
+```
+
+**Output:**
+
+```text
+Before the function
+Hello!
+After the function
+```
+
+**Fact (why this program):** A decorator adds extra work around a function without changing the function's code. `@greet_decorator` is the same as writing `say_hello = greet_decorator(say_hello)`.
+
+</details>
+
+### Program 47
+
+**Task:** Write a **function decorator** `shout` that makes a greeting function return its text in capitals. Then write a **class decorator** `add_school` that adds `school = "City School"` to a `Student` class.
+
+*From E25: What is the difference between a function decorator and a class decorator?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. `shout(function)` returns a `wrapper(name)` that calls the function and returns `.upper()`.
+2. Use `@shout` on `greet(name)`.
+3. `add_school(cls)` sets `cls.school` and returns the same class.
+4. Use `@add_school` on `Student`, then create a student and print `school`.
+
+**Program flow**
+
+```text
+greet("asha")       → wrapper runs on every call → "hello, asha".upper() → "HELLO, ASHA"
+@add_school         → runs once, when the class is defined → Student.school = "City School"
+Student("Ravi")     → student.school               → "City School"
+```
+
+**Pseudocode**
+
+```text
+FUNCTION shout(function):
+    FUNCTION wrapper(name):  RETURN UPPERCASE(function(name))
+    RETURN wrapper
+
+@shout
+FUNCTION greet(name):  RETURN "hello, " + name
+PRINT greet("asha")        // HELLO, ASHA
+
+FUNCTION add_school(cls):
+    cls.school = "City School"
+    RETURN cls
+
+@add_school
+CLASS Student:  init(name): self.name = name
+PRINT Student("Ravi").school    // City School
+```
+
+**Code**
+
+```python
+# Function decorator: wraps a function, runs on every call
+def shout(function):
+    def wrapper(name):
+        return function(name).upper()
+    return wrapper
+
+
+@shout
+def greet(name):
+    return f"hello, {name}"
+
+
+print(greet("asha"))     # HELLO, ASHA
+
+
+# Class decorator: changes a class once, when it is defined
+def add_school(cls):
+    cls.school = "City School"
+    return cls
+
+
+@add_school
+class Student:
+    def __init__(self, name):
+        self.name = name
+
+
+student = Student("Ravi")
+print(student.school)    # City School
+```
+
+**Output:**
+
+```text
+HELLO, ASHA
+City School
+```
+
+**Fact (why this program):**
+
+| | Function decorator | Class decorator |
+|---|---|---|
+| Receives | A function | A class |
+| Returns | A wrapper function | Usually the same class |
+| Runs | Its wrapper runs **on every call** | Usually **once**, when the class is defined |
+| Example | `@lru_cache` | `@dataclass` |
+
+</details>
+
+## Generators
+
+Functions that give values one at a time with `yield`.
+
+### Program 48
+
+**Task:** Write a generator `count_up_to(limit)` that gives the numbers from 1 to `limit`, one at a time, using `yield`. Get the first three values with `next()`, then turn a new generator into a list.
+
+*From E29: What is a generator, and how does `yield` work?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Start `number` at 1.
+2. While `number <= limit` → `yield number`, then add 1.
+3. Call `next()` three times on one generator.
+4. Print `list(count_up_to(5))`.
+
+**Program flow**
+
+```text
+counter = count_up_to(3) → nothing runs yet
+next(counter)            → runs to the first yield   → 1, pauses
+next(counter)            → continues, number = 2      → 2, pauses
+next(counter)            → continues, number = 3      → 3, pauses
+list(count_up_to(5))     → collects every value       → [1, 2, 3, 4, 5]
+```
+
+**Pseudocode**
+
+```text
+GENERATOR count_up_to(limit):
+    number = 1
+    WHILE number <= limit:
+        YIELD number          // give one value, then pause
+        number = number + 1
+    END WHILE
+
+counter = count_up_to(3)
+PRINT next(counter)    // 1
+PRINT next(counter)    // 2
+PRINT next(counter)    // 3
+PRINT list of count_up_to(5)    // [1, 2, 3, 4, 5]
+```
+
+**Code**
+
+```python
+def count_up_to(limit):
+    number = 1
+    while number <= limit:
+        yield number          # give one value, then pause here
+        number += 1           # continue from here on the next request
+
+
+counter = count_up_to(3)
+print(next(counter))   # 1
+print(next(counter))   # 2
+print(next(counter))   # 3
+
+print(list(count_up_to(5)))   # [1, 2, 3, 4, 5]
+```
+
+**Output:**
+
+```text
+1
+2
+3
+[1, 2, 3, 4, 5]
+```
+
+**Fact (why this program):** `yield` gives back one value and **pauses** the function. It remembers where it stopped, and the next `next()` continues from there.
+
+</details>
+
+### Program 49
+
+**Task:** Build the squares of 0 to 999,999 two ways: as a list and as a generator. Compare their memory size, add up the generator's values, and show that a generator can only be used once.
+
+*From E30: When would you use a generator instead of a list?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. List → `[n * n for n in range(1_000_000)]` builds every value now.
+2. Generator → `(n * n for n in range(1_000_000))` builds values one at a time.
+3. Compare sizes with `sys.getsizeof()`.
+4. `sum()` the generator twice → the second time it's already used up.
+5. Read one item from the list by index.
+
+**Program flow**
+
+```text
+getsizeof(list) > 1,000,000?  → YES → list stores every value
+getsizeof(gen) < 1,000?       → YES → generator stores almost nothing
+sum(gen) first time           → 333332833333500000
+sum(gen) second time          → 0   → already used up
+squares_list[10]              → 100 → list allows indexing
+```
+
+**Pseudocode**
+
+```text
+IMPORT sys
+squares_list = [n * n FOR n FROM 0 TO 999,999]    // stored now
+squares_gen  = (n * n FOR n FROM 0 TO 999,999)    // made one by one
+
+PRINT size of squares_list > 1,000,000    // True
+PRINT size of squares_gen < 1,000         // True
+PRINT sum of squares_gen                  // 333332833333500000
+PRINT sum of squares_gen                  // 0
+PRINT squares_list[10]                    // 100
+```
+
+**Code**
+
+```python
+import sys
+
+squares_list = [n * n for n in range(1_000_000)]   # all values stored now
+squares_gen = (n * n for n in range(1_000_000))    # values made one by one
+
+print(sys.getsizeof(squares_list) > 1_000_000)     # True: millions of bytes
+print(sys.getsizeof(squares_gen) < 1_000)          # True: tiny
+
+print(sum(squares_gen))    # 333332833333500000
+print(sum(squares_gen))    # 0: a generator can only be used once
+
+print(squares_list[10])    # 100: a list allows indexing and reuse
+```
+
+**Output:**
+
+```text
+True
+True
+333332833333500000
+0
+100
+```
+
+**Fact (why this program):** Use a **generator** for big data that you read once (large files, streams, batches), because it uses very little memory. Use a **list** when you need `len()`, indexing, sorting, or to loop more than once.
+
+</details>
+
+### Program 50
+
+**Task:** Write `get_with_return()`, which returns `[1, 2, 3]`, and `get_with_yield()`, which yields 1, 2 and 3. Print what each one gives back, and turn the generator into a list.
+
+*From E31: What is the difference between `return` and `yield`?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. `get_with_return()` → `return [1, 2, 3]`.
+2. `get_with_yield()` → `yield 1`, `yield 2`, `yield 3`.
+3. Print the return version, the type of the yield version, and `list()` of the yield version.
+
+**Program flow**
+
+```text
+get_with_return()        → runs fully, ends       → [1, 2, 3]
+get_with_yield()         → nothing runs yet        → a generator object
+list(get_with_yield())   → runs yield by yield     → [1, 2, 3]
+```
+
+**Pseudocode**
+
+```text
+FUNCTION get_with_return():  RETURN [1, 2, 3]
+
+GENERATOR get_with_yield():
+    YIELD 1
+    YIELD 2
+    YIELD 3
+
+PRINT get_with_return()                  // [1, 2, 3]
+PRINT type name of get_with_yield()      // generator
+PRINT list of get_with_yield()           // [1, 2, 3]
+```
+
+**Code**
+
+```python
+def get_with_return():
+    return [1, 2, 3]        # gives everything at once, and the function ends
+
+
+def get_with_yield():
+    yield 1                 # gives one value, then pauses
+    yield 2
+    yield 3
+
+
+print(get_with_return())                  # [1, 2, 3]
+print(type(get_with_yield()).__name__)    # generator: nothing has run yet
+print(list(get_with_yield()))             # [1, 2, 3]
+```
+
+**Output:**
+
+```text
+[1, 2, 3]
+generator
+[1, 2, 3]
+```
+
+**Fact (why this program):**
+
+| `return` | `yield` |
+|---|---|
+| Ends the function | Pauses the function |
+| Gives one result | Gives many values, one at a time |
+| Local variables are lost | Local variables are kept between values |
+
+</details>
+
+## Exceptions
+
+Handling errors, creating your own, and keeping the original cause.
+
+### Program 51
+
+**Task:** Write `divide(a, b)` that divides two numbers. Use `try` for the division, `except ZeroDivisionError` to print an error, `else` to print the result, and `finally` to print `"Done"`. Call it with `(10, 2)` and `(10, 0)`.
+
+*From E32: How do `try`, `except`, `else`, and `finally` work?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. `try:` → `result = a / b`.
+2. `except ZeroDivisionError:` → print the error.
+3. `else:` → print the result (only if there was no error).
+4. `finally:` → print "Done" (always).
+
+**Program flow**
+
+```text
+divide(10, 2) → try: 10 / 2 OK  → else: "Result: 5.0"            → finally: "Done"
+divide(10, 0) → try: 10 / 0 fails → except: "Error: cannot divide by zero" → finally: "Done"
+```
+
+**Pseudocode**
+
+```text
+FUNCTION divide(a, b):
+    TRY
+        result = a / b
+    CATCH ZeroDivisionError
+        PRINT "Error: cannot divide by zero"
+    ELSE
+        PRINT "Result:", result
+    FINALLY
+        PRINT "Done"
+    END TRY
+
+divide(10, 2)    // Result: 5.0, Done
+divide(10, 0)    // Error: cannot divide by zero, Done
+```
+
+**Code**
+
+```python
+def divide(a, b):
+    try:
+        result = a / b
+    except ZeroDivisionError:
+        print("Error: cannot divide by zero")
+    else:
+        print("Result:", result)
+    finally:
+        print("Done")
+
+
+divide(10, 2)
+divide(10, 0)
+```
+
+**Output:**
+
+```text
+Result: 5.0
+Done
+Error: cannot divide by zero
+Done
+```
+
+**Fact (why this program):**
+
+| Part | When it runs |
+|---|---|
+| `try` | Always: the risky code |
+| `except` | Only if an error happens |
+| `else` | Only if **no** error happens |
+| `finally` | Always, at the end: cleanup |
+
+</details>
+
+### Program 52
+
+**Task:** Create a custom exception `InsufficientBalanceError`. Write `withdraw(balance, amount)` that raises it when the amount is more than the balance, and otherwise returns the new balance. Withdraw 300 from 1000, then try to withdraw 5000 and catch the error.
+
+*From E33: How do you create and raise custom exceptions?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. `class InsufficientBalanceError(Exception): pass`.
+2. In `withdraw()`, check `amount > balance` → else `raise InsufficientBalanceError(...)`.
+3. Otherwise → `return balance - amount`.
+4. Catch the error with `except InsufficientBalanceError as error`.
+
+**Program flow**
+
+```text
+withdraw(1000, 300)   → 300 > 1000?  NO  → return 700
+withdraw(1000, 5000)  → 5000 > 1000? YES → raise InsufficientBalanceError
+except                →                  → "Error: Balance 1000 is less than 5000"
+```
+
+**Pseudocode**
+
+```text
+CLASS InsufficientBalanceError EXTENDS Exception:  (nothing)
+
+FUNCTION withdraw(balance, amount):
+    IF amount > balance THEN
+        RAISE InsufficientBalanceError "Balance <balance> is less than <amount>"
+    ELSE
+        RETURN balance - amount
+    END IF
+
+PRINT withdraw(1000, 300)    // 700
+TRY
+    withdraw(1000, 5000)
+CATCH InsufficientBalanceError AS error
+    PRINT "Error:", error    // Error: Balance 1000 is less than 5000
+END TRY
+```
+
+**Code**
+
+```python
+class InsufficientBalanceError(Exception):
+    pass
+
+
+def withdraw(balance, amount):
+    if amount > balance:
+        raise InsufficientBalanceError(f"Balance {balance} is less than {amount}")
+    return balance - amount
+
+
+print(withdraw(1000, 300))       # 700
+
+try:
+    withdraw(1000, 5000)
+except InsufficientBalanceError as error:
+    print("Error:", error)       # Error: Balance 1000 is less than 5000
+```
+
+**Output:**
+
+```text
+700
+Error: Balance 1000 is less than 5000
+```
+
+**Fact (why this program):** A custom exception is a class that inherits from `Exception`. Its name explains exactly what went wrong, and callers can catch that one error by name.
+
+</details>
+
+### Program 53
+
+**Task:** Create `InvalidAgeError`. Write `read_age(text)` that converts text to an integer. If `int()` fails with `ValueError`, raise `InvalidAgeError("Age must be a whole number")` **from** the original error. Read `"25"`, then try `"abc"` and print the error and its cause.
+
+*From E34: What is exception chaining using `raise ... from ...`?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. `class InvalidAgeError(Exception): pass`.
+2. `try:` → `return int(text)`.
+3. `except ValueError as error:` → `raise InvalidAgeError(...) from error`.
+4. Catch it and print the error and `error.__cause__`.
+
+**Program flow**
+
+```text
+read_age("25")   → int("25") OK     → 25
+read_age("abc")  → int("abc") fails → ValueError
+                 → raise InvalidAgeError from it → __cause__ = the ValueError
+except           → "Error: Age must be a whole number"
+                 → "Cause: invalid literal for int() with base 10: 'abc'"
+```
+
+**Pseudocode**
+
+```text
+CLASS InvalidAgeError EXTENDS Exception:  (nothing)
+
+FUNCTION read_age(text):
+    TRY
+        RETURN integer(text)
+    CATCH ValueError AS error
+        RAISE InvalidAgeError "Age must be a whole number" FROM error
+    END TRY
+
+PRINT read_age("25")    // 25
+TRY
+    read_age("abc")
+CATCH InvalidAgeError AS error
+    PRINT "Error:", error            // Age must be a whole number
+    PRINT "Cause:", error.__cause__  // invalid literal for int() ...
+END TRY
+```
+
+**Code**
+
+```python
+class InvalidAgeError(Exception):
+    pass
+
+
+def read_age(text):
+    try:
+        return int(text)
+    except ValueError as error:
+        raise InvalidAgeError("Age must be a whole number") from error
+
+
+print(read_age("25"))    # 25
+
+try:
+    read_age("abc")
+except InvalidAgeError as error:
+    print("Error:", error)
+    print("Cause:", error.__cause__)
+# Error: Age must be a whole number
+# Cause: invalid literal for int() with base 10: 'abc'
+```
+
+**Output:**
+
+```text
+25
+Error: Age must be a whole number
+Cause: invalid literal for int() with base 10: 'abc'
+```
+
+**Fact (why this program):** `raise New from original` gives the user a clear, simple error and keeps the real cause in `__cause__` for developers. The traceback shows both errors.
+
+</details>
+
+## Context managers
+
+Setup and cleanup with `with`, `__enter__` and `__exit__`.
+
+### Program 54
+
+**Task:** Create a `Lights` class that prints `"Lights on"` when a `with` block starts and `"Lights off"` when it ends. Use it once normally, and once with an error inside the block, to show that `"Lights off"` still prints.
+
+*From E36: What is a context manager, and how does `with` work?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. `__enter__` → print "Lights on" and return `self`.
+2. `__exit__` → print "Lights off" and return `False` (don't hide errors).
+3. Use `with Lights():` normally.
+4. Use it again, raise a `ValueError` inside, and catch it outside.
+
+**Program flow**
+
+```text
+with Lights():        → __enter__ → "Lights on"
+  block               →           → "Reading a book"
+end of block          → __exit__  → "Lights off"
+
+with Lights():        → __enter__ → "Lights on"
+  block               →           → "Working" → raise ValueError
+error leaves block    → __exit__  → "Lights off" (still runs) → return False
+except outside        →           → "Error: Power cut"
+```
+
+**Pseudocode**
+
+```text
+CLASS Lights:
+    __enter__():  PRINT "Lights on";  RETURN self
+    __exit__(error details):
+        PRINT "Lights off"     // always runs
+        RETURN False           // let the error continue
+
+WITH Lights():
+    PRINT "Reading a book"
+
+TRY
+    WITH Lights():
+        PRINT "Working"
+        RAISE ValueError "Power cut"
+CATCH ValueError AS error
+    PRINT "Error:", error    // Error: Power cut
+END TRY
+```
+
+**Code**
+
+```python
+class Lights:
+    def __enter__(self):
+        print("Lights on")
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        print("Lights off")      # always runs, even after an error
+        return False             # False: let the error continue
+
+
+with Lights():
+    print("Reading a book")
+
+try:
+    with Lights():
+        print("Working")
+        raise ValueError("Power cut")
+except ValueError as error:
+    print("Error:", error)
+```
+
+**Output:**
+
+```text
+Lights on
+Reading a book
+Lights off
+Lights on
+Working
+Lights off
+Error: Power cut
+```
+
+**Fact (why this program):** `with` calls `__enter__` at the start and `__exit__` at the end, **even if an error happens**. That's why files, locks, and database connections use `with`: cleanup is never skipped.
+
+</details>
+
+## Asyncio
+
+Running waiting tasks at the same time with `async` and `await`.
+
+### Program 55
+
+**Task:** Write two `async` functions, `make_tea()` and `make_toast()`. Each prints a starting message, waits 1 second with `await asyncio.sleep(1)`, and returns a "ready" message. Run both together with `asyncio.gather()` and print the results.
+
+*From E40: How do `async` and `await` work in Python?*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. `async def make_tea()` → print, `await asyncio.sleep(1)`, return "Tea is ready".
+2. `async def make_toast()` → the same for toast.
+3. `async def main()` → `await asyncio.gather(make_tea(), make_toast())`.
+4. Start it with `asyncio.run(main())`.
+
+**Program flow**
+
+```text
+asyncio.run(main())   → starts the event loop
+gather(tea, toast)    → make_tea starts   → "Boiling water..."  → await sleep(1): pauses
+                      → make_toast starts → "Toasting bread..." → await sleep(1): pauses
+after ~1 second       → both finish       → ['Tea is ready', 'Toast is ready']
+```
+
+**Pseudocode**
+
+```text
+IMPORT asyncio
+
+ASYNC FUNCTION make_tea():
+    PRINT "Boiling water..."
+    AWAIT sleep 1 second       // pause, let other tasks run
+    RETURN "Tea is ready"
+
+ASYNC FUNCTION make_toast():
+    PRINT "Toasting bread..."
+    AWAIT sleep 1 second
+    RETURN "Toast is ready"
+
+ASYNC FUNCTION main():
+    results = AWAIT run make_tea() AND make_toast() together
+    PRINT results              // ['Tea is ready', 'Toast is ready']
+
+RUN main()
+```
+
+**Code**
+
+```python
+import asyncio
+
+
+async def make_tea():
+    print("Boiling water...")
+    await asyncio.sleep(1)       # wait here, and let other tasks run
+    return "Tea is ready"
+
+
+async def make_toast():
+    print("Toasting bread...")
+    await asyncio.sleep(1)
+    return "Toast is ready"
+
+
+async def main():
+    results = await asyncio.gather(make_tea(), make_toast())   # run both together
+    print(results)
+
+
+asyncio.run(main())
+# Boiling water...
+# Toasting bread...
+# ['Tea is ready', 'Toast is ready']
+```
+
+**Output:**
+
+```text
+Boiling water...
+Toasting bread...
+['Tea is ready', 'Toast is ready']
+```
+
+**Fact (why this program):** `async def` makes a function that can pause. `await` pauses it until the result is ready, and lets other tasks run meanwhile. Both waits happen at the same time, so the whole program takes about **1 second, not 2**. Use asyncio for waiting work like network calls, not heavy calculations.
+
+</details>
+
 ## More programs
 
 The remaining programs, in their original order.

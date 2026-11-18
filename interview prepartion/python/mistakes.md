@@ -26,7 +26,7 @@ return super().role
 how child /subclass class method  use parent class class method
   def create(cls):
         return super().create()
-13. def __init__(self,*args,load):
+
 t1 = Truck("Tata","10 tons")   ==wrong
 
 def __init__(self,*args,load):
@@ -37,12 +37,7 @@ With def __init__(self, *args, load="10 tons"), load is keyword-only. Truck("Tat
 print(b) gives a NameError(name resolution)  in python == it comes under readable and concise syntax  features correct gives double quotes===>print("b),student.append("b)
 in  method we can declare varible like area but it is local to varible another method cannot use if u declare variable in init then it can shared by all methods
 
-14 How can a class method create and return an instance with a preset value?
-def large(cls):
-    return cls(12)
-15.How can a class method update a class attribute using a value passed to it?
-def rename_school(cls, name):
-        cls.school = name
+
 =================================CHEATSHEET==========================
 1 why any program output is None
 answer in fun not mention return keyword
@@ -51,6 +46,44 @@ answer forget to give print statement
 3.def get_length(self):==>return self.length
 4.def same_as(self,other):==>return self is other.    wrong ==>return self.name is other
 5.ClassName.class_variable.append(value)==>Team.member.append("ram")==>print(Team.member) 
+5.balance history show transaction record how much with draw and deposit. [400,-200]
+6.If a container should always start empty for each object, define it directly in __init__ using self, without adding it as a parameter. For example, self.history = [].
+for bankaccount=owner and balance first time when he open account
+deposit ==balance= balnce+amount
+withdraw= balance= balnce-amount
+syntax for appending in list==def deposit(self,amount):=>self.history.append(amount)
+syntax for appending in dictionary=def deposit(self, person, amount):  => self.history_dictionary[person] = amount
+
+7.how to read variable using method calling   def get_balance(self):==> return self.balance 
+ print(account.get_balance()) or directly variable name  print(account.balance)
+8.syntax for setting default value= def __init__(self, name, age, city="Delhi"):
+9.size_unit is global not change ,but pizza size is always changing so size_unit is class varible but size is instance varible
+10.syntax to print class varible and instance varible together=return f"{self.size} {self.size_unit}"
+11 syntax to create new object usin classmethod that use classvarible==def large(cls):   return cls(12)
+12.syntax how to class method that updates a class variable 
+def rename_school(cls, name):===> cls.school = name
+13 how to use ststic method def is_valid(size):
+13 syntac to create object from dictionary using classmethod=
+def from_dict(cls,data): ==> return cls(data["name"],data["age"])==>print(Admin.from_dict({"name":"asha","age":40}).age) 
+14.syntax to create subclass=class childclassname(parentclassname)==>class Dog(Animal):
+15.A child class inherits its parent’s constructor instance varible,methods when it has no constructor(no init method just have pass) of its own
+16 how child class reuse parent class instance varible initialization using positional argument.==super().__init__(brand)
+how child class reuse parent class instance varible initialization using by forwarding positional and keyword arguments=  super().__init__(*args,**kwargs)
+how child class reuse parent class instance method initialization==return super().hello().upper()
+17.Call another instance method in the same class==return self.hello() *2
+18 different form of super
+how to reuses the parent’s instance variable initialization==super().__init__(name)
+how to calls the parent’s instance method==return super().show()
+how to calls the parent’s class method, which uses cls to create a Child object.==return super().create()
+how to read or access parent’s class attribute role.==return super().role
+19.how to call MRO resolution==class LoggedModel(LogMixin,Model): return f"log" +super().save() 
+20.calling a common method on objects of different classes through a loop.=for vehicle in (Car(), Bike()): print(vehicle.start()) replace Car().start(),Bike().start()
+[print(vehicle.start()) for vehicle in (mycar, mybike)]
+========================questions====================
+1.why in c and c++ and php not use self use this and pthon why introduce self
+2.in subclass method why icant pass self.varaiable ex.super().__init__(self.brand) ==wrong  super().__init__(brand)==correct
+3.in child/subclass method   pass *args,**kargs to call parent method it can use varible name also whats adavantage=super().__init__(*args,**kargs) like super().__init__(self.brand)
+4.def __init__(self,battrey,*args,**kargs): ==corrct ,def __init__(self,*args,**kargs,battrey):==wrong  arguments cannot follow var-keyword argument
 
 ===================================================================================
 1. Use return when the caller needs a result
@@ -186,28 +219,8 @@ return super().hello().upper()
 7.for subclass or child class u can pass or child method also u can denote pass if u have not defind body 
 class Car(Vehicle):
       pass
-========================questions====================
-1.why in c and c++ and php not use self use this and pthon why introduce self
-2.in subclass method why icant pass self.varaiable ex.super().__init__(self.brand) ==wrong  super().__init__(brand)==correct
-3.in child/subclass method   pass *args,**kargs to call parent method it can use varible name also whats adavantage=super().__init__(*args,**kargs) like super().__init__(self.brand)
-4.def __init__(self,battrey,*args,**kargs): ==corrct ,def __init__(self,*args,**kargs,battrey):==wrong  arguments cannot follow var-keyword argument
-5.balance history show transaction record how much with draw and deposit. [400,-200]
-6.If a container should always start empty for each object, define it directly in __init__ using self, without adding it as a parameter. For example, self.history = [].
-for bankaccount=owner and balance first time when he open account
-deposit ==balance= balnce+amount
-withdraw= balance= balnce-amount
-syntax for appending in list==def deposit(self,amount):=>self.history.append(amount)
-syntax for appending in dictionary=def deposit(self, person, amount):  => self.history_dictionary[person] = amount
 
-7.how to read variable using method calling   def get_balance(self):==> return self.balance 
- print(account.get_balance()) or directly variable name  print(account.balance)
-8.syntax for setting default value= def __init__(self, name, age, city="Delhi"):
-9.size_unit is global not change ,but pizza size is always changing so size_unit is class varible but size is instance varible
-10.syntax to print class varible and instance varible together=return f"{self.size} {self.size_unit}"
-11 syntax to create new object usin classmethod that use classvarible==def large(cls):   return cls(12)
-12.syntax how to class method that updates a class variable 
-def rename_school(cls, name):===> cls.school = name
-13 how to use ststic method def is_valid(size):
+
 
 
 
