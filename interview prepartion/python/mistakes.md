@@ -79,11 +79,24 @@ how to read or access parent’s class attribute role.==return super().role
 19.how to call MRO resolution==class LoggedModel(LogMixin,Model): return f"log" +super().save() 
 20.calling a common method on objects of different classes through a loop.=for vehicle in (Car(), Bike()): print(vehicle.start()) replace Car().start(),Bike().start()
 [print(vehicle.start()) for vehicle in (mycar, mybike)]
+21.How can you create a list object that holds three objects of a user-defined class?
+board = ModelBoard([
+    Model("Random Forest", 0.91),
+    Model("Logistic Regression", 0.85),
+    Model("SVM", 0.88),
+]) ==>board = ModelBoard([model1, model2, model3]) 
+22.how to display or read the attributes of each object in a list using for loop
+for model in models:
+    print(model.name, model.accuracy)
+23.how to display or read the attributes of each object in a list using for loop
+def __repr__(self):
+    return f"{self.name}: {self.accuracy}"
 ========================questions====================
 1.why in c and c++ and php not use self use this and pthon why introduce self
 2.in subclass method why icant pass self.varaiable ex.super().__init__(self.brand) ==wrong  super().__init__(brand)==correct
 3.in child/subclass method   pass *args,**kargs to call parent method it can use varible name also whats adavantage=super().__init__(*args,**kargs) like super().__init__(self.brand)
 4.def __init__(self,battrey,*args,**kargs): ==corrct ,def __init__(self,*args,**kargs,battrey):==wrong  arguments cannot follow var-keyword argument
+
 
 ===================================================================================
 1. Use return when the caller needs a result

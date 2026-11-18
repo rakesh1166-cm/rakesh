@@ -2659,6 +2659,8 @@ Built-in, user-defined and anonymous functions, and using a `lambda` as a sortin
 
 **Task:** Show the three types of functions in Python: a **built-in** function (use `len()` and `max()` on `[4, 9, 1]`), a **user-defined** function `add(a, b)` written with `def`, and an **anonymous** function (a `lambda`) that squares a number.
 
+**Using a class (class inside a class):** An outer class `FunctionTypes` groups three inner (nested) classes, one for each type of function. You reach an inner class through the outer one: `FunctionTypes.BuiltIn`.
+
 **Level:** 🟢 Simple
 
 *From E22: What is a lambda function, and when should you avoid it?*
@@ -2729,8 +2731,6 @@ print(square(4))         # 16
 
 **Same program using a class inside a class**
 
-An outer class `FunctionTypes` groups three inner (nested) classes, one for each type of function. You reach an inner class through the outer one: `FunctionTypes.BuiltIn`.
-
 ```text
 FunctionTypes                 → outer class (a container)
 ├── BuiltIn     → show()      → uses len() and max()
@@ -2798,6 +2798,8 @@ Direct add: 30
 ### Program 44
 
 **Task:** You have three ML models with their accuracy. Sort them from highest to lowest accuracy using `sorted()` with a `lambda`, print each one, then find the best model with `max()`.
+
+**Using a class:** A `Model` class stores each model's `name` and `accuracy`. A `ModelBoard` class holds the list and has `sorted_by_accuracy()` and `best()` methods, which still use a `lambda` as the key.
 
 **Level:** 🟡 Medium
 
@@ -2870,8 +2872,6 @@ Best: Random Forest
 
 **Same program using a class**
 
-A `Model` class stores each model's `name` and `accuracy`. A `ModelBoard` class holds the list and has `sorted_by_accuracy()` and `best()` methods, which still use a `lambda` as the key.
-
 ```python
 class Model:
     def __init__(self, name, accuracy):
@@ -2918,11 +2918,61 @@ Best: Random Forest
 - `sorted()` and `max()` work the same on objects as on dicts. The `key` function decides what is compared.
 - Keeping the sorting inside `ModelBoard` means the rest of the code just calls `board.best()`.
 
+**Alternative: print without a `for` loop, using `__repr__`**
+
+Add `__repr__` to `Model`. Python calls it when it prints a model object, and also when it prints a **list** of models. So `print(board.sorted_by_accuracy())` shows every model with no loop.
+
+```python
+class Model:
+    def __init__(self, name, accuracy):
+        self.name = name
+        self.accuracy = accuracy
+
+    def __repr__(self):
+        return f"{self.name}: {self.accuracy}"
+
+
+class ModelBoard:
+    def __init__(self, models):
+        self.models = models
+
+    def sorted_by_accuracy(self):
+        return sorted(self.models, key=lambda model: model.accuracy, reverse=True)
+
+    def best(self):
+        return max(self.models, key=lambda model: model.accuracy)
+
+
+board = ModelBoard([
+    Model("Random Forest", 0.91),
+    Model("Logistic Regression", 0.85),
+    Model("SVM", 0.88),
+])
+
+print(board.sorted_by_accuracy())   # the list uses __repr__ for each model
+print("Best:", board.best())        # one model also uses __repr__
+```
+
+**Output:**
+
+```text
+[Random Forest: 0.91, SVM: 0.88, Logistic Regression: 0.85]
+Best: Random Forest: 0.91
+```
+
+**Points to remember**
+
+- Without `__repr__`, printing the list shows `[<__main__.Model object at 0x...>, ...]`.
+- A list always uses `__repr__` for its items, even if the class also has `__str__`. That's why `__repr__` is the one to add here.
+- One per line without a loop: `print(*board.sorted_by_accuracy(), sep="\n")`.
+
 </details>
 
 ### Program 64
 
 **Task:** Write a function `log_event(event, *tags, **details)` that builds one log line. `event` is required, `*tags` collects any number of extra words, and `**details` collects any number of `key=value` pairs. Call it three ways: with only an event, with tags, and with tags plus details.
+
+**Using a class:** A `Logger` class stores the app name in `__init__`. `log_event` becomes a method, and `*tags` and `**details` come after `self`.
 
 **Level:** 🟡 Medium
 
@@ -3000,8 +3050,6 @@ print(log_event("payment", "upi", user="asha", amount=500))
 
 **Same program using a class**
 
-A `Logger` class stores the app name in `__init__`. `log_event` becomes a method, and `*tags` and `**details` come after `self`.
-
 ```python
 class Logger:
     def __init__(self, app):
@@ -3044,6 +3092,8 @@ shop [PAYMENT] tags: upi | user=asha amount=500
 ### Program 65
 
 **Task:** Write `summarize_scores(scores, pass_mark=40, round_to=1)` that returns **three values**: the average (rounded), the number who passed, and the number who failed. Call it with the default pass mark, then with keyword arguments `pass_mark=60, round_to=2`. Unpack the three results into three variables.
+
+**Using a class:** A `ScoreReport` class stores the `scores` list once. `summarize()` becomes a method that keeps the same default arguments and still returns three values.
 
 **Level:** 🟡 Medium
 
@@ -3128,8 +3178,6 @@ Average: 59.2 | Passed: 2 | Failed: 3
 
 **Same program using a class**
 
-A `ScoreReport` class stores the `scores` list once. `summarize()` becomes a method that keeps the same default arguments and still returns three values.
-
 ```python
 class ScoreReport:
     def __init__(self, scores):
@@ -3175,6 +3223,8 @@ Average: 59.2 | Passed: 2 | Failed: 3
 ### Program 66
 
 **Task:** Clean a list of raw user names with a **pipeline of functions**. Write a closure `make_replacer(old, new)` that returns a function which replaces `old` with `new`. Put `str.strip`, `str.lower` and `make_replacer(" ", "_")` in a list called `steps`. Write `run_pipeline(value, steps)` that passes the value through each function in order, then use it on `["  Asha Rao ", "RAVI KUMAR", " neha  "]`.
+
+**Using a class:** A `Replacer` class takes the place of the closure: it saves `old` and `new` on `self` and uses `__call__`, so the object can be called like a function. A `Pipeline` class holds the steps and runs them.
 
 **Level:** 🔴 Difficult
 
@@ -3261,8 +3311,6 @@ data_science_team
 
 
 **Same program using a class**
-
-A `Replacer` class takes the place of the closure: it saves `old` and `new` on `self` and uses `__call__`, so the object can be called like a function. A `Pipeline` class holds the steps and runs them.
 
 ```python
 class Replacer:
@@ -3791,6 +3839,8 @@ A decorator adds extra work around a function or class without changing its code
 
 **Task:** Write a decorator `greet_decorator` that prints `"Before the function"` before and `"After the function"` after the function it wraps. Use it on `say_hello()`, which prints `"Hello!"`.
 
+**Using a class:** The decorator stays a plain function, and it is now used on a method, `say_hello(self)`, inside a `Greeter` class.
+
 **Level:** 🟢 Simple
 
 *From E24: What is a decorator, and how do you write one?*
@@ -3864,8 +3914,6 @@ After the function
 
 
 **Same program using a class**
-
-The decorator stays a plain function, and it is now used on a method, `say_hello(self)`, inside a `Greeter` class.
 
 ```python
 def greet_decorator(function):
@@ -4006,6 +4054,8 @@ City School
 
 **Task:** Write a decorator `log_call` that prints the function name and its arguments before the call, and the returned value after it. Use `functools.wraps` so the decorated function keeps its real name and docstring. Apply it to `add(a, b)` and `apply_discount(price, percent=10)`, then print `add.__name__` and `add.__doc__`.
 
+**Using a class:** `add` and `apply_discount` become methods of a `Calculator` class. The `log_call` wrapper takes `self` first, so `args` shows only the real arguments.
+
 **Level:** 🟡 Medium
 
 *Developer use: logging and debugging API handlers, service methods and ML training steps without editing each function.*
@@ -4104,8 +4154,6 @@ Doc: Add two numbers.
 
 **Same program using a class**
 
-`add` and `apply_discount` become methods of a `Calculator` class. The `log_call` wrapper takes `self` first, so `args` shows only the real arguments.
-
 ```python
 from functools import wraps
 
@@ -4163,6 +4211,8 @@ Doc: Add two numbers.
 ### Program 72
 
 **Task:** Write a decorator `login_required` for functions that take a `user` dict as their first argument. If `user["logged_in"]` is `False`, return `"Error: please log in"` and **don't** run the function. Otherwise run it. Apply it to `view_profile(user)` and `place_order(user, item)`, and call both with a logged-in and a logged-out user.
+
+**Using a class:** A `ShopSession` class stores the `user` on `self`. The `login_required` decorator checks `self.user`, so the methods no longer need a `user` argument.
 
 **Level:** 🟡 Medium
 
@@ -4255,8 +4305,6 @@ Error: please log in
 
 **Same program using a class**
 
-A `ShopSession` class stores the `user` on `self`. The `login_required` decorator checks `self.user`, so the methods no longer need a `user` argument.
-
 ```python
 from functools import wraps
 
@@ -4312,6 +4360,8 @@ Error: please log in
 ### Program 73
 
 **Task:** Write a decorator **with an argument**, `retry(times=3)`, that calls a function again when it raises `ConnectionError`, up to `times` attempts. Print each failed attempt. If every attempt fails, raise the last error. Test it with `fetch_data()`, which fails twice and succeeds on the 3rd call, and with `always_down()`, which always fails.
+
+**Using a class:** `fetch_data` and `always_down` become methods of an `ApiClient` class. The call counter moves from a global dict to `self.calls`.
 
 **Level:** 🔴 Difficult
 
@@ -4430,8 +4480,6 @@ Gave up: Service down
 
 **Same program using a class**
 
-`fetch_data` and `always_down` become methods of an `ApiClient` class. The call counter moves from a global dict to `self.calls`.
-
 ```python
 from functools import wraps
 
@@ -4503,6 +4551,8 @@ Functions that give values one at a time with `yield`.
 ### Program 48
 
 **Task:** Write a generator `count_up_to(limit)` that gives the numbers from 1 to `limit`, one at a time, using `yield`. Get the first three values with `next()`, then turn a new generator into a list.
+
+**Using a class:** A `Counter` class stores the `limit` as an attribute. The generator becomes the method `count_up()`, and `__iter__` returns it so you can loop over the object or pass it to `list()` directly.
 
 **Level:** 🟢 Simple
 
@@ -4577,8 +4627,6 @@ print(list(count_up_to(5)))   # [1, 2, 3, 4, 5]
 
 **Same program using a class**
 
-A `Counter` class stores the `limit` as an attribute. The generator becomes the method `count_up()`, and `__iter__` returns it so you can loop over the object or pass it to `list()` directly.
-
 ```python
 class Counter:
     """Counts from 1 up to a limit, one number at a time."""
@@ -4624,6 +4672,8 @@ print(list(Counter(5)))   # [1, 2, 3, 4, 5]
 ### Program 49
 
 **Task:** Build the squares of 0 to 999,999 two ways: as a list and as a generator. Compare their memory size, add up the generator's values, and show that a generator can only be used once.
+
+**Using a class:** A `Squares` class stores the `limit`. `as_list()` builds every value at once, and `as_generator()` uses `yield` to make values one by one.
 
 **Level:** 🟡 Medium
 
@@ -4696,8 +4746,6 @@ True
 
 **Same program using a class**
 
-A `Squares` class stores the `limit`. `as_list()` builds every value at once, and `as_generator()` uses `yield` to make values one by one.
-
 ```python
 import sys
 
@@ -4752,6 +4800,8 @@ True
 ### Program 50
 
 **Task:** Write `get_with_return()`, which returns `[1, 2, 3]`, and `get_with_yield()`, which yields 1, 2 and 3. Print what each one gives back, and turn the generator into a list.
+
+**Using a class:** A `NumberSource` class has two methods: `get_with_return()` uses `return`, and `get_with_yield()` uses `yield`.
 
 **Level:** 🟡 Medium
 
@@ -4826,8 +4876,6 @@ generator
 
 **Same program using a class**
 
-A `NumberSource` class has two methods: `get_with_return()` uses `return`, and `get_with_yield()` uses `yield`.
-
 ```python
 class NumberSource:
     """Gives back the numbers 1, 2, 3 in two different ways."""
@@ -4866,6 +4914,8 @@ generator
 ### Program 74
 
 **Task:** You have a list of log lines (pretend it's a big log file). Write a generator `error_lines(lines)` that checks one line at a time and yields only the lines that start with `"ERROR"`. Print a "checking" message for each line so you can see the generator works lazily. Get the first two errors with `next()`, then turn the rest into a list.
+
+**Using a class:** A `LogReader` class stores the log lines as an attribute. The generator becomes the method `error_lines()`, which yields only the ERROR lines.
 
 **Level:** 🟡 Medium
 
@@ -4951,8 +5001,6 @@ Any more? []
 
 **Same program using a class**
 
-A `LogReader` class stores the log lines as an attribute. The generator becomes the method `error_lines()`, which yields only the ERROR lines.
-
 ```python
 class LogReader:
     """Reads log lines lazily and hands back only the errors."""
@@ -5007,6 +5055,8 @@ Any more? []
 ### Program 75
 
 **Task:** Build a 3-stage generator pipeline. `read_records(count)` yields records `{"id": 1}`, `{"id": 2}`, … one at a time. `in_batches(records, size)` groups them into lists of `size` records. `send_to_api(batch)` pretends to send one batch. Send 7 records in batches of 3.
+
+**Using a class:** A `BatchSender` class stores `count` and `size`. Each pipeline stage becomes a method, and `run()` connects them.
 
 **Level:** 🔴 Difficult
 
@@ -5100,8 +5150,6 @@ Batch of 1 -> ids [7]
 
 **Same program using a class**
 
-A `BatchSender` class stores `count` and `size`. Each pipeline stage becomes a method, and `run()` connects them.
-
 ```python
 class BatchSender:
     """A 3-stage pipeline: read records, group them, send each batch."""
@@ -5161,6 +5209,8 @@ Handling errors, creating your own, and keeping the original cause.
 ### Program 51
 
 **Task:** Write `divide(a, b)` that divides two numbers. Use `try` for the division, `except ZeroDivisionError` to print an error, `else` to print the result, and `finally` to print `"Done"`. Call it with `(10, 2)` and `(10, 0)`.
+
+**Using a class:** A `Calculator` class has a `divide()` method. The `try` / `except` / `else` / `finally` blocks work inside a method exactly as they do in a function.
 
 **Level:** 🟢 Simple
 
@@ -5239,8 +5289,6 @@ Done
 
 
 **Same program using a class**
-
-A `Calculator` class has a `divide()` method. The `try` / `except` / `else` / `finally` blocks work inside a method exactly as they do in a function.
 
 ```python
 class Calculator:
@@ -5361,6 +5409,8 @@ Error: Balance 1000 is less than 5000
 
 **Task:** Write `get_discount(order, price_text)`. It converts `price_text` to a number and applies the order's `"discount"` percentage. Use **two `except` blocks**: one for `ValueError` (the price isn't a number, so return `0.0`) and one for `KeyError` (the order has no `"discount"` key, so return the full price). Test it with a good order, a bad price, and an order without a discount.
 
+**Using a class:** An `Order` class stores the order details. `get_discount(price_text)` becomes a method that reads the discount from `self.details`.
+
 **Level:** 🟡 Medium
 
 *Developer use: Reading form fields, query parameters, or JSON payloads, where values may be missing or in the wrong format.*
@@ -5439,8 +5489,6 @@ Missing key 'discount', no discount
 
 
 **Same program using a class**
-
-An `Order` class stores the order details. `get_discount(price_text)` becomes a method that reads the discount from `self.details`.
 
 ```python
 class Order:
@@ -5776,6 +5824,8 @@ Error: Power cut
 
 **Task:** Use `with open()` to write two tasks to a file `notes.txt` in a temporary folder, then read the file back line by line. After each `with` block, print `file.closed` to show that Python closed the file for you.
 
+**Using a class:** A `NotesFile` class stores the file `path`. `save()` writes with `with open()`, `show()` reads it back, and `delete()` removes the file.
+
 **Level:** 🟡 Medium
 
 *Developer use: Reading config files, writing reports, CSV exports and log files. `with open()` is the most-used context manager in Python.*
@@ -5857,8 +5907,6 @@ Closed after reading? True
 
 **Same program using a class**
 
-A `NotesFile` class stores the file `path`. `save()` writes with `with open()`, `show()` reads it back, and `delete()` removes the file.
-
 ```python
 import os
 import tempfile
@@ -5916,6 +5964,8 @@ Closed after reading? True
 ### Program 79
 
 **Task:** Write a context manager **without a class**, using `@contextmanager` from `contextlib`. `step(name)` prints `"[start] <name>"` before the block and `"[end] <name>"` after it, and gives the name in capitals to `as`. Use it once normally, and once with an error inside, to show that `"[end]"` still prints.
+
+**Using a class:** A `Pipeline` class holds a job name. Its `step()` method is decorated with `@contextmanager`, so each object can open `with pipeline.step(...)` blocks.
 
 **Level:** 🟡 Medium
 
@@ -6005,8 +6055,6 @@ Error: Out of memory
 
 
 **Same program using a class**
-
-A `Pipeline` class holds a job name. Its `step()` method is decorated with `@contextmanager`, so each object can open `with pipeline.step(...)` blocks.
 
 ```python
 from contextlib import contextmanager
@@ -6275,6 +6323,8 @@ Running waiting tasks at the same time with `async` and `await`.
 
 **Task:** Write the simplest async program: an `async def greet()` that prints `"Hello..."`, waits 1 second with `await asyncio.sleep(1)`, then prints `"...World!"`. First call `greet()` without running it and print the type of what you get back. Then run it properly with `asyncio.run()`.
 
+**Using a class:** A `Greeter` class stores a `name`, and `greet()` becomes an `async` method.
+
 **Level:** 🟢 Simple
 
 *Developer use: The starting point of every async app. FastAPI endpoints, async database drivers and HTTP clients like `httpx` are all `async def` functions.*
@@ -6346,8 +6396,6 @@ Hello...
 
 **Same program using a class**
 
-A `Greeter` class stores a `name`, and `greet()` becomes an `async` method.
-
 ```python
 import asyncio
 
@@ -6390,6 +6438,8 @@ Hello Asha...
 ### Program 55
 
 **Task:** Write two `async` functions, `make_tea()` and `make_toast()`. Each prints a starting message, waits 1 second with `await asyncio.sleep(1)`, and returns a "ready" message. Run both together with `asyncio.gather()` and print the results.
+
+**Using a class:** A `Kitchen` class has `make_tea()` and `make_toast()` as `async` methods, plus `breakfast()`, which runs both together.
 
 **Level:** 🟡 Medium
 
@@ -6478,8 +6528,6 @@ Toasting bread...
 
 **Same program using a class**
 
-A `Kitchen` class has `make_tea()` and `make_toast()` as `async` methods, plus `breakfast()`, which runs both together.
-
 ```python
 import asyncio
 
@@ -6524,6 +6572,8 @@ Toasting bread...
 ### Program 83
 
 **Task:** Write `async def fetch(api, seconds)` that pretends to call an API by sleeping for `seconds`, then returns `"<api> done in <seconds>s"`. Call three APIs (`users` 1s, `orders` 2s, `payments` 1.5s) together with `asyncio.gather()`. Print each result and the total time, rounded to whole seconds.
+
+**Using a class:** An `ApiClient` class stores a `base_url`. `fetch()` is one async call, and `fetch_all()` runs many calls together with `gather()`.
 
 **Level:** 🟡 Medium
 
@@ -6608,8 +6658,6 @@ Total time: 2 seconds
 
 **Same program using a class**
 
-An `ApiClient` class stores a `base_url`. `fetch()` is one async call, and `fetch_all()` runs many calls together with `gather()`.
-
 ```python
 import asyncio
 import time
@@ -6660,6 +6708,8 @@ Total time: 2 seconds
 ### Program 84
 
 **Task:** Use `asyncio.create_task()` to start `send_email()` (which takes 1 second) **in the background**. While the email is sending, keep handling a request in three short steps of 0.3 seconds. At the end, `await` the task and print its status.
+
+**Using a class:** A `RequestHandler` class has an async `send_email()` method, and a `handle()` method that starts the email in the background with `create_task()`.
 
 **Level:** 🟡 Medium
 
@@ -6747,8 +6797,6 @@ Email status: sent
 
 **Same program using a class**
 
-A `RequestHandler` class has an async `send_email()` method, and a `handle()` method that starts the email in the background with `create_task()`.
-
 ```python
 import asyncio
 
@@ -6797,6 +6845,8 @@ Email status: sent
 ### Program 85
 
 **Task:** Download 3 files with a **limit of 2 at a time**, using `asyncio.Semaphore(2)`. Each `download(name, seconds, limit)` waits for a free slot with `async with limit:`, then prints when it starts and finishes. Then try to download `huge.zip` (5 seconds) with `asyncio.wait_for(..., timeout=0.5)`, and handle the timeout.
+
+**Using a class:** A `Downloader` class keeps the limit as an attribute (`self.limit`), so every `download()` call shares the same semaphore.
 
 **Level:** 🔴 Difficult
 
@@ -6891,8 +6941,6 @@ huge.zip took too long, cancelled
 
 
 **Same program using a class**
-
-A `Downloader` class keeps the limit as an attribute (`self.limit`), so every `download()` call shares the same semaphore.
 
 ```python
 import asyncio
@@ -8476,6 +8524,8 @@ BaseHandler: send response
 
 **Task:** Sort the list `["banana", "fig", "apple"]` from shortest word to longest, using a `lambda` as the `key` for `sorted()`.
 
+**Using a class:** A `WordList` class holds the words, and its `shortest_first()` method sorts them with a `lambda` key.
+
 *From E22: What is a lambda function, and when should you avoid it?*
 
 <details>
@@ -8522,8 +8572,6 @@ print(sorted(words, key=lambda word: len(word)))
 
 **Same program using a class**
 
-A `WordList` class holds the words, and its `shortest_first()` method sorts them with a `lambda` key.
-
 ```python
 class WordList:
     def __init__(self, words):
@@ -8555,6 +8603,8 @@ print(fruits.words)          # the original list is unchanged
 ### Program 42
 
 **Task:** Given a list of user dicts (`name`, `age`, `active`), keep only the active users with `filter()` and a lambda, then sort them by age, oldest first, and print their names. Then find the oldest user overall with `max()` and `itemgetter("age")`, and print the name.
+
+**Using a class:** A `UserStore` class holds the list of users. The filtering and sorting move into `active_by_age()`, and the `max()` logic moves into `oldest()`.
 
 *From E22: What is a lambda function, and when should you avoid it?*
 
@@ -8628,8 +8678,6 @@ Meera
 
 
 **Same program using a class**
-
-A `UserStore` class holds the list of users. The filtering and sorting move into `active_by_age()`, and the `max()` logic moves into `oldest()`.
 
 ```python
 from operator import itemgetter
