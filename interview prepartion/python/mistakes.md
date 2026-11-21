@@ -87,9 +87,7 @@ board = ModelBoard([
 ]) ==>board = ModelBoard([model1, model2, model3]) 
 
 
-  print(self.UserDefined([4,8,9,2,1]).add())
-    print(self.Anonyms.square(4))
-square=staticmethod(lambda x:x*x)
+
 
 22.how to display or read the attributes of each object in a list using for loop
 for model in models:
@@ -141,7 +139,44 @@ closure=
 37.How can you use a list comprehension to pass each name and a list of processing steps to a function, then collect the results in a new list?
 clean_names = [run_pipeline(name, steps) for name in raw_names]
 
-38 why la
+
+38.How can an outer class’s instance method create an object of a nested class, call its method, and print the result?
+ print(self.UserDefined([4,8,9,2,1]).add())
+39.How can an instance method define a lambda function and call it with an instance attribute to return its square?
+x = lambda number: number * number
+return x(self.no)
+40.correct==>a=multiplier(5),print(a(7))  wrong=a=multiplier(5),print(a.(7))
+correct=def multiplier(no):
+    def multiply(multiply):
+        return no*multiply
+    return multiply
+wrong==def multiplier(no):
+    def multiply(multiply):
+        return no*multiply
+41.Given a list of dictionaries containing model names and accuracy scores, how can you sort the models by accuracy from highest to lowest using a lambda function?   
+print(sorted(models, key=lambda x: x["accuracy"], reverse=True))
+41.Given a list of dictionaries containing model names and accuracy scores, how can you find the model with the highest accuracy?
+
+42.Given a list of dictionaries containing model names and accuracy scores, how can you display each model’s name and accuracy on a separate line?
+for model in by_accuracy:
+    print(model["name"], model["accuracy"])
+[{'name': 'Random Forest', 'accuracy': 0.91}, {'name': 'SVM', 'accuracy': 0.88}, {'name': 'Logistic Regression', 'accuracy': 0.85}]
+42.Given a list of numbers, how can you sort them from highest to lowest using a lambda function?
+print(sorted(mymodels, key=lambda model: model, reverse=True))
+print(max(models, key=lambda x: x["accuracy"]))
+
+{'name': 'Random Forest', 'accuracy': 0.91}
+43.How can you represent model names and accuracy scores as a list of dictionaries and as a list of Model objects passed to ModelBoard?
+board = ModelBoard([
+    Model("Random Forest", 0.91),
+    Model("Logistic Regression", 0.85),
+    Model("SVM", 0.88),
+])
+
+print(board.sorted_by_accuracy())   # the list uses __repr__ for each model
+print("Best:", board.best())   
+ 44.def log_event(app, *tags, **details): ==> = log_event("random", *["web", "mobile"]) 
+ wrong==> log_event("random", ["web", "mobile"]) 
 ========================questions====================
 1.why in c and c++ and php not use self use this and pthon why introduce self
 2.in subclass method why icant pass self.varaiable ex.super().__init__(self.brand) ==wrong  super().__init__(brand)==correct
