@@ -85,12 +85,63 @@ board = ModelBoard([
     Model("Logistic Regression", 0.85),
     Model("SVM", 0.88),
 ]) ==>board = ModelBoard([model1, model2, model3]) 
+
+
+  print(self.UserDefined([4,8,9,2,1]).add())
+    print(self.Anonyms.square(4))
+square=staticmethod(lambda x:x*x)
+
 22.how to display or read the attributes of each object in a list using for loop
 for model in models:
     print(model.name, model.accuracy)
 23.how to display or read the attributes of each object in a list using for loop
 def __repr__(self):
     return f"{self.name}: {self.accuracy}"
+print(board.sorted_by_accuracy())   
+
+24.How can you join strings from a list or tuple into a single string using spaces or a comma followed by a space as the separator?
+items = ["web", "mobile"] ==>print(" ".join(items))   # web mobile || print(", ".join(items))  # web, mobile
+tags = ("web", "mobile") ==?print(" ".join(tags))    # web mobile
+
+25.How can an instance method collect extra positional arguments passed during its call and join them into a single string, separated by a comma and a space?==joined_tags = ", ".join(tags)   # "web, mobile"
+26.How can you append a “tags” label and comma-separated tag values to an existing string?
+line += " tags: " + ", ".join(tags).
+
+27.How can you convert a dictionary into a list of strings in the format key=value?
+ [f"{key}={value}" for key, value in details.items()]
+27.How can an instance method collect keyword arguments passed during its call and convert them into a list of key=value strings?
+ pairs = [f"{key}={value}" for key, value in details.items()] # ['user=asha', 'amount=500']
+
+28.How can you calculate the average of a list of scores and round it to a specified number of decimal places?
+ average = round(sum(scores) / len(scores), round_to)
+29.How can you count how many scores meet or exceed the passing mark?
+passed = sum(1 for score in scores if score >= pass_mark)
+30.How can you calculate the number of failed scores using the total number of scores and the number that passed?
+failed = len(scores) - passed
+
+31.. How can you remove spaces from both ends of each name? from list
+names = ["  Asha Rao ", " Ravi Kumar  "]
+print([name.strip() for name in names])
+print([str.strip(name) for name in names])
+32 How can you convert every name to lowercase?
+print([name.lower() for name in names])
+print([str.lower(name) for name in names])
+33.How can you replace spaces with underscores in each name?
+print([str.replace(name, " ", "_") for name in names])
+34.How can you remove surrounding spaces, convert to lowercase, and replace spaces with underscores?
+print([name.strip().lower().replace(" ", "_") for name in names])
+print([str.replace(str.lower(str.strip(name)), " ", "_") for name in names])
+35.How can you replace underscores with hyphens in each name?
+print([name.replace("_", "-") for name in names])
+print([str.replace(name, "_", "-") for name in names])
+
+closure=
+
+
+37.How can you use a list comprehension to pass each name and a list of processing steps to a function, then collect the results in a new list?
+clean_names = [run_pipeline(name, steps) for name in raw_names]
+
+38 why la
 ========================questions====================
 1.why in c and c++ and php not use self use this and pthon why introduce self
 2.in subclass method why icant pass self.varaiable ex.super().__init__(self.brand) ==wrong  super().__init__(brand)==correct
@@ -232,7 +283,7 @@ return super().hello().upper()
 7.for subclass or child class u can pass or child method also u can denote pass if u have not defind body 
 class Car(Vehicle):
       pass
-
+8.nevers starts with class writting, first concept defination then connected with real example , then stars with action or fun , then formulla syntax/logic ,then call fun through object creation and finally starts with class, init action/fun object creation ,basically any program cover with some fun without class then put inside class
 
 
 

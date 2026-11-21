@@ -203,7 +203,25 @@ except AppError as error:
 
 Used in: Programs 29, 33
 
-**7. Decorator**
+**7. Closure (function that remembers)**
+
+```python
+def multiplier(number):               # outer: takes the value to remember
+    def multiply(value):              # inner: uses number from the outer function
+        return value * number
+    return multiply                   # return the function, not multiply()
+
+
+double = multiplier(2)                # remembers number = 2
+triple = multiplier(3)                # remembers number = 3
+
+print(double(5))                      # 10
+print(triple(5))                      # 15
+```
+
+Used in: Programs 66, 86. Patterns 8 and 9 (decorators) are closures too: `wrapper` remembers `function`.
+
+**8. Decorator**
 
 ```python
 from functools import wraps
@@ -227,7 +245,7 @@ def greet(name):
 print(greet("Asha"))
 ```
 
-**8. Decorator that takes an argument**
+**9. Decorator that takes an argument**
 
 ```python
 from functools import wraps
@@ -252,7 +270,7 @@ def ping():
 ping()
 ```
 
-**9. Context manager (`with`)**
+**10. Context manager (`with`)**
 
 ```python
 class Resource:
@@ -269,7 +287,7 @@ with Resource() as resource:
     print("working")
 ```
 
-**10. Generator**
+**11. Generator**
 
 ```python
 def generate(items):
@@ -282,7 +300,7 @@ for value in generate(["a", "", "b"]):
     print(value)
 ```
 
-**11. Dataclass with validation**
+**12. Dataclass with validation**
 
 ```python
 from dataclasses import dataclass, field
@@ -302,7 +320,7 @@ class Record:
 print(Record("Asha", 90))
 ```
 
-**12. Mixin**
+**13. Mixin**
 
 ```python
 class FeatureMixin:
@@ -446,6 +464,11 @@ blue
 
 **Fact (why this program):** `self` is the object before the dot. In `red.show()`, `self` is `red`; in `blue.show()`, `self` is `blue`. One method, but each object gets its own answer.
 
+**Real-life example:**
+
+- 🏠 **Everyday:** Every student is asked the same question, 'What is your roll number?', but each one gives their own answer.
+- 💻 **In software:** In a Django model, `order.get_total()` runs the same code but returns a different total for each order row.
+
 </details>
 
 ### Program 2
@@ -540,6 +563,11 @@ print(first.area(50))  # 1500
 
 **Fact (why this program):** Look at the method's parameters. Python supplies `self` automatically, so `get_length()` gets nothing and `area()` gets only `width`.
 
+**Real-life example:**
+
+- 🏠 **Everyday:** A tailor already has your cloth length noted, so they only ask for the width to work out the area.
+- 💻 **In software:** In an API client, `client.get(path)` takes only the path because the base URL is already stored on `self`.
+
 </details>
 
 ### Program 3
@@ -600,6 +628,11 @@ True
 ```
 
 **Fact (why this program):** `self` (inside the class) and `first` (outside the class) are two names for the **same object**, so `self is other` is `True`.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** 'Rahul' at home and 'Roll No. 12' at school are two names for the same boy.
+- 💻 **In software:** Caching and ORM code use `obj is other` to check whether two variables point to the very same loaded record.
 
 </details>
 
@@ -668,6 +701,11 @@ print(b.tasks)    # []: not shared
 ```
 
 **Fact (why this program):** A mutable class attribute is **one shared copy**. Changing it through `a` also changes what `b` sees. Create lists in `__init__` to give each object its own.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** A class notice board is shared by everyone, but each student's notebook belongs only to them.
+- 💻 **In software:** A list in the class body of a Flask service leaks one user's data into another user's request; create it in `__init__` instead.
 
 </details>
 
@@ -801,6 +839,11 @@ For example, if Asha deposits again, the list keeps both deposits, but the dict 
 
 **Fact (why this program):** An object's **state** is its data. You read it and change it through methods, and every change is stored on the object (`self.balance`, `self.history`, `self.history_dictionary`). Create the list and dict in `__init__` so each account gets its own.
 
+**Real-life example:**
+
+- 🏠 **Everyday:** A bank passbook records every deposit and withdrawal and always shows the latest balance.
+- 💻 **In software:** A wallet or payment service keeps the balance and a transaction log on the account object and changes them only through methods.
+
 </details>
 
 ## Alternative-Single class with methods
@@ -873,6 +916,11 @@ Mumbai
 ```
 
 **Fact (why this program):** You pass the arguments that `__init__` asks for: required ones always, default ones only if you want to change them. Python passes `self` for you.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** A school admission form needs your name and age, but the city field is already filled in as 'Delhi'.
+- 💻 **In software:** A Pydantic model in FastAPI makes some request fields required and gives others a default value.
 
 </details>
 
@@ -970,6 +1018,11 @@ Given: ['release']
 
 **Fact (why this program):** Python creates a default value **once**, when the `def` line runs, not on every call. A default `[]` or `{}` is therefore shared by every object. Use `None` and create the list inside `__init__`. This is one of the most common Python interview traps.
 
+**Real-life example:**
+
+- 🏠 **Everyday:** If every new student gets the same shared answer sheet, one student's answers show up on everyone's sheet.
+- 💻 **In software:** A `tags=[]` default in a ticket model makes all tickets share one tag list, which is a classic production bug.
+
 </details>
 
 ### Program 57
@@ -1055,6 +1108,11 @@ amit | push | retries=0 | Welcome
 ```
 
 **Fact (why this program):** Required arguments come first, defaults come after. Keyword arguments let the caller skip a default in the middle (`retries=5` without giving `channel`) and make the call easy to read. `retries=0` is a real value, so it is used, not replaced by the default.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** On Swiggy you change only the spice level and leave every other option at its default.
+- 💻 **In software:** `send_notification(user, msg, retries=5)` changes the retries and leaves the default channel as it is.
 
 </details>
 
@@ -1152,6 +1210,11 @@ with is not None: 0
 
 **Fact (why this program):** `self.DEFAULT_PORT` looks up the attribute on the object's own class first, so a child class can change a default with one line. Use `is not None` to pick the default: `or` also replaces real values such as `0`, `""` and `False`.
 
+**Real-life example:**
+
+- 🏠 **Everyday:** A restaurant chain has standard menu prices, and one branch changes only the price of tea.
+- 💻 **In software:** A database connector stores `DEFAULT_PORT` on the class, and its MySQL subclass overrides only the port.
+
 </details>
 
 ## Alternative-Single class: default arguments
@@ -1216,6 +1279,11 @@ large
 ```
 
 **Fact (why this program):** A default is written with `=` in `__init__`. Leave it out and the default is used; pass a value and it replaces the default **for that object only**.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** A coffee shop gives you a medium cup unless you ask for a large one.
+- 💻 **In software:** `requests.get(url, timeout=10)` uses the default timeout unless a call passes its own value.
 
 </details>
 
@@ -1307,6 +1375,11 @@ False
 
 **Fact (why this program):** Instance methods get `self` (one object), class methods get `cls` (the class), and static methods get neither (a plain helper).
 
+**Real-life example:**
+
+- 🏠 **Everyday:** In a pizza shop, 'make my pizza' needs your order, 'change the menu units' affects the whole shop, and 'convert inches to cm' needs neither.
+- 💻 **In software:** Django models use instance methods for one row, class methods for the whole table, and static methods for helper checks.
+
 </details>
 
 ### Program 18
@@ -1374,6 +1447,11 @@ Green School
 ```
 
 **Fact (why this program):** A class method receives `cls`, so it can change class attributes. One change is seen by **every** object.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** When the school changes its name, every student's ID card shows the new name.
+- 💻 **In software:** A class method updates a shared setting such as `Config.environment`, and every object sees the change.
 
 </details>
 
@@ -1466,6 +1544,11 @@ Error: Invalid email: ravi@site
 
 **Fact (why this program):** A static method is a plain function kept inside the class because it belongs there. It gets no `self` or `cls`, so you can call it without an object, for example in a form check before you create the user.
 
+**Real-life example:**
+
+- 🏠 **Everyday:** The railway booking form checks your mobile number before any ticket is booked.
+- 💻 **In software:** `User.is_valid_email()` checks a signup form before the user object or database row is created.
+
 </details>
 
 ### Program 19
@@ -1529,6 +1612,11 @@ Admin
 ```
 
 **Fact (why this program):** A class method works without an object, so it's ideal for creating objects in another way. Because `cls` is whichever class called it, `Admin.from_dict` returns an `Admin`.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** You can open a bank account by filling in a form or by uploading your Aadhaar, and either way you get an account.
+- 💻 **In software:** `User.from_dict(json_data)` builds an object from an API response, and `Admin.from_dict` returns an `Admin`.
 
 </details>
 
@@ -1638,6 +1726,11 @@ Type of d1: DigitalProduct
 
 **Fact (why this program):** A class method gets `cls`, the class it was called on, so `return cls(...)` builds the right type: a child class gets a child object without new code. Use a static method for helpers that need neither `self` nor `cls`. Write `Product.created += 1`, not `self.created += 1`: the second creates a new attribute on the object and the class counter never changes.
 
+**Real-life example:**
+
+- 🏠 **Everyday:** A shop reads labels like 'Rs. 1199' from a supplier list and counts how many items it added.
+- 💻 **In software:** Import scripts use `Product.from_csv(line)` to load catalogue rows, with a static helper that reads the price.
+
 </details>
 
 ## Inheritance
@@ -1706,6 +1799,11 @@ woof
 ```
 
 **Fact (why this program):** Syntax: `class Child(Parent):`. The parent name goes in brackets. The child gets every parent method (`eat`) and can add its own (`bark`).
+
+**Real-life example:**
+
+- 🏠 **Everyday:** A child inherits the family surname and also has a hobby of their own.
+- 💻 **In software:** `CustomUser(AbstractUser)` in Django reuses the parent's login methods and adds new fields.
 
 </details>
 
@@ -1788,6 +1886,11 @@ Toyota
 
 **Fact (why this program):** **Scenario 1:** the child has no `__init__`, so Python runs the parent's `__init__`. That's why you pass the **parent's** arguments (`brand`).
 
+**Real-life example:**
+
+- 🏠 **Everyday:** A new bank branch uses the head office account-opening form as it is.
+- 💻 **In software:** A Django class-based view subclass with no `__init__` uses the parent's setup.
+
 </details>
 
 ### Program 9
@@ -1857,6 +1960,11 @@ print(t2.load)  # 20 tons
 ```
 
 **Fact (why this program):** **Scenario 4:** default values in the child's `__init__` are optional. Pass only the required ones, or pass a new value to replace the default.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** A truck rental gives you a 10-ton truck unless you ask for a bigger one.
+- 💻 **In software:** A `PremiumPlan(Plan)` subclass adds a `storage='100GB'` default and still stores the parent's fields.
 
 </details>
 
@@ -1941,6 +2049,11 @@ HELLO
 
 **Fact (why this program):** The same instance method can be called through the object, through the class, from a saved variable, by name with `getattr`, from inside the class with `self`, and from a child with `super()`.
 
+**Real-life example:**
+
+- 🏠 **Everyday:** You can call a friend by dialling their number, from your contacts, from recent calls, or by asking someone else to call them.
+- 💻 **In software:** Frameworks call your methods by name with `getattr`, plugin systems store them in variables, and subclasses reach them with `super()`.
+
 </details>
 
 ### Program 10
@@ -2009,6 +2122,11 @@ print(ev.battery, ev.brand, ev.color)  # 75 kWh Tesla red
 ```
 
 **Fact (why this program):** **Scenario 5:** `*args, **kwargs` lets the child take its own argument and forward the rest to the parent, so you pass the parent's arguments plus the child's extra one.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** A courier hub adds its own tracking sticker and passes the rest of the parcel on unchanged.
+- 💻 **In software:** A custom Django form or DRF serializer takes its own argument and forwards `*args, **kwargs` to the parent.
 
 </details>
 
@@ -2113,6 +2231,11 @@ new
 
 **Fact (why this program):** `super()` reaches the parent's version of anything: `__init__`, a normal method, a class attribute, or a class method.
 
+**Real-life example:**
+
+- 🏠 **Everyday:** A junior manager follows the senior manager's rules, reuses their templates, and adds a few steps of their own.
+- 💻 **In software:** Overriding `save()` in a Django model and calling `super().save()` keeps the parent's behaviour and adds new behaviour.
+
 </details>
 
 ## Alternative-Inheritance
@@ -2181,6 +2304,11 @@ Honda 5
 ```
 
 **Fact (why this program):** **Scenario 2:** the child has its own `__init__` and calls `super().__init__()`. You pass the **child's** arguments; the child hands the parent its part.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** At a hotel, reception records your name and room service adds the number of guests.
+- 💻 **In software:** A custom exception calls `super().__init__(message)` and stores its own extra fields, such as `status_code`.
 
 </details>
 
@@ -2260,6 +2388,11 @@ I can swim
 ```
 
 **Fact (why this program):** With multiple inheritance, a class gets the methods of all its parents. Python looks for a method in the order shown by `__mro__` (Method Resolution Order): the class itself first, then the parents from left to right, then `object`.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** A duck can fly like a bird and swim like a fish, so it has both skills.
+- 💻 **In software:** `AdminUser(Auditable, Permissioned)` gets features from two parent classes at once.
 
 </details>
 
@@ -2342,6 +2475,11 @@ log, report saved
 ```
 
 **Fact (why this program):** A mixin adds one small feature to many unrelated classes. The MRO decides the order: `LogMixin` runs first, then `super()` moves to the next class.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** A 'gift wrap' option can be added to any product in an online shop.
+- 💻 **In software:** Django's `LoginRequiredMixin` adds a login check to many unrelated views.
 
 </details>
 
@@ -2449,6 +2587,11 @@ Error: Unknown fields: ['colour']
 
 **Fact (why this program):** `super()` doesn't mean "my parent". It means "the **next class in the MRO**". So `OwnerMixin`'s `super()` calls `TimestampMixin`, even though `OwnerMixin` doesn't know it exists. Each class takes only its own keyword arguments and passes the rest on, so every `__init__` runs once, and `Base` catches typos.
 
+**Real-life example:**
+
+- 🏠 **Everyday:** In a relay race, each runner runs their own leg and passes the baton to the next runner in order.
+- 💻 **In software:** Django and DRF mixins each take their own keyword arguments and call `super().__init__(**kwargs)`, so the whole chain runs.
+
 </details>
 
 ### Program 23
@@ -2529,6 +2672,11 @@ A
 ```
 
 **Fact (why this program):** Python follows the MRO `D → B → C → A`, and each class runs **once**. `super()` in `B` goes to `C`, not straight to `A`.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** Two departments report to the same CEO, but the CEO receives the meeting invite only once.
+- 💻 **In software:** With multiple inheritance, the MRO makes sure a shared base class setup, such as opening a DB connection, runs only once.
 
 </details>
 
@@ -2649,6 +2797,11 @@ Error: Cannot create a consistent method resolution order (MRO) for bases Base, 
 
 **Fact (why this program):** When two parents have the same method, the one listed **first** (left) in the class line wins, because it comes earlier in the MRO. Put mixins on the left and the base class last. Python refuses an order that breaks its rules (a parent placed before its own child), and raises `TypeError` when the class is created.
 
+**Real-life example:**
+
+- 🏠 **Everyday:** Two signboards point in different directions, and you follow the one you see first.
+- 💻 **In software:** A report class mixes in JSON and CSV export, and checking `__mro__` shows why the wrong `export()` ran.
+
 </details>
 
 ## Functions
@@ -2729,6 +2882,11 @@ print(square(4))         # 16
 
 **Fact (why this program):** Built-in functions are ready to use. User-defined functions are written with `def` and have a name. A lambda is a one-line function with no name, best for short jobs like a sorting key.
 
+**Real-life example:**
+
+- 🏠 **Everyday:** A kitchen has ready appliances (built-in), your own family recipe (def), and a quick one-time pinch of salt you never name (lambda).
+- 💻 **In software:** You call built-ins like len() everywhere, write def functions for business logic, and pass a lambda as a quick key to sort API results.
+
 **Same program using a class inside a class**
 
 ```text
@@ -2792,6 +2950,177 @@ Direct add: 30
 - An inner class object doesn't get the outer object automatically. Pass it in yourself if you need it.
 - `staticmethod(lambda ...)` stops Python from passing `self` to the lambda, so `square(4)` gets only `4`.
 - Use nested classes to **group** small helper classes that only make sense inside the outer class. If the inner class is big or used elsewhere, write it as a normal top-level class.
+
+**Alternative: lambda inside an instance method**
+
+One simple class, `Calculator`, stores a number in `self.no`. All three types of function are used inside **instance methods**. The `square()` method creates a lambda and calls it with `self.no`.
+
+```text
+Calculator(4)                    → self.no = 4
+├── show_builtins([4, 9, 1])     → built-in len() and max() → 3, 9
+├── add(2, 3)                    → user-defined def         → 5
+└── square()                     → x = lambda number: ...   → x(self.no) → 16
+```
+
+```python
+class Calculator:
+    def __init__(self, no):
+        self.no = no                      # the number this object works on
+
+    # 1. Built-in functions used inside an instance method
+    def show_builtins(self, numbers):
+        print("Length:", len(numbers))
+        print("Largest:", max(numbers))
+
+    # 2. User-defined: the method itself is written with def
+    def add(self, a, b):
+        return a + b
+
+    # 3. Anonymous: a lambda created inside an instance method
+    def square(self):
+        x = lambda number: number * number   # lambda lives only inside this method
+        return x(self.no)                    # call it with the object's number
+
+
+calc = Calculator(4)
+calc.show_builtins([4, 9, 1])
+print("Add:", calc.add(2, 3))
+print("Square:", calc.square())
+
+calc.no = 7                  # change the object's data
+print("Square:", calc.square())
+```
+
+**Output:**
+
+```text
+Length: 3
+Largest: 9
+Add: 5
+Square: 16
+Square: 49
+```
+
+**Points to remember**
+
+- `square()` is a normal **instance method**, so it receives `self` and can read `self.no`.
+- The lambda `x` is a **local variable**. It is created on each call and can't be used outside `square()`.
+- The lambda doesn't need `self` or `staticmethod`, because it isn't stored on the class. It's just called inside the method.
+- `calc.square()` takes no argument, because the number comes from the object. Change `calc.no` and the result changes.
+- A shorter way to write the same method is `return (lambda number: number * number)(self.no)`. The two-line version is easier to read.
+
+</details>
+
+### Program 86
+
+**Task:** Write a closure `multiplier(number)` that returns an inner function `multiply(value)`. Create `double = multiplier(2)` and `triple = multiplier(3)`, call both with `5`, and show the value the closure remembers.
+
+**Using a class:** A `Multiplier` class stores `number` in `__init__`, and `__call__` lets the object be called like a function, so `double(5)` works the same way.
+
+**Level:** 🟢 Simple
+
+*Developer use: Closures create small, pre-configured functions such as a tax calculator for one rate, a logger for one module, or the inner function of a decorator.*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Outer function `multiplier(number)` takes the number to remember.
+2. Inner function `multiply(value)` uses `number` from the outer function.
+3. Return `multiply` itself, **without calling it** (no brackets).
+4. `double = multiplier(2)` → `double(5)` gives 10.
+5. `triple = multiplier(3)` → `triple(5)` gives 15.
+
+**Program flow**
+
+```text
+multiplier(2)   → creates multiply, remembers number = 2 → double
+multiplier(3)   → creates multiply, remembers number = 3 → triple
+double(5)       → 5 * 2 → 10
+triple(5)       → 5 * 3 → 15
+double.__closure__[0].cell_contents → 2 (the remembered value)
+```
+
+**Pseudocode**
+
+```text
+FUNCTION multiplier(number):
+    FUNCTION multiply(value):
+        RETURN value * number      // number comes from the outer function
+    RETURN multiply                // return the function, don't call it
+
+double = multiplier(2)
+triple = multiplier(3)
+PRINT double(5)     // 10
+PRINT triple(5)     // 15
+```
+
+**Code**
+
+```python
+def multiplier(number):
+    def multiply(value):
+        return value * number   # uses number from the outer function
+    return multiply
+
+
+double = multiplier(2)
+triple = multiplier(3)
+
+print(double(5))   # 10 -> remembers number = 2
+print(triple(5))   # 15 -> remembers number = 3
+print(double.__closure__[0].cell_contents)   # 2: the remembered value
+```
+
+**Output:**
+
+```text
+10
+15
+2
+```
+
+**Fact (why this program):** A closure is an inner function that **remembers variables from its outer function**, even after the outer function has finished. `multiplier(2)` has already returned, but `double` still knows `number = 2`. Each call to `multiplier` makes a new closure with its own remembered value.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** A shop gives each cashier a stamp set to one discount, 10% or 20%. Every bill the cashier stamps uses that cashier's own discount.
+- 💻 **In software:** Every decorator is a closure: `wrapper` remembers the `func` it wraps. Closures also build pre-set helpers such as `make_tax(0.18)`.
+
+**Same program using a class**
+
+```python
+class Multiplier:
+    def __init__(self, number):
+        self.number = number          # remembered on the object
+
+    def __call__(self, value):        # lets the object be called like a function
+        return value * self.number
+
+
+double = Multiplier(2)
+triple = Multiplier(3)
+
+print(double(5))      # 10
+print(triple(5))      # 15
+print(double.number)  # 2
+```
+
+**Output:**
+
+```text
+10
+15
+2
+```
+
+**Points to remember**
+
+- Closure: the value is kept in the function's `__closure__`. Class: the value is kept in `self.number`.
+- Use a closure for one small job. Use a class when you need several values, several methods, or want to change the value later.
+- Return `multiply`, not `multiply()`. With brackets you return a result, not a function.
+- To **change** a remembered variable inside the inner function, declare it `nonlocal` first.
 
 </details>
 
@@ -2868,6 +3197,11 @@ Best: Random Forest
 ```
 
 **Fact (why this program):** `key=` tells `sorted()` and `max()` what to compare. `reverse=True` sorts from highest to lowest. `sorted()` returns a new list and leaves `models` unchanged.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** A teacher ranks students by marks to find the topper, without rewriting the register.
+- 💻 **In software:** In ML projects you sort experiment results by accuracy and pick the best model with max() before saving it.
 
 
 **Same program using a class**
@@ -3047,6 +3381,11 @@ print(log_event("payment", "upi", user="asha", amount=500))
 
 **Fact (why this program):** `*args` packs extra **positional** arguments into a tuple, and `**kwargs` packs extra **keyword** arguments into a dict. The order in the definition is always: normal arguments, then `*args`, then `**kwargs`.
 
+**Real-life example:**
+
+- 🏠 **Everyday:** A Swiggy order has one restaurant, any number of dishes, and any number of notes like 'less spicy' or 'no onion'.
+- 💻 **In software:** Logging helpers and wrapper functions accept *args/**kwargs so callers can pass any extra tags or fields, like logger.info(msg, extra={...}).
+
 
 **Same program using a class**
 
@@ -3174,6 +3513,11 @@ Average: 59.2 | Passed: 2 | Failed: 3
 ```
 
 **Fact (why this program):** Default arguments make a function easy to call in the common case. Keyword arguments (`pass_mark=60`) make the call readable and let you skip or reorder optional values. `return a, b, c` really returns **one tuple**, which you can unpack into separate variables.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** A tea stall gives normal sugar by default, unless you clearly say 'sugar=less'.
+- 💻 **In software:** Library calls like requests.get(url, timeout=5) or train_test_split(test_size=0.2) use defaults and keyword arguments for optional settings.
 
 
 **Same program using a class**
@@ -3308,6 +3652,11 @@ data_science_team
 ```
 
 **Fact (why this program):** In Python, functions are **first-class objects**: you can store them in a list, pass them to another function, and return them from a function. A **closure** is an inner function that remembers variables from the outer function even after it has finished. Together they let you build flexible pipelines: adding a step means adding one function to the list.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** A factory line where each worker does one step (wash, cut, pack) on every item that passes.
+- 💻 **In software:** Data-cleaning pipelines in pandas or scikit-learn chain small functions to clean text before training a model.
 
 
 **Same program using a class**
@@ -3447,6 +3796,11 @@ Reading: Wings of Fire by A. P. J. Abdul Kalam
 
 **Fact (why this program):** A dunder method is a method with **d**ouble **under**scores on both sides, like `__str__`. You don't call it yourself: `print(book)` calls `book.__str__()` for you. Without `__str__`, Python only shows the class name and a memory address.
 
+**Real-life example:**
+
+- 🏠 **Everyday:** A book without a cover label is just 'a book'; a label tells you its title and author at a glance.
+- 💻 **In software:** Django models define __str__ so the admin panel shows 'Order #101' instead of a memory address.
+
 </details>
 
 ### Program 45
@@ -3528,6 +3882,11 @@ Cart with 3 items
 ```
 
 **Fact (why this program):** You never call dunder methods yourself. Python calls them for you: `print()` calls `__str__`, `len()` calls `__len__`, and `+` calls `__add__`.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** Two shopping baskets can be emptied into one bigger basket, and you can count items in each.
+- 💻 **In software:** E-commerce code merges guest and logged-in carts with + and checks len(cart) before checkout.
 
 </details>
 
@@ -3623,6 +3982,11 @@ p1 is p2: False
 
 **Fact (why this program):** `sorted()`, `min()` and `max()` only need `__lt__` to compare objects. Without `__eq__`, `==` checks whether both names point to the **same object**. `__repr__` is the developer view of an object, and it is what you see inside lists. `__str__` is the user view.
 
+**Real-life example:**
+
+- 🏠 **Everyday:** On Amazon you sort phones by price, and two listings of the same phone at the same price are the same deal.
+- 💻 **In software:** Product catalogues and priority queues define __lt__ so objects can be sorted, and __eq__ to find duplicates.
+
 </details>
 
 ### Program 69
@@ -3717,6 +4081,11 @@ Error: Cannot add INR and USD
 ```
 
 **Fact (why this program):** `a + b` calls `a.__add__(b)`. If the left side doesn't know how to add (like `0 + Money`), Python tries the **right** side's `__radd__`. That is why `sum()` needs `__radd__`. Returning a new object keeps `Money` safe to share, because nothing changes it later.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** You can add ₹100 and ₹50, but you can't directly add ₹100 and $50 without converting.
+- 💻 **In software:** Payment and billing systems use a Money class so totals with sum() never mix currencies by mistake.
 
 </details>
 
@@ -3829,6 +4198,11 @@ False
 
 **Fact (why this program):** Python uses **protocols**: any object with `__len__` works with `len()`, any object with `__iter__` works in a `for` loop, and any object with `__contains__` works with `in`. You don't need to inherit from `list`. Implement the dunder methods and your class behaves like a built-in collection.
 
+**Real-life example:**
+
+- 🏠 **Everyday:** A Spotify playlist lets you count songs, pick song 1, play them in order, and check if a song is in it.
+- 💻 **In software:** Custom collections like PyTorch Dataset implement __len__ and __getitem__ so DataLoader can index and loop over them.
+
 </details>
 
 ## Decorators
@@ -3911,6 +4285,11 @@ After the function
 ```
 
 **Fact (why this program):** A decorator adds extra work around a function without changing the function's code. `@greet_decorator` is the same as writing `say_hello = greet_decorator(say_hello)`.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** A gift wrapper adds paper around the gift without changing the gift inside.
+- 💻 **In software:** Flask/FastAPI route decorators like @app.get('/') wrap your function to add web routing around it.
 
 
 **Same program using a class**
@@ -4041,6 +4420,11 @@ City School
 
 **Fact (why this program):**
 
+**Real-life example:**
+
+- 🏠 **Everyday:** A loudspeaker changes your voice every time you speak; a school badge is pinned to your uniform once.
+- 💻 **In software:** @lru_cache wraps a function on every call, while @dataclass changes a class once when it is defined.
+
 | | Function decorator | Class decorator |
 |---|---|---|
 | Receives | A function | A class |
@@ -4150,6 +4534,11 @@ Doc: Add two numbers.
 ```
 
 **Fact (why this program):** Using `*args, **kwargs` in the wrapper lets one decorator work on functions with any arguments. Without `@wraps`, `add.__name__` would be `"wrapper"` and the docstring would be lost, which breaks debugging, logs and tools like FastAPI that read function details.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** A CCTV camera records who entered and what they carried, without stopping them.
+- 💻 **In software:** Teams add a @log_call decorator to service functions for audit logs, and @wraps keeps names correct in tracebacks.
 
 
 **Same program using a class**
@@ -4301,6 +4690,11 @@ Error: please log in
 ```
 
 **Fact (why this program):** A decorator can decide **whether** the function runs at all, not only add work before and after it. That is why authentication, permission checks and rate limiting are usually decorators: the rule lives in one place instead of being copied into every function.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** A security guard checks your ID card before letting you into the office.
+- 💻 **In software:** Django's @login_required and FastAPI auth dependencies block pages until the user is logged in.
 
 
 **Same program using a class**
@@ -4477,6 +4871,11 @@ Gave up: Service down
 
 **Fact (why this program):** A decorator that takes an argument needs **three levels**: `retry(times)` returns `decorator`, which returns `wrapper`. `@retry(times=3)` first **calls** `retry(3)`, and the result is the real decorator. Only catch the errors you expect (here `ConnectionError`). Retrying on every error would hide real bugs.
 
+**Real-life example:**
+
+- 🏠 **Everyday:** If a UPI payment fails, you try again a few times before giving up.
+- 💻 **In software:** API clients use @retry(times=3), like the tenacity library, to handle flaky network calls.
+
 
 **Same program using a class**
 
@@ -4624,6 +5023,11 @@ print(list(count_up_to(5)))   # [1, 2, 3, 4, 5]
 
 **Fact (why this program):** `yield` gives back one value and **pauses** the function. It remembers where it stopped, and the next `next()` continues from there.
 
+**Real-life example:**
+
+- 🏠 **Everyday:** A token machine at a bank gives the next token number only when someone presses the button.
+- 💻 **In software:** Generators produce IDs, pages of results, or rows one at a time instead of building the full list.
+
 
 **Same program using a class**
 
@@ -4742,6 +5146,11 @@ True
 ```
 
 **Fact (why this program):** Use a **generator** for big data that you read once (large files, streams, batches), because it uses very little memory. Use a **list** when you need `len()`, indexing, sorting, or to loop more than once.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** Filling a water tank holds all the water at once; a tap gives water only as you use it.
+- 💻 **In software:** Reading a 10 GB CSV row by row with a generator avoids loading it all into RAM.
 
 
 **Same program using a class**
@@ -4866,6 +5275,11 @@ generator
 ```
 
 **Fact (why this program):**
+
+**Real-life example:**
+
+- 🏠 **Everyday:** A courier delivers the whole parcel at once (return), while a newspaper arrives one day at a time (yield).
+- 💻 **In software:** An API returns a full JSON list for small data, but streams large responses chunk by chunk with yield.
 
 | `return` | `yield` |
 |---|---|
@@ -4997,6 +5411,11 @@ Any more? []
 ```
 
 **Fact (why this program):** The "checking" lines show that a generator works **lazily**: it reads only as many lines as it needs to find the next error, then pauses. With a real file (`for line in open("app.log")`), memory use stays small even for a file of many gigabytes.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** A teacher flips through answer sheets and only pulls out the ones that failed.
+- 💻 **In software:** Ops scripts scan huge server logs lazily and yield only ERROR lines for alerts.
 
 
 **Same program using a class**
@@ -5147,6 +5566,11 @@ Batch of 1 -> ids [7]
 
 **Fact (why this program):** Each stage takes a generator and gives out another one, so records flow through **one at a time**, and at most one batch is in memory. The `if batch:` after the loop matters: without it, the last record (7) would be silently lost. Forgetting that leftover batch is a common bug.
 
+**Real-life example:**
+
+- 🏠 **Everyday:** A school bus takes students in groups of 40, not all 500 at once.
+- 💻 **In software:** Data jobs send records to an API or database in batches of N, and ML training loads data in mini-batches.
+
 
 **Same program using a class**
 
@@ -5280,6 +5704,11 @@ Done
 
 **Fact (why this program):**
 
+**Real-life example:**
+
+- 🏠 **Everyday:** At an ATM you try to withdraw; if it fails you see an error, if it works you get cash, and the card always comes back out.
+- 💻 **In software:** Database code uses try/except/finally so the connection is always closed, even when a query fails.
+
 | Part | When it runs |
 |---|---|
 | `try` | Always: the risky code |
@@ -5403,6 +5832,11 @@ Error: Balance 1000 is less than 5000
 
 **Fact (why this program):** A custom exception is a class that inherits from `Exception`. Its name explains exactly what went wrong, and callers can catch that one error by name.
 
+**Real-life example:**
+
+- 🏠 **Everyday:** A UPI app shows 'Insufficient balance' instead of a vague 'Something went wrong'.
+- 💻 **In software:** Banking and wallet services raise InsufficientBalanceError so the API can return a clear message and status code.
+
 </details>
 
 ### Program 76
@@ -5486,6 +5920,11 @@ Missing key 'discount', no discount
 ```
 
 **Fact (why this program):** One `try` can have several `except` blocks. Python checks them **from top to bottom** and runs only the first one that matches. Catch specific errors like `ValueError` and `KeyError` rather than a bare `except:`, so real bugs (such as a typo in a variable name) aren't hidden. For a missing dict key, `order.get("discount", 0)` is often simpler than catching `KeyError`.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** A shop clerk handles a torn note one way and a missing coupon another way.
+- 💻 **In software:** Form and API handlers catch ValueError for bad input and KeyError for missing fields, each with its own reply.
 
 
 **Same program using a class**
@@ -5617,6 +6056,11 @@ Cause: invalid literal for int() with base 10: 'abc'
 
 **Fact (why this program):** `raise New from original` gives the user a clear, simple error and keeps the real cause in `__cause__` for developers. The traceback shows both errors.
 
+**Real-life example:**
+
+- 🏠 **Everyday:** A doctor says 'fever' and also notes the real cause, 'infection', on the report.
+- 💻 **In software:** Services wrap low-level errors like ValueError in a domain error with raise ... from err, so logs keep the root cause.
+
 </details>
 
 ### Program 77
@@ -5722,6 +6166,11 @@ Payment attempt logged
 
 **Fact (why this program):** `except PaymentError` also catches **every child class**, so new payment errors added later are handled automatically. Put the **more specific** `except` first: if `except PaymentError` came first, the `InsufficientFunds` block would never run. Storing extra data on the exception (`needed`, `available`) lets the caller react to it, not just print it.
 
+**Real-life example:**
+
+- 🏠 **Everyday:** 'Payment failed' can be card declined or low balance, but the shop handles all of them at one counter.
+- 💻 **In software:** Payment gateways define PaymentError with child errors, so one except PaymentError block handles every payment problem.
+
 </details>
 
 ## Context managers
@@ -5818,6 +6267,11 @@ Error: Power cut
 
 **Fact (why this program):** `with` calls `__enter__` at the start and `__exit__` at the end, **even if an error happens**. That's why files, locks, and database connections use `with`: cleanup is never skipped.
 
+**Real-life example:**
+
+- 🏠 **Everyday:** A motion-sensor light in a corridor switches on when you walk in and switches off when you leave, even if you leave in a hurry.
+- 💻 **In software:** Database connections, locks and network sockets use `with` so they are always released, even when a request crashes.
+
 </details>
 
 ### Program 78
@@ -5903,6 +6357,11 @@ Closed after reading? True
 ```
 
 **Fact (why this program):** Without `with`, you must call `file.close()` yourself, and if an error happens first, the file stays open (and written data may not be saved). `with open()` closes the file as soon as the block ends, **even after an error**. Always prefer it.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** A library book drop box takes the book back automatically, so you never forget to return it.
+- 💻 **In software:** Reading CSV uploads or writing log and report files in Django or FastAPI apps with `with open()` so file handles never leak.
 
 
 **Same program using a class**
@@ -6052,6 +6511,11 @@ Error: Out of memory
 ```
 
 **Fact (why this program):** `@contextmanager` turns a generator into a context manager. The code **before** `yield` is the setup, and the code **after** it is the cleanup. The `try/finally` around `yield` is important: without it, an error inside the `with` block would skip the cleanup.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** A shop shutter: open it before work (setup), do business, and pull it down at closing (cleanup), whatever happened during the day.
+- 💻 **In software:** Writing quick helpers like `with timer():` or `with temp_directory():` in test suites and scripts without a full class.
 
 
 **Same program using a class**
@@ -6206,6 +6670,11 @@ Saved rows: ['order-1', 'order-2']
 
 **Fact (why this program):** `__exit__` receives the error details. `exc_type` is `None` when the block finished normally, which is how the manager knows whether to **commit** or **roll back**. Because of this, the half-finished order (`order-3`) is never saved, which keeps the data consistent.
 
+**Real-life example:**
+
+- 🏠 **Everyday:** A UPI payment either completes fully or the money comes back to your account; it never stays half-sent.
+- 💻 **In software:** SQLAlchemy sessions and Django's `transaction.atomic()` save all rows on success and roll everything back on an error.
+
 </details>
 
 ### Program 81
@@ -6313,6 +6782,11 @@ Not ignored: Wrong value {'debug': False}
 
 **Fact (why this program):** The return value of `__exit__` decides what happens to an error: `True` **swallows** it, and `False` (or `None`) lets it continue. Only suppress errors you expect, as `contextlib.suppress(KeyError)` does. Restoring the old value **before** that check means the setting is put back in every case.
 
+**Real-life example:**
+
+- 🏠 **Everyday:** Putting your phone on silent for a meeting and switching the ringer back on afterwards, even if the meeting ends early.
+- 💻 **In software:** Overriding settings in tests (`override_settings`, `mock.patch`) and ignoring an expected error with `contextlib.suppress`.
+
 </details>
 
 ## Asyncio
@@ -6392,6 +6866,11 @@ Hello...
 ```
 
 **Fact (why this program):** Calling an `async def` function doesn't run its body. It returns a **coroutine** object, a paused task waiting to be started. It runs only when you `await` it or pass it to `asyncio.run()`. Forgetting `await` is the most common async bug, and Python warns `coroutine ... was never awaited`.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** Booking a cab only creates the request; nothing moves until a driver actually starts the trip.
+- 💻 **In software:** Forgetting `await` in a FastAPI endpoint returns a coroutine object instead of data and gives the 'coroutine was never awaited' warning.
 
 
 **Same program using a class**
@@ -6525,6 +7004,11 @@ Toasting bread...
 
 **Fact (why this program):** `async def` makes a function that can pause. `await` pauses it until the result is ready, and lets other tasks run meanwhile. Both waits happen at the same time, so the whole program takes about **1 second, not 2**. Use asyncio for waiting work like network calls, not heavy calculations.
 
+**Real-life example:**
+
+- 🏠 **Everyday:** Putting the kettle on and the bread in the toaster at the same time, so breakfast is ready in one wait instead of two.
+- 💻 **In software:** An async endpoint that loads a user's profile and notifications together instead of one after the other.
+
 
 **Same program using a class**
 
@@ -6654,6 +7138,11 @@ Total time: 2 seconds
 ```
 
 **Fact (why this program):** With `gather()`, the total time is the time of the **slowest** call (2s), not the sum of all of them (4.5s). The results come back **in the order you passed the calls**, not the order they finished, so you can unpack them safely.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** Three friends order from Swiggy, Zomato and a dhaba at once; dinner starts when the slowest order arrives, not after adding all delivery times.
+- 💻 **In software:** A dashboard API calling users, orders and payments services in parallel with `aiohttp`, so the response is as fast as the slowest service.
 
 
 **Same program using a class**
@@ -6793,6 +7282,11 @@ Email status: sent
 ```
 
 **Fact (why this program):** `await some_coroutine()` waits right there, but `create_task()` **starts the work alongside** your code and gives you a handle to await later. The task only gets to run when your code reaches an `await` (asyncio switches tasks only at `await`). That's why "Sending email" prints after step 1. Keep a reference to the task, or it may be garbage-collected.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** You start the washing machine and cook dinner while it runs, checking on it only at the end.
+- 💻 **In software:** Sending a welcome email or push notification in the background while the signup request carries on.
 
 
 **Same program using a class**
@@ -6939,6 +7433,11 @@ huge.zip took too long, cancelled
 
 **Fact (why this program):** A `Semaphore(2)` is a counter of free slots. `async with` takes a slot and gives it back when the block ends, so no more than 2 downloads ever run at once. `wait_for()` **cancels** a task that runs past its timeout and raises `TimeoutError`. Without timeouts, one slow server can hang your whole program.
 
+**Real-life example:**
+
+- 🏠 **Everyday:** A bank has only two counters open, so customers wait for a free counter, and anyone taking too long is asked to come back later.
+- 💻 **In software:** Limiting concurrent scraping or API calls to avoid rate limits, and timing out a slow third-party payment API.
+
 
 **Same program using a class**
 
@@ -7067,6 +7566,11 @@ print(b.tasks)    # []: not shared
 
 **Fact (why this program):** You add to an instance list with `append()`, like `a.tasks.append("report")`. Because `tasks` is created in `__init__`, only team `a` changes. `members` lives on the class, so `b` sees `"Asha"` too.
 
+**Real-life example:**
+
+- 🏠 **Everyday:** A school notice board is shared by every class, but each student's notebook belongs only to that student.
+- 💻 **In software:** Accidentally storing per-user data in a class attribute so one user's cart or session data leaks into another's.
+
 </details>
 
 ### Program 20
@@ -7130,6 +7634,11 @@ started
 ```
 
 **Fact (why this program):** Use inheritance when the child **is a** kind of parent. Code written for `Vehicle` works for every child, without writing it again.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** Every vehicle at a toll plaza starts the same way with a key, whether it is a car or a bike.
+- 💻 **In software:** Django class-based views inherit `get()` and `dispatch()` from a parent view without rewriting them.
 
 </details>
 
@@ -7222,6 +7731,11 @@ Invalid port: 99999
 
 **Fact (why this program):** `__init__` must return `None`, so it reports bad input by **raising** an error, not by returning an error code. When you need to build and return an object in a special way, such as from environment settings, use a class method. It calls `cls(...)`, so `__init__` still validates the host and port.
 
+**Real-life example:**
+
+- 🏠 **Everyday:** You can tell the auto driver the address yourself or just show the saved location on your phone; both get you to the same place.
+- 💻 **In software:** Building database settings from code in tests and from environment variables in Docker or production deployments.
+
 </details>
 
 ### Program 25
@@ -7295,6 +7809,11 @@ Asha Patel
 ```
 
 **Fact (why this program):** `self` is just the first argument, not a keyword. `asha.full_name()` is the same as `User.full_name(asha)`: in the first, Python passes `asha` as `self` for you; in the second, you pass it yourself.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** When a teacher says 'show your notebook', each student shows their own notebook without being told whose it is.
+- 💻 **In software:** Model methods like `user.get_full_name()` in Django, where Python passes the user object as `self` automatically.
 
 </details>
 
@@ -7372,6 +7891,11 @@ https://mail.example.com/send
 ```
 
 **Fact (why this program):** One class, two instances, each with its own settings. In `payments.build_request()`, `self` is `payments`, so it uses the payment URL and token. The same method on `emails` uses the email settings.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** Two Paytm wallets use the same app but each has its own number and balance.
+- 💻 **In software:** Separate API client objects for a payment gateway and an email service, each with its own base URL and token.
 
 </details>
 
@@ -7452,6 +7976,11 @@ Sita, 22, Pune
 
 **Fact (why this program):** The class is the blank form template, `__init__` fills it in, each instance is one filled form, and methods are the action buttons. A button works only on the form it belongs to: `ram.update()` changes Ram's form, not Sita's, because `self` is `ram`.
 
+**Real-life example:**
+
+- 🏠 **Everyday:** A blank school admission form is printed once, and each parent fills in their own copy.
+- 💻 **In software:** Django and Pydantic models act as the template, and each record or request body is one filled-in instance.
+
 </details>
 
 ### Program 28
@@ -7528,6 +8057,11 @@ print(client.timeout, client.retries)   # 30 3
 ```
 
 **Fact (why this program):** `inspect.signature()` shows exactly which arguments a class needs. Parameters without a default (`base_url`) are required, parameters with a default are optional, and parameters after `*` (`verify_ssl`) must be passed by keyword. Python hides `self` because it passes it for you.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** A train booking needs the destination, offers a default berth and class, and gives senior-citizen concession only if you tick it by name.
+- 💻 **In software:** Library constructors like `httpx.Client(timeout=..., verify=...)` use defaults and keyword-only flags.
 
 </details>
 
@@ -7607,6 +8141,11 @@ except APIError as error:
 ```
 
 **Fact (why this program):** **Scenario 2:** `NotFoundError` has its own `__init__`, so you pass **its** arguments (`resource`, `resource_id`). Each class hands its parent what the parent needs: `NotFoundError` passes the message and `404` to `APIError`, and `APIError` passes the message to `Exception`.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** A hospital slip says both what went wrong and which department to visit.
+- 💻 **In software:** FastAPI or DRF APIs raise `NotFoundError` with a 404 status code so the handler can return the right HTTP response.
 
 </details>
 
@@ -7695,6 +8234,11 @@ print(cart.total())      # 2500
 
 **Fact (why this program):** Create the list in `__init__` (`self.items = []`) so each object gets its own copy, then add to it with `append()` inside a method. Adding through `add_item()` gives you one place to put checks later, such as stock or quantity limits.
 
+**Real-life example:**
+
+- 🏠 **Everyday:** Each customer at a supermarket gets their own trolley, and the bill adds price times quantity at the counter.
+- 💻 **In software:** E-commerce carts that add items through an `add_item()` method so stock and price checks live in one place.
+
 </details>
 
 ### Program 31
@@ -7767,6 +8311,11 @@ print(confirmations)
 ```
 
 **Fact (why this program):** `send_confirmation(self, order_id)` has two parameters, but you pass only `order_id`. Python passes `email` as `self`. The list lives outside the class, so **your code** collects the results.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** A courier gives you a receipt for each parcel, and you keep the receipts in your own file.
+- 💻 **In software:** A service object returns confirmation messages and the calling view collects them in a list for the response.
 
 </details>
 
@@ -7846,6 +8395,11 @@ print(email.confirmations)
 
 **Fact (why this program):** The list is created in `__init__`, so the **object** remembers its own history and the method adds to it. Don't put `confirmations = []` in the class body: that would be one list shared by every `EmailService` object.
 
+**Real-life example:**
+
+- 🏠 **Everyday:** Your bank passbook records every transaction made on your own account.
+- 💻 **In software:** A notification or audit service that keeps a per-instance log of everything it sent.
+
 </details>
 
 ### Program 33
@@ -7902,6 +8456,11 @@ Order 4521 not found
 ```
 
 **Fact (why this program):** `OrderNotFound` has no `__init__`, so Python uses the parent's (`Exception.__init__`). That's why passing a message works with only `pass` in the class: `Exception` stores it in `args` and shows it when printed.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** A shop puts up a new 'Out of stock' sign using the same standard board as all its other notices.
+- 💻 **In software:** Defining `class OrderNotFound(Exception): pass` in a service layer so callers can catch that one error by name.
 
 </details>
 
@@ -8002,6 +8561,11 @@ Cannot ship an order that is created
 
 **Fact (why this program):** The object's state (`status`) changes only through its methods, so the methods can block wrong changes, such as shipping before payment. If any code could set `order.status = "shipped"` directly, these rules could be skipped.
 
+**Real-life example:**
+
+- 🏠 **Everyday:** A Flipkart order cannot be shipped before it is paid; the app only allows steps that make sense for the current status.
+- 💻 **In software:** Order and payment state machines in backend services, where methods block invalid status changes.
+
 </details>
 
 ### Program 35
@@ -8094,6 +8658,11 @@ print(Order.calculate_tax(500, 0.05))       # 25.0
 
 **Fact (why this program):** Needs one object's data → **instance** method (`total`). Creates objects or uses class data → **class** method (`from_json`). Needs neither → **static** method (`calculate_tax`).
 
+**Real-life example:**
+
+- 🏠 **Everyday:** GST is a fixed rule for everyone, each bill applies it to its own amount, and a bill can also be created from a scanned slip.
+- 💻 **In software:** An `Order` model with a tax helper, a `total()` method and a `from_json()` constructor for API payloads.
+
 </details>
 
 ### Program 36
@@ -8173,6 +8742,11 @@ https://staging.api.example.com/list
 ```
 
 **Fact (why this program):** A class method receives `cls`, so it can change a class attribute. Both clients read `base_url` from the class, so **one** call switches every client to staging. It changes the setting for the whole program, so use it only for app-wide settings.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** When the head office changes the company address, every branch letterhead shows the new address.
+- 💻 **In software:** Switching a client class from a staging URL to the production URL for all instances at once.
 
 </details>
 
@@ -8266,6 +8840,11 @@ False postgres://prod
 
 **Fact (why this program):** A class method creates an object **before** you have one, so it's the way to give a class several ways to be built (`from_json`, `from_env`). The standard library does the same: `date.fromisoformat()`, `datetime.now()`, `dict.fromkeys()`, and `Path.home()` are all class methods.
 
+**Real-life example:**
+
+- 🏠 **Everyday:** You can open a bank account at the branch or by uploading documents online; both give you the same account.
+- 💻 **In software:** App settings loaded with `Settings.from_json()` locally and `Settings.from_env()` in Docker, like Pydantic `BaseSettings`.
+
 </details>
 
 ### Program 38
@@ -8345,6 +8924,11 @@ Collected Rs.499 via UPI
 
 **Fact (why this program):** Card and UPI **are** payment methods, so they inherit from `PaymentMethod` and share the same `pay()` method name, each with its own behaviour. The parent's `pay()` raises `NotImplementedError` to force every child to write its own. Adding wallet payments later only needs a new `WalletPayment(PaymentMethod)` class.
 
+**Real-life example:**
+
+- 🏠 **Everyday:** Every payment counter must accept payment, but cash, card and UPI each do it their own way.
+- 💻 **In software:** A payment gateway layer where `CardPayment` and `UpiPayment` must each implement `pay()`, or `NotImplementedError` reminds you.
+
 </details>
 
 ### Program 39
@@ -8421,6 +9005,11 @@ INSERT {'title': 'Hello World', 'slug': 'hello-world'}
 ```
 
 **Fact (why this program):** This uses two forms of `super()`: `super().__init__()` runs the parent's setup, and `super().save()` runs the parent's method after the child adds its own step. It's how you override `save()` in a Django model: add your step, then call `super()`. If you forget `super().save()`, nothing gets saved.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** A new employee fills a short form and HR copies the details into the company's standard record.
+- 💻 **In software:** ORM models where a child calls `super().__init__(**fields)` so the base `save()` builds the INSERT query.
 
 </details>
 
@@ -8518,6 +9107,11 @@ BaseHandler: send response
 
 **Fact (why this program):** Both mixins inherit from `BaseHandler`, which makes a diamond. Because each one calls `super()`, every step runs in MRO order, and the response is sent only **once**. If `AuthMixin` called `BaseHandler.handle(self, request)` directly, the logging step would be skipped.
 
+**Real-life example:**
+
+- 🏠 **Everyday:** At an airport you pass security check, then baggage scan, then reach the gate, always in the same order.
+- 💻 **In software:** Django views combining `LoginRequiredMixin` and logging mixins, where the MRO decides the order each step runs.
+
 </details>
 
 ### Program 41
@@ -8568,6 +9162,11 @@ print(sorted(words, key=lambda word: len(word)))
 ```
 
 **Fact (why this program):** A lambda is a small one-line function with no name. It's ideal for a short `key=` like this. Here `key=len` would also work. For logic with several steps, error handling, or reuse, write a normal `def` function instead.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** Lining students up by height instead of by name, using the same list of students.
+- 💻 **In software:** Sorting search results, file names or tags by length, date or score with `sorted(items, key=lambda x: ...)`.
 
 
 **Same program using a class**
@@ -8675,6 +9274,11 @@ Meera
 ```
 
 **Fact (why this program):** Lambdas are short throwaway functions for `filter()`, `sorted()` and `max()`. For a simple field lookup, `itemgetter("age")` does the same job as `lambda u: u["age"]`. A list comprehension is often clearer than `filter` with a lambda: `[u for u in users if u["active"]]`.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** From the class register, pick only students present today, line them up oldest first, and find the eldest.
+- 💻 **In software:** Filtering active users from an API response and sorting them before sending the data to the frontend.
 
 
 **Same program using a class**
