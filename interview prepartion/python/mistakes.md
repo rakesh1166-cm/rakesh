@@ -112,7 +112,7 @@ line += " tags: " + ", ".join(tags).
 
 28.How can you calculate the average of a list of scores and round it to a specified number of decimal places?
  average = round(sum(scores) / len(scores), round_to)
-29.How can you count how many scores meet or exceed the passing mark?
+29.How can you count how many scores meet or exceed the passing mark from given list
 passed = sum(1 for score in scores if score >= pass_mark)
 30.How can you calculate the number of failed scores using the total number of scores and the number that passed?
 failed = len(scores) - passed
@@ -177,6 +177,123 @@ print(board.sorted_by_accuracy())   # the list uses __repr__ for each model
 print("Best:", board.best())   
  44.def log_event(app, *tags, **details): ==> = log_event("random", *["web", "mobile"]) 
  wrong==> log_event("random", ["web", "mobile"]) 
+
+ 45.Can a Python function return multiple values in a single return statement?
+ return average, passed, failed
+ 46.How can a Python method return multiple values as a tuple or as a list?
+ # Return a tuple==>return average, passed, failed ||# Return a list==>return [average, passed, failed]
+ 47.How can you use unpacking to get each key and its value separately or both from a Python dictionary?
+ summary = report.summarize()
+ avg, passed, failed = summary
+ print(avg, passed, failed)  # average passed failed
+
+ avg, passed, failed = summary["average"], summary["passed"], summary["failed"]
+print(avg, passed, failed)  # 70.0 2 1
+
+for key, value in summary.items():
+    print(key, value)
+
+ 47.How can you capture three values returned by a Python method in separate variables on a single line?
+ Use tuple unpacking.avg, passed, failed = report.summarize()
+ Use list unpacking.avg, passed, failed = report.summarize()
+ 
+ avg, passed, failed = report.summarize()==frame a question how to get multiple value from one fun in single line avg, passed, failed = report.summarize()
+ 47.command to replace string==>def replace(text):     return text.replace(self.text, new)
+ wrong=def replace(old):
+            return old.replace(self.text, new)
+  correct=def replace(text):     return text.replace(self.text, new)
+48.How can you use the __call__ dunder method to create a callable object that replaces text, performing the same task as a replacement closure?
+ def __call__(self, text):            # lets you call the object like a function
+        return text.replace(self.old, self.new)
+49.Why do we define the __str__ dunder method in a Python class, and how does Python call it
+to return a readable string for an object:
+
+book = Book("Wings of Fire", "A. P. J. Abdul Kalam")
+50.Which dunder method should you use to display a readable string for each object when you print a list of objects?[<__main__.Model object at 0x...>, ...].
+def __repr__(self):
+    return f"{self.name}: {self.accuracy}"
+    [Random Forest: 0.91, Logistic Regression: 0.85, SVM: 0.88]
+50.How can you use a for loop to print each object’s attributes on a separate line without defining __repr__?
+ for model in board.sorted_by_accuracy():
+    print(model.name, model.accuracy)
+51. to call __str__ use print(cart1)   cart1 = Cart(["pen", "book"]) but for len we use print(len(cart1))
+and add both = cart1 + cart2 why diffent way to call in dunder method
+
+__str__       -> print(cart1)= return f"{self.title} by {self.author}" ||return f"{self.currency} {self.amount:.2f}"
+__repr__      -> print(repr(cart1)) or print(cart1) = return f"Product({self.name!r}, {self.price})"
+__len__       -> print(len(cart1)) =  return len(self.items)
+__add__       -> print(cart1 + cart2)= return Money(self.amount + other.amount, self.currency)
+__getitem__   -> print(cart1[0])=return self.items[index]
+__contains__  -> print("pen" in cart1)==> return item in self.items
+__iter__      -> print(list(cart1))
+__bool__      -> print(bool(cart1))
+__eq__        -> print(cart1 == cart2) =   return self.name == other.name and self.price == other.price ||  return (self.price, self.name) == (other.price, other.name)
+
+__lt__        -> print(cart1 < cart2)=return self.price < other.price ||return (self.price, self.name) > (other.price, other.name)
+__call__      -> print(cart1())
+__init__      -> print(Cart(["pen", "book"]))
+
+52.How can you sort a list of tuples and a list of dictionaries
+tuple_models = [("Logistic Regression", 0.85), ("Random Forest", 0.91)]
+dict_models = [
+    {"name": "Logistic Regression", "accuracy": 0.85},
+    {"name": "Random Forest", "accuracy": 0.91},
+]
+
+# For each tuple, use the value at index 1.
+print(sorted(tuple_models, key=lambda model: model[1], reverse=True))
+
+# For each dictionary, use the value under the "accuracy" key.
+print(sorted(dict_models, key=lambda model: model["accuracy"], reverse=True))
+
+53.How does Python sort a list of tuples or a list of dictionaries when you don’t specify a sort key?
+models = [("SVM", 0.88), ("Random Forest", 0.91), ("SVM", 0.85)]
+
+print(sorted(models))
+# [('Random Forest', 0.91), ('SVM', 0.85), ('SVM', 0.88)]
+54.How does Python sort a  list of dictionaries when you don’t specify a sort key?
+Plain dictionaries have no default sort order. If sorted() tries to compare two dictionaries directly, it raises TypeError.
+55.how to find chepest and expensive product  on given list of tuple and list of dictionary with and without dunder method. based on specifc key
+tuple_products = [("Book", 250), ("Pen", 20), ("Bag", 800)]
+
+# The price is at index 1.
+print(min(tuple_products, key=lambda product: product[1]))  # ('Pen', 20)
+print(max(tuple_products, key=lambda product: product[1]))  # ('Bag', 800)
+
+dict_products = [
+    {"name": "Book", "price": 250},
+    {"name": "Pen", "price": 20},
+    {"name": "Bag", "price": 800},
+]
+
+# The price is stored under the "price" key.
+print(min(dict_products, key=lambda product: product["price"]))
+# {'name': 'Pen', 'price': 20}
+
+print(max(dict_products, key=lambda product: product["price"]))
+# {'name': 'Bag', 'price': 800}
+56.how to find chepest and expensive product  on given list of tuple and list of dictionary with and without dunder method. 
+products = [(250, "Book"), (20, "Pen"), (800, "Bag")]
+
+print(min(products))  # (20, 'Pen')
+print(max(products))  # (800, 'Bag')
+57.how to find chepest and expensive product  on given list of tuple and list of dictionary with and without dunder method.
+products = [(250, "Book"), (20, "Pen"), (800, "Bag")]
+
+print("Cheaprint("Cheapest:", min(products))
+print("Most expensive:", max(products))pest:", min(products))
+print("Most expensive:", max(products))
+\
+58.how to find topper and wekest student  on given list of tuple and list of dictionary with and without dunder method.
+
+58. how to compare two tuple object using dunder mathod
+
+59. to call dunder method must be str or repr dunder method needs suppose if u call add,contain or len any otherdunder method     ~~~~~~~~~^~~~~~
+TypeError: can only concatenate list (not "str") to list
+To get custom readable text automatically when you print a Cart, define __str__ or __repr__.
+60.corrct ==>return Cart(self.item+other.item)   wrong ==>return Cart(self.item+other)   
+61.correct= return f"{len(self.item)}"  wrong =return len(self.item) while call dunder method
+62.How do __lt__ and __gt__ let you compare two Product objects by price, and which method does Python use when you call sorted(products), min(products), or max(products)
 ========================questions====================
 1.why in c and c++ and php not use self use this and pthon why introduce self
 2.in subclass method why icant pass self.varaiable ex.super().__init__(self.brand) ==wrong  super().__init__(brand)==correct
