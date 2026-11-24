@@ -387,6 +387,15 @@ def read_age(text):
         return int(text)
     except ValueError as error:
         raise InvalidAgeError("Age must be a whole number") from error
+78.What are the different ways to raise a custom exception in Python, and in which blocks can you use raise?
+Inside an if block to raise a custom exception when a condition is true
+if condition:
+    raise CustomError("Invalid input")
+Inside an except block to turn a caught exception into a custom one
+try:
+    result = int(text)
+except ValueError as error:
+    raise CustomError("Expected a whole number") from error            
 78.What are some examples of custom exceptions in Python, which built-in exception should each inherit from, and when would you raise each one?
 | Built-in parent | Example custom exception | When you might raise it |
 |---|---|---|
@@ -400,6 +409,63 @@ def read_age(text):
 | `NameError` | `UnknownVariableError` | A calculator you wrote encounters an undefined variable in an expression. In ordinary Python code, `NameError` usually points to a bug you should fix directly. |
 | `Exception` | `InsufficientBalanceError` | A withdrawal exceeds the account balance, violating a business rule. |        
 
+79.How can you unpack each tuple or dictionary in a list into separate variables directly in a for loop?
+pairs = [("Pen", 20), ("Book", 250)]
+
+for name, price in pairs:
+    print(name, price)
+prices = {"Pen": 20, "Book": 250}
+
+for name, price in prices.items():
+    print(name, price)    
+80.How do you catch multiple exception types in a single except block and print the name of the exception that occurred?
+  except (
+        ValueError,
+        TypeError,
+        KeyError,
+        IndexError,
+        ZeroDivisionError,
+        AttributeError,
+        FileNotFoundError,
+        NameError,
+    ) as error:
+
+ 81.How do you call a function stored in a variable, whether it was created using def or lambda?
+ def greet():
+    return "Hello"
+
+first = greet
+second = lambda: "Hi"
+
+print(first())   # Hello
+print(second())  # Hi   
+81.What are two ways to store a function in a tuple so you can call it later, using either a named function or a lambda?
+def get_price():
+    return float("500")
+
+
+checks = [
+    ("Named function", get_price),
+    ("Lambda function", lambda: float("500")),
+]
+
+for label, operation in checks:
+    print(label, operation())
+
+given order = {"price": "500", "items": ["pen", "book"], "customers": 0}
+
+82.How do you pass a label, a lambda, a built-in exception type, a custom exception type, and an error message to a function that converts the built-in exception into the custom one?
+ check_order(
+    "Customer age", lambda: int("twenty"),
+    ValueError, InvalidAgeError, "Age must be a whole number",
+) 
+83.How do you make a child custom exception inherit from a parent custom exception, and how can the child use super().__init__() to set its error message?
+class PaymentError(Exception):
+    """Base class for payment errors."""
+
+class InsufficientFunds(PaymentError):
+    def __init__(self, needed, available):
+        super().__init__(f"Need Rs. {needed}, have Rs. {available}")
 ========================questions====================
 1.why in c and c++ and php not use self use this and pthon why introduce self
 2.in subclass method why icant pass self.varaiable ex.super().__init__(self.brand) ==wrong  super().__init__(brand)==correct
