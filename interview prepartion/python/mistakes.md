@@ -294,6 +294,79 @@ To get custom readable text automatically when you print a Cart, define __str__ 
 60.corrct ==>return Cart(self.item+other.item)   wrong ==>return Cart(self.item+other)   
 61.correct= return f"{len(self.item)}"  wrong =return len(self.item) while call dunder method
 62.How do __lt__ and __gt__ let you compare two Product objects by price, and which method does Python use when you call sorted(products), min(products), or max(products)
+63.What is the basic Python syntax for try, except, else, and finally?
+def run_operation():
+    try:
+        result = do_something()
+    except ErrorType as error:
+        print(error)
+    else:
+        print("Result:", result)
+    finally:
+        print("Done")
+
+64.How do you use the same structure with an if statement inside try and a raise statement inside if to raise a custom exception when the condition is true?
+ def run_operation(value):
+    try:
+        if invalid_condition(value):
+            raise CustomError(f"Invalid value: {value}")
+
+        result = do_something(value)
+    except CustomError as error:
+        print(error)
+    else:
+        print("Result:", result)
+    finally:
+        print("Done")
+ def withdraw(balance, amount):
+    try:
+        if amount > balance:
+            raise InsufficientBalanceError(f"Balance {balance} is less than {amount}")
+        balance=balance - amount 
+    except InsufficientBalanceError:
+        print ("InsufficientBalanceError")
+    else:
+        print("balance", + balance)
+    finally:
+        print("done")  
+64.Why might you handle a successful result in the else block of a try–`except` statement, and when can you return the result directly from try? Is an else block required when you use finally?
+========Return directly from try================
+try:
+    return a / b
+except ZeroDivisionError:
+    return None
+=======Handle success in else=======
+try:
+    result = a / b
+except ZeroDivisionError:
+    print("Cannot divide by zero")
+else:
+    print("Result:", result)
+finally:
+    print("Done")                    
+64.raise is part of try,except ,else or finally mcq
+65.Exception is part of try,except ,else or finally mcq
+66.In Python, what happens to a value returned from try, except, or else if finally also has a return? What changes if finally uses print() instead?
+67.How do you create a custom exception in Python by inheriting from the built-in Exception class?
+class CustomError(Exception):
+    pass
+ class InsufficientBalanceError(Exception):
+    pass   
+68.correct=print("balance", + balance) wrong=print("balance" + balance)
+TypeError: can only concatenate str (not "int") to str
+69.Where do you put the if statement and the raise statement in a try–`except` block to raise an exception only when a condition is true?
+Put the if inside try and indent raise inside the if. Align except with try.
+try:
+    if amount > balance:
+        raise InsufficientBalanceError("Not enough balance")
+
+    balance -= amount
+70.domain level question generally withdraw  return balance=balnace-amount
+71.how to calculate price after discount=price - price * discount / 100
+73.How do you retrieve a value by its key from a dictionary stored in an instance attribute and assign it to a local variable?
+percent = self.details["discount"]
+74.How can you fix TypeError: unsupported operand type(s) for /: 'str' and 'int' when dividing a numeric string by an integer in Python?
+   price = float(price_text)   or    price = int(price_text)  
 ========================questions====================
 1.why in c and c++ and php not use self use this and pthon why introduce self
 2.in subclass method why icant pass self.varaiable ex.super().__init__(self.brand) ==wrong  super().__init__(brand)==correct
