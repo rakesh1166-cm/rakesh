@@ -381,6 +381,25 @@ KeyError means the requested key is missing from a dictionary. order["discount"]
 | `AttributeError` | The object lacks the requested attribute or method. | `"500".append("pen")` |
 | `FileNotFoundError` | You try to open a file that does not exist. | `open("missing_receipt.txt", "r")` if the file is absent |
 | `NameError` | You use a name that Python cannot find. | `print(order_total)` if `order_total` is undefined |   
+77.What is the syntax for raising a custom exception with raise inside an except block, and how does from error preserve the original exception as its cause?
+def read_age(text):
+    try:
+        return int(text)
+    except ValueError as error:
+        raise InvalidAgeError("Age must be a whole number") from error
+78.What are some examples of custom exceptions in Python, which built-in exception should each inherit from, and when would you raise each one?
+| Built-in parent | Example custom exception | When you might raise it |
+|---|---|---|
+| `ValueError` | `InvalidAgeError` | An age cannot be parsed or is outside the allowed range. |
+| `TypeError` | `InvalidPriceTypeError` | A function expects a numeric price and receives a list. |
+| `KeyError` | `MissingOrderFieldError` | A required key such as `"discount"` is missing from an order dictionary. |
+| `IndexError` | `InvalidCartIndexError` | A cart item is requested at a position outside the list. |
+| `ZeroDivisionError` | `ZeroCustomerCountError` | A bill-splitting calculation has zero customers. |
+| `AttributeError` | `MissingRequiredAttributeError` | A plugin object lacks the required `process` method. |
+| `FileNotFoundError` | `ReceiptNotFoundError` | The receipt file for an order is missing. |
+| `NameError` | `UnknownVariableError` | A calculator you wrote encounters an undefined variable in an expression. In ordinary Python code, `NameError` usually points to a bug you should fix directly. |
+| `Exception` | `InsufficientBalanceError` | A withdrawal exceeds the account balance, violating a business rule. |        
+
 ========================questions====================
 1.why in c and c++ and php not use self use this and pthon why introduce self
 2.in subclass method why icant pass self.varaiable ex.super().__init__(self.brand) ==wrong  super().__init__(brand)==correct

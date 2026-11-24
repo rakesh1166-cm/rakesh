@@ -674,6 +674,19 @@ One real-life example for every program in [programming.md](programming.md), gro
 | `FileNotFoundError` | The receipt file isn't there |
 | `except (...)` + `else` | Note the problem and keep billing; print the bill if all is fine |
 
+### Program 88: Custom exceptions for each built-in error
+
+- 🏠 **Everyday:** A bank clerk doesn't tell you "system error 404". They say "Your balance is too low" or "Your cheque date is invalid", and the technical reason stays in the bank's internal log.
+- 💻 **In software:** Django and FastAPI apps raise errors like `OrderNotFoundError` or `PaymentDeclinedError` from service code, and one handler turns them into proper HTTP responses (404, 402) while the logs keep the original `KeyError` or `ConnectionError`.
+
+| Concept | Real life |
+|---|---|
+| Built-in error (`KeyError`) | The technical problem inside the bank's system |
+| Custom error (`MissingOrderFieldError`) | The clear message the clerk tells you |
+| `raise ... from error` | The clerk notes the technical reason in the internal log |
+| `class InvalidAgeError(ValueError)` | A specific form of a general problem, still handled by the same desk |
+| `InsufficientBalanceError(Exception)` | The bank's own rule: not enough money in the account |
+
 ### Program 53: Exception chaining with from
 
 - 🏠 **Everyday:** A doctor says 'fever' and also notes the real cause, 'infection', on the report.

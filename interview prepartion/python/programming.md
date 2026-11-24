@@ -6181,6 +6181,296 @@ Undefined total: NameError -> name 'order_total' is not defined
 
 </details>
 
+### Program 88
+
+**Task:** Create one **custom exception for each built-in error** from Program 87, each inheriting from its built-in parent (for example `class InvalidAgeError(ValueError)`), plus `InsufficientBalanceError(Exception)` for a business rule. Write `check_order(label, operation, built_in_error, custom_error, message)` that runs the operation, catches the built-in error, and raises the custom one with `raise ... from error`. Then write `pay(balance, amount)`, which raises `InsufficientBalanceError` when the amount is more than the balance.
+
+**Using a class:** An `OrderService` class stores the `order` and the `balance`. Its `check()` method converts built-in errors into custom ones and prints the original cause, and `pay()` raises `InsufficientBalanceError`.
+
+**Level:** 🔴 Difficult
+
+*Developer use: Real projects turn low-level errors (`KeyError`, `FileNotFoundError`) into clear domain errors (`MissingOrderFieldError`, `ReceiptNotFoundError`), so callers and API responses show business messages and the original cause is kept for debugging.*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Create 8 custom exceptions, each inheriting from one built-in error, and give each a body of `pass`.
+2. Create `InsufficientBalanceError(Exception)` for a rule Python doesn't know about.
+3. `check_order()` uses **two `try` blocks**:
+   - inner `try`: run `operation()`, catch `built_in_error`, and `raise custom_error(message) from error`
+   - outer `try`: catch `custom_error` and print its name and message
+4. `read_receipt(filename)` opens a file, which fails if the file is missing.
+5. `pay(balance, amount)` raises `InsufficientBalanceError` itself. No built-in error is involved.
+6. Call `check_order()` once for each error, then call `pay()` inside `try` / `except`.
+
+**Program flow**
+
+```text
+int("twenty")            → ValueError         → raise InvalidAgeError from it
+"500" / 10               → TypeError          → raise InvalidPriceTypeError
+order["discount"]        → KeyError           → raise MissingOrderFieldError
+order["items"][5]        → IndexError         → raise InvalidCartIndexError
+500 / 0                  → ZeroDivisionError  → raise ZeroCustomerCountError
+object().process()       → AttributeError     → raise MissingRequiredAttributeError
+read_receipt("missing")  → FileNotFoundError  → raise ReceiptNotFoundError
+price + service_fee      → NameError          → raise UnknownVariableError
+outer except             → prints "label: CustomName - message"
+
+pay(300, 500)            → 500 > 300          → raise InsufficientBalanceError (your own rule)
+```
+
+**Pseudocode**
+
+```text
+CLASS InvalidAgeError INHERITS ValueError: pass
+... (one custom class per built-in error)
+CLASS InsufficientBalanceError INHERITS Exception: pass
+
+FUNCTION check_order(label, operation, built_in_error, custom_error, message):
+    TRY
+        TRY
+            operation()
+        CATCH built_in_error AS error
+            RAISE custom_error(message) FROM error      // keep the cause
+        END TRY
+    CATCH custom_error AS error
+        PRINT label, name of error, error
+    END TRY
+
+FUNCTION pay(balance, amount):
+    IF amount > balance: RAISE InsufficientBalanceError
+    RETURN balance - amount
+```
+
+**Code**
+
+```python
+class InvalidAgeError(ValueError):
+    pass
+
+
+class InvalidPriceTypeError(TypeError):
+    pass
+
+
+class MissingOrderFieldError(KeyError):
+    pass
+
+
+class InvalidCartIndexError(IndexError):
+    pass
+
+
+class ZeroCustomerCountError(ZeroDivisionError):
+    pass
+
+
+class MissingRequiredAttributeError(AttributeError):
+    pass
+
+
+class ReceiptNotFoundError(FileNotFoundError):
+    pass
+
+
+class UnknownVariableError(NameError):
+    pass
+
+
+class InsufficientBalanceError(Exception):
+    pass
+
+
+def check_order(label, operation, built_in_error, custom_error, message):
+    try:
+        try:
+            operation()
+        except built_in_error as error:
+            raise custom_error(message) from error
+    except custom_error as error:
+        print(f"{label}: {type(error).__name__} - {error}")
+
+
+def read_receipt(filename):
+    with open(filename, encoding="utf-8") as receipt:
+        return receipt.read()
+
+
+def pay(balance, amount):
+    if amount > balance:
+        raise InsufficientBalanceError(
+            f"Balance {balance} is less than {amount}"
+        )
+    return balance - amount
+
+
+order = {"items": ["pen", "book"], "price": 500}
+
+check_order(
+    "Customer age", lambda: int("twenty"),
+    ValueError, InvalidAgeError, "Age must be a whole number",
+)
+
+check_order(
+    "Price", lambda: "500" / 10,
+    TypeError, InvalidPriceTypeError, "Price must be numeric",
+)
+
+check_order(
+    "Discount", lambda: order["discount"],
+    KeyError, MissingOrderFieldError, "discount",
+)
+
+check_order(
+    "Cart item", lambda: order["items"][5],
+    IndexError, InvalidCartIndexError, "Cart index is out of range",
+)
+
+check_order(
+    "Split payment", lambda: order["price"] / 0,
+    ZeroDivisionError, ZeroCustomerCountError, "Customer count must be positive",
+)
+
+check_order(
+    "Payment plugin", lambda: object().process(),
+    AttributeError, MissingRequiredAttributeError, "Plugin needs a process method",
+)
+
+check_order(
+    "Receipt", lambda: read_receipt("missing_receipt.txt"),
+    FileNotFoundError, ReceiptNotFoundError, "Receipt file is missing",
+)
+
+check_order(
+    "Order formula", lambda: order["price"] + service_fee,
+    NameError, UnknownVariableError, "Formula references an undefined service_fee",
+)
+
+try:
+    pay(balance=300, amount=500)
+except InsufficientBalanceError as error:
+    print(f"Payment: {type(error).__name__} - {error}")
+```
+
+**Output:**
+
+```text
+Customer age: InvalidAgeError - Age must be a whole number
+Price: InvalidPriceTypeError - Price must be numeric
+Discount: MissingOrderFieldError - 'discount'
+Cart item: InvalidCartIndexError - Cart index is out of range
+Split payment: ZeroCustomerCountError - Customer count must be positive
+Payment plugin: MissingRequiredAttributeError - Plugin needs a process method
+Receipt: ReceiptNotFoundError - Receipt file is missing
+Order formula: UnknownVariableError - Formula references an undefined service_fee
+Payment: InsufficientBalanceError - Balance 300 is less than 500
+```
+
+**Built-in error → custom error**
+
+| Built-in error | Custom error (child of it) | Business meaning |
+|---|---|---|
+| `ValueError` | `InvalidAgeError` | Age isn't a whole number |
+| `TypeError` | `InvalidPriceTypeError` | Price isn't numeric |
+| `KeyError` | `MissingOrderFieldError` | Order has no `discount` field |
+| `IndexError` | `InvalidCartIndexError` | No item at that cart position |
+| `ZeroDivisionError` | `ZeroCustomerCountError` | Bill split among 0 customers |
+| `AttributeError` | `MissingRequiredAttributeError` | Plugin has no `process()` method |
+| `FileNotFoundError` | `ReceiptNotFoundError` | Receipt file is missing |
+| `NameError` | `UnknownVariableError` | Formula uses an undefined name |
+| `Exception` | `InsufficientBalanceError` | Your own rule: balance too low |
+
+**Fact (why this program):** A custom exception is just a class that inherits from an exception class. Inheriting from the **matching built-in** (`InvalidAgeError(ValueError)`) means old code that catches `ValueError` still works. `raise ... from error` keeps the original built-in error as `__cause__`, so you get a clear business message **and** the real reason for debugging. `InsufficientBalanceError` inherits from `Exception` because Python raises nothing by itself here: it's your own business rule.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** A bank clerk doesn't tell you "system error 404". They say "Your balance is too low" or "Your cheque date is invalid", and the technical reason stays in the bank's internal log.
+- 💻 **In software:** Django and FastAPI apps raise errors like `OrderNotFoundError` or `PaymentDeclinedError` from service code, and one handler turns them into proper HTTP responses (404, 402) while the logs keep the original `KeyError` or `ConnectionError`.
+
+**Same program using a class**
+
+```python
+class InvalidAgeError(ValueError):
+    pass
+
+
+class MissingOrderFieldError(KeyError):
+    pass
+
+
+class ZeroCustomerCountError(ZeroDivisionError):
+    pass
+
+
+class InsufficientBalanceError(Exception):
+    pass
+
+
+class OrderService:
+    def __init__(self, order, balance):
+        self.order = order
+        self.balance = balance
+
+    def check(self, label, operation, built_in_error, custom_error, message):
+        try:
+            try:
+                operation()
+            except built_in_error as error:
+                raise custom_error(message) from error
+        except custom_error as error:
+            cause = type(error.__cause__).__name__
+            print(f"{label}: {type(error).__name__} - {error} (cause: {cause})")
+
+    def pay(self, amount):
+        if amount > self.balance:
+            raise InsufficientBalanceError(
+                f"Balance {self.balance} is less than {amount}"
+            )
+        self.balance -= amount
+        return self.balance
+
+    def run_all(self):
+        self.check("Customer age", lambda: int("twenty"),
+                   ValueError, InvalidAgeError, "Age must be a whole number")
+        self.check("Discount", lambda: self.order["discount"],
+                   KeyError, MissingOrderFieldError, "discount")
+        self.check("Split payment", lambda: self.order["price"] / 0,
+                   ZeroDivisionError, ZeroCustomerCountError,
+                   "Customer count must be positive")
+        try:
+            self.pay(500)
+        except InsufficientBalanceError as error:
+            print(f"Payment: {type(error).__name__} - {error}")
+
+
+service = OrderService({"items": ["pen", "book"], "price": 500}, balance=300)
+service.run_all()
+
+# A custom error is still its built-in parent
+print(issubclass(InvalidAgeError, ValueError))
+```
+
+**Output:**
+
+```text
+Customer age: InvalidAgeError - Age must be a whole number (cause: ValueError)
+Discount: MissingOrderFieldError - 'discount' (cause: KeyError)
+Split payment: ZeroCustomerCountError - Customer count must be positive (cause: ZeroDivisionError)
+Payment: InsufficientBalanceError - Balance 300 is less than 500
+True
+```
+
+**Points to remember**
+
+- `error.__cause__` holds the original built-in error, set by `raise ... from error`. The class version prints its name.
+- `MissingOrderFieldError` prints `'discount'` **with quotes**, because every `KeyError` child adds quotes around its message when printed.
+- `except ValueError:` also catches `InvalidAgeError`, because the child **is a** `ValueError`. That's why `issubclass(...)` prints `True`.
+- Use the outer `try` only for a demo like this. In real code, raise the custom error and let the caller (for example an API error handler) catch it.
+
+</details>
+
 ### Program 53
 
 **Task:** Create `InvalidAgeError`. Write `read_age(text)` that converts text to an integer. If `int()` fails with `ValueError`, raise `InvalidAgeError("Age must be a whole number")` **from** the original error. Read `"25"`, then try `"abc"` and print the error and its cause.
