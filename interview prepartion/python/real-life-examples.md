@@ -661,6 +661,19 @@ One real-life example for every program in [programming.md](programming.md), gro
 | `except KeyError → full price` | No coupon, so you pay the full price |
 | `two except blocks` | Each problem handled its own way |
 
+### Program 87: All common built-in error types
+
+- 🏠 **Everyday:** A shop billing counter checks each order. A wrong price, a missing coupon, an item that isn't in the bag, a missing receipt: each problem gets its own label, but the cashier keeps billing the next customer.
+- 💻 **In software:** In a FastAPI or Django view, you validate a request body and turn each kind of error into a clear message (for example a 400 Bad Request with "price must be a number") instead of letting the server crash.
+
+| Concept | Real life |
+|---|---|
+| `ValueError` | Price written as "five hundred" instead of 500 |
+| `KeyError` / `IndexError` | Coupon not on the bill / 6th item in a 2-item bag |
+| `ZeroDivisionError` | Splitting the bill among zero customers |
+| `FileNotFoundError` | The receipt file isn't there |
+| `except (...)` + `else` | Note the problem and keep billing; print the bill if all is fine |
+
 ### Program 53: Exception chaining with from
 
 - 🏠 **Everyday:** A doctor says 'fever' and also notes the real cause, 'infection', on the report.

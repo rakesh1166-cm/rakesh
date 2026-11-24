@@ -5972,6 +5972,215 @@ Missing key 'discount', no discount
 
 </details>
 
+### Program 87
+
+**Task:** Write `run_order_check(label, operation)` that runs an `operation` inside `try`, catches **eight common built-in errors** in one `except` tuple, and prints the error's type name. If no error happens, `else` prints the result. Test it with nine checks on an `order` dict: one valid check, plus one for each error type: `ValueError`, `TypeError`, `KeyError`, `IndexError`, `ZeroDivisionError`, `AttributeError`, `FileNotFoundError` and `NameError`.
+
+**Using a class:** An `OrderChecker` class stores the `order` and keeps the error tuple as a class attribute `COMMON_ERRORS`. `run_check()` holds the `try` / `except` / `else`, and `run_all()` runs every check.
+
+**Level:** 🟡 Medium
+
+*Developer use: When you validate user input, API payloads or files, you need to know which built-in error each mistake raises, so you can catch the right one and show a clear message.*
+
+<details>
+<summary>Answer</summary>
+
+**Steps**
+
+1. Write `run_order_check(label, operation)`. `operation` is a function with no arguments.
+2. In `try`, call `operation()`.
+3. In one `except (...) as error`, list the eight error types, then print `type(error).__name__`.
+4. In `else`, print the result. It runs only when there was **no** error.
+5. Write `read_receipt()`, which opens a file that doesn't exist.
+6. Make a list of `(label, operation)` pairs. Use a `lambda` so each operation runs only **inside** `try`.
+7. Loop over the list and call `run_order_check()` for each pair.
+
+**Program flow**
+
+```text
+order = {"price": "500", "items": ["pen", "book"], "customers": 0}
+
+float("500")              → works                       → else   → 500.0
+float("five hundred")     → text isn't a number         → except → ValueError
+"500" / 10                → str / int not allowed       → except → TypeError
+order["discount"]         → key not in dict             → except → KeyError
+order["items"][5]         → list has only 2 items       → except → IndexError
+500 / 0                   → divide by zero              → except → ZeroDivisionError
+"500".append("pen")       → str has no append()         → except → AttributeError
+open("nonexistent...")    → file not there              → except → FileNotFoundError
+order_total               → name never defined          → except → NameError
+```
+
+**Pseudocode**
+
+```text
+FUNCTION run_order_check(label, operation):
+    TRY
+        result = operation()
+    CATCH ValueError, TypeError, KeyError, IndexError,
+          ZeroDivisionError, AttributeError, FileNotFoundError, NameError AS error
+        PRINT label, name of error type
+    ELSE                                 // only when no error
+        PRINT label, result
+    END TRY
+
+order = {price: "500", items: ["pen", "book"], customers: 0}
+checks = list of (label, small function)
+FOR EACH (label, operation) IN checks:
+    run_order_check(label, operation)
+```
+
+**Code**
+
+```python
+def run_order_check(label, operation):
+    try:
+        result = operation()
+    except (
+        ValueError,
+        TypeError,
+        KeyError,
+        IndexError,
+        ZeroDivisionError,
+        AttributeError,
+        FileNotFoundError,
+        NameError,
+    ) as error:
+        print(f"{label}: {type(error).__name__}")
+    else:
+        print(f"{label}: {result}")
+
+
+def read_receipt():
+    with open("nonexistent_receipt.txt", "r") as file:
+        return file.read()
+
+
+order = {"price": "500", "items": ["pen", "book"], "customers": 0}
+
+checks = [
+    ("Valid price", lambda: float(order["price"])),
+    ("Invalid price", lambda: float("five hundred")),
+    ("Divide a string", lambda: order["price"] / 10),
+    ("Missing discount", lambda: order["discount"]),
+    ("Invalid item position", lambda: order["items"][5]),
+    ("Split among zero customers", lambda: 500 / order["customers"]),
+    ("Add an item to a string", lambda: order["price"].append("pen")),
+    ("Missing receipt", read_receipt),
+    ("Undefined total", lambda: order_total),
+]
+
+for label, operation in checks:
+    run_order_check(label, operation)
+```
+
+**Output:**
+
+```text
+Valid price: 500.0
+Invalid price: ValueError
+Divide a string: TypeError
+Missing discount: KeyError
+Invalid item position: IndexError
+Split among zero customers: ZeroDivisionError
+Add an item to a string: AttributeError
+Missing receipt: FileNotFoundError
+Undefined total: NameError
+```
+
+**All 8 error types at a glance**
+
+| Error | When it happens | Example from this program | Usual fix |
+|---|---|---|---|
+| `ValueError` | Right type, but a bad value | `float("five hundred")` | Validate input before converting |
+| `TypeError` | An operation on the wrong type | `"500" / 10` (str ÷ int) | Convert first: `float("500") / 10` |
+| `KeyError` | A dict key doesn't exist | `order["discount"]` | `order.get("discount", 0)` |
+| `IndexError` | A list position is out of range | `order["items"][5]` (only 2 items) | Check `len()` first |
+| `ZeroDivisionError` | Dividing by zero | `500 / 0` | Check the divisor isn't 0 |
+| `AttributeError` | The object has no such method or attribute | `"500".append("pen")` | Use the right type (a list has `append`) |
+| `FileNotFoundError` | The file path doesn't exist | `open("nonexistent_receipt.txt")` | Check the path, or create the file |
+| `NameError` | A variable was never defined | `order_total` | Define it before you use it |
+
+**Fact (why this program):** One `except` can catch **several error types** if you put them in a tuple. `type(error).__name__` tells you which one actually happened. The `lambda` is important: it **delays** each operation, so the error happens inside `try`. Without the lambda, the error would happen while the list is being built and would crash the program.
+
+**Real-life example:**
+
+- 🏠 **Everyday:** A shop billing counter checks each order. A wrong price, a missing coupon, an item that isn't in the bag, a missing receipt: each problem gets its own label, but the cashier keeps billing the next customer.
+- 💻 **In software:** In a FastAPI or Django view, you validate a request body and turn each kind of error into a clear message (for example a 400 Bad Request with "price must be a number") instead of letting the server crash.
+
+**Same program using a class**
+
+```python
+class OrderChecker:
+    COMMON_ERRORS = (
+        ValueError,
+        TypeError,
+        KeyError,
+        IndexError,
+        ZeroDivisionError,
+        AttributeError,
+        FileNotFoundError,
+        NameError,
+    )
+
+    def __init__(self, order):
+        self.order = order
+
+    def run_check(self, label, operation):
+        try:
+            result = operation()
+        except self.COMMON_ERRORS as error:
+            print(f"{label}: {type(error).__name__} -> {error}")
+        else:
+            print(f"{label}: {result}")
+
+    def read_receipt(self):
+        with open("nonexistent_receipt.txt", "r") as file:
+            return file.read()
+
+    def run_all(self):
+        checks = [
+            ("Valid price", lambda: float(self.order["price"])),
+            ("Invalid price", lambda: float("five hundred")),
+            ("Divide a string", lambda: self.order["price"] / 10),
+            ("Missing discount", lambda: self.order["discount"]),
+            ("Invalid item position", lambda: self.order["items"][5]),
+            ("Split among zero customers", lambda: 500 / self.order["customers"]),
+            ("Add an item to a string", lambda: self.order["price"].append("pen")),
+            ("Missing receipt", self.read_receipt),
+            ("Undefined total", lambda: order_total),
+        ]
+        for label, operation in checks:
+            self.run_check(label, operation)
+
+
+checker = OrderChecker({"price": "500", "items": ["pen", "book"], "customers": 0})
+checker.run_all()
+```
+
+**Output:**
+
+```text
+Valid price: 500.0
+Invalid price: ValueError -> could not convert string to float: 'five hundred'
+Divide a string: TypeError -> unsupported operand type(s) for /: 'str' and 'int'
+Missing discount: KeyError -> 'discount'
+Invalid item position: IndexError -> list index out of range
+Split among zero customers: ZeroDivisionError -> division by zero
+Add an item to a string: AttributeError -> 'str' object has no attribute 'append'
+Missing receipt: FileNotFoundError -> [Errno 2] No such file or directory: 'nonexistent_receipt.txt'
+Undefined total: NameError -> name 'order_total' is not defined
+```
+
+**Points to remember**
+
+- Storing the tuple as `COMMON_ERRORS` lets you reuse it: `except self.COMMON_ERRORS as error:`.
+- Printing `{error}` shows Python's own message, which tells you **why** the error happened. The exact wording can change a little between Python versions.
+- `self.read_receipt` is passed **without brackets**, so it is called later, inside `try`.
+- In real code, catch only the errors you expect at that spot. Don't use a bare `except:` or `except Exception:` that hides real bugs, such as a `NameError` caused by a typo.
+
+</details>
+
 ### Program 53
 
 **Task:** Create `InvalidAgeError`. Write `read_age(text)` that converts text to an integer. If `int()` fails with `ValueError`, raise `InvalidAgeError("Age must be a whole number")` **from** the original error. Read `"25"`, then try `"abc"` and print the error and its cause.

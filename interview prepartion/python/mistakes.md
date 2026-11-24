@@ -367,6 +367,20 @@ try:
 percent = self.details["discount"]
 74.How can you fix TypeError: unsupported operand type(s) for /: 'str' and 'int' when dividing a numeric string by an integer in Python?
    price = float(price_text)   or    price = int(price_text)  
+75.What is the difference between ValueError and KeyError in Python? When does each happen in get_discount()?
+ValueError means the value is invalid for the operation. float("five hundred") raises ValueError because the text cannot be converted to a number. The function returns 0.0.
+KeyError means the requested key is missing from a dictionary. order["discount"] raises KeyError when order is {}. The function returns the original price, 500.0.
+76.What are eight common Python exceptions, and what simple example triggers each one?
+| Exception | When it happens | Example |
+|---|---|---|
+| `ValueError` | The value is invalid for the operation. | `float("five hundred")` |
+| `TypeError` | The operation receives a type it cannot use. | `"500" / 10` |
+| `KeyError` | The requested key is missing from a dictionary. | `{}["discount"]` |
+| `IndexError` | The requested position is outside the list. | `["pen", "book"][5]` |
+| `ZeroDivisionError` | You divide by zero. | `500 / 0` |
+| `AttributeError` | The object lacks the requested attribute or method. | `"500".append("pen")` |
+| `FileNotFoundError` | You try to open a file that does not exist. | `open("missing_receipt.txt", "r")` if the file is absent |
+| `NameError` | You use a name that Python cannot find. | `print(order_total)` if `order_total` is undefined |   
 ========================questions====================
 1.why in c and c++ and php not use self use this and pthon why introduce self
 2.in subclass method why icant pass self.varaiable ex.super().__init__(self.brand) ==wrong  super().__init__(brand)==correct
