@@ -107,7 +107,7 @@ Unpack a list into separate tags==log_event("random", *["web", "mobile"])
 ====Python cheat sheet_ objects, strings, scores.png========
 Object collections
 how to creates three Model objects as passes two positional arguments to the constructor., each with a name and an accuracy score. It puts those objects in a list and passes the entire list as one argument to ModelBoard
-a list contain model instance while mdoelboard stores list=> board=ModelBoard(models)  ||ModelBoard([models1,or models2,models3})
+a list contain model instance while mdoelboard stores list=> board=ModelBoard(models)  ||ModelBoard([models1,or models2,models3])
 ===display object attributes=======
 using for loop
 using dunder method=__repr__
