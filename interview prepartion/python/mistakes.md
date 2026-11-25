@@ -466,6 +466,16 @@ class PaymentError(Exception):
 class InsufficientFunds(PaymentError):
     def __init__(self, needed, available):
         super().__init__(f"Need Rs. {needed}, have Rs. {available}")
+
+
+ 84.How can you combine multiple variables into a list?
+ line = "P101,Laptop,45000"
+sku, name, price = line.split(",")
+
+product = [sku, name, price]
+
+print(product)
+or example p1 = Product.from_csv("SKU1, Kettle, Rs. 1199")      
 ========================questions====================
 1.why in c and c++ and php not use self use this and pthon why introduce self
 2.in subclass method why icant pass self.varaiable ex.super().__init__(self.brand) ==wrong  super().__init__(brand)==correct

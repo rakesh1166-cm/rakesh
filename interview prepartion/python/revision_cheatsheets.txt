@@ -1,0 +1,128 @@
+Python_04wrongcorrect.png
+1.print a string and integer=runtime type error when balance is an int
+while concatenation + in print both are string or both integer otherwise convert int to string or string to int or float
+2.to display data with f"" or simply print or return
+3.invalid python syntax error==
+  (1)misplaced colon or semicolon inside print
+ (II) unclosed parenthesis
+(iii)assignment after return
+4.misplaced indentation error
+wrong missing indentation==after if raise in same line
+5.runtime numeric text and missing keys
+(i) run time typeerror if divide numeric text /int str.int or addition sub or concatenation b/w string integer
+(ii) value error float("five hundred")
+(iii) raises key error if key error absent
+6.Runtime callable and attribute
+in string not use append =attribute error .only list can append
+7. program runs but gives wrong result
+(i) after finally use print not return otherwise order of output mismatch
+(ii)wrong if u want  function need return a value
+
+
+Python Common Mistakes Reference-2.png
+1.missing return or print stmt in function block
+2.missing self in instance method parameter
+3.missing stored attribute==store data on self when other method need it
+4.constructor argument   mismatch in init method and while create object
+5.keyword only parameter=parameters after *arg must supplied by name
+6.duplicate and misplaced argument in keyword parameter
+7.reading parent attribute too early using super and self =not use self.brand inside super
+8.text container names=print(b) rasises name error
+how to add element in existing list and dictionary using self in instance method block
+
+Python OOP syntax cheat sheet-1.png
+object and attribute
+how to create instance
+how to read instance attribute
+how to call instance method
+update a shared class list
+
+instance method
+how to call method on same or own object
+how to check object identity
+
+default and state====
+how to declare default value,list and dictionary in regular construrctor init
+
+in dictionary how to assign default value
+formula to update and return balance =balance-amount
+
+inheritance=========
+how to reuse parents regular constructor initialization by position
+how to reuse parents regular constructor initialization by keyword
+how to reuse parents regular constructor initialization by unpack forward arg and karg
+
+method reuse================
+how to reuse parent method and transform returned text like capital letter
+how to reuse parent class attribute  
+
+classmethod===============
+how classmethod creates and return instance
+how class method updates class attributes
+
+alternate constructor and regular method============
+alternate constructor=classmethod return instance from dictionary like name and age=syntax
+static method=checks utility=syntax
+
+formatting and polymorphism============
+format a string with f"string format how to print two instance varible
+How can you combine multiple variables into a list?=sku, name, price = line.split(",")=product = [sku, name, price]
+how to call same method on different object using for loop and list comprhension ==polymorphism , car and bike both have start method
+
+Python cheat sheet_ closures and pipelines.png============
+closure factory==remember multiply and multiplier
+inner fun remember outer fun varible
+return inner fun not instance varible
+syntax car("red") not a.7  ==no meed to call inner function just supply value
+
+replace closure============
+text.replace(old,new) where old and new outer fun parmeter and text inner fun val or parameter
+
+pipeline================
+cleans each name in raw_names through a pipeline or list that removes leading and trailing spaces, converts the text to lowercase, and replaces internal spaces with underscores. Each function receives the previous function’s result, and the list comprehension stores the cleaned names in clean_names.
+list conatining all filtering parmeter  and listcomprhension pass pipeline function=print([run_pipeline(name, steps) for name in raw_names])
+
+Nested class method call=============
+print("Add:", self.UserDefined().add(2, 3))
+lambda inside instance method================
+how to call lambda fun with instance attribute x(self.no)
+=====dictionary data======
+how to create list of dictionary for models where parameter is  name and accuracy == initialize
+how to sorted with order above dictionary and find  best model and wrost model based on accuracy syntax or formula to remember
+first find formula then apply for loop on result
+to sorting dictionary use lambda fun but for tuple direct formulla=sorted(products) where dictionary==>sorted(models, key=lambda model: model["accuracy"], reverse=True)
+how to creates three Model objects s passes two positional arguments,each with a name and an accuracy score. It puts those objects in a list and passes the
+entire list as one argument to ModelBoard
+(a list contain model instance while mdoelboard stores list)
+how to sort objects and numbers inside instance method  where objects is dictionnary or tuple format and number in list.
+========Argument unpacking===============
+positional and keyword argument are optional =*args and **kwargs
+===different way========= 
+Pass each tag separately==log_event("random", "web", "mobile")    
+Unpack a list into separate tags==log_event("random", *["web", "mobile"])  
+===Ways to pass values when creating the object for keywordargument===
+ Pass keyword arguments directly== Event("random", name="ram", age=34)
+ Unpack an inline dictionary with == Event("random", **{"name": "ram", "age": 34})
+
+====Python cheat sheet_ objects, strings, scores.png========
+Object collections
+how to creates three Model objects as passes two positional arguments to the constructor., each with a name and an accuracy score. It puts those objects in a list and passes the entire list as one argument to ModelBoard
+a list contain model instance while mdoelboard stores list=> board=ModelBoard(models)  ||ModelBoard([models1,or models2,models3})
+===display object attributes=======
+using for loop
+using dunder method=__repr__
+join list or tuple
+joing list or tuple based on space or creteria comma, slashes "/". one item per line("\n".join(items))
+joining extra positional argument(*tags) inside instance method then append text using concatenation +
+============keyword argument and dictionaries==========================
+how to collect keyword argument in instance method then iterate over dictionary then get item in formatted string
+apply joing keyword argument after getting formatted string in list in above==  return ", ".join(f"{key}={value}" for key, value in kwargs.items())
+we can append and concatenate also
+===========average and pass counts=============
+formulla to find average, passed and failed .where given data is in list format , 
+========strip surrounding whitespace================
+formulla use list comprhension to apply strip given data in list =2 way without str, with str
+formmaula use list comprhension to get data in lowecase,uppercase or replace data given data in list==2 way without str, with str
+
+
+
