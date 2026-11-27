@@ -53,7 +53,6 @@ deposit ==balance= balnce+amount
 withdraw= balance= balnce-amount
 syntax for appending in list==def deposit(self,amount):=>self.history.append(amount)
 syntax for appending in dictionary=def deposit(self, person, amount):  => self.history_dictionary[person] = amount
-
 7.how to read variable using method calling   def get_balance(self):==> return self.balance 
  print(account.get_balance()) or directly variable name  print(account.balance)
 8.syntax for setting default value= def __init__(self, name, age, city="Delhi"):

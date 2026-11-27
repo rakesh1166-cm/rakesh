@@ -1,0 +1,446 @@
+================================================================================
+SUBJECT 4: DBMS, SQL AND TRANSACTIONS
+================================================================================
+
+How each answer is written:
+  Definition -> 1 to 3 simple lines (the line you can say directly in interview)
+  Example    -> a real-life example that connects to the definition
+  Then code / calculation / table wherever the question asks for it.
+
+
+--------------------------------------------------------------------------------
+Q17. Draw an ER diagram for a college course-registration system with
+     students, courses, and enrollments. Identify cardinalities and map the
+     relationships to relational tables.
+--------------------------------------------------------------------------------
+
+>> ER (Entity-Relationship) diagram
+   Definition : A picture of the database design showing entities (things),
+                their attributes (details), and the relationships between
+                them.
+   Example    : Before building a college ERP, we draw Student, Course, and
+                how they are connected - like an architect's plan before
+                construction.
+
+>> Entity
+   Definition : A real-world object about which we store data. Drawn as a
+                rectangle.
+   Example    : STUDENT, COURSE.
+
+>> Attribute
+   Definition : A property of an entity. Drawn as an oval; the primary key is
+                underlined.
+   Example    : student_id, name, email for a student.
+
+>> Relationship
+   Definition : An association between entities. Drawn as a diamond.
+   Example    : A student ENROLLS IN a course.
+
+>> Cardinality
+   Definition : How many instances of one entity can be related to how many
+                of another: 1:1, 1:N, or M:N.
+   Example    : One student enrolls in many courses, and one course has many
+                students -> M:N.
+
+ER diagram:
+
+      (student_id) (name) (email) (dept)        (course_id) (title) (credits)
+            \        |      |      /                  \        |      /
+          +-------------------------+             +----------------------+
+          |         STUDENT         |             |        COURSE        |
+          +-------------------------+             +----------------------+
+                      |  M                                N  |
+                      |          /-----------------\         |
+                      +---------<    ENROLLS IN     >--------+
+                                 \-----------------/
+                                   (semester) (grade)
+
+     Optional extension:  INSTRUCTOR  1 ---< TEACHES >--- N  COURSE
+
+Cardinalities:
+   STUDENT  - ENROLLS IN - COURSE  : M:N (many-to-many)
+   ENROLLS IN has its own attributes: semester, grade (they belong to the
+   pair student + course, not to either one alone).
+   Participation: a course may have zero students (partial); every enrollment
+   must have one student and one course (total).
+   INSTRUCTOR - TEACHES - COURSE   : 1:N (one instructor, many courses).
+
+Mapping rules:
+   - Each strong entity -> its own table.
+   - 1:N relationship   -> put the primary key of the "1" side as a foreign
+                           key in the "N" side.
+   - M:N relationship   -> create a separate table whose key is made of both
+                           primary keys (plus the relationship's attributes).
+
+Relational tables:
+   STUDENT(student_id PK, name, email, dept)
+   INSTRUCTOR(instructor_id PK, name, dept)
+   COURSE(course_id PK, title, credits, instructor_id FK -> INSTRUCTOR)
+   ENROLLMENT(student_id FK -> STUDENT,
+              course_id  FK -> COURSE,
+              semester, grade,
+              PRIMARY KEY (student_id, course_id, semester))
+
+SQL:
+   CREATE TABLE enrollment (
+       student_id INT REFERENCES student(student_id),
+       course_id  VARCHAR(10) REFERENCES course(course_id),
+       semester   VARCHAR(10),
+       grade      CHAR(2),
+       PRIMARY KEY (student_id, course_id, semester)
+   );
+
+Key point: the M:N relationship becomes two 1:N relationships
+(STUDENT 1:N ENROLLMENT and COURSE 1:N ENROLLMENT).
+
+
+--------------------------------------------------------------------------------
+Q18. Explain 1NF, 2NF, and 3NF using an enrollment table that initially stores
+     student, course, and instructor details together. State the functional
+     dependencies you assume and show the decomposition.
+--------------------------------------------------------------------------------
+
+>> Normalization
+   Definition : Organising tables to remove duplicate data and avoid
+                insert, update, and delete anomalies.
+   Example    : If an instructor's name is stored in 500 enrollment rows,
+                changing it means updating 500 rows - normalization stores
+                it once.
+
+>> Functional dependency (FD)
+   Definition : A -> B means if you know A, you know exactly one value of B.
+   Example    : roll_no -> student_name (one roll number = one name).
+
+Starting (unnormalized) table:
+   ENROLL(student_id, student_name, course_id, course_title,
+          instructor_id, instructor_name, grade)
+
+   101 | Ravi  | CS101, CS102 | DBMS, OS | I1, I2 | Rao, Devi | A, B
+   102 | Priya | CS101        | DBMS     | I1     | Rao       | A
+
+Assumed functional dependencies:
+   student_id            -> student_name
+   course_id             -> course_title, instructor_id
+   instructor_id         -> instructor_name
+   (student_id,course_id)-> grade
+   Candidate key: (student_id, course_id)
+   (Assumption: each course is taught by one instructor.)
+
+Anomalies in this design:
+   Update : Rao's name is repeated - change it in one row, forget others.
+   Insert : Cannot add a new course until some student enrolls.
+   Delete : If the last student drops CS102, we lose who teaches it.
+
+>> 1NF (First Normal Form)
+   Definition : Every cell holds a single (atomic) value - no lists or
+                repeating groups.
+   Example    : "CS101, CS102" in one cell breaks 1NF; give each course its
+                own row.
+
+   ENROLL(student_id, student_name, course_id, course_title,
+          instructor_id, instructor_name, grade)
+   101 | Ravi  | CS101 | DBMS | I1 | Rao  | A
+   101 | Ravi  | CS102 | OS   | I2 | Devi | B
+   102 | Priya | CS101 | DBMS | I1 | Rao  | A
+
+>> 2NF (Second Normal Form)
+   Definition : In 1NF, and every non-key column depends on the WHOLE primary
+                key, not just part of it (no partial dependency).
+   Example    : student_name depends only on student_id (part of the key),
+                so it must move to its own table.
+
+   Partial dependencies:
+     student_id -> student_name                   (part of key)
+     course_id  -> course_title, instructor_id,
+                   instructor_name                (part of key)
+   Decompose:
+     STUDENT(student_id PK, student_name)
+     COURSE(course_id PK, course_title, instructor_id, instructor_name)
+     ENROLLMENT(student_id, course_id, grade)   PK = (student_id, course_id)
+
+>> 3NF (Third Normal Form)
+   Definition : In 2NF, and no non-key column depends on another non-key
+                column (no transitive dependency).
+   Example    : In COURSE, course_id -> instructor_id -> instructor_name;
+                instructor_name depends on the key only through
+                instructor_id.
+
+   Decompose COURSE:
+     COURSE(course_id PK, course_title, instructor_id FK)
+     INSTRUCTOR(instructor_id PK, instructor_name)
+
+Final 3NF schema:
+   STUDENT(student_id PK, student_name)
+   COURSE(course_id PK, course_title, instructor_id FK)
+   INSTRUCTOR(instructor_id PK, instructor_name)
+   ENROLLMENT(student_id FK, course_id FK, grade,
+              PK(student_id, course_id))
+
+Easy way to remember: every non-key column must depend on
+"the key (1NF), the whole key (2NF), and nothing but the key (3NF)".
+
+
+--------------------------------------------------------------------------------
+Q19. Given Booking(id, customer_id, city, amount, status), write SQL to show
+     each city's confirmed booking count and total confirmed revenue. Include
+     only cities with at least five confirmed bookings. Explain WHERE versus
+     HAVING.
+--------------------------------------------------------------------------------
+
+>> GROUP BY
+   Definition : Groups rows that have the same value in a column so we can
+                apply aggregate functions (COUNT, SUM, AVG) to each group.
+   Example    : Total sales per city.
+
+SQL:
+   SELECT   city,
+            COUNT(*)    AS confirmed_bookings,
+            SUM(amount) AS confirmed_revenue
+   FROM     Booking
+   WHERE    status = 'confirmed'          -- filter ROWS first
+   GROUP BY city
+   HAVING   COUNT(*) >= 5                 -- filter GROUPS after counting
+   ORDER BY confirmed_revenue DESC;
+
+>> WHERE
+   Definition : Filters individual ROWS before grouping. Cannot use
+                aggregate functions.
+   Example    : Remove cancelled / pending bookings before counting.
+
+>> HAVING
+   Definition : Filters GROUPS after GROUP BY, using aggregate results.
+   Example    : Keep only cities whose confirmed count is 5 or more.
+
+Logical order of execution:
+   FROM -> WHERE -> GROUP BY -> HAVING -> SELECT -> ORDER BY
+
+Small example:
+   Hyderabad: 6 confirmed, 2 cancelled -> WHERE keeps 6 -> 6 >= 5 -> shown
+   Pune     : 4 confirmed, 3 cancelled -> WHERE keeps 4 -> 4 <  5 -> hidden
+   (Without WHERE, Pune would count 7 and wrongly appear.)
+
+Common mistakes:
+   - WHERE COUNT(*) >= 5          -> error, aggregates not allowed in WHERE.
+   - HAVING status = 'confirmed'  -> wrong place; row filters belong in WHERE
+                                     (also slower, because it filters late).
+
+
+--------------------------------------------------------------------------------
+Q20. Explain ACID using a seat-booking transaction. Show how rollback and
+     concurrency control help when two customers attempt to book the same seat.
+--------------------------------------------------------------------------------
+
+>> Transaction
+   Definition : A group of database operations that must be treated as one
+                single unit of work.
+   Example    : Booking a movie seat = mark seat booked + record payment +
+                create ticket.
+
+>> Atomicity
+   Definition : All steps happen, or none happen.
+   Example    : If payment fails after the seat is marked booked, the seat is
+                released - no "booked but unpaid" seat.
+
+>> Consistency
+   Definition : A transaction takes the database from one valid state to
+                another, obeying all rules and constraints.
+   Example    : A seat can never belong to two customers; wallet balance can
+                never go negative.
+
+>> Isolation
+   Definition : Transactions running at the same time do not see each
+                other's half-finished work; the result is as if they ran one
+                after another.
+   Example    : Two people booking seat 12A at the same second cannot both
+                succeed.
+
+>> Durability
+   Definition : Once a transaction is committed, its result survives crashes
+                and power failures (stored using logs on disk).
+   Example    : After "Booking confirmed" appears, a server restart does not
+                lose the ticket.
+
+Seat-booking transaction:
+   BEGIN;
+     SELECT status FROM seats
+       WHERE show_id = 10 AND seat_no = '12A'
+       FOR UPDATE;                        -- lock this seat row
+     -- if status = 'FREE':
+     UPDATE seats SET status = 'BOOKED', customer_id = 101
+       WHERE show_id = 10 AND seat_no = '12A';
+     INSERT INTO payments(customer_id, amount) VALUES (101, 250);
+   COMMIT;
+   -- on any error (payment failed, seat not free):  ROLLBACK;
+
+>> Rollback
+   Definition : Undoing all changes made by a transaction that has not
+                committed, using the undo log.
+   Example    : Payment gateway times out -> ROLLBACK -> seat 12A becomes FREE
+                again.
+
+>> Concurrency control
+   Definition : Techniques (locks, timestamps, versioning) that make
+                simultaneous transactions behave correctly.
+   Example    : Only one booking can hold the lock on seat 12A at a time.
+
+Problem without concurrency control (lost update / double booking):
+   Time | Customer A (T1)           | Customer B (T2)
+   -----+---------------------------+---------------------------
+    t1  | reads 12A = FREE          |
+    t2  |                           | reads 12A = FREE
+    t3  | books 12A, COMMIT         |
+    t4  |                           | books 12A, COMMIT   <- double booking!
+
+With locking (SELECT ... FOR UPDATE):
+   Time | Customer A (T1)                | Customer B (T2)
+   -----+--------------------------------+--------------------------------
+    t1  | locks 12A, reads FREE          |
+    t2  |                                | tries to lock 12A -> WAITS
+    t3  | books 12A, COMMIT (lock freed) |
+    t4  |                                | gets lock, reads BOOKED
+    t5  |                                | "Seat unavailable", ROLLBACK
+
+Other safe options:
+   - UNIQUE constraint on (show_id, seat_no) in the tickets table - the
+     second insert fails.
+   - Optimistic update:  UPDATE seats SET status='BOOKED', customer_id=102
+                         WHERE seat_no='12A' AND status='FREE';
+     If 0 rows were updated, someone else got the seat first.
+
+
+--------------------------------------------------------------------------------
+Q21. Explain dirty reads, non-repeatable reads, and phantom reads using
+     transaction timelines. Discuss how isolation levels address them.
+--------------------------------------------------------------------------------
+
+>> Dirty read
+   Definition : A transaction reads data written by another transaction that
+                has NOT committed yet, and that data may later be rolled back.
+   Example    : You see a discount price that the shop owner typed but then
+                cancelled.
+
+   Time | T1                             | T2
+   -----+--------------------------------+------------------------------
+    t1  | UPDATE price = 400 (was 500)   |
+    t2  |                                | SELECT price -> 400  (dirty)
+    t3  | ROLLBACK (price back to 500)   |
+    t4  |                                | uses 400 - a value that never
+        |                                | officially existed
+
+>> Non-repeatable read
+   Definition : A transaction reads the SAME row twice and gets different
+                values, because another transaction updated and committed in
+                between.
+   Example    : You check your balance (Rs.1000), and a moment later it shows
+                Rs.500 because a payment went through.
+
+   Time | T1                             | T2
+   -----+--------------------------------+------------------------------
+    t1  | SELECT balance -> 1000         |
+    t2  |                                | UPDATE balance = 500; COMMIT
+    t3  | SELECT balance -> 500 (changed)|
+
+>> Phantom read
+   Definition : A transaction runs the same query twice and gets a different
+                SET of rows, because another transaction inserted or deleted
+                matching rows.
+   Example    : A report counts Hyderabad bookings twice and gets 5, then 6.
+
+   Time | T1                                   | T2
+   -----+--------------------------------------+---------------------------
+    t1  | SELECT COUNT(*) WHERE city='Hyd' -> 5|
+    t2  |                                      | INSERT booking city='Hyd';
+        |                                      | COMMIT
+    t3  | SELECT COUNT(*) WHERE city='Hyd' -> 6|  <- a new "phantom" row
+
+>> Isolation level
+   Definition : A setting that decides how much one transaction is protected
+                from the effects of other concurrent transactions. Higher
+                isolation = safer, but less concurrency (slower).
+   Example    : A banking report needs high isolation; a "views count" on a
+                video can live with low isolation.
+
+   Isolation level   | Dirty read | Non-repeatable read | Phantom read
+   ------------------+------------+---------------------+-------------
+   Read Uncommitted  | Possible   | Possible            | Possible
+   Read Committed    | Prevented  | Possible            | Possible
+   Repeatable Read   | Prevented  | Prevented           | Possible*
+   Serializable      | Prevented  | Prevented           | Prevented
+   (* per the SQL standard; MySQL InnoDB also blocks most phantoms using
+      gap locks.)
+
+How they work (simple view):
+   Read Committed  - read only committed versions of rows.
+   Repeatable Read - keep the same snapshot (or keep read locks) for the
+                     whole transaction, so rows read once don't change.
+   Serializable    - also lock ranges / check conflicts, so results equal
+                     some one-by-one order of transactions.
+   Defaults: PostgreSQL, Oracle, SQL Server -> Read Committed;
+             MySQL InnoDB -> Repeatable Read.
+   SQL: SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+
+
+--------------------------------------------------------------------------------
+Q22. Explain how a B-tree index can speed up a database lookup. For a composite
+     index on (city, booking_date), discuss which queries can benefit and what
+     the index costs on writes.
+--------------------------------------------------------------------------------
+
+>> Index
+   Definition : A separate sorted data structure that lets the database find
+                rows quickly without scanning the whole table.
+   Example    : The index at the back of a textbook - go straight to page 245
+                instead of reading every page.
+
+>> B-tree (B+ tree) index
+   Definition : A balanced, multi-way search tree where keys are kept sorted
+                and all leaves are at the same depth; databases use the B+
+                tree variant whose leaves are linked for range scans.
+                Search, insert, delete are O(log n).
+   Example    : A phone directory - jump to section "S", then page "Sh",
+                then the exact name.
+
+Why it is fast:
+   Each node is one disk page holding hundreds of keys (high fan-out). So
+   even 1 crore (10 million) rows need only about 3-4 levels:
+     Without index : full table scan - read every page.
+     With index    : root -> internal -> leaf -> row = about 3-4 page reads.
+
+        [ Delhi | Mumbai ]                       <- root
+        /        |         \
+   [Agra..]  [Hyd | Jaipur]  [Pune..]            <- internal
+                 |
+     leaf: (Hyd,2026-01-02) -> (Hyd,2026-01-05) -> ...  <- linked leaves
+
+>> Composite index on (city, booking_date)
+   Definition : One index on two columns, sorted first by city and then by
+                booking_date within each city.
+   Example    : A phone book sorted by surname, then first name.
+
+   Leftmost-prefix rule: the index helps only when the query uses the
+   leading column (city) first.
+
+   Query                                              | Uses index?
+   ---------------------------------------------------+-----------------------
+   WHERE city = 'Hyd'                                 | Yes
+   WHERE city = 'Hyd' AND booking_date = '2026-11-01' | Yes (best)
+   WHERE city = 'Hyd' AND booking_date BETWEEN        | Yes (range in one city)
+         '2026-11-01' AND '2026-11-30'                |
+   WHERE city = 'Hyd' ORDER BY booking_date           | Yes, no extra sort
+   SELECT city, booking_date ... WHERE city = 'Hyd'   | Yes, covering index
+                                                      | (no table lookup)
+   WHERE booking_date = '2026-11-01'  (no city)       | Usually NO - skips the
+                                                      | leading column
+   WHERE city LIKE '%bad'                             | No - leading wildcard
+   WHERE UPPER(city) = 'HYD'                          | No - function on column
+
+Costs on writes:
+   - INSERT  : a new entry must also be added to the index in sorted position;
+               a full page may split -> extra disk writes.
+   - UPDATE  : changing city or booking_date moves the index entry.
+   - DELETE  : the entry must be removed from the index too.
+   - Extra disk space and memory for the index pages.
+   - More locking work under heavy concurrent writes.
+   Example: a table with 6 indexes does about 7 writes for every insert.
+   Rule: index columns that are frequently searched, joined, or sorted; avoid
+   indexing write-heavy tables unnecessarily.

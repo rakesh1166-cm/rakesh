@@ -1,0 +1,369 @@
+================================================================================
+SUBJECT 7: SOFTWARE ENGINEERING AND SYSTEM DESIGN
+================================================================================
+
+How each answer is written:
+  Definition -> 1 to 3 simple lines (the line you can say directly in interview)
+  Example    -> a real-life example that connects to the definition
+  Then code / calculation / table wherever the question asks for it.
+
+
+--------------------------------------------------------------------------------
+Q33. Compare Waterfall and Agile. Which would you choose when a client's
+     requirements change frequently? Explain how you would handle feedback,
+     testing, and releases.
+--------------------------------------------------------------------------------
+
+>> SDLC (Software Development Life Cycle)
+   Definition : The set of phases a software project goes through -
+                requirements, design, coding, testing, deployment,
+                maintenance.
+   Example    : Building a college ERP: gather needs from staff, design
+                screens, code, test, go live, fix issues.
+
+>> Waterfall model
+   Definition : A linear model where each phase is finished completely before
+                the next starts; going back is difficult and costly.
+   Example    : Constructing a building - the foundation is finished before
+                the walls; you cannot easily change the foundation later.
+   Good for   : Fixed, clear requirements (government tender, bank core
+                system, safety-critical software).
+
+>> Agile model
+   Definition : An iterative model where software is built in small parts
+                (sprints of 1-4 weeks); each sprint delivers working software
+                and takes client feedback.
+   Example    : Swiggy/Zomato apps add small features every few weeks and
+                change them based on user feedback.
+   Popular frameworks: Scrum (sprints, daily stand-up, sprint review,
+                retrospective) and Kanban (continuous flow board).
+
+   Feature              | Waterfall                 | Agile
+   ---------------------+---------------------------+---------------------------
+   Approach             | Linear, one pass          | Iterative, incremental
+   Requirement changes  | Hard and costly           | Welcome every sprint
+   Client involvement   | Start and end only        | Continuous
+   Testing              | After coding is complete  | In every sprint
+   Delivery             | One final release         | Working software often
+   Risk                 | Found late                | Found early
+   Documentation        | Heavy                     | Lightweight, just enough
+
+Choice when requirements change frequently: AGILE (Scrum), because changes
+are absorbed in the next sprint instead of restarting the whole project.
+
+How I would handle:
+>> Feedback
+   Definition : Collecting the client's opinion on working software regularly.
+   Example    : Sprint review demo every 2 weeks; client comments go into the
+                product backlog, and the Product Owner re-prioritises them.
+
+>> Testing
+   Definition : Checking each feature inside the same sprint it is built.
+   Example    : Developers write unit tests; CI (GitHub Actions/Jenkins) runs
+                all tests on every commit; "Definition of Done" includes
+                tests passing; automated regression tests protect old
+                features.
+
+>> Releases
+   Definition : Delivering small, frequent, low-risk updates.
+   Example    : Each sprint produces a releasable build; deploy to staging
+                for client UAT, then production; feature flags hide
+                half-finished features; easy rollback if something breaks.
+
+
+--------------------------------------------------------------------------------
+Q34. Differentiate unit, integration, system, and acceptance testing. Write one
+     example of each for a user-registration feature.
+--------------------------------------------------------------------------------
+
+>> Software testing
+   Definition : Running software to find defects and confirm it meets the
+                requirements.
+   Example    : Trying wrong passwords on a login page to see if it rejects
+                them.
+
+Testing levels (small to big) - registration feature:
+   Form: name, email, password -> save user -> send welcome email.
+
+>> Unit testing
+   Definition : Testing the smallest piece of code (one function/class) in
+                isolation, usually by developers, with dependencies mocked.
+   Example    : Test validate_password("abc") returns False because it is
+                shorter than 8 characters, and validate_password("Abc@1234")
+                returns True.
+
+       def test_short_password_rejected():
+           assert validate_password("abc") is False
+
+>> Integration testing
+   Definition : Testing that two or more modules work correctly TOGETHER.
+   Example    : Call register_user() with a real test database and check
+                that the user row is actually saved and the password is
+                stored as a hash, not plain text.
+
+>> System testing
+   Definition : Testing the complete, integrated application end to end
+                against the requirements, done by the QA team.
+   Example    : Open the website, fill the registration form, submit, check
+                the success page, receive the welcome email, and log in with
+                the new account. Also test duplicate email -> "Email already
+                registered".
+
+>> Acceptance testing (UAT - User Acceptance Testing)
+   Definition : Testing by the client/end users to confirm the software
+                solves their business need before go-live.
+   Example    : College admin registers 5 real students and confirms "A new
+                student can register and log in within 2 minutes" - then
+                signs off.
+
+   Level        | Who          | Scope                | Question it answers
+   -------------+--------------+----------------------+-------------------------
+   Unit         | Developer    | One function         | Does this code work?
+   Integration  | Developer/QA | Modules together     | Do the parts connect?
+   System       | QA team      | Whole application    | Does the system meet
+                |              |                      | the spec?
+   Acceptance   | Client/users | Business scenario    | Is it what we wanted?
+
+   Real-life analogy (building a car): unit = test the brake alone;
+   integration = brake + wheel together; system = test-drive the full car;
+   acceptance = customer test-drives before buying.
+
+
+--------------------------------------------------------------------------------
+Q35. Compare a monolithic application and microservices. For a small team
+     building a new booking platform, choose an initial architecture and
+     explain when you would reconsider it.
+--------------------------------------------------------------------------------
+
+>> Monolithic architecture
+   Definition : The whole application (UI, business logic, database access)
+                is built and deployed as ONE single unit.
+   Example    : A small restaurant where one cook does everything - simple
+                to run, but if the cook is sick the whole restaurant stops.
+
+>> Microservices architecture
+   Definition : The application is split into small independent services,
+                each owning one business function and its own data, talking
+                over APIs/messages, deployed separately.
+   Example    : A food court - separate counters (pizza, juice, billing). One
+                counter can close or expand without affecting the others.
+                Netflix and Amazon use microservices.
+
+   Feature           | Monolith                    | Microservices
+   ------------------+-----------------------------+-----------------------------
+   Deployment        | One unit, deploy all        | Each service separately
+   Development speed | Fast at start               | Slow at start (more setup)
+   Scaling           | Scale whole app             | Scale only busy service
+   Failure impact    | One bug can crash all       | Failure isolated
+   Data              | One shared database         | Database per service
+   Complexity        | Low                         | High (network, monitoring,
+                     |                             | distributed transactions)
+   Team size fit     | Small team                  | Many independent teams
+   Debugging         | Easy (one process)          | Harder (tracing across
+                     |                             | services)
+
+Decision for a small team building a new booking platform:
+   Choose a MODULAR MONOLITH.
+   - Small team -> cannot afford the DevOps cost of many services.
+   - Requirements will change a lot early; refactoring inside one codebase is
+     easy.
+   - Booking needs strong consistency (seat/payment in one DB transaction) -
+     much simpler in one database.
+   - Keep clear modules inside it (users, search, booking, payment,
+     notification) so they can be split out later.
+
+       +-------------------- Booking App (one deploy) -------------------+
+       |  [Users]  [Search]  [Booking]  [Payment]  [Notification]        |
+       +---------------------------------+-------------------------------+
+                                         |
+                                  [ One Database ]
+
+When to reconsider (move to microservices step by step):
+   - Different parts need very different scaling (search gets 100x more
+     traffic than booking).
+   - Team grows to several teams blocking each other on one codebase.
+   - Deployments become slow/risky - a small change needs full redeploy.
+   - A module needs a different technology (e.g. search engine,
+     ML recommendation in Python).
+   First candidates to split: search and notifications (independent, high
+   load). Use the "strangler pattern" - move one module at a time.
+
+
+--------------------------------------------------------------------------------
+Q36. Explain REST and HTTP idempotency. Design a booking endpoint that prevents
+     duplicate bookings when a client retries a POST after a timeout.
+--------------------------------------------------------------------------------
+
+>> REST (Representational State Transfer)
+   Definition : An architectural style for web APIs where everything is a
+                resource with a URL, and we use standard HTTP methods (GET,
+                POST, PUT, PATCH, DELETE) to act on it. It is stateless - each
+                request carries all needed information.
+   Example    : GET /bookings/101 -> read booking 101;
+                POST /bookings -> create a new booking.
+
+>> Idempotency
+   Definition : An operation is idempotent if doing it once or many times
+                gives the SAME final result on the server.
+   Example    : Pressing a lift button 5 times still calls the lift once.
+                Paying Rs.500 twice because you pressed "Pay" twice is NOT
+                idempotent.
+
+   Method | Purpose            | Idempotent? | Why
+   -------+--------------------+-------------+-------------------------------
+   GET    | Read               | Yes         | Only reads
+   PUT    | Replace whole item | Yes         | Same data set again = same
+   DELETE | Remove             | Yes         | Deleted once stays deleted
+   PATCH  | Partial update     | Not always  | "add 1 seat" changes each time
+   POST   | Create             | NO          | Each call creates a new record
+
+The problem:
+   Client sends POST /bookings -> server creates booking -> response is lost
+   (timeout) -> client retries -> a SECOND booking and a second charge.
+
+>> Idempotency key
+   Definition : A unique ID (UUID) the client generates once per booking
+                attempt and sends with every retry, so the server can
+                recognise repeated requests.
+   Example    : Like a token number at a bank counter - showing the same
+                token again does not open a new account.
+
+Design:
+   Request:
+       POST /api/v1/bookings
+       Idempotency-Key: 7f3c9a2e-1b4d-4c8e-9f00-5a6b7c8d9e10
+       { "user_id": 42, "show_id": 9, "seat_no": "A10" }
+
+   Table:
+       idempotency_keys(key PRIMARY KEY, user_id, request_hash,
+                        status, response_body, created_at)
+       bookings(id, user_id, show_id, seat_no, ...,
+                UNIQUE(show_id, seat_no))      -- extra safety net
+
+   Server logic:
+       1. Read Idempotency-Key header (reject with 400 if missing).
+       2. Look up the key:
+          a. Found + completed      -> return the SAVED response
+                                       (same booking id, 201). No new booking.
+          b. Found + in progress    -> return 409 "request in progress,
+                                       retry later".
+          c. Found but different body -> 422 (key reused wrongly).
+          d. Not found              -> insert key with status "processing"
+                                       (the PRIMARY KEY stops two parallel
+                                       requests from both inserting).
+       3. In ONE database transaction: lock/check the seat, insert booking,
+          mark key "completed" and store the response.
+       4. Return 201 Created with the booking.
+       5. Expire keys after 24-48 hours.
+
+   Sequence:
+       Client                     Server                    DB
+         | POST + Key K  ---------> | insert K (processing) -> |
+         |                          | create booking B1 -----> |
+         |   X response lost        | save K -> response(B1)   |
+         | POST + Key K (retry) --> | K found, completed       |
+         | <-------- 201 B1 ------- | returns SAME booking B1  |
+
+   Defence in depth: the UNIQUE(show_id, seat_no) constraint ensures that
+   even two different users cannot book the same seat; payment gateways
+   (Razorpay/Stripe) use the same idempotency-key idea.
+
+
+--------------------------------------------------------------------------------
+Q37. Design a CSV-to-database ETL pipeline. Explain validation, rejected-row
+     handling, transaction boundaries, logging, and how reruns avoid duplicate
+     records.
+--------------------------------------------------------------------------------
+
+>> ETL (Extract, Transform, Load)
+   Definition : A process that Extracts data from a source, Transforms
+                (cleans, validates, converts) it, and Loads it into a target
+                database.
+   Example    : Every night, a college loads the day's attendance CSV from
+                biometric machines into the student database.
+
+Pipeline:
+
+   [CSV file] -> [Extract] -> [Validate + Transform] -> [Load (upsert)] -> [DB]
+                                    |                         |
+                                    v                         v
+                             [Rejected rows file]     [Run log / audit table]
+
+   Example file: orders.csv -> order_id, customer_email, amount, order_date
+
+>> Extract
+   Definition : Read the source file safely.
+   Example    : Read in chunks (e.g. 10,000 rows) so big files do not fill
+                memory; check the header has the expected columns; record the
+                file name and checksum.
+
+>> Validation
+   Definition : Checking every row against rules before loading.
+   Example    : Rules for orders.csv:
+                - Schema : all required columns present
+                - Type   : amount is a number, order_date is a valid date
+                - Range  : amount > 0, date not in the future
+                - Format : email matches a valid pattern
+                - Unique : order_id not repeated inside the same file
+                - Reference : customer exists in the customers table
+
+>> Transform
+   Definition : Convert valid data into the target format.
+   Example    : Trim spaces, lowercase emails, convert "27/11/2026" to
+                2026-11-27, convert currency to paise/decimal.
+
+>> Rejected-row handling
+   Definition : Bad rows are not loaded and do not stop the whole job;
+                they are saved separately with the reason.
+   Example    : rejected_orders_2026-11-27.csv
+                    row_no, raw_data, error_reason
+                    57, "A12,abc@,-50,2026-13-01", "invalid email; amount<0"
+                The team fixes them and reloads. Add a threshold: if more
+                than 5% rows are rejected, fail the job and alert (the file
+                itself is probably wrong).
+
+>> Transaction boundaries
+   Definition : Deciding which set of DB changes must succeed or fail
+                together (commit or rollback as one unit).
+   Example    : Commit per batch of 5,000 rows: a failure rolls back only
+                that batch, and a rerun continues safely. For small files,
+                load into a STAGING table first, then move to the final
+                table in ONE transaction - all or nothing.
+
+>> Logging
+   Definition : Recording what happened in each run so problems can be
+                traced and audited.
+   Example    : Table etl_runs(run_id, file_name, file_checksum, started_at,
+                finished_at, rows_read, rows_loaded, rows_rejected, status,
+                error_message). Use log levels INFO/WARNING/ERROR and send an
+                alert on failure.
+
+>> Idempotent rerun (avoid duplicates)
+   Definition : Running the pipeline again on the same file gives the same
+                final data - no duplicate rows.
+   Example    : The nightly job crashed at 60%; we rerun it the next morning
+                without creating 60% duplicate orders.
+   Techniques :
+     1. Natural / business key with a UNIQUE constraint (order_id).
+     2. UPSERT instead of plain INSERT:
+
+            INSERT INTO orders (order_id, customer_email, amount, order_date)
+            VALUES (%s, %s, %s, %s)
+            ON CONFLICT (order_id) DO UPDATE
+               SET customer_email = EXCLUDED.customer_email,
+                   amount         = EXCLUDED.amount,
+                   order_date     = EXCLUDED.order_date;
+            -- MySQL: INSERT ... ON DUPLICATE KEY UPDATE
+
+     3. File-level tracking: store the file checksum in etl_runs; if the
+        same file is already marked "success", skip it.
+     4. Staging + swap: truncate staging, load, validate, then merge into the
+        final table in one transaction.
+
+Short Python sketch:
+    for batch in read_csv_in_chunks("orders.csv", 5000):
+        good, bad = validate(batch)
+        write_rejects(bad)
+        with conn:                      # one transaction per batch
+            upsert_orders(conn, transform(good))
+        log_progress(run_id, len(good), len(bad))

@@ -1,0 +1,298 @@
+================================================================================
+SUBJECT 9: ALLIED TOPICS, TEACHING AND RESEARCH
+================================================================================
+
+How each answer is written:
+  Definition -> 1 to 3 simple lines (the line you can say directly in interview)
+  Example    -> a real-life example that connects to the definition
+  Then code / calculation / table wherever the question asks for it.
+
+
+--------------------------------------------------------------------------------
+Q48. [IoT] Draw a simple IoT classroom-monitoring system with sensors, a
+     gateway, and a dashboard. Explain how it handles connectivity loss,
+     duplicate messages, and device authentication.
+--------------------------------------------------------------------------------
+
+>> IoT (Internet of Things)
+   Definition : A network of physical devices with sensors that collect data
+                and send it over the internet for monitoring or control.
+   Example    : Smart classroom that measures temperature, CO2 and occupancy
+                and switches fans/lights automatically.
+
+>> Sensor
+   Definition : A device that measures a physical quantity and converts it
+                into data.
+   Example    : DHT22 (temperature/humidity), MQ-135 / CO2 sensor (air
+                quality), PIR (motion/occupancy), LDR (light).
+
+>> Gateway
+   Definition : A local device that collects data from sensors, does basic
+                processing, and forwards it to the cloud.
+   Example    : A Raspberry Pi / ESP32 in each block collecting data from all
+                classrooms on that floor.
+
+>> MQTT
+   Definition : A lightweight publish/subscribe messaging protocol designed
+                for IoT devices with low power and unreliable networks.
+   Example    : Sensor publishes to topic "cbit/blockA/room101/co2"; the
+                cloud subscribes to it.
+
+>> Dashboard
+   Definition : A web/mobile screen that shows live data, charts and alerts.
+   Example    : Grafana / ThingsBoard showing "Room 101: 31 C, CO2 1200 ppm
+                - open windows" alert to the facility manager.
+
+Architecture:
+
+   Room 101           Room 102
+   [Temp][CO2][PIR]   [Temp][CO2][PIR]        (sensor nodes, ESP32)
+        \   |   /          \   |   /
+         Wi-Fi / Zigbee / LoRa (MQTT over TLS)
+                  \         /
+              +--------------------+
+              |  Gateway (R-Pi)    |  local buffer (SQLite), edge rules
+              +---------+----------+
+                        | MQTT/HTTPS over TLS
+              +---------v----------+
+              | Cloud: MQTT broker |
+              | -> ingest service  |
+              | -> time-series DB  |  (InfluxDB / TimescaleDB)
+              +---------+----------+
+                        |
+              +---------v----------+      +-----------------+
+              |  Dashboard / API   | ---> | Alerts (SMS/app)|
+              +--------------------+      +-----------------+
+
+>> Connectivity loss
+   Definition : Handling periods when the internet or Wi-Fi link is down
+                without losing data.
+   Example    : College internet goes down for 2 hours.
+   Handling   :
+     - Store-and-forward: gateway saves readings in a local buffer (SQLite /
+       SD card) with timestamps, and uploads them in order when the link
+       returns.
+     - Sensor node keeps a small ring buffer if the gateway is unreachable.
+     - Retries with exponential backoff (1s, 2s, 4s ...) to avoid flooding.
+     - MQTT QoS 1 (at-least-once delivery) and persistent sessions.
+     - Edge rules still work offline (e.g. switch on exhaust fan if CO2 is
+       high).
+     - Heartbeat: dashboard marks a device "offline" if no message in 5 min.
+
+>> Duplicate messages
+   Definition : The same reading arriving more than once, usually because a
+                retry was sent after the acknowledgement was lost.
+   Example    : QoS 1 resends "room101 temp=29" because the ACK was lost.
+   Handling   :
+     - Every message carries device_id + sequence number (or message_id) +
+       timestamp.
+     - Server stores (device_id, seq_no) with a UNIQUE constraint, or checks
+       a cache of recent IDs -> duplicate is ignored (idempotent ingest).
+     - Upsert on (device_id, timestamp) in the time-series DB.
+
+>> Device authentication
+   Definition : Proving that a message really comes from a registered,
+                trusted device.
+   Example    : Stopping a student's laptop from pretending to be a sensor
+                and sending fake readings.
+   Handling   :
+     - Each device gets a unique identity: X.509 certificate (mutual TLS)
+       or a unique token/key - never one shared password.
+     - All traffic encrypted with TLS.
+     - Broker access control: device can publish only to its own topic
+       (room101 cannot publish to room102).
+     - Device registry: lost/stolen device -> revoke its certificate.
+     - Secure boot and signed firmware updates (OTA).
+
+
+--------------------------------------------------------------------------------
+Q49. [Teaching Practice] How would you teach recursion to first-year students
+     in 10 minutes? Include a learning objective, a call-stack trace, one
+     common mistake, and a short assessment question.
+--------------------------------------------------------------------------------
+
+>> Recursion
+   Definition : A function that solves a problem by calling ITSELF on a
+                smaller version of the same problem, until it reaches a
+                simple case (base case) it can answer directly.
+   Example    : Russian dolls - open a doll, find a smaller doll inside,
+                repeat until the smallest doll that does not open.
+
+>> Base case
+   Definition : The condition where the function stops calling itself and
+                returns a direct answer.
+   Example    : The smallest doll; factorial(1) = 1.
+
+>> Recursive case
+   Definition : The part where the function calls itself with a smaller input
+                that moves towards the base case.
+   Example    : factorial(n) = n * factorial(n - 1).
+
+>> Call stack
+   Definition : The memory area where each function call is stored as a
+                "frame" until it returns - last called, first returned (LIFO).
+   Example    : A pile of plates - you add plates going down and remove them
+                coming back.
+
+Learning objective:
+   By the end of 10 minutes, students will be able to identify the base case
+   and recursive case of a recursive function, and trace its calls on the
+   call stack for a small input.
+
+Lesson plan (10 minutes):
+   0:00-1:30  Hook: Russian dolls / standing between two mirrors.
+              Question: "How many people are ahead of you in a queue? Ask the
+              person in front, who asks the next..." - that is recursion.
+   1:30-3:30  Define base case + recursive case. Write factorial on board:
+
+                  def fact(n):
+                      if n == 1:          # base case
+                          return 1
+                      return n * fact(n - 1)   # recursive case
+
+   3:30-6:30  Call-stack trace for fact(4) - draw boxes on the board:
+
+                  Going DOWN (calls pushed)      Coming UP (returns)
+                  fact(4) -> 4 * fact(3)         fact(1) returns 1
+                  fact(3) -> 3 * fact(2)         fact(2) returns 2*1 = 2
+                  fact(2) -> 2 * fact(1)         fact(3) returns 3*2 = 6
+                  fact(1) -> base case, 1        fact(4) returns 4*6 = 24
+
+                  Stack at deepest point:
+                  | fact(1) |  <- top
+                  | fact(2) |
+                  | fact(3) |
+                  | fact(4) |
+                  +---------+
+
+   6:30-8:00  Common mistake: forgetting the base case, or a recursive call
+              that does not move towards it:
+
+                  def fact(n):
+                      return n * fact(n - 1)   # no base case!
+
+              Show: fact(3) -> fact(2) -> fact(1) -> fact(0) -> fact(-1)...
+              -> RecursionError (stack overflow). Also mention fact(0) with
+              the base case "n == 1" never stops - use "n <= 1".
+   8:00-10:00 Assessment (think-pair-share, 1 minute each, then answer).
+
+Assessment question:
+   What does the following print, and what is the base case?
+
+       def sum_digits(n):
+           if n < 10:
+               return n
+           return n % 10 + sum_digits(n // 10)
+
+       print(sum_digits(472))
+
+   Answer: 13 (2 + 7 + 4); base case is n < 10.
+   Trace: sum_digits(472) = 2 + sum_digits(47) = 2 + (7 + sum_digits(4))
+          = 2 + 7 + 4 = 13.
+
+Teaching techniques used: real-life analogy, live board trace, showing an
+error on purpose, and a quick formative check (exit question).
+
+
+--------------------------------------------------------------------------------
+Q50. [Research Practice] Design an experiment to compare two ML models on the
+     same dataset. Explain the baseline, data split, metric selection,
+     reproducibility, and how you would decide whether one model is
+     meaningfully better.
+--------------------------------------------------------------------------------
+
+>> Experiment design
+   Definition : A planned, fair procedure to compare methods so that any
+                difference in results comes from the methods themselves, not
+                from luck or unfair setup.
+   Example    : Comparing two fertilisers on the same type of soil, same
+                water, same season - only the fertiliser changes.
+
+Running example: Compare Logistic Regression (Model A) and Random Forest
+(Model B) for predicting student dropout (Yes/No), dataset of 5,000 students.
+
+>> Research question and hypothesis
+   Definition : The exact question and the claim we test, fixed BEFORE
+                running experiments.
+   Example    : "Does Random Forest give higher F1 on dropout prediction than
+                Logistic Regression?"
+                H0: no difference in F1; H1: Model B's F1 is higher.
+
+>> Baseline
+   Definition : A simple reference model that any proposed model must beat
+                to be useful.
+   Example    : (1) Majority-class predictor ("nobody drops out"),
+                (2) Logistic Regression as a simple standard model.
+                If Random Forest cannot clearly beat these, it is not worth
+                the extra complexity.
+
+>> Data split
+   Definition : Dividing data into parts used for training, tuning, and
+                final testing, so the model is judged on unseen data.
+   Example    :
+     - Hold out a TEST set (20%) once, stratified by class, and do not look
+       at it until the very end.
+     - On the remaining 80%: stratified 5-fold (or 5x2) cross-validation for
+       training and hyperparameter tuning.
+     - BOTH models use EXACTLY the same folds and the same test set.
+     - If data has time order (semesters), use time-based split - train on
+       past batches, test on the latest batch.
+     - Fit scaling/imputation inside each training fold only (pipeline) to
+       avoid data leakage.
+
+>> Metric selection
+   Definition : Choosing the measure that matches the real goal of the
+                problem, decided before seeing results.
+   Example    : Dropouts are rare (say 10%), so accuracy is misleading.
+                Primary metric: F1-score / recall of the "dropout" class
+                (missing an at-risk student is costly). Secondary: PR-AUC,
+                precision, training time, interpretability.
+
+>> Reproducibility
+   Definition : Anyone repeating the experiment with the same code and data
+                gets the same results.
+   Example    :
+     - Fix random seeds (numpy, sklearn random_state, torch).
+     - Record library versions (requirements.txt), hardware, dataset
+       version and the exact split indices.
+     - Code in Git; log every run's parameters and scores (MLflow / CSV).
+     - Equal tuning budget for both models (e.g. 50 random-search trials
+       each) - an unfair tuning effort is a common bias.
+
+>> Deciding "meaningfully better"
+   Definition : A difference counts only if it is (1) statistically
+                significant - unlikely to be luck, and (2) practically
+                significant - big enough to matter in real use.
+   Example    : Random Forest F1 = 0.71 vs Logistic Regression F1 = 0.70 is
+                probably noise; 0.78 vs 0.70 across all folds probably is not.
+
+   Steps:
+     1. Repeat runs: 5-fold CV repeated with 5-10 different seeds, so we get
+        a distribution of scores, not one number.
+        Report mean +/- standard deviation for each model.
+     2. Paired statistical test (scores are paired because both models use
+        the same folds):
+          - Paired t-test or Wilcoxon signed-rank test on per-fold scores
+            (5x2 CV paired t-test is a well-known choice).
+          - McNemar's test on the SINGLE held-out test set: compare the
+            cases where A is right and B wrong vs B right and A wrong.
+
+                              Model B correct | Model B wrong
+              Model A correct       n00       |      n01
+              Model A wrong         n10       |      n11
+
+              chi2 = (|n01 - n10| - 1)^2 / (n01 + n10), 1 degree of freedom
+              p < 0.05 -> the two models' errors differ significantly.
+     3. Confidence interval: bootstrap the test set (e.g. 1,000 resamples)
+        to get a 95% CI for the F1 difference. If the CI does not include 0,
+        the difference is reliable.
+     4. Practical significance: is the gain worth it? Check effect size,
+        extra cost, inference time, and interpretability (faculty may prefer
+        a model they can explain).
+     5. Report honestly: all results including failures, tables with
+        mean +/- SD, p-values, and the final one-time test-set score.
+
+   Decision rule example:
+     "Model B is meaningfully better if its mean F1 is at least 0.03 higher,
+     the paired test gives p < 0.05, and the 95% CI of the difference is
+     above 0."

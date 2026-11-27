@@ -1,0 +1,579 @@
+================================================================================
+SUBJECT 8: MATHEMATICS, AI, ML AND DATA SCIENCE
+================================================================================
+
+How each answer is written:
+  Definition -> 1 to 3 simple lines (the line you can say directly in interview)
+  Example    -> a real-life example that connects to the definition
+  Then code / calculation / table wherever the question asks for it.
+
+
+--------------------------------------------------------------------------------
+Q38. Explain conditional probability and Bayes' theorem. If 2% of transactions
+     are fraudulent, a detector flags 90% of frauds, and it falsely flags 5% of
+     genuine transactions, calculate the probability that a flagged
+     transaction is fraudulent.
+--------------------------------------------------------------------------------
+
+>> Probability
+   Definition : A number between 0 and 1 that says how likely an event is.
+   Example    : Chance of rain tomorrow = 0.7 (70%).
+
+>> Conditional probability
+   Definition : The probability of event A happening GIVEN that event B has
+                already happened. Written P(A | B) = P(A and B) / P(B).
+   Example    : P(traffic jam | it is raining) is higher than P(traffic jam)
+                on a normal day.
+
+>> Bayes' theorem
+   Definition : A formula to update a probability when new evidence arrives.
+                It "reverses" a conditional probability:
+                    P(A | B) = P(B | A) * P(A) / P(B)
+   Example    : A doctor knows how often a test is positive for sick people,
+                and uses Bayes to find how likely a person with a positive
+                test is actually sick.
+
+   Terms:
+     Prior      P(A)     - belief before evidence (2% of transactions are fraud)
+     Likelihood P(B | A) - how likely the evidence is if A is true (90%)
+     Evidence   P(B)     - total probability of the evidence (all flags)
+     Posterior  P(A | B) - updated belief after evidence (our answer)
+
+Calculation:
+   Given:  P(Fraud)              = 0.02    P(Genuine) = 0.98
+           P(Flag | Fraud)       = 0.90
+           P(Flag | Genuine)     = 0.05
+
+   Step 1 - total probability of a flag:
+           P(Flag) = P(Flag|Fraud)*P(Fraud) + P(Flag|Genuine)*P(Genuine)
+                   = 0.90*0.02 + 0.05*0.98
+                   = 0.018 + 0.049
+                   = 0.067
+
+   Step 2 - Bayes:
+           P(Fraud | Flag) = 0.018 / 0.067 = 0.2687  ->  about 26.9%
+
+   Check with 10,000 transactions:
+           Frauds  = 200  -> flagged 90% = 180
+           Genuine = 9,800 -> wrongly flagged 5% = 490
+           Total flagged = 670 ; fraud among them = 180 / 670 = 26.9%
+
+   Interpretation: even with a 90% detector, only about 1 in 4 flagged
+   transactions is really fraud, because fraud is rare (low prior) and the 5%
+   false alarms on the huge genuine group add up. So flagged transactions
+   should go for a second check (OTP / manual review), not be blocked
+   directly.
+
+
+--------------------------------------------------------------------------------
+Q39. Explain BFS, uniform-cost search, and A* using route planning. What does
+     it mean for an A* heuristic to be admissible?
+--------------------------------------------------------------------------------
+
+>> Search problem
+   Definition : Finding a sequence of steps from a start state to a goal
+                state, e.g. a path from one city to another.
+   Example    : Google Maps finding a route from home to college.
+
+Route map used (edge = road with cost in km):
+     S-A = 1,  S-B = 4,  A-B = 2,  A-G = 10,  B-G = 3      (S = start, G = goal)
+
+>> BFS (Breadth-First Search)
+   Definition : Explores level by level using a queue and finds the path with
+                the FEWEST steps (edges), ignoring road costs.
+   Example    : Fewest metro stations to change between, not shortest km.
+   Result     : S -> A -> G (2 roads) but cost = 11 km - NOT the cheapest.
+
+>> UCS (Uniform-Cost Search)
+   Definition : Always expands the node with the lowest total cost so far,
+                g(n), using a priority queue. Finds the cheapest path when
+                costs are positive (it is Dijkstra's idea).
+   Example    : Choosing the route with the least total distance or fare.
+   Trace      : S(0) -> add A(1), B(4)
+                A(1) -> B improves to 3, add G(11)
+                B(3) -> G improves to 6
+                G(6) -> goal reached
+   Result     : S -> A -> B -> G, cost = 6 km (optimal).
+
+>> A* search
+   Definition : Expands the node with the lowest f(n) = g(n) + h(n), where
+                g(n) = cost so far and h(n) = estimated cost to the goal
+                (heuristic). It is UCS plus a "sense of direction".
+   Example    : Maps use straight-line distance to the destination as h(n),
+                so they don't waste time exploring roads going the opposite
+                way.
+   Heuristic  : h(S)=5, h(A)=4, h(B)=2, h(G)=0
+   Trace      : S f=0+5=5 -> add A f=1+4=5, B f=4+2=6
+                A f=5 -> B f=3+2=5, G f=11+0=11
+                B f=5 -> G f=6+0=6
+                G f=6 -> goal
+   Result     : S -> A -> B -> G, cost = 6 (optimal), and on big maps A*
+                expands far fewer nodes than UCS.
+
+   Comparison:
+     Algorithm | Uses              | Optimal?               | Speed
+     ----------+-------------------+------------------------+-----------------
+     BFS       | number of steps   | only if all costs equal | fast, ignores cost
+     UCS       | g(n)              | yes (positive costs)   | explores all directions
+     A*        | g(n) + h(n)       | yes, if h is admissible | fastest with good h
+
+>> Admissible heuristic
+   Definition : A heuristic that NEVER overestimates the true cost to reach
+                the goal: h(n) <= actual cost from n to goal, for every n.
+   Example    : Straight-line (air) distance is admissible for road travel -
+                a road can never be shorter than the straight line.
+   Check      : true costs to G: S=6, A=5, B=3, G=0
+                h values  : S=5, A=4, B=2, G=0  -> all <= true cost -> admissible.
+   Why it matters: with an admissible heuristic, A* is guaranteed to return
+   the optimal path. If h overestimates, A* may skip the best route.
+   (Consistent heuristic: h(n) <= cost(n, n') + h(n') - a stronger property.)
+
+
+--------------------------------------------------------------------------------
+Q40. Compare supervised, unsupervised, and reinforcement learning. Give one
+     application of each and identify what information the model learns from.
+--------------------------------------------------------------------------------
+
+>> Machine Learning
+   Definition : Teaching computers to learn patterns from data and make
+                decisions without being explicitly programmed with rules.
+   Example    : Gmail learning to detect spam from millions of emails.
+
+>> Supervised learning
+   Definition : The model learns from LABELLED data - inputs along with the
+                correct answers - and learns to predict the answer for new
+                inputs.
+   Learns from: Input-output pairs (X, y).
+   Example    : Spam detection - emails labelled "spam" / "not spam".
+                Also: house-price prediction (regression), loan approval
+                (classification).
+
+>> Unsupervised learning
+   Definition : The model learns from UNLABELLED data and finds hidden
+                structure such as groups or patterns on its own.
+   Learns from: Only inputs X, no answers.
+   Example    : Customer segmentation - an e-commerce site groups customers
+                into "bargain hunters", "premium buyers", etc. Also: anomaly
+                detection, market-basket analysis.
+
+>> Reinforcement learning
+   Definition : An agent learns by trial and error, taking actions in an
+                environment and receiving rewards or penalties, to maximise
+                total reward over time.
+   Learns from: Rewards / penalties from its own actions.
+   Example    : A robot or self-driving car learning to drive; AlphaGo
+                learning to play Go; a game-playing bot.
+                Like training a dog - treat for good behaviour.
+
+   Type           | Data              | Goal                   | Application
+   ---------------+-------------------+------------------------+---------------
+   Supervised     | Labelled (X, y)   | Predict y              | Spam filter
+   Unsupervised   | Unlabelled (X)    | Find structure/groups  | Customer segments
+   Reinforcement  | Rewards from env. | Best action policy     | Game AI, robots
+
+
+--------------------------------------------------------------------------------
+Q41. Explain overfitting and underfitting using training and validation
+     results. Describe how regularization, cross-validation, and early
+     stopping can help.
+--------------------------------------------------------------------------------
+
+>> Overfitting
+   Definition : The model memorises the training data, including noise, so it
+                performs very well on training data but poorly on new data.
+   Example    : A student who memorises last year's question paper scores
+                100 on it but fails when new questions come.
+   Signs      : Training accuracy 99%, validation accuracy 70% (big gap).
+
+>> Underfitting
+   Definition : The model is too simple to learn the real pattern, so it
+                performs poorly on BOTH training and new data.
+   Example    : A student who studied only chapter 1 fails every paper.
+   Signs      : Training accuracy 60%, validation accuracy 58% (both low).
+
+>> Good fit
+   Definition : The model learns the general pattern - high and close
+                training and validation scores.
+   Signs      : Training 92%, validation 90%.
+
+   Situation    | Train score | Validation score | Fix
+   -------------+-------------+------------------+---------------------------
+   Underfitting | Low         | Low              | More complex model, more
+                |             |                  | features, train longer
+   Good fit     | High        | High (close)     | -
+   Overfitting  | Very high   | Much lower       | Regularization, more data,
+                |             |                  | simpler model, early stop
+
+>> Regularization
+   Definition : Adding a penalty for large weights to the loss function, so
+                the model stays simpler and does not memorise noise.
+                L1 (Lasso) adds |w|, L2 (Ridge) adds w^2; dropout in neural
+                networks.
+   Example    : Like telling a student "explain in simple steps" - avoids
+                over-complicated answers that only fit one question.
+
+>> Cross-validation
+   Definition : Splitting data into k parts (folds), training on k-1 and
+                testing on the remaining one, rotating k times, and averaging
+                the score. Gives a reliable estimate and helps choose
+                hyperparameters.
+   Example    : Testing a student with 5 different question papers instead of
+                one, then averaging.
+
+>> Early stopping
+   Definition : While training, watch the validation loss and stop when it
+                starts increasing, even if training loss is still going down.
+   Example    : Stop practising the same paper once your mock-test scores
+                stop improving.
+
+   Loss curve picture:
+       Loss
+        |\   training loss
+        | \_______________
+        |  \     ___----- validation loss starts rising -> overfitting
+        |   \___/
+        |       ^ stop here (early stopping point)
+        +-------------------------- epochs
+
+
+--------------------------------------------------------------------------------
+Q42. Given TP=40, FP=10, FN=20, and TN=130, calculate accuracy, precision,
+     recall, and F1-score. Explain which metric you would emphasize for fraud
+     screening and why.
+--------------------------------------------------------------------------------
+
+>> Confusion matrix
+   Definition : A table comparing actual and predicted classes - shows
+                correct and wrong predictions of each type.
+   Example    : Fraud system results for 200 transactions:
+
+                          Predicted Fraud   Predicted Genuine
+       Actual Fraud           TP = 40           FN = 20
+       Actual Genuine         FP = 10           TN = 130
+
+   TP = fraud correctly caught       FN = fraud missed
+   FP = genuine wrongly flagged      TN = genuine correctly passed
+   Total = 40 + 10 + 20 + 130 = 200
+
+>> Accuracy
+   Definition : Fraction of all predictions that are correct.
+   Formula    : (TP + TN) / Total = (40 + 130) / 200 = 170 / 200 = 0.85 (85%)
+   Example    : Out of 200 transactions, 170 were judged correctly.
+
+>> Precision
+   Definition : Of everything the model flagged as positive, how many were
+                really positive. "When it raises an alarm, is it right?"
+   Formula    : TP / (TP + FP) = 40 / 50 = 0.80 (80%)
+   Example    : Of 50 flagged transactions, 40 were real fraud.
+
+>> Recall (Sensitivity / True Positive Rate)
+   Definition : Of all actual positives, how many the model caught.
+                "How many frauds did we catch?"
+   Formula    : TP / (TP + FN) = 40 / 60 = 0.667 (66.7%)
+   Example    : Of 60 real frauds, 40 were caught and 20 escaped.
+
+>> F1-score
+   Definition : The harmonic mean of precision and recall - one number that
+                balances both.
+   Formula    : 2 * P * R / (P + R) = 2 * 0.80 * 0.667 / (0.80 + 0.667)
+              = 1.0667 / 1.4667 = 0.727 (72.7%)
+
+   Summary:  Accuracy 0.85 | Precision 0.80 | Recall 0.667 | F1 0.727
+
+Which metric for fraud screening -> RECALL (first), then precision / F1:
+   - Missing a fraud (FN) means real money lost and an unhappy customer;
+     a false alarm (FP) only costs an OTP or a phone call.
+   - Fraud is rare, so accuracy is misleading - a model that never flags
+     anything can still have very high accuracy.
+   - Here recall is only 66.7%: one in three frauds escapes, so we would
+     lower the decision threshold to catch more, while watching precision so
+     the review team is not flooded with false alarms (PR curve / F1 /
+     F2-score to balance).
+   Contrast: for a spam filter, precision matters more - you don't want an
+   important email (job offer) going to spam.
+
+
+--------------------------------------------------------------------------------
+Q43. Compare linear regression, logistic regression, and decision trees. For
+     predicting whether a student will complete an online course, choose a
+     starting model and explain your choice.
+--------------------------------------------------------------------------------
+
+>> Linear regression
+   Definition : Predicts a continuous number by fitting a straight line:
+                y = w1*x1 + w2*x2 + ... + b, minimising squared error.
+   Example    : Predicting a house price from area and number of rooms.
+
+>> Logistic regression
+   Definition : Predicts the probability of a class (yes/no) by passing a
+                linear combination through the sigmoid function, which gives
+                a value between 0 and 1.
+   Example    : Probability that an email is spam; probability a loan will
+                default.
+
+>> Decision tree
+   Definition : Makes predictions by asking a series of if-else questions on
+                features, splitting the data into branches until a leaf gives
+                the answer. Works for classification and regression.
+   Example    : "Is attendance > 75%? -> Did they submit assignments? -> Pass".
+
+   Feature            | Linear regression | Logistic regression | Decision tree
+   -------------------+-------------------+---------------------+----------------
+   Output             | Number            | Probability / class | Class or number
+   Relationship       | Linear            | Linear (in log-odds)| Non-linear
+   Interpretability   | High (weights)    | High (odds)         | High (rules)
+   Needs scaling      | Helpful           | Helpful             | No
+   Overfitting risk   | Low               | Low                 | High (if deep)
+   Handles categories | Needs encoding    | Needs encoding      | Naturally
+
+Choice for "will a student complete the online course?" (Yes / No):
+   Start with LOGISTIC REGRESSION because:
+     - It is a binary classification problem -> linear regression is not
+       suitable (it can predict values like 1.3 or -0.2).
+     - It gives a probability (e.g. 0.82 chance of completion), so the
+       platform can rank students and send reminders to those below 0.4.
+     - It is simple, fast, and interpretable - coefficients show which
+       factors matter (videos watched, quiz scores, days inactive), which is
+       easy to explain to course coordinators.
+     - It is a strong baseline to compare against.
+   Then try a decision tree / random forest if the relationships look
+   non-linear (e.g. "drop-out risk jumps after 7 days of inactivity"), and
+   keep it only if it clearly beats the baseline on validation data.
+
+
+--------------------------------------------------------------------------------
+Q44. Explain K-means clustering using customer segmentation. Describe centroid
+     assignment and updates, and explain how feature scaling and the choice of
+     K affect results.
+--------------------------------------------------------------------------------
+
+>> Clustering
+   Definition : An unsupervised method that groups similar data points
+                together without using labels.
+   Example    : A supermarket grouping customers by buying behaviour.
+
+>> K-means clustering
+   Definition : Divides data into K groups, where each point belongs to the
+                cluster with the nearest centre (centroid). It minimises the
+                total squared distance of points to their centroids.
+   Example    : An online store segments customers using annual spend and
+                visits per month into K = 3 groups: "low spenders",
+                "regular shoppers", "premium customers", and sends each group
+                different offers.
+
+Algorithm steps:
+   1. Choose K and pick K initial centroids (randomly, or k-means++).
+   2. Assignment step - assign every customer to the NEAREST centroid
+      (usually Euclidean distance).
+   3. Update step - move each centroid to the MEAN of the customers assigned
+      to it.
+   4. Repeat steps 2-3 until assignments stop changing (convergence).
+
+   Small example (1 feature - monthly spend in Rs. thousands):
+     Data: 2, 3, 4, 10, 11, 12       K = 2, initial centroids 2 and 4
+     Assign : {2, 3} -> C1=2 ;  {4, 10, 11, 12} -> C2=4
+     Update : C1 = 2.5 ;  C2 = (4+10+11+12)/4 = 9.25
+     Assign : {2, 3, 4} -> C1 ; {10, 11, 12} -> C2
+     Update : C1 = 3 ; C2 = 11
+     Assign : no change -> stop. Clusters: low spenders and high spenders.
+
+>> Feature scaling in K-means
+   Definition : Putting features on the same scale (standardization) before
+                clustering.
+   Why        : K-means uses distance. If annual spend is in rupees
+                (0 - 5,00,000) and visits are 0-30, spend completely
+                dominates and visits are ignored.
+   Example    : Without scaling, clusters are formed only by spend; after
+                standardization both spend and visit frequency shape the
+                segments.
+
+>> Choice of K
+   Definition : K is the number of clusters and must be chosen before
+                running the algorithm.
+   Effect     : Too small K -> very different customers are mixed together.
+                Too large K -> tiny clusters that are not useful for business.
+   Methods    :
+     - Elbow method: plot inertia (within-cluster sum of squares) vs K and
+       choose the K where the curve bends (stops dropping sharply).
+     - Silhouette score: measures how well each point fits its own cluster
+       compared to others (-1 to 1, higher is better).
+     - Business sense: marketing team can run only 4 campaigns -> K about 4.
+
+Limitations: sensitive to initial centroids (use k-means++ / multiple runs),
+sensitive to outliers, and assumes roughly round, similar-sized clusters.
+
+
+--------------------------------------------------------------------------------
+Q45. Explain forward propagation, loss calculation, and backpropagation in a
+     neural network. Describe what happens if the learning rate is too high or
+     too low.
+--------------------------------------------------------------------------------
+
+>> Neural network
+   Definition : A model made of layers of connected neurons; each neuron
+                computes a weighted sum of its inputs plus a bias and applies
+                an activation function.
+   Example    : Recognising handwritten digits on a cheque.
+
+>> Forward propagation
+   Definition : Passing the input through the network layer by layer to get
+                the prediction: z = w*x + b, a = activation(z).
+   Example    : An image enters, passes through hidden layers, and the output
+                says "digit 7 with 92% probability".
+
+>> Loss calculation
+   Definition : Measuring how wrong the prediction is using a loss function -
+                MSE for regression, cross-entropy for classification.
+   Example    : Predicted house price 48 lakh, actual 50 lakh -> loss
+                measures that error of 2 lakh.
+
+>> Backpropagation
+   Definition : Using the chain rule to calculate how much each weight
+                contributed to the loss (the gradient), going backwards from
+                output to input.
+   Example    : After a team loses a match, the coach works backwards to see
+                how much each player's mistake contributed.
+
+>> Gradient descent (weight update)
+   Definition : Updating every weight in the direction that reduces the loss:
+                w_new = w_old - learning_rate * (dLoss / dw)
+
+Worked example - one neuron, linear output, loss L = (y - y_hat)^2:
+   x = 1, w = 0.5, b = 0, true y = 1, learning rate = 0.1
+   Forward : y_hat = w*x + b = 0.5
+   Loss    : L = (1 - 0.5)^2 = 0.25
+   Backward: dL/dw = -2 * (y - y_hat) * x = -2 * 0.5 * 1 = -1
+   Update  : w = 0.5 - 0.1 * (-1) = 0.6
+   New prediction = 0.6 -> loss = 0.16 (smaller, so the model improved)
+
+   Training loop = forward -> loss -> backward -> update, repeated for many
+   epochs.
+
+>> Learning rate
+   Definition : The step size used when updating weights.
+   Example    : Walking downhill in fog - step size decides how fast and how
+                safely you reach the bottom.
+
+   Too HIGH learning rate:
+     - Steps jump over the minimum; loss jumps up and down (oscillates) or
+       even explodes (NaN), and the model never converges.
+   Too LOW learning rate:
+     - Very tiny steps; training is extremely slow and may get stuck in a
+       poor local minimum / plateau before the time budget runs out.
+   Right learning rate:
+     - Loss decreases smoothly and steadily.
+   Fixes: try values like 0.1, 0.01, 0.001; use learning-rate schedules
+   (decay) or adaptive optimizers such as Adam.
+
+
+--------------------------------------------------------------------------------
+Q46. Compare CNNs and Transformers. Explain convolution and self-attention at a
+     high level, and give an application where each is a sensible choice.
+--------------------------------------------------------------------------------
+
+>> CNN (Convolutional Neural Network)
+   Definition : A neural network that uses small filters sliding over the
+                input to detect local patterns (edges, textures, shapes),
+                building up to whole objects in deeper layers.
+   Example    : Detecting a tumour in an X-ray or recognising a face to
+                unlock a phone.
+
+>> Convolution
+   Definition : Sliding a small filter (e.g. 3x3) over an image and computing
+                a weighted sum at each position, producing a feature map that
+                shows where that pattern appears.
+   Example    : Like scanning a page with a magnifying glass looking for one
+                specific shape - the same filter is reused everywhere
+                (weight sharing), so it works wherever the object appears.
+
+>> Transformer
+   Definition : A neural network built on self-attention that looks at all
+                parts of the input at the same time to understand how each
+                part relates to every other part.
+   Example    : ChatGPT, Google Translate, BERT in search engines.
+
+>> Self-attention
+   Definition : For each word (token), the model computes how much it should
+                "pay attention" to every other word, using Query, Key, and
+                Value vectors: Attention = softmax(Q * K^T / sqrt(d)) * V.
+   Example    : In "The animal didn't cross the road because IT was tired",
+                attention links "it" to "animal", even though they are far
+                apart.
+
+   Feature             | CNN                         | Transformer
+   --------------------+-----------------------------+---------------------------
+   Core operation      | Convolution (local filters) | Self-attention (global)
+   Looks at            | Nearby pixels first         | All tokens at once
+   Built-in assumption | Locality, translation       | Very few - learns relations
+                       | invariance                  | from data
+   Data needed         | Works with less data        | Needs large data / pretraining
+   Compute             | Efficient on images         | Cost grows with length^2
+   Best known for      | Images, video               | Text, speech, also images (ViT)
+
+Sensible applications:
+   CNN         -> Defect detection on a factory line or medical image
+                  classification with a few thousand labelled images; also
+                  runs fast on mobile/edge devices.
+   Transformer -> Machine translation, chatbots, document summarisation, or
+                  sentiment analysis of reviews, where long-range context in
+                  text matters (usually by fine-tuning a pretrained model
+                  like BERT).
+
+
+--------------------------------------------------------------------------------
+Q47. Explain data leakage. A team scales the entire dataset before splitting it
+     into training and test sets. Describe what goes wrong and how to correct
+     the pipeline.
+--------------------------------------------------------------------------------
+
+>> Data leakage
+   Definition : When information that would NOT be available at prediction
+                time (especially from the test set or the target) sneaks into
+                training, making the model look better than it really is.
+   Example    : A student sees the exam paper before the exam - high marks,
+                but no real learning. In the real world the model then fails.
+
+   Common types:
+     - Train-test contamination: preprocessing using test data (this case).
+     - Target leakage: a feature that is created after the outcome, e.g.
+       using "loan_recovery_call_made" to predict loan default.
+     - Duplicate rows appearing in both train and test sets.
+     - Time leakage: using future data to predict the past.
+
+What goes wrong when scaling before splitting:
+   - StandardScaler computes mean and SD on the WHOLE dataset, including the
+     test rows.
+   - So the training data is transformed using statistics that already
+     "know" the test set's distribution.
+   - The test score becomes optimistic (too good) and does not reflect
+     performance on truly new data. The same problem occurs with imputation,
+     PCA, feature selection, or SMOTE done before the split.
+
+Wrong pipeline:
+    X_scaled = StandardScaler().fit_transform(X)      # uses test data too
+    X_train, X_test, y_train, y_test = train_test_split(X_scaled, y)
+
+Correct pipeline - split first, fit only on training data:
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42, stratify=y)
+
+    scaler = StandardScaler()
+    X_train_s = scaler.fit_transform(X_train)   # learn mean/SD from train only
+    X_test_s  = scaler.transform(X_test)        # only APPLY to test
+
+Best practice - use an sklearn Pipeline so cross-validation is also safe:
+    from sklearn.pipeline import Pipeline
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.model_selection import cross_val_score
+
+    pipe = Pipeline([
+        ("scaler", StandardScaler()),
+        ("model",  LogisticRegression())
+    ])
+    scores = cross_val_score(pipe, X_train, y_train, cv=5)  # scaler refit
+                                                            # in every fold
+    pipe.fit(X_train, y_train)
+    print(pipe.score(X_test, y_test))   # honest final test score
+
+Rule to remember: "Split first. Fit on train. Transform test."

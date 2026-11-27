@@ -1,0 +1,800 @@
+================================================================================
+SUBJECT 10: DATA SCIENCE
+================================================================================
+
+How each answer is written:
+  Definition -> 1 to 3 simple lines (the line you can say directly in interview)
+  Example    -> a real-life example that connects to the definition
+  Then code / calculation / table wherever the question asks for it.
+
+
+--------------------------------------------------------------------------------
+Q51. What is data science? Explain the data science life cycle (problem
+     definition, data collection, cleaning, EDA, modelling, evaluation,
+     deployment) using a real example such as student result analysis.
+--------------------------------------------------------------------------------
+
+>> Data Science
+   Definition : The field that uses statistics, programming, and domain
+                knowledge to turn raw data into useful insights and
+                predictions.
+   Example    : Netflix/YouTube studying what you watched to recommend the
+                next video.
+
+>> Data Science Life Cycle
+   Definition : The step-by-step process a data project follows, from asking
+                the question to using the model in real life (industry name:
+                CRISP-DM).
+
+   Running example: "Predict which students are at risk of failing the
+   semester so mentors can help early."
+
+   1. Problem definition
+      Definition : Clearly state the question and how success is measured.
+      Example    : "Find at-risk students 6 weeks before exams; catch at
+                   least 80% of students who would fail."
+
+   2. Data collection
+      Definition : Gathering the required data from all sources.
+      Example    : Attendance, internal marks, assignment submissions, and
+                   previous semester grades from the college ERP.
+
+   3. Data cleaning
+      Definition : Fixing wrong, missing, duplicate, or inconsistent data.
+      Example    : Removing duplicate roll numbers, converting "AB" (absent)
+                   to 0, filling missing internal marks.
+
+   4. EDA (Exploratory Data Analysis)
+      Definition : Exploring the data with statistics and plots to find
+                   patterns.
+      Example    : Plots show students below 65% attendance score much lower.
+
+   5. Feature engineering
+      Definition : Creating useful input columns for the model.
+      Example    : attendance %, average internal marks, number of late
+                   assignments.
+
+   6. Modelling
+      Definition : Training an algorithm on the data to learn the pattern.
+      Example    : Logistic regression / decision tree predicting Pass/Fail.
+
+   7. Evaluation
+      Definition : Checking the model on unseen data with the right metric.
+      Example    : Recall on "Fail" class - we must not miss weak students.
+
+   8. Deployment and monitoring
+      Definition : Putting the model into real use and tracking it over time.
+      Example    : A monthly dashboard for mentors; retrain every semester.
+
+
+--------------------------------------------------------------------------------
+Q52. Differentiate structured, semi-structured, and unstructured data with
+     examples. How is each one stored and processed?
+--------------------------------------------------------------------------------
+
+>> Structured data
+   Definition : Data in a fixed format of rows and columns with a defined
+                schema.
+   Example    : Student table in MySQL - roll_no, name, branch, CGPA.
+   Stored in  : Relational databases (MySQL, Oracle, PostgreSQL), Excel.
+   Processed  : SQL queries, pandas.
+
+>> Semi-structured data
+   Definition : Data with tags or keys that give some structure, but no fixed
+                schema - each record can have different fields.
+   Example    : JSON response from a UPI payment API, XML files, email
+                (fixed headers like To/From + free text body).
+   Stored in  : NoSQL databases (MongoDB), JSON/XML files.
+   Processed  : JSON/XML parsers, pandas json_normalize, Spark.
+
+>> Unstructured data
+   Definition : Data with no predefined format or model.
+   Example    : CCTV videos, lecture recordings, WhatsApp images, scanned
+                answer sheets, customer reviews.
+   Stored in  : Data lakes, HDFS, cloud storage (Amazon S3).
+   Processed  : NLP for text, computer vision / deep learning for images and
+                video, speech-to-text for audio.
+
+Key point: around 80% of today's data is unstructured, which is why deep
+learning has become so important.
+
+
+--------------------------------------------------------------------------------
+Q53. Explain mean, median, mode, variance, and standard deviation. For a skewed
+     dataset such as employee salaries, which measure of central tendency
+     would you report and why?
+--------------------------------------------------------------------------------
+
+>> Mean
+   Definition : The average - sum of all values divided by the count.
+   Example    : Average marks of a class.
+
+>> Median
+   Definition : The middle value after sorting the data. Not affected by
+                extreme values.
+   Example    : Typical house price in a city (a few mansions don't distort it).
+
+>> Mode
+   Definition : The value that appears most often.
+   Example    : Most-sold shoe size - a shop stocks more of that size.
+
+>> Variance
+   Definition : The average of squared distances from the mean - tells how
+                spread out the data is.
+   Formula    : variance = sum (x - mean)^2 / n
+
+>> Standard deviation (SD)
+   Definition : The square root of variance - spread in the same unit as the
+                data.
+   Example    : Two sections both average 70 marks. Section A SD = 5 (all
+                students similar), Section B SD = 20 (mixed toppers and weak
+                students).
+
+Worked example: data = 2, 4, 4, 4, 5, 5, 7, 9
+     Mean     = 40 / 8 = 5
+     Median   = (4 + 5) / 2 = 4.5
+     Mode     = 4
+     Variance = (9+1+1+1+0+0+4+16) / 8 = 32 / 8 = 4
+     SD       = sqrt(4) = 2
+
+Skewed salaries (Rs. thousands per month): 30, 35, 40, 45, 500 (CEO)
+     Mean   = 650 / 5 = 130   -> misleading, no normal employee earns this
+     Median = 40              -> represents the typical employee
+   Answer: Report the MEDIAN for skewed data, because the mean is pulled
+   towards extreme values while the median is not. (This is why governments
+   report median household income.)
+
+
+--------------------------------------------------------------------------------
+Q54. Explain the normal distribution, skewness, and kurtosis. State the
+     68-95-99.7 rule and the Central Limit Theorem, and explain why the CLT
+     matters in practice.
+--------------------------------------------------------------------------------
+
+>> Normal distribution
+   Definition : A symmetric, bell-shaped curve where most values are near the
+                mean and fewer values appear as you move away. Mean = median =
+                mode.
+   Example    : Heights of adult students, measurement errors, marks in a
+                very large exam.
+
+>> 68-95-99.7 rule (Empirical rule)
+   Definition : In a normal distribution, about 68% of values lie within 1 SD
+                of the mean, 95% within 2 SD, and 99.7% within 3 SD.
+   Example    : Student heights: mean = 165 cm, SD = 7 cm
+                  68%   between 158 and 172 cm
+                  95%   between 151 and 179 cm
+                  99.7% between 144 and 186 cm
+                A student of 190 cm is very rare (beyond 3 SD).
+
+>> Skewness
+   Definition : A measure of how much a distribution leans to one side
+                (lack of symmetry).
+   Right / positive skew : long tail on the right, mean > median.
+                Example: incomes - most earn moderate, a few earn crores.
+   Left / negative skew  : long tail on the left, mean < median.
+                Example: marks in an easy exam - most score high, few fail.
+
+>> Kurtosis
+   Definition : A measure of how heavy the tails are - how often extreme
+                values occur. Normal distribution has kurtosis = 3
+                (excess kurtosis = 0).
+   High kurtosis (leptokurtic): more extreme values.
+                Example: daily stock returns - sudden crashes happen more
+                often than a normal curve predicts.
+   Low kurtosis (platykurtic): fewer extremes, flatter curve.
+
+>> Central Limit Theorem (CLT)
+   Definition : If we take many random samples of size n (usually n >= 30)
+                from ANY population, the distribution of the sample means
+                will be approximately normal, with mean = population mean and
+                SD = sigma / sqrt(n).
+   Example    : Individual restaurant bills are skewed (most small, few huge
+                party bills). But if each day you take the average of 50
+                random bills, those daily averages form a bell curve.
+
+   Why CLT matters in practice:
+     - Lets us use normal-based tools (confidence intervals, z-test, t-test)
+       even when the original data is not normal.
+     - Basis of A/B testing (e.g. comparing average order value of two app
+       designs), quality control, and opinion polls/surveys.
+     - Explains why bigger samples give more reliable estimates
+       (error shrinks as sigma / sqrt(n)).
+
+
+--------------------------------------------------------------------------------
+Q55. Explain hypothesis testing: null and alternative hypotheses, p-value,
+     significance level, and Type I and Type II errors. When would you use a
+     t-test, a chi-square test, and ANOVA?
+--------------------------------------------------------------------------------
+
+>> Hypothesis testing
+   Definition : A statistical method to decide, using sample data, whether a
+                claim about a population is supported or not.
+   Example    : Does the new teaching method really improve marks, or did
+                marks go up by chance?
+
+>> Null hypothesis (H0)
+   Definition : The default claim - "no effect" or "no difference".
+   Example    : H0: new method average = old method average.
+
+>> Alternative hypothesis (H1)
+   Definition : What we want to prove - "there is an effect".
+   Example    : H1: new method average > old method average.
+
+>> p-value
+   Definition : The probability of getting results this extreme (or more) if
+                H0 were true. Small p-value = strong evidence against H0.
+   Example    : p = 0.01 means: if the method had no effect, there is only a
+                1% chance of seeing such a big improvement by luck.
+
+>> Significance level (alpha)
+   Definition : The cut-off we fix before the test (usually 0.05) - the risk
+                of wrongly rejecting H0 that we are willing to accept.
+   Decision   : p-value < alpha -> reject H0 (result is significant).
+                p-value >= alpha -> fail to reject H0.
+
+>> Type I error (False Positive)
+   Definition : Rejecting H0 when it is actually true.
+   Example    : Saying a healthy person has a disease; saying the new method
+                works when it actually doesn't. Probability = alpha.
+
+>> Type II error (False Negative)
+   Definition : Not rejecting H0 when it is actually false.
+   Example    : Telling a sick patient they are healthy; missing a method
+                that really works. Probability = beta.
+
+   Court analogy: H0 = "accused is innocent".
+     Type I  = punishing an innocent person.
+     Type II = letting a guilty person go free.
+
+Which test to use:
+   Test       | Use when                                | Example
+   -----------+-----------------------------------------+--------------------------
+   t-test     | Compare means of 1 or 2 groups          | Avg marks: Section A vs B
+              | (numeric data)                          |
+   Chi-square | Check if two CATEGORICAL variables are  | Is gender related to
+              | related (counts in a table)             | branch choice (CSE/ECE)?
+   ANOVA      | Compare means of 3 or more groups       | Avg marks under 3
+              |                                         | teaching methods
+
+   Why ANOVA instead of many t-tests? Doing many t-tests increases the chance
+   of a Type I error; ANOVA tests all groups together in one test.
+
+
+--------------------------------------------------------------------------------
+Q56. Differentiate correlation and causation with an example. Compare Pearson
+     and Spearman correlation and say when each is appropriate.
+--------------------------------------------------------------------------------
+
+>> Correlation
+   Definition : A number between -1 and +1 that shows how strongly two
+                variables move together. +1 = move up together, -1 = one goes
+                up while the other goes down, 0 = no linear relation.
+   Example    : Study hours and exam marks are positively correlated.
+
+>> Causation
+   Definition : One variable directly CAUSES the change in another.
+   Example    : Pressing the brake causes the car to slow down.
+
+Correlation is NOT causation:
+   Ice-cream sales and drowning cases rise together. Ice-cream does not cause
+   drowning - both are caused by a third factor (summer heat), called a
+   confounding variable.
+   College example: students who take coaching score higher - but this may be
+   due to family income or motivation, not the coaching itself.
+   To prove causation: run a randomized controlled experiment / A/B test.
+
+>> Pearson correlation
+   Definition : Measures the strength of a LINEAR relationship between two
+                continuous numeric variables.
+   Use when   : Data is numeric, relationship is roughly a straight line, no
+                big outliers.
+   Example    : Height vs weight; study hours vs marks.
+
+>> Spearman correlation
+   Definition : Measures a MONOTONIC relationship (always increasing or always
+                decreasing) using the RANKS of the values.
+   Use when   : Data is ordinal (ranks, ratings), relationship is curved but
+                consistent, or there are outliers.
+   Example    : Class rank vs entrance-exam rank; customer rating (1-5 stars)
+                vs repeat purchases.
+
+
+--------------------------------------------------------------------------------
+Q57. How do you handle missing values? Explain MCAR, MAR, and MNAR, and compare
+     deletion, mean/median/mode imputation, and model-based (KNN) imputation.
+--------------------------------------------------------------------------------
+
+>> Missing values
+   Definition : Places in the dataset where no value was recorded (NaN/null).
+   Example    : A sensor went offline; a user skipped the "income" field in a
+                form.
+
+Types of missingness:
+>> MCAR - Missing Completely At Random
+   Definition : Missing purely by chance; not related to any data.
+   Example    : Some lab samples lost because a test tube broke.
+
+>> MAR - Missing At Random
+   Definition : Missingness depends on OTHER recorded columns, not on the
+                missing value itself.
+   Example    : Younger people skip the income question more often (age is
+                recorded, so we can account for it).
+
+>> MNAR - Missing Not At Random
+   Definition : Missingness depends on the missing value itself.
+   Example    : Very high earners hide their income; students with low marks
+                don't report their marks. Most dangerous type - causes bias.
+
+Handling methods:
+>> Deletion (drop rows/columns)
+   Definition : Remove rows (or columns) that have missing values.
+   Use when   : Very few rows missing (< ~5%) and data is MCAR; drop a column
+                if most of it is empty.
+   Problem    : Loses information; causes bias if not MCAR.
+
+>> Mean / median / mode imputation
+   Definition : Fill missing values with the column's mean, median, or mode.
+   Use        : Mean for normal numeric data, median for skewed numeric data
+                (salary), mode for categorical data (city).
+   Problem    : Quick, but reduces variance and weakens correlations.
+
+>> KNN imputation (model-based)
+   Definition : Fill the missing value using the values of the k most similar
+                rows.
+   Example    : A flat's missing price is filled from the 5 most similar
+                flats (same area, size, bedrooms).
+   Problem    : More accurate, but slower and features must be scaled first.
+
+Code:
+    df["salary"] = df["salary"].fillna(df["salary"].median())
+    df["city"]   = df["city"].fillna(df["city"].mode()[0])
+
+    from sklearn.impute import KNNImputer
+    df[num_cols] = KNNImputer(n_neighbors=5).fit_transform(df[num_cols])
+
+Good practice: add a "was_missing" flag column, and fit the imputer on the
+training data only (to avoid data leakage).
+
+
+--------------------------------------------------------------------------------
+Q58. How do you detect and treat outliers? Explain the IQR method, the z-score
+     method, and box plots. When should an outlier be kept rather than
+     removed?
+--------------------------------------------------------------------------------
+
+>> Outlier
+   Definition : A data point that is very different from the rest of the
+                data.
+   Example    : Age = 150 in a student dataset (typing error), or a
+                billionaire's income in a salary survey (real but extreme).
+
+>> IQR method
+   Definition : IQR = Q3 - Q1 (spread of the middle 50%). Any value below
+                Q1 - 1.5*IQR or above Q3 + 1.5*IQR is an outlier. Works well
+                even for skewed data.
+   Worked example - marks: 40, 45, 50, 55, 60, 65, 70, 150
+       Q1 = 47.5 (median of lower half 40,45,50,55)
+       Q3 = 67.5 (median of upper half 60,65,70,150)
+       IQR = 67.5 - 47.5 = 20
+       Lower limit = 47.5 - 30 = 17.5
+       Upper limit = 67.5 + 30 = 97.5   -> 150 is an outlier
+
+>> Z-score method
+   Definition : z = (x - mean) / SD tells how many SDs a value is from the
+                mean. Usually |z| > 3 is an outlier. Best for roughly normal
+                data.
+   Example    : Mean height 165, SD 7 -> a height of 190 has z = 3.6 ->
+                outlier.
+
+>> Box plot
+   Definition : A chart showing median, Q1, Q3 (the box), whiskers up to
+                1.5*IQR, and outliers as separate dots - the IQR method drawn
+                as a picture.
+   Example    : A box plot of delivery times instantly shows a few orders
+                that took 3 hours.
+
+Treatment options:
+   - Remove it, if it is a data-entry or sensor error (age = 150).
+   - Cap it (winsorize) at the upper/lower limit.
+   - Transform the data (log transform for salary).
+   - Use robust models / statistics (median, tree-based models).
+
+When to KEEP the outlier:
+   When it is real and it is the thing you care about:
+   - Fraud detection - the unusual Rs.2 lakh transaction at 3 a.m. IS the
+     fraud.
+   - Medical data - a very high sugar reading may be a real emergency.
+   - Festival / Big Billion Day sales - genuine business spikes.
+   Rule: first ask "Is it an error or a real event?" - remove errors, keep
+   genuine events.
+
+
+--------------------------------------------------------------------------------
+Q59. Explain feature engineering. Compare label encoding, one-hot encoding,
+     and target encoding, and compare min-max normalization with
+     standardization. Which algorithms need feature scaling and which do not?
+--------------------------------------------------------------------------------
+
+>> Feature engineering
+   Definition : Creating, transforming, or selecting input columns so that a
+                model can learn patterns better.
+   Example    : From a transaction date, create "is_weekend" and "hour"; from
+                date of birth, create "age".
+
+Encoding - converting categories (text) into numbers:
+>> Label encoding
+   Definition : Give each category an integer (0, 1, 2 ...).
+   Use when   : Categories have a natural order (ordinal).
+   Example    : Size: Small = 0, Medium = 1, Large = 2.
+   Problem    : For non-ordered data (city), the model wrongly thinks
+                Mumbai(2) > Delhi(1).
+
+>> One-hot encoding
+   Definition : Create a separate 0/1 column for each category.
+   Use when   : Categories have no order and are few.
+   Example    : City -> is_Delhi, is_Mumbai, is_Hyderabad.
+   Problem    : Too many columns when categories are many (e.g. 20,000
+                pincodes).
+
+>> Target encoding
+   Definition : Replace each category with the average target value for that
+                category.
+   Use when   : Many categories (high cardinality).
+   Example    : Pincode -> average house price in that pincode.
+   Problem    : Can leak the target; compute it on training folds only and
+                use smoothing.
+
+Scaling - bringing numeric features to a similar range:
+>> Min-max normalization
+   Definition : x' = (x - min) / (max - min) -> values between 0 and 1.
+   Example    : Image pixels 0-255 -> 0-1 before feeding to a neural network.
+   Problem    : One extreme outlier squeezes all other values together.
+
+>> Standardization (z-score scaling)
+   Definition : z = (x - mean) / SD -> mean 0 and SD 1.
+   Example    : Putting salary (in lakhs) and age (in years) on the same scale.
+   Benefit    : Handles outliers better; preferred for PCA, SVM, and linear
+                models.
+
+Why scaling matters: in KNN, distance between (salary = 50,000, age = 25) and
+(salary = 52,000, age = 60) is dominated by salary - age is ignored unless we
+scale.
+
+   Need scaling (distance or gradient based) | Do NOT need scaling
+   ------------------------------------------+------------------------------
+   KNN, K-means, SVM, PCA                    | Decision Tree
+   Linear / logistic regression (esp. with   | Random Forest
+   regularization), Neural networks          | XGBoost / Gradient Boosting
+                                             | Naive Bayes
+
+
+--------------------------------------------------------------------------------
+Q60. What is exploratory data analysis (EDA)? Given a new dataset, list the
+     steps you would follow and the plots you would use (histogram, box plot,
+     scatter plot, correlation heatmap, pair plot).
+--------------------------------------------------------------------------------
+
+>> EDA (Exploratory Data Analysis)
+   Definition : The first step of analysis, where we use summary statistics
+                and plots to understand the data, find patterns, and spot
+                problems before building any model.
+   Example    : Like a doctor's general check-up before deciding treatment.
+
+Steps (example: student performance dataset):
+   1. Understand the structure  -> df.shape, df.info(), df.head()
+   2. Summary statistics        -> df.describe()
+   3. Missing values/duplicates -> df.isnull().sum(), df.duplicated().sum()
+   4. Univariate analysis       -> distribution of each column
+   5. Bivariate / multivariate  -> how features relate to each other and to
+                                   the target
+   6. Outlier check             -> box plots, IQR
+   7. Write down insights       -> ideas for cleaning and new features
+
+Plots:
+>> Histogram
+   Definition : Shows the distribution (shape) of one numeric variable.
+   Example    : Marks distribution - is it normal or skewed?
+
+>> Box plot
+   Definition : Shows median, spread, and outliers; good for comparing groups.
+   Example    : Marks of Section A vs Section B vs Section C.
+
+>> Scatter plot
+   Definition : Shows the relationship between two numeric variables.
+   Example    : Study hours (x) vs marks (y) - upward trend.
+
+>> Correlation heatmap
+   Definition : The correlation matrix drawn in colours, to quickly find
+                strongly related features (and multicollinearity).
+   Example    : Internal marks and external marks show 0.8 correlation.
+
+>> Pair plot
+   Definition : Scatter plots for every pair of features, with histograms on
+                the diagonal - a one-shot overview of a small dataset.
+   Example    : Iris dataset - shows that petal length separates the species.
+
+   (Also: bar / count plot for categorical columns, e.g. number of students
+   per branch.)
+
+
+--------------------------------------------------------------------------------
+Q61. Explain the curse of dimensionality. Describe the steps of PCA
+     (standardize, covariance matrix, eigenvectors, eigenvalues, projection)
+     and explain how you choose the number of components using explained
+     variance.
+--------------------------------------------------------------------------------
+
+>> Curse of dimensionality
+   Definition : As the number of features grows, the data becomes very
+                sparse, distances between points become almost the same, and
+                models need much more data and tend to overfit.
+   Example    : Finding a friend on a straight road (1D) is easy, in a ground
+                (2D) harder, in a 10-storey building (3D) much harder. Or: a
+                medical dataset with 100 patients but 10,000 gene features.
+
+>> PCA (Principal Component Analysis)
+   Definition : A dimensionality-reduction method that converts many
+                correlated features into a few new uncorrelated features
+                (principal components) that keep most of the information
+                (variance).
+   Example    : Height and weight are strongly related, so PCA can combine
+                them into one "body size" feature. Face recognition compresses
+                thousands of pixels into ~100 "eigenfaces".
+
+Steps of PCA:
+   1. Standardize   - make every feature mean 0, SD 1, so large-unit features
+                      (salary) don't dominate small ones (age).
+   2. Covariance matrix - a d x d matrix showing how each pair of features
+                      varies together.
+   3. Eigenvectors  - the directions of the new axes (principal components).
+   4. Eigenvalues   - how much variance lies along each eigenvector.
+                      Sort components by eigenvalue (largest first).
+   5. Projection    - multiply the standardized data by the top-k eigenvectors
+                      to get the new n x k dataset.
+
+Choosing the number of components (k):
+   Explained variance ratio of a component = its eigenvalue / sum of all
+   eigenvalues. Keep adding components until the cumulative explained
+   variance reaches about 90-95% (or use the "elbow" of a scree plot).
+
+   Example - eigenvalues: 4.0, 2.5, 1.5, 1.0, 0.5, 0.5 (total = 10)
+       PC1 = 40%  -> cumulative 40%
+       PC2 = 25%  -> cumulative 65%
+       PC3 = 15%  -> cumulative 80%
+       PC4 = 10%  -> cumulative 90%   <- choose k = 4 (6 features -> 4)
+
+   Code:  from sklearn.decomposition import PCA
+          pca = PCA(n_components=0.95)   # keep 95% variance
+          X_new = pca.fit_transform(X_scaled)
+
+Limitations: captures only linear relationships, and the new components are
+hard to explain in business terms.
+
+
+--------------------------------------------------------------------------------
+Q62. How do you handle an imbalanced dataset? Compare random undersampling,
+     oversampling, SMOTE, and class weights, and explain why accuracy is
+     misleading on such data.
+--------------------------------------------------------------------------------
+
+>> Imbalanced dataset
+   Definition : A classification dataset where one class has far more
+                samples than the other.
+   Example    : Credit card fraud - 1 fraud in every 1,000 transactions;
+                rare-disease diagnosis.
+
+Why accuracy is misleading:
+   A model that always says "Not Fraud" gets 99.9% accuracy but catches ZERO
+   frauds. Accuracy is dominated by the majority class.
+   Use instead: confusion matrix, precision, recall, F1-score, PR-AUC.
+
+>> Random undersampling
+   Definition : Randomly remove samples from the majority class to balance.
+   Example    : Keep 1,000 genuine + 1,000 fraud transactions.
+   Problem    : Throws away useful data.
+
+>> Random oversampling
+   Definition : Randomly duplicate samples from the minority class.
+   Example    : Copy each fraud transaction 10 times.
+   Problem    : Model memorises the copies -> overfitting.
+
+>> SMOTE (Synthetic Minority Over-sampling Technique)
+   Definition : Creates NEW synthetic minority samples by picking a minority
+                point and one of its nearest minority neighbours, and
+                generating a point on the line between them:
+                    new = x + random(0,1) * (neighbour - x)
+   Example    : Creates realistic "in-between" fraud transactions instead of
+                exact copies.
+   Problem    : Can create noisy points where classes overlap.
+
+>> Class weights
+   Definition : Keep the data as it is, but make the model's penalty for
+                misclassifying the minority class much higher.
+   Example    : LogisticRegression(class_weight="balanced") - missing a fraud
+                costs ~1000x more than a false alarm.
+   Benefit    : No data is added or removed.
+
+Important rules:
+   - Apply resampling ONLY on the training set, never on the test set.
+   - Also tune the decision threshold (e.g. flag if probability > 0.2
+     instead of 0.5).
+
+
+--------------------------------------------------------------------------------
+Q63. Using pandas, write code to load a sales CSV, remove duplicates, fill
+     missing values, and find the average sales per region. Explain loc vs
+     iloc, and merge vs join vs concat.
+--------------------------------------------------------------------------------
+
+>> pandas
+   Definition : A Python library for working with tabular data (DataFrames)
+                - like Excel, but in code and much faster for big data.
+   Example    : Analysing a company's monthly sales file of 1 lakh rows.
+
+Code:
+    import pandas as pd
+
+    df = pd.read_csv("sales.csv")                 # load
+    df = df.drop_duplicates()                     # remove duplicate rows
+
+    df["sales"]  = df["sales"].fillna(df["sales"].median())  # numeric
+    df["region"] = df["region"].fillna("Unknown")            # categorical
+
+    avg_sales = (df.groupby("region")["sales"]
+                   .mean()
+                   .sort_values(ascending=False))
+    print(avg_sales)
+
+>> loc
+   Definition : Selects rows/columns by LABEL (index name, column name). The
+                end of a slice is INCLUDED.
+   Example    : df.loc[0:5, "sales"] -> rows with labels 0 to 5 (6 rows).
+                Like finding a seat by its name tag.
+
+>> iloc
+   Definition : Selects rows/columns by integer POSITION. The end of a slice
+                is EXCLUDED (like Python lists).
+   Example    : df.iloc[0:5, 2] -> rows at positions 0 to 4, 3rd column.
+                Like "the 3rd seat from the left".
+
+>> merge
+   Definition : SQL-style join of two DataFrames on common column(s);
+                supports inner, left, right, outer.
+   Example    : pd.merge(sales, customers, on="customer_id", how="left")
+                -> add customer name and city to every sale.
+
+>> join
+   Definition : A DataFrame method that joins on the INDEX by default (a
+                shortcut for merge on index).
+   Example    : sales.join(customers.set_index("customer_id"),
+                           on="customer_id")
+
+>> concat
+   Definition : Stacks DataFrames on top of each other (rows, axis=0) or side
+                by side (columns, axis=1). No key matching.
+   Example    : pd.concat([jan, feb, mar], ignore_index=True)
+                -> combine three monthly sales files into one quarter file.
+
+
+--------------------------------------------------------------------------------
+Q64. Explain the 5 V's of big data. Compare Hadoop MapReduce and Apache Spark,
+     and explain the word-count example in MapReduce.
+--------------------------------------------------------------------------------
+
+>> Big Data
+   Definition : Data that is too large, too fast, or too varied to store and
+                process on a single machine with traditional databases.
+   Example    : All UPI transactions in India, or every click on Amazon.
+
+The 5 V's:
+   Volume   - the huge AMOUNT of data.
+              Example: social media platforms storing petabytes of photos.
+   Velocity - the SPEED at which data is created and must be processed.
+              Example: UPI payments and stock-market ticks every second.
+   Variety  - different TYPES of data.
+              Example: e-commerce has order tables, JSON click logs, product
+              images, and text reviews.
+   Veracity - the ACCURACY / trustworthiness of data.
+              Example: fake reviews, faulty sensor readings.
+   Value    - the useful BUSINESS INSIGHT we get from it.
+              Example: recommendations that increase sales.
+
+>> Hadoop MapReduce
+   Definition : A programming model that processes huge data in parallel on
+                a cluster in two phases - Map and Reduce - writing
+                intermediate results to disk.
+   Example    : Overnight batch job counting each product's yearly sales.
+
+>> Apache Spark
+   Definition : A fast cluster-computing engine that keeps data in MEMORY and
+                supports batch, streaming, SQL, and machine learning (MLlib).
+   Example    : Real-time fraud scoring, or training ML models that loop over
+                the same data many times.
+
+   Feature          | Hadoop MapReduce          | Apache Spark
+   -----------------+---------------------------+---------------------------
+   Processing       | Disk-based                | In-memory
+   Speed            | Slower                    | Much faster (esp. iterative)
+   Ease of coding   | Verbose Java code         | Python, Scala, SQL APIs
+   Real-time        | Batch only                | Batch + streaming
+   ML support       | Poor (many disk passes)   | Good (MLlib)
+   Cost             | Cheaper (disk)            | Needs more RAM
+
+Word count in MapReduce:
+   Input lines:  "deer bear river"   "car car river"   "deer car bear"
+
+   1. Split   : each line goes to a different mapper.
+   2. Map     : emit (word, 1) for every word
+                (deer,1) (bear,1) (river,1) | (car,1) (car,1) (river,1) |
+                (deer,1) (car,1) (bear,1)
+   3. Shuffle & sort : group all values by key
+                bear:[1,1]  car:[1,1,1]  deer:[1,1]  river:[1,1]
+   4. Reduce  : add the values for each key
+                bear 2,  car 3,  deer 2,  river 2
+
+   Real-life analogy: election vote counting - each booth counts its votes
+   (Map), votes are sent to the counting centre grouped by candidate
+   (Shuffle), and totals are added per candidate (Reduce).
+
+
+--------------------------------------------------------------------------------
+Q65. Teaching practice: Design a two-hour data science lab session for
+     third-year students on EDA. State the dataset, the tasks, the expected
+     outcomes, and how you would evaluate students.
+--------------------------------------------------------------------------------
+
+>> Lab session plan
+   Definition : A structured plan stating what students will learn, what
+                they will do in each time slot, and how their learning will
+                be checked.
+
+Title     : Exploratory Data Analysis on the Titanic dataset
+Dataset   : Titanic (Kaggle / seaborn) - small, well known, and has missing
+            values, categorical columns, and outliers, so it covers all EDA
+            skills. (Alternative: a student-performance dataset.)
+Tools     : Python, pandas, matplotlib/seaborn, Jupyter or Google Colab.
+Prerequisite: Python basics and a pandas introduction.
+
+Learning objectives - by the end, students will be able to:
+   1. Load and inspect a dataset using pandas.
+   2. Handle missing values and duplicates with a reason for each choice.
+   3. Draw and interpret a histogram, box plot, count plot, and heatmap.
+   4. Write three data-backed insights.
+
+Time plan (120 minutes):
+   0-10    Introduction: why EDA matters, with a real example (a wrong
+           conclusion caused by dirty data).
+   10-25   Load and inspect: shape, info(), describe() - teacher demo,
+           students follow.
+   25-45   Cleaning: fill missing Age with the median per Pclass, Embarked
+           with the mode, drop Cabin (mostly empty); check duplicates.
+   45-75   Visualisation: Age histogram, Fare box plot by Pclass, survival
+           count by Sex, correlation heatmap.
+   75-95   Independent task - students answer:
+             (a) Did women survive more than men?
+             (b) Is fare related to survival?
+             (c) Which age group was most at risk?
+   95-110  Two or three students present findings; class discussion.
+   110-120 Short quiz, recap, and record-book submission instructions.
+
+Expected outcomes:
+   - A cleaned dataset and a notebook with at least 4 labelled plots.
+   - A one-line interpretation under every plot.
+   - Three insights, e.g. "Female survival rate was much higher than male."
+
+Evaluation (10 marks rubric):
+   Code runs and cleaning is correct, with reasons ......... 3
+   Correct plot types with titles and labelled axes ........ 3
+   Quality of interpretation / insights .................... 3
+   Viva .................................................... 1
+
+   Sample viva questions:
+     - Why did you use the median and not the mean to fill Age?
+     - What do the whiskers of a box plot show?
+     - "First-class passengers survived more" - is that correlation or
+       causation?
+
+Common student mistakes to watch for: filling skewed columns with the mean,
+plots without axis labels, and claiming causation from a plot.

@@ -1,0 +1,299 @@
+================================================================================
+SUBJECT 5: COMPUTER NETWORKS AND SECURITY
+================================================================================
+
+How each answer is written:
+  Definition -> 1 to 3 simple lines (the line you can say directly in interview)
+  Example    -> a real-life example that connects to the definition
+  Then code / calculation / table wherever the question asks for it.
+
+
+--------------------------------------------------------------------------------
+Q23. Explain how DNS, IP, TCP, TLS, and HTTP work together when a browser opens
+     an HTTPS URL. Draw a sequence diagram for a fresh connection.
+--------------------------------------------------------------------------------
+
+>> DNS (Domain Name System)
+   Definition : The "phonebook of the internet" - converts a domain name
+                (www.cbit.ac.in) into an IP address that computers use.
+   Example    : You save "Amma" in contacts; the phone actually dials the
+                number behind that name.
+
+>> IP (Internet Protocol)
+   Definition : Gives every device an address and routes packets from the
+                source to the destination across networks, hop by hop.
+                It is "best effort" - no guarantee of delivery or order.
+   Example    : The PIN code + address on a courier parcel; post offices
+                forward it towards the destination.
+
+>> TCP (Transmission Control Protocol)
+   Definition : A connection-oriented transport protocol that delivers data
+                reliably and in order, using a handshake, acknowledgements,
+                and retransmission.
+   Example    : A registered post with acknowledgement - you know it reached,
+                and lost parcels are resent.
+
+>> TLS (Transport Layer Security)
+   Definition : The security layer that encrypts data between browser and
+                server and proves the server's identity using a certificate.
+                HTTPS = HTTP over TLS.
+   Example    : A sealed, tamper-proof envelope plus an ID card proving the
+                receiver is really your bank.
+
+>> HTTP (HyperText Transfer Protocol)
+   Definition : The application-layer protocol where the browser sends a
+                request (GET/POST) and the server returns a response (status
+                code + HTML/JSON).
+   Example    : Placing an order at a restaurant counter (request) and
+                receiving your food (response).
+
+Step by step when you type https://www.example.com:
+   1. DNS   : Browser checks its cache -> OS cache -> asks the DNS resolver,
+              which queries root -> .com -> example.com servers and returns
+              the IP, e.g. 93.184.216.34.
+   2. IP    : All further packets are addressed to that IP and routed across
+              the internet.
+   3. TCP   : 3-way handshake on port 443 (SYN, SYN-ACK, ACK) creates a
+              reliable connection.
+   4. TLS   : ClientHello / ServerHello, server sends its certificate, browser
+              verifies it, both agree on session keys -> encrypted channel.
+   5. HTTP  : Browser sends "GET /" inside the encrypted channel; server
+              replies "200 OK" with HTML. Browser then fetches CSS, JS, images.
+
+Sequence diagram (fresh connection, nothing cached):
+
+   Browser              DNS Resolver              Web Server (443)
+      |                       |                          |
+      |-- DNS query --------->|                          |
+      |   www.example.com ?   |                          |
+      |<-- IP 93.184.216.34 --|                          |
+      |                                                  |
+      |------------------- TCP SYN --------------------->|
+      |<------------------ TCP SYN-ACK ------------------|
+      |------------------- TCP ACK --------------------->|   TCP connected
+      |                                                  |
+      |------------------- TLS ClientHello ------------->|
+      |<------ TLS ServerHello + Certificate + keyshare--|
+      |   (browser verifies certificate)                 |
+      |------------------- TLS Finished ---------------->|   encrypted channel
+      |                                                  |
+      |------------------- HTTP GET / ------------------>|   (encrypted)
+      |<------------------ HTTP 200 OK + HTML -----------|   (encrypted)
+      |                                                  |
+
+Layer view:  HTTP (application) -> TLS (security) -> TCP (transport)
+             -> IP (network) -> Ethernet/Wi-Fi (link).
+
+
+--------------------------------------------------------------------------------
+Q24. Compare TCP and UDP. Explain the TCP three-way handshake and choose a
+     transport for file transfer and live voice traffic, with reasons.
+--------------------------------------------------------------------------------
+
+>> TCP
+   Definition : Connection-oriented, reliable, ordered delivery with flow and
+                congestion control.
+   Example    : A phone call - you first connect, and you confirm the other
+                person heard you.
+
+>> UDP (User Datagram Protocol)
+   Definition : Connectionless, fast, "fire and forget" delivery - no
+                handshake, no acknowledgement, no retransmission.
+   Example    : Announcements over a loudspeaker - spoken once; if someone
+                misses a word, it is not repeated.
+
+Comparison:
+   Feature            | TCP                        | UDP
+   -------------------+----------------------------+---------------------------
+   Connection         | Yes (3-way handshake)      | No
+   Reliability        | Guaranteed, retransmits    | No guarantee
+   Order              | In order                   | May arrive out of order
+   Speed / overhead   | Slower, 20-byte header     | Faster, 8-byte header
+   Flow/congestion    | Yes                        | No
+   Used by            | HTTP/HTTPS, FTP, SMTP, SSH | DNS, VoIP, video calls,
+                      |                            | online games, streaming
+
+>> TCP three-way handshake
+   Definition : The 3-message exchange TCP uses to open a connection, where
+                both sides agree on starting sequence numbers.
+   Example    : "Hello, can you hear me?" - "Yes, I can hear you, can you
+                hear me?" - "Yes." Now the conversation begins.
+
+     Client                              Server
+       |------ SYN (seq = x) ------------->|   1. client asks to connect
+       |<----- SYN-ACK (seq = y,           |   2. server agrees and
+       |         ack = x + 1) -------------|      sends its own seq
+       |------ ACK (ack = y + 1) --------->|   3. client confirms
+       |        connection ESTABLISHED     |
+
+   (Closing uses a 4-way exchange: FIN, ACK, FIN, ACK.)
+
+Choice of transport:
+   File transfer -> TCP.
+      Every byte must arrive and in order; one missing byte corrupts the file
+      (a PDF or a .zip will not open). Delay of a few ms is acceptable.
+
+   Live voice (VoIP, WhatsApp/Zoom calls) -> UDP.
+      Speed matters more than perfection. A retransmitted packet would arrive
+      too late to be useful and cause lag; losing a few milliseconds of audio
+      is barely noticed. (Apps add their own light checks on top, e.g. RTP.)
+
+
+--------------------------------------------------------------------------------
+Q25. Divide 192.168.10.0/24 into four equal subnets. Give the subnet mask,
+     network address, usable host range, and broadcast address for each.
+--------------------------------------------------------------------------------
+
+>> Subnetting
+   Definition : Dividing one big network into smaller networks by borrowing
+                bits from the host part of the IP address.
+   Example    : A college splits one network into separate subnets for CSE,
+                ECE, admin, and library, so traffic and security are managed
+                separately.
+
+>> Subnet mask
+   Definition : A 32-bit number that tells which part of an IP address is the
+                network part and which is the host part.
+
+>> Network address / Broadcast address
+   Definition : Network address = first address of a subnet (identifies the
+                subnet, not given to a host). Broadcast address = last address
+                (sends to all hosts in that subnet). Everything in between is
+                usable for hosts.
+
+Calculation:
+   Need 4 subnets -> borrow 2 bits (2^2 = 4).
+   New prefix = /24 + 2 = /26
+   Subnet mask = 255.255.255.192   (last octet 11000000 = 192)
+   Block size = 256 - 192 = 64 addresses per subnet
+   Usable hosts per subnet = 2^6 - 2 = 62
+
+   Subnet | Network address  | Usable host range               | Broadcast
+   -------+------------------+---------------------------------+----------------
+   1      | 192.168.10.0/26  | 192.168.10.1   - 192.168.10.62  | 192.168.10.63
+   2      | 192.168.10.64/26 | 192.168.10.65  - 192.168.10.126 | 192.168.10.127
+   3      | 192.168.10.128/26| 192.168.10.129 - 192.168.10.190 | 192.168.10.191
+   4      | 192.168.10.192/26| 192.168.10.193 - 192.168.10.254 | 192.168.10.255
+
+   All four use mask 255.255.255.192.
+   Quick trick: network addresses go up in steps of the block size (0, 64,
+   128, 192); broadcast = next network address - 1.
+
+
+--------------------------------------------------------------------------------
+Q26. Explain SQL injection in the context of a login form. Show how a
+     parameterized query handles user input safely and explain why string
+     concatenation is risky.
+--------------------------------------------------------------------------------
+
+>> SQL injection
+   Definition : An attack where a user types SQL code into an input field,
+                and the application mixes it into its query, so the attacker
+                changes what the query does.
+   Example    : Writing "and also give me the locker key" on a bank form, and
+                the clerk blindly follows everything written on it.
+
+Vulnerable login (string concatenation):
+
+    username = request.form["username"]
+    password = request.form["password"]
+    query = "SELECT * FROM users WHERE username = '" + username + \
+            "' AND password = '" + password + "'"
+    cursor.execute(query)
+
+   Attacker enters:  username = admin' --      password = anything
+   Final query:
+       SELECT * FROM users WHERE username = 'admin' --' AND password = '...'
+   "--" starts a comment, so the password check is removed -> attacker logs
+   in as admin without a password.
+   Another input:  ' OR '1'='1   -> WHERE ... = '' OR '1'='1'  -> always true.
+   Worse inputs can read all tables or run  '; DROP TABLE users; --
+
+Why string concatenation is risky:
+   The database receives ONE string and cannot tell which part is the
+   developer's SQL and which part is the user's data. Quotes and keywords
+   typed by the user become part of the command.
+
+>> Parameterized query (prepared statement)
+   Definition : The SQL is sent with placeholders, and user input is sent
+                separately as values. The database always treats the values
+                as data, never as SQL code.
+   Example    : A form with fixed boxes - whatever you write inside the
+                "Name" box is only ever read as a name.
+
+    query = "SELECT id, password_hash FROM users WHERE username = %s"
+    cursor.execute(query, (username,))
+    row = cursor.fetchone()
+    if row and bcrypt.checkpw(password.encode(), row[1]):
+        login_success()
+
+   Now  admin' --  is searched as a literal username "admin' --", which does
+   not exist -> login fails. (Java: PreparedStatement with ?; also ORMs like
+   SQLAlchemy/Django ORM parameterize automatically.)
+
+Other defences: input validation, least-privilege DB user (no DROP rights),
+hashed passwords, generic error messages, and a Web Application Firewall.
+
+
+--------------------------------------------------------------------------------
+Q27. Differentiate encryption, hashing, and digital signatures. Give one use
+     case for each and explain why passwords should be stored with a salted
+     password-hashing algorithm.
+--------------------------------------------------------------------------------
+
+>> Encryption
+   Definition : Converting readable data into unreadable form using a key, so
+                only someone with the right key can convert it back
+                (two-way / reversible).
+                Symmetric = same key (AES). Asymmetric = public/private key
+                pair (RSA).
+   Use case   : HTTPS encrypts your card details between browser and bank;
+                WhatsApp end-to-end encrypted chats.
+
+>> Hashing
+   Definition : Converting data of any size into a fixed-size value
+                ("fingerprint") with a one-way function - it cannot be
+                reversed, and a tiny change in input gives a totally
+                different hash. (SHA-256)
+   Use case   : Checking a downloaded file is not corrupted or tampered by
+                comparing its SHA-256 hash with the one on the website.
+
+>> Digital signature
+   Definition : A hash of a message encrypted with the sender's PRIVATE key.
+                Anyone can verify it with the sender's PUBLIC key. It proves
+                who sent it (authentication), that it was not changed
+                (integrity), and the sender cannot deny it (non-repudiation).
+   Use case   : Digitally signed income-tax returns / e-documents, software
+                updates signed by the vendor, SSL certificates.
+
+Comparison:
+   Feature       | Encryption          | Hashing             | Digital signature
+   --------------+---------------------+---------------------+-------------------
+   Goal          | Confidentiality     | Integrity           | Authenticity +
+                 |                     |                     | integrity
+   Reversible?   | Yes (with key)      | No                  | Verified, not
+                 |                     |                     | decrypted to data
+   Key           | Secret / public key | No key              | Private signs,
+                 |                     |                     | public verifies
+   Example       | AES, RSA            | SHA-256             | RSA / ECDSA sign
+
+Why store passwords with a SALTED password-hashing algorithm:
+   >> Salt
+      Definition : A random value, unique for each user, added to the password
+                   before hashing and stored next to the hash.
+      Example    : Two users both choose "password123" - with different salts
+                   their stored hashes are completely different.
+
+   Reasons:
+   1. Never store plain text or encrypted passwords - if the DB leaks or the
+      key leaks, every password is exposed. A hash cannot be reversed.
+   2. Without a salt, the same password gives the same hash, so attackers use
+      precomputed "rainbow tables" and crack millions at once. A unique salt
+      makes precomputed tables useless and hides users with equal passwords.
+   3. Use a SLOW password-hashing algorithm (bcrypt, scrypt, Argon2, PBKDF2),
+      not a fast one like MD5/SHA-256. Being deliberately slow (work factor)
+      makes brute-force guessing of billions of passwords impractical.
+
+    import bcrypt
+    hashed = bcrypt.hashpw(b"MyPass@123", bcrypt.gensalt(rounds=12))  # store
+    bcrypt.checkpw(b"MyPass@123", hashed)   # True at login

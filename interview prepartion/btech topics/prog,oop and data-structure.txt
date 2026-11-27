@@ -1,0 +1,343 @@
+SUBJECT 1: PROGRAMMING, OOP AND DATA STRUCTURES
+================================================================================
+
+How each answer is written:
+  Definition -> 1 to 3 simple lines (the line you can say directly in interview)
+  Example    -> a real-life example that connects to the definition
+  Then code / calculation / table wherever the question asks for it.
+
+
+--------------------------------------------------------------------------------
+Q1. Explain encapsulation, abstraction, inheritance, and polymorphism using a
+    bank account or payment system. Show a short code example of runtime
+    polymorphism.
+--------------------------------------------------------------------------------
+
+>> OOP (Object-Oriented Programming)
+   Definition : A way of writing programs by organising code into objects,
+                where each object holds its own data and the functions that
+                work on that data.
+   Example    : In a banking app, every customer's account is an object with
+                data (account no, balance) and actions (deposit, withdraw).
+
+>> Encapsulation
+   Definition : Wrapping data and the methods that use it into one unit
+                (class), and hiding the data so it can be changed only through
+                those methods.
+   Example    : The balance of a bank account is private. You cannot set
+                balance = 1,00,000 directly; you must call deposit() or
+                withdraw(), which check the rules (no negative amount, no
+                withdrawal above balance).
+
+>> Abstraction
+   Definition : Showing only WHAT an object does and hiding HOW it does it.
+   Example    : At an ATM you press "Withdraw Rs.500". You don't see the PIN
+                check, server call, or ledger update happening inside.
+
+>> Inheritance
+   Definition : A new class (child) reuses the properties and methods of an
+                existing class (parent) and can add its own. It is an
+                "is-a" relationship.
+   Example    : SavingsAccount and CurrentAccount both inherit from Account
+                (account no, balance, deposit). Savings adds interest;
+                Current adds overdraft.
+
+>> Polymorphism
+   Definition : "One name, many forms" - the same method call behaves
+                differently depending on the object.
+                Compile-time = method overloading (decided by compiler).
+                Runtime      = method overriding (decided while running).
+   Example    : At checkout, the app just calls pay(). If the user chose UPI,
+                UPI's pay() runs; if Card, the card's pay() runs. Checkout
+                code does not change when a new payment method is added.
+
+Code - runtime polymorphism (Python):
+
+    class Payment:                          # parent (abstraction)
+        def pay(self, amount):
+            raise NotImplementedError
+
+    class UPIPayment(Payment):              # inheritance
+        def pay(self, amount):              # overriding
+            return f"Paid Rs.{amount} using UPI"
+
+    class CardPayment(Payment):
+        def pay(self, amount):
+            return f"Paid Rs.{amount} using Card"
+
+    def checkout(method: Payment, amount):
+        print(method.pay(amount))           # which pay()? decided at runtime
+
+    checkout(UPIPayment(), 500)    # Paid Rs.500 using UPI
+    checkout(CardPayment(), 500)   # Paid Rs.500 using Card
+
+Key line for interview: "Encapsulation protects data, abstraction hides
+complexity, inheritance reuses code, polymorphism lets one interface work with
+many types."
+
+
+--------------------------------------------------------------------------------
+Q2. Differentiate compile-time errors, runtime exceptions, and logical errors.
+    Give a code example of each and explain how you would diagnose it.
+--------------------------------------------------------------------------------
+
+>> Compile-time (syntax) error
+   Definition : A mistake in the rules (grammar) of the language, caught
+                BEFORE the program runs. The program does not start at all.
+   Example    : Like a form rejected at the counter because a field is
+                missing - it is never processed.
+   Code       :  Java:   int x = 10        // missing semicolon
+                 Python: print("hello"     # SyntaxError: '(' was never closed
+   Diagnose   : Read the compiler/interpreter message and the line number;
+                IDE red underlines show it immediately.
+
+>> Runtime exception
+   Definition : The program starts fine but crashes WHILE running because an
+                operation is impossible at that moment.
+   Example    : A car starts fine but stops midway because the fuel ran out.
+   Code       :  marks = [80, 90]
+                 print(marks[5])        # IndexError
+                 print(10 / 0)          # ZeroDivisionError
+                 int("abc")             # ValueError
+   Diagnose   : Read the stack trace (it shows the exact line), check the
+                input values, and handle expected cases with try/except.
+
+>> Logical error
+   Definition : The program runs without crashing but gives a WRONG answer
+                because the logic or formula is wrong.
+   Example    : A GPS that works perfectly but takes you to the wrong address.
+   Code       :  a, b = 80, 90
+                 avg = a + b / 2        # gives 125.0, correct is (a+b)/2 = 85
+   Diagnose   : Hardest to find - test with inputs whose answer you already
+                know, use print statements / debugger breakpoints, and write
+                unit tests.
+
+Summary table:
+    Type          | When found          | Program crashes? | Tool to find it
+    --------------+---------------------+------------------+------------------
+    Compile-time  | Before running      | Never starts     | Compiler message
+    Runtime       | While running       | Yes              | Stack trace
+    Logical       | After seeing output | No (wrong result)| Tests, debugger
+
+
+--------------------------------------------------------------------------------
+Q3. Compare arrays and linked lists. Explain the time complexity of indexed
+    access, search, insertion, and deletion, including the case where you
+    already have a reference to the insertion point.
+--------------------------------------------------------------------------------
+
+>> Array
+   Definition : A collection of elements of the same type stored in
+                continuous (side-by-side) memory, accessed directly by index.
+   Example    : Theatre seats in one row numbered 1 to 50 - you can walk
+                straight to seat 15 without checking seats 1 to 14.
+
+>> Linked list
+   Definition : A chain of nodes where each node stores data and a pointer
+                (link) to the next node. Nodes can be anywhere in memory.
+   Example    : Train coaches joined by couplings. To reach coach 5 you walk
+                from the engine. To add a coach in between you just unhook
+                and re-hook two couplings - no other coach moves.
+
+Time complexity:
+    Operation                           | Array        | Linked list
+    ------------------------------------+--------------+-----------------------
+    Access by index (a[i])              | O(1)         | O(n) - walk from head
+    Search (unsorted)                   | O(n)         | O(n)
+    Search (sorted)                     | O(log n)     | O(n) - no binary search
+    Insert/delete at beginning          | O(n) - shift | O(1)
+    Insert/delete at end                | O(1)*        | O(1) with tail pointer
+    Insert/delete in middle by position | O(n) - shift | O(n) - walk to it
+    Insert when you ALREADY HAVE a      | O(n) - still | O(1) - only change
+    reference to the insertion point    | must shift   | 2 pointers
+    (* amortized, for a dynamic array like Python list / Java ArrayList)
+
+Key point (the case asked in the question):
+   If you already hold a pointer to node P, inserting a new node after P is
+   O(1):   new.next = P.next ;  P.next = new
+   In an array, even if you know the index, all later elements must move one
+   step right -> O(n).
+   (For deleting P itself in a singly linked list you need the previous node,
+   so a doubly linked list gives O(1) delete.)
+
+When to use:
+   Array       -> frequent reading by index, less memory, cache friendly
+                  (e.g. storing marks of 60 students).
+   Linked list -> frequent insert/delete in the middle
+                  (e.g. music playlist next/previous, undo history, LRU cache).
+
+
+--------------------------------------------------------------------------------
+Q4. Explain stacks and queues. Show how a stack checks balanced parentheses and
+    how a queue supports breadth-first search.
+--------------------------------------------------------------------------------
+
+>> Stack
+   Definition : A linear structure that follows LIFO - Last In, First Out.
+                Insert = push, remove = pop, both happen at the top only.
+   Example    : A pile of plates - you take the plate placed last. Browser
+                "Back" button and Ctrl+Z (undo) work like a stack.
+
+>> Queue
+   Definition : A linear structure that follows FIFO - First In, First Out.
+                Insert at rear (enqueue), remove from front (dequeue).
+   Example    : A ticket counter line - the first person in line is served
+                first. Printer jobs and CPU process scheduling use queues.
+
+Balanced parentheses using a stack:
+   Rule: opening bracket -> push.
+         closing bracket -> stack must not be empty AND top must be its
+                            matching opening bracket -> pop.
+         at the end       -> stack must be empty.
+
+    def is_balanced(s):
+        pairs = {')': '(', ']': '[', '}': '{'}
+        stack = []
+        for ch in s:
+            if ch in "([{":
+                stack.append(ch)
+            elif ch in pairs:
+                if not stack or stack.pop() != pairs[ch]:
+                    return False
+        return not stack
+
+   Trace "{[()]}":  push {  push [  push (  ->  ')' pops (  ']' pops [
+                    '}' pops {  -> stack empty -> BALANCED
+   Trace "([)]"  :  push (  push [  -> ')' but top is [  -> NOT BALANCED
+   Real use     :  Compilers / code editors check matching brackets this way.
+
+Queue in Breadth-First Search (BFS):
+   BFS visits a graph level by level - first all neighbours, then
+   neighbours of neighbours. The queue keeps the "next to visit" nodes in the
+   order they were discovered.
+   Example: LinkedIn shows 1st-degree connections, then 2nd-degree - that is
+   BFS.
+
+    Graph:  A -> B, C     B -> D     C -> D, E
+
+    from collections import deque
+    def bfs(graph, start):
+        visited = {start}
+        q = deque([start])
+        order = []
+        while q:
+            node = q.popleft()                 # dequeue
+            order.append(node)
+            for nb in graph[node]:
+                if nb not in visited:
+                    visited.add(nb)
+                    q.append(nb)               # enqueue
+        return order
+
+   Trace:  queue [A] -> visit A, add B,C -> [B,C]
+           visit B, add D          -> [C,D]
+           visit C, D seen, add E  -> [D,E]
+           visit D -> visit E      -> order: A B C D E
+
+
+--------------------------------------------------------------------------------
+Q5. Explain hashing. Insert 10, 17, 24, 31 into a hash table of size 7 using
+    h(k) = k % 7. Show how linear probing and separate chaining handle the
+    collisions.
+--------------------------------------------------------------------------------
+
+>> Hashing
+   Definition : Converting a key into a table index using a hash function, so
+                data can be stored and found in O(1) average time.
+   Example    : In a library, the book code tells you the exact shelf, so you
+                go straight there instead of checking every shelf.
+
+>> Collision
+   Definition : When two different keys get the same index.
+   Example    : Two cars given the same parking slot number.
+
+Step 1 - compute h(k) = k % 7:
+     10 % 7 = 3
+     17 % 7 = 3
+     24 % 7 = 3
+     31 % 7 = 3      -> ALL FOUR keys collide at index 3.
+
+>> Linear probing (open addressing)
+   Definition : If the slot is full, check the next slot (i+1, i+2, ...)
+                until an empty slot is found. Everything stays inside the
+                table.
+   Example    : Your parking slot is taken, so you park in the next free one.
+
+     10 -> 3 (empty)                       -> stored at 3
+     17 -> 3 full -> 4                     -> stored at 4
+     24 -> 3 full, 4 full -> 5             -> stored at 5
+     31 -> 3, 4, 5 full -> 6               -> stored at 6
+
+     Index : 0    1    2    3    4    5    6
+     Value : -    -    -    10   17   24   31
+
+   Problem: keys form a cluster (primary clustering), so searching becomes
+   slower.
+
+>> Separate chaining
+   Definition : Each table slot holds a linked list. All keys that hash to
+                the same index are added to that slot's list.
+   Example    : One pigeonhole in a hostel holds all letters for that room.
+
+     Index 0 : -
+     Index 1 : -
+     Index 2 : -
+     Index 3 : 10 -> 17 -> 24 -> 31
+     Index 4 : -
+     Index 5 : -
+     Index 6 : -
+
+Comparison:
+     Linear probing    : no extra memory, table can fill up (load factor <= 1),
+                         clustering problem, deletion is tricky.
+     Separate chaining : extra memory for list nodes, never "full", load
+                         factor can go above 1, simple deletion.
+   Real use: Python dict, Java HashMap (HashMap uses chaining), caches.
+
+
+--------------------------------------------------------------------------------
+Q6. Construct a binary search tree by inserting 50, 30, 70, 20, 40, 60, 80.
+    Give its inorder, preorder, and postorder traversals, then show how to
+    delete 50.
+--------------------------------------------------------------------------------
+
+>> Binary Search Tree (BST)
+   Definition : A binary tree where for every node, all values in the left
+                subtree are smaller and all values in the right subtree are
+                larger. Search, insert, delete take O(log n) on average.
+   Example    : The "guess the number" game - each guess tells you go
+                lower or higher, so half the options are removed each time.
+                Dictionary lookups work the same way.
+
+Construction (compare with root, go left if smaller, right if larger):
+
+                 50
+               /    \
+             30      70
+            /  \    /  \
+          20   40  60   80
+
+>> Traversals (how we visit every node)
+   Inorder   (Left, Node, Right) : 20 30 40 50 60 70 80   <- always sorted
+   Preorder  (Node, Left, Right) : 50 30 20 40 70 60 80
+   Postorder (Left, Right, Node) : 20 40 30 60 80 70 50
+   Uses: inorder -> sorted output; preorder -> copy/save a tree;
+         postorder -> delete a tree (children before parent).
+
+Deleting 50 (root with TWO children):
+   Three delete cases:
+     1. Leaf          -> just remove it.
+     2. One child     -> replace node with its child.
+     3. Two children  -> replace with inorder successor (smallest value in the
+                         right subtree), then delete the successor.
+   Inorder successor of 50 = smallest in right subtree = 60 (a leaf).
+   Copy 60 into the root and remove the old 60:
+
+                 60
+               /    \
+             30      70
+            /  \       \
+          20   40       80
+
+   New inorder: 20 30 40 60 70 80 (still sorted -> BST property kept).
+   (Using inorder predecessor 40 is also correct.)

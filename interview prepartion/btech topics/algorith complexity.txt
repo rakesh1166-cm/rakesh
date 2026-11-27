@@ -1,0 +1,304 @@
+================================================================================
+SUBJECT 2: ALGORITHMS AND COMPLEXITY
+================================================================================
+
+How each answer is written:
+  Definition -> 1 to 3 simple lines (the line you can say directly in interview)
+  Example    -> a real-life example that connects to the definition
+  Then code / calculation / table wherever the question asks for it.
+
+
+--------------------------------------------------------------------------------
+Q7. Explain Big-O, Big-Omega, and Big-Theta. Derive the complexity of a nested
+    loop in which the inner loop doubles its counter on every iteration.
+--------------------------------------------------------------------------------
+
+>> Time complexity
+   Definition : How the running time of an algorithm grows as the input size
+                (n) grows - counted in steps, not seconds.
+   Example    : Searching a name in an unsorted list of 10 lakh students takes
+                about 10 lakh checks in the worst case -> O(n).
+
+>> Big-O (O) - upper bound
+   Definition : The algorithm takes AT MOST this much time (for large n).
+                Usually used for the worst case.
+   Example    : "Delivery within 5 days" - it may come earlier, never later.
+                Linear search is O(n).
+
+>> Big-Omega (Omega) - lower bound
+   Definition : The algorithm takes AT LEAST this much time.
+                Usually linked to the best case.
+   Example    : "Delivery takes at least 1 day." Linear search is Omega(1)
+                (item found at the first position).
+
+>> Big-Theta (Theta) - tight bound
+   Definition : Upper and lower bounds are the same - the time grows EXACTLY
+                at this rate.
+   Example    : Reading every page of a 300-page book always takes 300 page
+                turns. Summing an array is Theta(n).
+
+   Notation | Meaning        | Bound   | Example (linear search)
+   ---------+----------------+---------+------------------------
+   O        | at most        | upper   | O(n)
+   Omega    | at least       | lower   | Omega(1)
+   Theta    | exactly        | tight   | merge sort Theta(n log n)
+
+Nested loop where the inner counter doubles:
+
+    for (i = 0; i < n; i++) {          // outer loop: n times
+        for (j = 1; j < n; j = j * 2) {  // inner loop: j = 1, 2, 4, 8 ...
+            print(i, j);                 // O(1) work
+        }
+    }
+
+Derivation:
+   Inner loop: j takes values 1, 2, 4, ..., 2^k while 2^k < n.
+               2^k < n  ->  k < log2(n)  ->  inner loop runs about log2(n) times.
+   Outer loop: runs n times, and each time the inner loop runs log2(n) times.
+   Total steps = n * log2(n)
+   Complexity  = O(n log n)   (in fact Theta(n log n), since it ALWAYS runs
+                               the same number of times)
+
+   Check with n = 16: inner loop j = 1, 2, 4, 8 -> 4 times = log2(16).
+                      total = 16 * 4 = 64 steps.
+
+   Real-life link: doubling = halving the remaining distance, the same idea as
+   binary search -> that is where "log n" always comes from.
+
+
+--------------------------------------------------------------------------------
+Q8. Trace merge sort on [8, 3, 5, 1, 4]. Write its recurrence and derive its
+    time and auxiliary space complexity.
+--------------------------------------------------------------------------------
+
+>> Merge sort
+   Definition : A divide-and-conquer sorting algorithm: split the list into
+                two halves, sort each half recursively, then merge the two
+                sorted halves.
+   Example    : Two teachers each sort half of the answer sheets by roll
+                number, then combine the two sorted piles by always picking
+                the smaller roll number from the top.
+
+>> Divide and conquer
+   Definition : Break a big problem into smaller sub-problems of the same
+                type, solve them, and combine the answers.
+
+Trace on [8, 3, 5, 1, 4]:
+
+   DIVIDE:
+                       [8, 3, 5, 1, 4]
+                      /               \
+               [8, 3, 5]             [1, 4]
+               /       \             /    \
+           [8, 3]      [5]         [1]    [4]
+           /    \
+         [8]    [3]
+
+   MERGE (combine back, smallest first):
+         [8] + [3]          -> [3, 8]
+         [3, 8] + [5]       -> [3, 5, 8]
+         [1] + [4]          -> [1, 4]
+         [3, 5, 8] + [1, 4] -> compare 3,1 -> 1
+                               compare 3,4 -> 3
+                               compare 5,4 -> 4
+                               right side empty -> copy 5, 8
+                            -> [1, 3, 4, 5, 8]   SORTED
+
+Recurrence:
+   T(n) = 2 T(n/2) + c*n        (2 halves + linear merge)
+   T(1) = c
+
+Time complexity derivation (recursion tree):
+   Level 0 : 1 problem of size n        -> merge work c*n
+   Level 1 : 2 problems of size n/2     -> merge work c*n
+   Level 2 : 4 problems of size n/4     -> merge work c*n
+   ...
+   Number of levels = log2(n)   (keep halving until size 1)
+   Total = c*n * log2(n)  ->  O(n log n)
+   (Master theorem: a = 2, b = 2, f(n) = n = n^(log_2 2) -> Theta(n log n))
+   Best, average, and worst case are ALL O(n log n).
+
+Auxiliary space:
+   - Merging needs a temporary array of size n      -> O(n)
+   - Recursion stack depth = log n                  -> O(log n)
+   - Total auxiliary space = O(n) + O(log n) = O(n)
+
+
+--------------------------------------------------------------------------------
+Q9. Compare quicksort and merge sort with respect to worst-case time, memory,
+    and stability. State which you would choose for sorting a file larger than
+    RAM and explain why.
+--------------------------------------------------------------------------------
+
+>> Quicksort
+   Definition : Pick a pivot, put smaller elements to its left and larger to
+                its right (partition), then sort both sides recursively.
+   Example    : Arranging students by height: choose one student as the
+                reference, shorter ones stand left, taller ones right, repeat
+                in each group.
+
+>> Stable sort
+   Definition : A sort that keeps equal items in their original order.
+   Example    : Sorting students by marks; two students with 85 stay in
+                roll-number order, as they were before sorting.
+
+>> External sorting
+   Definition : Sorting data that is too large to fit in RAM, by sorting
+                chunks in memory and merging them from disk.
+
+Comparison:
+   Feature             | Quicksort                  | Merge sort
+   --------------------+----------------------------+-------------------------
+   Best / average time | O(n log n)                 | O(n log n)
+   Worst-case time     | O(n^2) (bad pivot, e.g.    | O(n log n) always
+                       | sorted input + first pivot)|
+   Extra memory        | O(log n) stack, in-place   | O(n) extra array
+   Stable?             | No                         | Yes
+   Cache / practice    | Very fast in RAM           | Slower in RAM, but
+                       |                            | sequential access
+   Best for            | Arrays in memory           | Linked lists, external
+                       |                            | sorting, stable needs
+   Fix for worst case  | Random / median-of-three   | -
+                       | pivot                      |
+
+For a file LARGER than RAM -> choose MERGE SORT (external merge sort):
+   1. Read a chunk that fits in RAM (e.g. 1 GB of a 10 GB file), sort it in
+      memory, write it to disk as a sorted "run". -> 10 sorted runs.
+   2. K-way merge: read the first part of every run, repeatedly take the
+      smallest element, write it to the output file.
+   Why: merge sort reads and writes data SEQUENTIALLY, which is fast on disk;
+   quicksort needs random access to the whole array, which is extremely slow
+   on disk. Merge sort also guarantees O(n log n).
+   Real example: databases use external merge sort for ORDER BY on huge
+   tables; Hadoop sorts map outputs the same way.
+
+
+--------------------------------------------------------------------------------
+Q10. Compare BFS and DFS using a graph. Explain which finds a shortest path in
+     an unweighted graph and how DFS can detect a cycle in a directed graph.
+--------------------------------------------------------------------------------
+
+>> Graph
+   Definition : A set of nodes (vertices) connected by edges.
+   Example    : Cities connected by roads; people connected as friends.
+
+>> BFS (Breadth-First Search)
+   Definition : Visit the graph level by level - first all neighbours, then
+                their neighbours - using a QUEUE.
+   Example    : A ripple spreading in water; LinkedIn 1st, 2nd, 3rd-degree
+                connections.
+
+>> DFS (Depth-First Search)
+   Definition : Go as deep as possible along one path, then backtrack - using
+                a STACK (or recursion).
+   Example    : Solving a maze - keep walking one corridor until a dead end,
+                then come back and try another.
+
+Example graph:
+            A
+           / \
+          B   C
+         / \   \
+        D   E   F
+
+   BFS from A : A B C D E F   (level by level)
+   DFS from A : A B D E C F   (deep first, then backtrack)
+
+   Feature            | BFS                        | DFS
+   -------------------+----------------------------+--------------------------
+   Data structure     | Queue (FIFO)               | Stack / recursion (LIFO)
+   Order              | Level by level             | Deep first, backtrack
+   Shortest path      | YES (unweighted graph)     | No guarantee
+   Memory             | Can be high (whole level)  | Lower (one path)
+   Time               | O(V + E)                   | O(V + E)
+   Used for           | Shortest path, social      | Cycle detection,
+                      | networks, web crawling     | topological sort, mazes
+
+Shortest path in an unweighted graph -> BFS.
+   Reason: BFS reaches all nodes at distance 1 before any node at distance 2,
+   so the FIRST time BFS reaches a node, it has used the minimum number of
+   edges. Example: fewest number of flight changes between two cities.
+
+Cycle detection in a DIRECTED graph using DFS (three colours):
+   WHITE = not visited, GRAY = in the current recursion path,
+   BLACK = completely finished.
+   If DFS finds an edge to a GRAY node (a "back edge"), there is a cycle.
+
+    def has_cycle(graph):
+        color = {v: "WHITE" for v in graph}
+        def dfs(u):
+            color[u] = "GRAY"
+            for v in graph[u]:
+                if color[v] == "GRAY":            # back edge -> cycle
+                    return True
+                if color[v] == "WHITE" and dfs(v):
+                    return True
+            color[u] = "BLACK"
+            return False
+        return any(color[v] == "WHITE" and dfs(v) for v in graph)
+
+   Trace: A -> B -> C -> A
+          dfs(A) GRAY, dfs(B) GRAY, dfs(C) GRAY, C sees A which is GRAY
+          -> CYCLE found.
+   Real example: detecting circular dependencies between course
+   prerequisites, or deadlock in a wait-for graph.
+
+
+--------------------------------------------------------------------------------
+Q11. Explain Dijkstra's algorithm. Trace it from A using edges A->B=4, A->C=1,
+     C->B=2, B->D=1, and C->D=5. Explain why negative edge weights can
+     invalidate the method.
+--------------------------------------------------------------------------------
+
+>> Dijkstra's algorithm
+   Definition : Finds the shortest distance from one source node to all
+                other nodes in a graph with NON-NEGATIVE edge weights, by
+                always finalising the unvisited node with the smallest
+                distance (greedy method).
+   Example    : Google Maps finding the shortest route from your home to all
+                places in the city.
+
+>> Relaxation
+   Definition : If going through node u gives a shorter path to v, update it:
+                if dist[u] + w(u,v) < dist[v] then dist[v] = dist[u] + w(u,v)
+
+Graph:
+          A ---4---> B ---1---> D
+          |          ^          ^
+          1          2          5
+          |          |          |
+          v          |          |
+          C ---------+----------+
+          (C has two outgoing edges: C->B = 2 and C->D = 5)
+
+   Edges: A->B=4, A->C=1, C->B=2, B->D=1, C->D=5
+
+Trace from A:
+   Step | Pick (smallest) | A | B          | C | D          | Visited
+   -----+-----------------+---+------------+---+------------+-------------
+   0    | start           | 0 | inf        |inf| inf        | {}
+   1    | A (0)           | 0 | 4          | 1 | inf        | {A}
+   2    | C (1)           | 0 | 1+2 = 3    | 1 | 1+5 = 6    | {A,C}
+   3    | B (3)           | 0 | 3          | 1 | 3+1 = 4    | {A,C,B}
+   4    | D (4)           | 0 | 3          | 1 | 4          | {A,C,B,D}
+
+Final shortest distances and paths:
+   A = 0
+   C = 1   (A -> C)
+   B = 3   (A -> C -> B)       better than direct A -> B = 4
+   D = 4   (A -> C -> B -> D)  better than A -> C -> D = 6
+
+Complexity: O((V + E) log V) with a min-heap (priority queue).
+
+Why negative edge weights break Dijkstra:
+   Dijkstra assumes that once a node is finalised (picked as smallest), no
+   later path can make it shorter. With a negative edge, a later path CAN
+   become shorter.
+
+   Example: A->B = 2, A->C = 5, C->B = -4
+     Dijkstra picks B first with distance 2 and finalises it.
+     Real shortest path: A -> C -> B = 5 + (-4) = 1   -> Dijkstra is WRONG.
+   Real-life link: a road that "pays you back" (cashback toll) can make a
+   longer-looking route cheaper, which the greedy choice never rechecks.
+   Solution: use Bellman-Ford, O(V*E), which handles negative weights and also
+   detects negative cycles.

@@ -1,0 +1,1122 @@
+================================================================================
+SUBJECT 12: DEEP LEARNING
+================================================================================
+
+How each answer is written:
+  Definition -> 1 to 3 simple lines (the line you can say directly in interview)
+  Example    -> a real-life example that connects to the definition
+  Then code / calculation / table wherever the question asks for it.
+
+
+--------------------------------------------------------------------------------
+Q82. Explain the perceptron and its learning rule. Why can a single
+     perceptron not solve XOR, and how does a multilayer perceptron solve it?
+--------------------------------------------------------------------------------
+
+>> Deep Learning
+   Definition : A branch of machine learning that uses neural networks with
+                many layers to learn patterns directly from raw data.
+   Example    : Face unlock on a phone, Google Translate, voice assistants.
+
+>> Perceptron
+   Definition : The simplest artificial neuron. It multiplies inputs by
+                weights, adds a bias, and outputs 1 if the sum is above 0,
+                else 0:   y = step(w1*x1 + w2*x2 + ... + b)
+   Example    : Loan approval with two inputs (salary, credit score): if the
+                weighted score crosses a threshold -> approve (1), else
+                reject (0).
+
+>> Perceptron learning rule
+   Definition : After each wrong prediction, move the weights towards the
+                correct answer:
+                    w = w + eta * (t - y) * x
+                    b = b + eta * (t - y)
+                (t = target, y = prediction, eta = learning rate)
+                If the prediction is correct, (t - y) = 0 and nothing changes.
+   Example    : w = [0, 0], b = 0, eta = 1, input x = (1, 1), target t = 1.
+                y = step(0) = 0 -> error = 1 - 0 = 1
+                w = [0+1*1, 0+1*1] = [1, 1],  b = 0 + 1 = 1
+
+>> Linear separability
+   Definition : Data is linearly separable if ONE straight line (or plane)
+                can separate the two classes. A single perceptron can only
+                learn such data.
+   Example    : AND and OR are linearly separable; XOR is not.
+
+Why a single perceptron cannot solve XOR:
+   XOR truth table: (0,0)->0  (0,1)->1  (1,0)->1  (1,1)->0
+
+        x2
+        1 |  1(0,1)      0(1,1)
+          |
+        0 |  0(0,0)      1(1,0)
+          +-------------------- x1
+             0           1
+
+   The 1s are on one diagonal and the 0s on the other. No single straight
+   line can put both 1s on one side and both 0s on the other side.
+   (This limitation, shown by Minsky and Papert in 1969, slowed neural network
+   research for years.)
+
+>> Multilayer Perceptron (MLP)
+   Definition : A network with one or more hidden layers between input and
+                output. Hidden layers combine several straight lines, so it
+                can learn non-linear boundaries.
+   Example    : XOR = (x1 OR x2) AND NOT (x1 AND x2).
+
+   MLP for XOR with explicit weights (step activation):
+       Hidden h1 (OR)  = step(1*x1 + 1*x2 - 0.5)
+       Hidden h2 (AND) = step(1*x1 + 1*x2 - 1.5)
+       Output y        = step(1*h1 - 1*h2 - 0.5)
+
+        x1 ----+----> [h1: OR ] ---(+1)---+
+               \  /                       +--> [y] = XOR
+                \/                        |
+                /\                        |
+        x2 ----+----> [h2: AND] ---(-1)---+
+
+   Check:
+       x1 x2 | h1 h2 | h1 - h2 - 0.5 | y
+       0  0  | 0  0  |    -0.5       | 0
+       0  1  | 1  0  |    +0.5       | 1
+       1  0  | 1  0  |    +0.5       | 1
+       1  1  | 1  1  |    -0.5       | 0     -> correct XOR
+
+
+--------------------------------------------------------------------------------
+Q83. Compare the sigmoid, tanh, ReLU, Leaky ReLU, and softmax activation
+     functions. Why is ReLU preferred in hidden layers, and what is the dying
+     ReLU problem?
+--------------------------------------------------------------------------------
+
+>> Activation function
+   Definition : A function applied to a neuron's output that adds
+                non-linearity. Without it, many layers collapse into one
+                linear model.
+   Example    : Like a dimmer switch deciding how strongly a neuron "fires".
+
+>> Sigmoid
+   Definition : f(x) = 1 / (1 + e^-x). Squeezes any number into 0 to 1.
+   Example    : Output layer for spam / not spam - gives a probability.
+   Problem    : Saturates (gradient near 0 for large |x|), not zero-centred.
+
+>> Tanh
+   Definition : f(x) = (e^x - e^-x) / (e^x + e^-x). Squeezes into -1 to 1,
+                zero-centred.
+   Example    : Hidden states in RNNs/LSTMs.
+   Problem    : Still saturates -> vanishing gradients.
+
+>> ReLU (Rectified Linear Unit)
+   Definition : f(x) = max(0, x). Passes positive values, blocks negatives.
+   Example    : Default hidden-layer activation in CNNs (image classifiers).
+
+>> Leaky ReLU
+   Definition : f(x) = x if x > 0, else 0.01*x. Like ReLU but lets a small
+                gradient through for negative inputs.
+   Example    : Used in GAN discriminators to avoid dead neurons.
+
+>> Softmax
+   Definition : Converts a vector of scores into probabilities that add up
+                to 1:  p_i = e^(z_i) / sum of e^(z_j)
+   Example    : Digit recognition - probabilities for classes 0 to 9.
+   Worked     : scores [2.0, 1.0, 0.1]
+                e^z = [7.389, 2.718, 1.105], sum = 11.212
+                probabilities = [0.659, 0.242, 0.099] -> class 1 wins
+
+Comparison:
+   Function   | Range    | Used in              | Main problem
+   -----------+----------+----------------------+-------------------------
+   Sigmoid    | (0, 1)   | Binary output layer  | Vanishing gradient
+   Tanh       | (-1, 1)  | RNN hidden layers    | Vanishing gradient
+   ReLU       | [0, inf) | Hidden layers (CNN)  | Dying ReLU
+   Leaky ReLU | (-inf,inf)| Hidden layers, GANs | Extra slope to choose
+   Softmax    | (0, 1),  | Multi-class output   | Only for output layer
+              | sum = 1  |                      |
+
+Why ReLU is preferred in hidden layers:
+   1. Gradient is exactly 1 for positive inputs -> no vanishing gradient,
+      deep networks train faster.
+   2. Very cheap to compute (just max(0, x)).
+   3. Gives sparse activations (many zeros) -> efficient representation.
+
+>> Dying ReLU problem
+   Definition : A neuron whose input becomes negative for every example
+                always outputs 0 and gets gradient 0, so its weights never
+                update again - the neuron is "dead".
+   Example    : A large learning rate pushes a bias to a big negative value;
+                that neuron stays off for every image forever.
+   Fix        : Leaky ReLU / ELU, a smaller learning rate, He initialization.
+
+
+--------------------------------------------------------------------------------
+Q84. Compare MSE, binary cross-entropy, and categorical cross-entropy. Which
+     loss and output activation would you use for regression, binary
+     classification, and multi-class classification?
+--------------------------------------------------------------------------------
+
+>> Loss function
+   Definition : A number that measures how wrong the model's prediction is.
+                Training tries to make this number as small as possible.
+   Example    : Like the marks deducted in an exam - fewer deductions means a
+                better answer.
+
+>> MSE (Mean Squared Error)
+   Definition : Average of the squared differences between actual and
+                predicted values:  MSE = (1/n) * sum (y - y_hat)^2
+                Big errors are punished heavily because of the square.
+   Example    : House-price prediction: actual 50 lakh, predicted 45 lakh
+                -> error^2 = 25.
+
+>> Binary cross-entropy (BCE / log loss)
+   Definition : Loss for two-class problems that heavily punishes confident
+                wrong predictions:
+                    BCE = -[ y*log(p) + (1 - y)*log(1 - p) ]
+   Example    : Spam detection, actual = spam (y = 1):
+                    p = 0.9 -> loss = -ln(0.9) = 0.105   (good)
+                    p = 0.1 -> loss = -ln(0.1) = 2.303   (confident & wrong)
+
+>> Categorical cross-entropy (CCE)
+   Definition : Loss for multi-class problems; looks at the probability the
+                model gave to the correct class:
+                    CCE = - sum over classes ( y_k * log(p_k) )
+   Example    : Digit is "7" and the model gives p(7) = 0.8
+                -> loss = -ln(0.8) = 0.223.
+                (Sparse CCE = same loss when labels are integers like 7
+                instead of one-hot vectors.)
+
+Which to use:
+   Problem type               | Output layer               | Loss
+   ---------------------------+----------------------------+---------------------
+   Regression (house price)   | 1 neuron, linear (no act.) | MSE (or MAE / Huber)
+   Binary (spam / not spam)   | 1 neuron, sigmoid          | Binary cross-entropy
+   Multi-class (digit 0-9)    | 10 neurons, softmax        | Categorical CE
+   Multi-label (tags on a     | k neurons, sigmoid each    | Binary CE per label
+   photo: dog AND beach)      |                            |
+
+Why not MSE for classification? With sigmoid/softmax, MSE gives very small
+gradients when the model is confidently wrong, so learning is slow;
+cross-entropy gives large gradients exactly when the model is badly wrong.
+
+
+--------------------------------------------------------------------------------
+Q85. Compare the SGD, Momentum, RMSProp, and Adam optimizers. What problem
+     does each one solve, and why is Adam a common default?
+--------------------------------------------------------------------------------
+
+>> Optimizer
+   Definition : The algorithm that uses the gradients to update the weights
+                so the loss goes down.
+   Example    : A person walking down a foggy hill, choosing the step
+                direction and step size to reach the valley.
+
+>> SGD (Stochastic Gradient Descent)
+   Definition : Update weights using the gradient of a small batch:
+                    w = w - lr * g
+   Solves     : Full-batch gradient descent is too slow on big data.
+   Problem    : Noisy, zig-zags in narrow valleys, one learning rate for all
+                weights.
+   Example    : Walking downhill looking only at the ground under your feet.
+
+>> Momentum
+   Definition : Adds a "velocity" that remembers past gradients:
+                    v = beta*v + g        (beta ~ 0.9)
+                    w = w - lr * v
+   Solves     : Zig-zagging and slow progress; speeds up in a consistent
+                direction.
+   Example    : A ball rolling downhill gains speed and rolls over small
+                bumps.
+
+>> RMSProp
+   Definition : Divides the step by a running average of squared gradients,
+                giving each weight its own adaptive learning rate:
+                    s = beta*s + (1 - beta)*g^2
+                    w = w - lr * g / (sqrt(s) + eps)
+   Solves     : Some weights get huge gradients, others tiny ones; one fixed
+                learning rate cannot suit both.
+   Example    : Taking small careful steps on steep slopes and bigger steps
+                on flat ground.
+
+>> Adam (Adaptive Moment Estimation)
+   Definition : Momentum + RMSProp together, with bias correction:
+                    m = b1*m + (1 - b1)*g          (average gradient)
+                    v = b2*v + (1 - b2)*g^2        (average squared gradient)
+                    w = w - lr * m_hat / (sqrt(v_hat) + eps)
+                Defaults: lr = 0.001, b1 = 0.9, b2 = 0.999.
+   Solves     : Both direction smoothing and per-weight step sizes.
+   Example    : A ball that has momentum AND adjusts its step to the slope.
+
+Comparison:
+   Optimizer | Remembers past? | Adaptive LR per weight? | Typical use
+   ----------+-----------------+-------------------------+-------------------
+   SGD       | No              | No                      | Simple baseline
+   Momentum  | Yes (direction) | No                      | CNNs (SGD+momentum)
+   RMSProp   | Yes (squares)   | Yes                     | RNNs
+   Adam      | Yes (both)      | Yes                     | Default for most
+
+Why Adam is a common default:
+   - Works well "out of the box" with lr = 0.001 and little tuning.
+   - Fast convergence, handles sparse and noisy gradients (NLP, GANs).
+   - Note: well-tuned SGD + momentum sometimes generalizes slightly better for
+     image classification, so it is still used in research.
+
+
+--------------------------------------------------------------------------------
+Q86. Explain vanishing and exploding gradients. How do ReLU, Xavier/He
+     initialization, batch normalization, residual connections, and gradient
+     clipping help?
+--------------------------------------------------------------------------------
+
+>> Vanishing gradient
+   Definition : During backpropagation, gradients are multiplied layer by
+                layer; if each factor is less than 1, the gradient becomes
+                almost zero in early layers, so they stop learning.
+   Example    : Chinese whispers - after many people, the message fades away.
+   Numbers    : Sigmoid's maximum derivative is 0.25.
+                Over 10 layers: 0.25^10 = 0.00000095 (about 1 in a million).
+
+>> Exploding gradient
+   Definition : If each factor is greater than 1, the gradient grows very
+                large, weights jump wildly, and the loss becomes NaN.
+   Example    : A microphone placed near a speaker - a small sound grows into
+                a loud screech.
+   Numbers    : 1.5^50 = about 637 million.
+
+Solutions:
+>> ReLU
+   Definition : Gradient is 1 for positive inputs, so it does not shrink
+                layer after layer (unlike sigmoid/tanh).
+   Example    : Replacing sigmoid with ReLU is what made 8+ layer CNNs like
+                AlexNet trainable.
+
+>> Xavier / He initialization
+   Definition : Start the weights with a carefully chosen variance so the
+                signal keeps the same size as it moves through layers.
+                Xavier (Glorot): Var(w) = 2 / (fan_in + fan_out) -> sigmoid/tanh
+                He:             Var(w) = 2 / fan_in              -> ReLU
+   Example    : Like setting every amplifier in a chain to the right volume
+                so the sound is neither lost nor distorted.
+
+>> Batch normalization
+   Definition : Normalizes each layer's inputs to mean 0, SD 1 in every
+                mini-batch, then rescales them with learnable gamma and beta.
+                Keeps activations in a healthy range.
+   Example    : Like converting all students' marks to the same scale before
+                comparing them.
+
+>> Residual (skip) connections
+   Definition : Add the input of a block directly to its output:
+                y = F(x) + x. The "+x" path gives the gradient a shortcut
+                straight to earlier layers.
+   Example    : An express lift in a tall building - you skip floors instead
+                of taking every staircase. (ResNet trains 152 layers.)
+
+>> Gradient clipping
+   Definition : If the gradient's size (norm) is larger than a threshold,
+                scale it down:  if ||g|| > c :  g = g * c / ||g||
+                Mainly fixes EXPLODING gradients.
+   Example    : A speed limiter in a car - you can still drive, but never
+                above the limit. Common in RNN/LSTM training.
+   Code       : torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+
+   Problem             | Main fixes
+   --------------------+--------------------------------------------------
+   Vanishing gradient  | ReLU, He init, batch norm, residual connections,
+                       | LSTM/GRU for sequences
+   Exploding gradient  | Gradient clipping, proper init, batch norm,
+                       | lower learning rate
+
+
+--------------------------------------------------------------------------------
+Q87. Explain dropout and batch normalization. How does each behave
+     differently during training and during testing?
+--------------------------------------------------------------------------------
+
+>> Dropout
+   Definition : A regularization method that randomly switches off a fraction
+                p of neurons in each training step, so the network cannot
+                depend on any single neuron. It reduces overfitting.
+   Example    : A cricket team that practises with random players missing -
+                every player learns to contribute, so the team does not
+                collapse if the star player is out.
+
+   Training : each neuron is dropped with probability p (e.g. 0.5); the kept
+              neurons are scaled up by 1 / (1 - p) ("inverted dropout") so
+              the expected output stays the same.
+   Testing  : NO neurons are dropped; the full network is used with no extra
+              scaling (scaling was already done during training).
+
+>> Batch normalization (BatchNorm)
+   Definition : Normalizes a layer's inputs using the mean and variance of
+                the mini-batch, then applies learnable scale (gamma) and
+                shift (beta):  y = gamma * (x - mean) / sqrt(var + eps) + beta
+                Gives faster, more stable training.
+   Example    : Converting marks from different exams to the same scale
+                before comparing students.
+
+   Training : uses the CURRENT mini-batch's mean and variance, and keeps a
+              running (moving) average of them.
+   Testing  : uses the stored running mean and variance - so a single test
+              image gives the same answer no matter what other images are in
+              the batch.
+
+Summary:
+   Layer      | Training                         | Testing / inference
+   -----------+----------------------------------+----------------------------
+   Dropout    | Randomly drop p of neurons,      | Use all neurons,
+              | scale the rest by 1/(1-p)        | no dropping
+   BatchNorm  | Batch mean & variance; update    | Fixed running mean &
+              | running averages                 | variance
+
+Practical point: in PyTorch call model.train() before training and
+model.eval() before testing - forgetting model.eval() is a common bug that
+gives random, changing predictions.
+
+
+--------------------------------------------------------------------------------
+Q88. Explain the layers of a CNN: convolution, padding, stride, pooling, and
+     fully connected layers. For a 32x32x3 input with ten 5x5 filters, stride
+     1, and no padding, compute the output size and the number of parameters.
+     (Formula: output = (N - F + 2P) / S + 1.)
+--------------------------------------------------------------------------------
+
+>> CNN (Convolutional Neural Network)
+   Definition : A neural network designed for grid data like images. It uses
+                small filters that slide over the image to detect patterns
+                such as edges, shapes, and objects.
+   Example    : Face detection in phone cameras, X-ray disease detection,
+                number-plate recognition.
+
+>> Convolution layer
+   Definition : A small filter (e.g. 3x3 or 5x5) slides over the image; at each
+                position it multiplies and adds values to produce one output.
+                Each filter learns to detect one pattern and produces one
+                feature map.
+   Example    : An edge-detecting filter lights up wherever a vertical line
+                appears, like scanning a page with a magnifying glass.
+
+>> Padding
+   Definition : Adding a border of zeros around the image so the filter can
+                cover the edges and the output size does not shrink.
+                "valid" = no padding, "same" = output size = input size.
+   Example    : Adding a margin around a photo before framing it.
+
+>> Stride
+   Definition : How many pixels the filter jumps each step. Stride 2 halves
+                the output size.
+   Example    : Reading every word (stride 1) vs every second word (stride 2).
+
+>> Pooling layer
+   Definition : Reduces the size of a feature map by summarising small areas -
+                max pooling keeps the largest value, average pooling the mean.
+                No learnable parameters.
+   Example    : Making a thumbnail of a photo - smaller but the main content
+                remains. 2x2 max pooling: [[1,3],[2,8]] -> 8
+
+>> Fully connected (dense) layer
+   Definition : Every input connects to every output; placed at the end to
+                combine all detected features into a final decision.
+   Example    : After detecting "whiskers + pointed ears + fur", the FC layer
+                decides "cat".
+
+   Typical flow:  Input -> [Conv -> ReLU -> Pool] x N -> Flatten -> FC -> Softmax
+
+Calculation:  Input 32x32x3, ten 5x5 filters, stride S = 1, padding P = 0
+   Output size = (N - F + 2P) / S + 1
+               = (32 - 5 + 2*0) / 1 + 1
+               = 27 + 1 = 28
+   Output volume = 28 x 28 x 10   (depth = number of filters)
+
+   Parameters:
+     Each filter = 5 x 5 x 3 weights = 75, plus 1 bias = 76
+     10 filters  = 76 x 10 = 760 parameters
+
+   Extra (often asked as a follow-up):
+     - "same" padding: P = (F - 1)/2 = 2 -> (32 - 5 + 4)/1 + 1 = 32 -> 32x32x10
+     - then 2x2 max pool, stride 2 on 28x28x10 -> 14x14x10, 0 parameters
+     - A fully connected layer from 32x32x3 (3072 inputs) to 10 outputs would
+       need 30,730 parameters -> convolution shares weights and is far smaller.
+
+
+--------------------------------------------------------------------------------
+Q89. Compare the LeNet, AlexNet, VGG, GoogLeNet (Inception), and ResNet
+     architectures. Explain how skip connections in ResNet allow very deep
+     networks to train.
+--------------------------------------------------------------------------------
+
+>> CNN architecture
+   Definition : A specific, proven arrangement of conv, pooling, and FC
+                layers. Each famous architecture introduced one key idea.
+   Example    : Like car models - each new model added one major feature.
+
+>> LeNet-5 (1998, Yann LeCun)
+   Definition : The first successful CNN: 2 conv + 2 pooling + 3 FC layers,
+                about 60K parameters.
+   Example    : Read handwritten digits on bank cheques and postal codes.
+
+>> AlexNet (2012)
+   Definition : Deeper CNN (5 conv + 3 FC, ~60M parameters) that first used
+                ReLU, dropout, data augmentation, and GPU training.
+   Example    : Won ImageNet 2012 by a huge margin - started the deep
+                learning boom.
+
+>> VGG-16 / VGG-19 (2014)
+   Definition : Very simple and uniform design - only 3x3 convolutions stacked
+                deep (16 or 19 layers). ~138M parameters, so heavy and slow.
+   Example    : Still widely used as a feature extractor and for style
+                transfer.
+
+>> GoogLeNet / Inception (2014)
+   Definition : Uses "Inception modules" that run 1x1, 3x3, and 5x5 filters in
+                parallel and join the results; 1x1 convs reduce depth to save
+                computation. 22 layers but only ~5-7M parameters.
+   Example    : Like looking at a scene with different zoom lenses at once.
+
+>> ResNet (2015)
+   Definition : Adds skip (residual) connections, allowing 50, 101, even 152
+                layers to train. ResNet-50 has ~25M parameters.
+   Example    : Most common backbone today for image classification and
+                medical imaging.
+
+   Model     | Year | Depth     | Params  | Key idea
+   ----------+------+-----------+---------+--------------------------------
+   LeNet-5   | 1998 | 7 layers  | ~60K    | First CNN, conv + pool
+   AlexNet   | 2012 | 8 layers  | ~60M    | ReLU, dropout, GPU
+   VGG-16    | 2014 | 16 layers | ~138M   | Only 3x3 filters, very deep
+   GoogLeNet | 2014 | 22 layers | ~5-7M   | Inception module, 1x1 convs
+   ResNet-50 | 2015 | 50 layers | ~25M    | Skip connections
+
+>> Skip connection in ResNet
+   Definition : The input x of a block is added directly to the block's
+                output:  y = F(x) + x.  The layers only need to learn the
+                "residual" F(x) = (desired output - x).
+
+        x ----------------------------+
+        |                             | (identity shortcut)
+        +--> [Conv-BN-ReLU-Conv-BN] --+--> (+) --> ReLU --> y
+                   F(x)
+
+   Why very deep networks can now train:
+   1. Gradient highway: dy/dx = dF/dx + 1. The "+1" means the gradient
+      always has a direct path back, so it does not vanish across 100+ layers.
+   2. Easy identity: if a layer is not useful, it just learns F(x) = 0 and
+      passes x unchanged - so adding layers can never make the network worse.
+      (Without skips, a 56-layer plain network had HIGHER training error than
+      a 20-layer one - the "degradation problem".)
+   Example: A flyover that lets traffic bypass every signal in the city.
+
+
+--------------------------------------------------------------------------------
+Q90. Explain transfer learning and fine-tuning. For a small medical-image
+     dataset, which layers of a pretrained model would you freeze and which
+     would you retrain? How does data augmentation help?
+--------------------------------------------------------------------------------
+
+>> Transfer learning
+   Definition : Reusing a model already trained on a large dataset (e.g.
+                ImageNet, 1.2M images) as the starting point for a new task,
+                instead of training from scratch.
+   Example    : A person who can drive a car learns to drive a truck much
+                faster than someone who has never driven.
+
+>> Feature extraction (freezing)
+   Definition : Keep the pretrained layers fixed (frozen) and train only a new
+                classifier head added on top.
+   Example    : Using ResNet-50's learned edges and textures and only training
+                the final layer to say "pneumonia / normal".
+
+>> Fine-tuning
+   Definition : After training the new head, unfreeze some of the top
+                pretrained layers and train them further with a very small
+                learning rate so they adapt to the new data.
+   Example    : The truck driver adjusting to the larger turning radius.
+
+What each part of a CNN learns:
+   Early layers  -> edges, colours, textures      (useful for ANY image)
+   Middle layers -> shapes, patterns              (fairly general)
+   Last layers   -> ImageNet-specific objects     (dogs, cars - not needed)
+
+Plan for a small medical-image dataset (e.g. 2,000 chest X-rays):
+   1. Load a pretrained model (ResNet-50 / EfficientNet) without its top
+      FC layer.
+   2. FREEZE all convolution layers (especially the early ones).
+   3. Add a NEW head: global average pooling -> dropout -> dense(sigmoid or
+      softmax) and train only this head (lr ~ 1e-3).
+   4. Fine-tune: UNFREEZE the last 1-2 convolution blocks and retrain with a
+      very small learning rate (lr ~ 1e-5) so pretrained knowledge is not
+      destroyed.
+   5. Keep the early layers frozen - with little data, retraining them causes
+      overfitting.
+
+   Your data size | Similar to ImageNet?   | What to do
+   ---------------+------------------------+--------------------------------
+   Small          | Similar                | Freeze all, train head only
+   Small          | Different (X-ray, MRI) | Freeze early, fine-tune top blocks
+   Large          | Similar                | Fine-tune most layers
+   Large          | Different              | Fine-tune all (or train from
+                  |                        | scratch with pretrained init)
+
+Code (Keras):
+    base = tf.keras.applications.ResNet50(weights="imagenet",
+                                          include_top=False,
+                                          input_shape=(224, 224, 3))
+    base.trainable = False                       # freeze
+    model = tf.keras.Sequential([
+        base,
+        tf.keras.layers.GlobalAveragePooling2D(),
+        tf.keras.layers.Dropout(0.3),
+        tf.keras.layers.Dense(1, activation="sigmoid")   # pneumonia yes/no
+    ])
+
+>> Data augmentation
+   Definition : Creating new training images by applying realistic changes
+                (rotate, flip, zoom, shift, brightness) to existing ones. It
+                increases the effective dataset size and reduces overfitting.
+   Example    : The same X-ray slightly rotated or brighter is still the same
+                disease, so the model learns the disease and not the position
+                or the machine's brightness.
+   Caution    : Use only changes that are medically valid - e.g. horizontal
+                flip of a chest X-ray moves the heart to the wrong side, so
+                avoid it; apply augmentation to training data only.
+
+
+--------------------------------------------------------------------------------
+Q91. Explain RNNs and backpropagation through time. Why do RNNs struggle with
+     long sequences? Explain the forget, input, and output gates of an LSTM,
+     and compare LSTM with GRU.
+--------------------------------------------------------------------------------
+
+>> RNN (Recurrent Neural Network)
+   Definition : A neural network for sequence data that has a memory (hidden
+                state) passed from one time step to the next:
+                    h_t = tanh(W_h * h_(t-1) + W_x * x_t + b)
+   Example    : Predicting the next word while typing on a phone keyboard -
+                it remembers the previous words.
+
+        x1        x2        x3
+        |         |         |
+       [RNN] --> [RNN] --> [RNN] --> output
+         h1        h2        h3     (same weights at every step)
+
+>> Backpropagation Through Time (BPTT)
+   Definition : Unroll the RNN over all time steps (like a deep network, one
+                layer per step) and apply normal backpropagation; gradients
+                from every step are added for the shared weights.
+   Example    : Finding which earlier word in a sentence caused a wrong
+                prediction at the end.
+
+Why RNNs struggle with long sequences:
+   In BPTT the gradient is multiplied by W_h (and tanh derivative) once per
+   time step. Over 100 steps this product either shrinks to ~0 (vanishing)
+   or blows up (exploding), so the network forgets early information.
+   Example: "The boy who lived in Hyderabad for many years ... ___ loves
+   biryani." A simple RNN forgets that the subject was "boy" -> can't choose
+   "he".
+
+>> LSTM (Long Short-Term Memory)
+   Definition : An RNN with a separate cell state (long-term memory) and
+                three gates that decide what to forget, what to add, and what
+                to output. The cell state is updated by addition, so gradients
+                flow over long sequences.
+   Example    : A student's notebook - strike out old notes, write new
+                important points, and read out only what is needed for the
+                current question.
+
+   >> Forget gate
+      Definition : Decides what to REMOVE from the old memory (0 = forget,
+                   1 = keep).   f_t = sigmoid(W_f [h_(t-1), x_t] + b_f)
+      Example    : A new subject appears in the sentence -> forget the old
+                   subject's gender.
+   >> Input gate
+      Definition : Decides what NEW information to WRITE into memory.
+                   i_t = sigmoid(...),  c~_t = tanh(...)
+      Example    : Store the new subject "she".
+   >> Cell state update
+                   c_t = f_t * c_(t-1) + i_t * c~_t
+   >> Output gate
+      Definition : Decides what part of the memory to OUTPUT as the hidden
+                   state now.  o_t = sigmoid(...),  h_t = o_t * tanh(c_t)
+      Example    : Output only "subject is singular" to choose "is" vs "are".
+
+>> GRU (Gated Recurrent Unit)
+   Definition : A simpler version of LSTM with only two gates (update and
+                reset) and no separate cell state.
+   Example    : Same notebook idea with fewer rules - faster to write.
+
+   Feature        | LSTM                          | GRU
+   ---------------+-------------------------------+---------------------------
+   Gates          | 3 (forget, input, output)     | 2 (update, reset)
+   Memory         | Cell state + hidden state     | Hidden state only
+   Parameters     | More (4 weight sets)          | ~25% fewer (3 weight sets)
+   Speed          | Slower                        | Faster
+   Best for       | Very long sequences, big data | Smaller data, faster training
+   Accuracy       | Usually similar - try both    |
+
+Note: today Transformers have largely replaced RNNs for text, but LSTM/GRU
+are still used for time series and on small devices.
+
+
+--------------------------------------------------------------------------------
+Q92. Explain the encoder-decoder (seq2seq) model and the attention mechanism.
+     Describe the Transformer architecture: self-attention, multi-head
+     attention, and positional encoding. Compare BERT and GPT.
+--------------------------------------------------------------------------------
+
+>> Encoder-decoder (seq2seq) model
+   Definition : Two networks: the encoder reads the whole input sequence into
+                a summary (context vector); the decoder generates the output
+                sequence from it, one token at a time.
+   Example    : English to Hindi translation: "How are you" -> "Aap kaise
+                hain". Input and output lengths can differ.
+   Problem    : A single fixed-size context vector cannot hold a long
+                sentence - quality drops for long inputs.
+
+>> Attention mechanism
+   Definition : At each output step, the decoder looks back at ALL encoder
+                states and gives a weight to each one, focusing on the most
+                relevant input words.
+   Example    : A human translator looks back at the specific source word
+                they are translating right now, not the whole sentence
+                equally.
+
+>> Transformer (2017, "Attention Is All You Need")
+   Definition : An encoder-decoder architecture with NO recurrence - it uses
+                only attention and feed-forward layers, so all words are
+                processed in parallel. It is the base of ChatGPT, BERT, Gemini,
+                and Claude.
+   Example    : Google Translate and all modern large language models.
+
+   One Transformer encoder block:
+        Input embeddings + positional encoding
+                 |
+        [Multi-head self-attention] -> Add & LayerNorm
+                 |
+        [Feed-forward network]      -> Add & LayerNorm
+                 |
+               Output    (stack N such blocks; decoder adds masked
+                          self-attention + attention over encoder output)
+
+>> Self-attention
+   Definition : Every word looks at every other word in the same sentence to
+                decide how much each one matters for its meaning. Each word
+                produces a Query, Key, and Value vector:
+                    Attention(Q, K, V) = softmax( Q * K^T / sqrt(d_k) ) * V
+   Example    : "The animal didn't cross the road because IT was tired" -
+                self-attention links "it" strongly to "animal", not "road".
+
+>> Multi-head attention
+   Definition : Run several self-attention operations ("heads") in parallel,
+                each with its own Q/K/V weights, then join the results. Each
+                head can learn a different type of relationship.
+   Example    : Like a panel of examiners - one checks grammar, one checks
+                who-did-what, one checks tense - then they combine marks.
+
+>> Positional encoding
+   Definition : Since a Transformer reads all words at once, it has no idea
+                of word order. A position vector (sine/cosine pattern or a
+                learned vector) is added to each word embedding.
+   Example    : "Dog bites man" vs "Man bites dog" - same words, different
+                meaning; positional encoding tells them apart.
+
+>> BERT vs GPT
+   Feature        | BERT (Google, 2018)            | GPT (OpenAI, 2018 onward)
+   ---------------+--------------------------------+---------------------------
+   Part used      | Encoder only                   | Decoder only
+   Reads text     | Bidirectional (left AND right) | Left-to-right only
+   Pre-training   | Masked LM: fill the [MASK]     | Next-word prediction
+                  | "I ate [MASK] for lunch"       | "I ate biryani for ___"
+   Best at        | Understanding: classification, | Generation: chat, writing,
+                  | NER, search, Q&A extraction    | summarizing, code
+   Example        | Google Search query            | ChatGPT
+                  | understanding                  |
+
+
+--------------------------------------------------------------------------------
+Q93. Explain autoencoders. Compare undercomplete, denoising, and variational
+     autoencoders, and give applications such as anomaly detection and
+     dimensionality reduction.
+--------------------------------------------------------------------------------
+
+>> Autoencoder
+   Definition : A neural network trained to copy its input to its output
+                through a narrow middle layer (bottleneck). The encoder
+                compresses, the decoder reconstructs. It learns without
+                labels (unsupervised).
+   Example    : Zipping a file and unzipping it - but the network learns its
+                own best way to compress.
+
+        Input (784) -> [Encoder] -> Bottleneck (32) -> [Decoder] -> Output (784)
+                                     (code / latent)
+        Loss = reconstruction error, e.g. MSE(input, output)
+
+>> Undercomplete autoencoder
+   Definition : The bottleneck is smaller than the input, forcing the network
+                to keep only the most important features.
+   Example    : Compressing a 28x28 digit image (784 values) into 32 numbers.
+                With linear layers and MSE it behaves like PCA; with
+                non-linear layers it is a "non-linear PCA".
+
+>> Denoising autoencoder
+   Definition : The input is deliberately corrupted with noise, but the
+                target is the clean original - the network learns to remove
+                noise.
+   Example    : Cleaning scanned old documents or grainy low-light photos.
+
+>> Variational autoencoder (VAE)
+   Definition : The encoder outputs a probability distribution (mean and
+                variance) instead of a single point. We sample from it
+                (z = mean + sigma * random noise) and decode. Loss =
+                reconstruction + KL divergence (keeps the latent space
+                smooth). Because of this, it can GENERATE new data.
+   Example    : Generating new realistic face images or new molecule designs
+                by sampling random points in the latent space.
+
+   Type          | Input        | Bottleneck      | Main use
+   --------------+--------------+-----------------+--------------------------
+   Undercomplete | Clean        | Fixed vector    | Compression, features
+   Denoising     | Noisy        | Fixed vector    | Noise removal
+   Variational   | Clean        | Distribution    | Generating new data
+                 |              | (mean, var)     |
+
+Applications:
+>> Anomaly detection
+   Definition : Train the autoencoder only on NORMAL data. It reconstructs
+                normal data well but abnormal data badly - high
+                reconstruction error = anomaly.
+   Example    : Train on normal credit-card transactions; a fraud transaction
+                gets a large reconstruction error and is flagged. Also
+                factory machine sensor faults.
+
+>> Dimensionality reduction
+   Definition : Use the bottleneck output as a compact feature vector for
+                visualization or another model.
+   Example    : Compress customer behaviour (200 features) into 10 features
+                for clustering.
+
+Others: image denoising, image colourisation, recommendation systems.
+
+
+--------------------------------------------------------------------------------
+Q94. Explain Generative Adversarial Networks: the generator, the
+     discriminator, and the minimax loss. What is mode collapse, and where are
+     GANs used?
+--------------------------------------------------------------------------------
+
+>> GAN (Generative Adversarial Network)
+   Definition : Two neural networks trained against each other - a generator
+                that creates fake data and a discriminator that tries to tell
+                fake from real. Both improve until the fakes look real.
+   Example    : A counterfeiter (generator) vs a police officer
+                (discriminator) - as police get better at catching fake
+                notes, the counterfeiter makes better notes.
+
+        random noise z --> [Generator G] --> fake image --+
+                                                          +--> [Discriminator D] --> real or fake?
+                       real images from dataset ----------+
+
+>> Generator (G)
+   Definition : Takes random noise z and produces fake data G(z). Its goal is
+                to fool the discriminator.
+   Example    : Produces a face image of a person who does not exist.
+
+>> Discriminator (D)
+   Definition : A binary classifier that outputs the probability that its
+                input is real. Its goal is to catch fakes.
+   Example    : Looks at a face and says "0.9 real" or "0.2 real".
+
+>> Minimax loss
+   Definition : A two-player game - D tries to MAXIMIZE, G tries to MINIMIZE
+                the same value:
+                min_G max_D  V = E[ log D(x) ] + E[ log(1 - D(G(z))) ]
+                  - D wants D(x) -> 1 for real and D(G(z)) -> 0 for fake.
+                  - G wants D(G(z)) -> 1 (fake judged real).
+                At the ideal end point D outputs 0.5 for everything - it can
+                no longer tell real from fake.
+   Training   : alternate - one step training D, then one step training G.
+
+>> Mode collapse
+   Definition : The generator finds a few outputs that fool the discriminator
+                and keeps producing only those, losing variety.
+   Example    : A GAN trained on digits 0-9 generates only "1"s; a face GAN
+                produces almost the same face every time.
+   Fixes      : Wasserstein GAN (WGAN), minibatch discrimination, unrolled
+                GANs, adding noise / regularization.
+
+Where GANs are used:
+   - Realistic image generation (StyleGAN faces, "this person does not
+     exist").
+   - Image-to-image translation: sketch -> photo (pix2pix), horse -> zebra
+     (CycleGAN), day -> night.
+   - Super-resolution: making low-quality images sharp (SRGAN).
+   - Data augmentation: synthetic medical images where real data is scarce.
+   - Old photo restoration and colourisation.
+   Caution: deepfakes - ethical misuse risk.
+   Note: for image generation, diffusion models (Stable Diffusion, DALL-E)
+   have now largely replaced GANs, but GANs remain popular for fast real-time
+   generation.
+
+
+--------------------------------------------------------------------------------
+Q95. How do you diagnose a deep learning model from its training and
+     validation loss curves? Explain the effect of learning rate, batch size,
+     number of epochs, and learning-rate schedules.
+--------------------------------------------------------------------------------
+
+>> Loss curves
+   Definition : Plots of training loss and validation loss after each epoch.
+                Their shape tells whether the model is learning well,
+                underfitting, or overfitting.
+   Example    : Like a patient's temperature chart - the trend tells the
+                doctor what is wrong.
+
+   Overfitting picture:
+     loss
+      |\
+      | \           ___---- validation loss (starts rising)
+      |  \     __---
+      |   \__--   ^ best epoch -> stop here (early stopping)
+      |    --___
+      |         ---___ training loss (keeps falling)
+      +---------------------------- epochs
+
+Diagnosis table:
+   What you see                              | Problem        | Fix
+   ------------------------------------------+----------------+----------------------
+   Train and val both high and flat          | Underfitting   | Bigger model, train
+                                             |                | longer, higher LR
+   Train keeps falling, val starts rising    | Overfitting    | Early stopping,
+                                             |                | dropout, augmentation,
+                                             |                | more data, weight decay
+   Both fall and stay close together         | Good fit       | Keep it
+   Loss jumps up and down or becomes NaN     | LR too high    | Lower LR, grad clipping
+   Loss decreases very very slowly           | LR too low     | Increase LR
+   Val loss much lower than train loss       | Check: dropout | Usually fine; check for
+                                             | or data leak   | leakage between splits
+
+>> Learning rate
+   Definition : The size of each weight-update step. The single most
+                important hyperparameter.
+   Example    : Walking down a hill - giant leaps overshoot the valley (too
+                high: loss explodes / oscillates); tiny steps take forever or
+                get stuck (too low).
+
+>> Batch size
+   Definition : Number of samples used to compute one gradient update.
+   Small (16-32)    : noisy updates (acts like regularization, can generalize
+                      better), less GPU memory, slower per epoch.
+   Large (256-1024) : smooth, stable gradients, faster on GPU, needs more
+                      memory, may generalize slightly worse; often needs a
+                      larger learning rate.
+   Example    : Taking an opinion poll from 30 people (quick but noisy) vs
+                1,000 people (accurate but costly).
+
+>> Number of epochs
+   Definition : How many times the model sees the whole training set.
+   Too few    : underfitting. Too many: overfitting.
+   Fix        : Use early stopping - stop when validation loss has not
+                improved for "patience" epochs (e.g. 5) and restore the best
+                weights.
+   Example    : Revising a chapter 3 times helps; revising it 50 times means
+                you start memorising the exact questions, not the concept.
+
+>> Learning-rate schedule
+   Definition : Changing the learning rate during training - usually large at
+                the start (fast progress) and smaller later (fine
+                adjustment).
+   Types      : Step decay (divide by 10 every 30 epochs), exponential decay,
+                cosine annealing, warm-up (start small then increase - used
+                for Transformers), ReduceLROnPlateau (reduce when val loss
+                stops improving).
+   Example    : Parking a car - drive fast on the road, then slow down and
+                make small movements to park exactly.
+
+   Code (Keras):
+     callbacks = [
+       tf.keras.callbacks.EarlyStopping(patience=5, restore_best_weights=True),
+       tf.keras.callbacks.ReduceLROnPlateau(factor=0.5, patience=2)
+     ]
+
+
+--------------------------------------------------------------------------------
+Q96. Compare TensorFlow/Keras and PyTorch. Write a small model in either one
+     that classifies MNIST digits, and explain each layer you use.
+--------------------------------------------------------------------------------
+
+>> TensorFlow / Keras
+   Definition : TensorFlow is Google's deep learning framework; Keras is its
+                simple high-level API where you build models by stacking
+                layers and call fit().
+   Example    : Quick prototypes, production deployment on mobile (TF Lite)
+                and web (TF.js).
+
+>> PyTorch
+   Definition : Meta's deep learning framework that feels like normal Python
+                - you write the training loop yourself and can debug line by
+                line.
+   Example    : Most research papers and Hugging Face models use PyTorch.
+
+   Feature          | TensorFlow / Keras              | PyTorch
+   -----------------+---------------------------------+-------------------------
+   Developer        | Google                          | Meta (Facebook)
+   Style            | High-level: model.fit()         | Pythonic, explicit loop
+   Ease for         | Very easy                       | Easy, needs more code
+   beginners        |                                 |
+   Debugging        | Harder (graph mode)             | Easy (normal Python)
+   Research use     | Less                            | Dominant
+   Deployment       | Strong (TF Serving, TF Lite)    | TorchServe, ONNX
+   Graph            | Static by default (tf.function) | Dynamic (eager)
+
+>> MNIST
+   Definition : A dataset of 70,000 grayscale 28x28 images of handwritten
+                digits 0-9 (60,000 train, 10,000 test).
+   Example    : The "hello world" of deep learning; similar to reading PIN
+                codes on postal envelopes.
+
+Code (Keras CNN, about 99% test accuracy):
+
+    import tensorflow as tf
+
+    (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
+    x_train = x_train[..., None] / 255.0     # shape (60000, 28, 28, 1), 0-1
+    x_test  = x_test[..., None] / 255.0
+
+    model = tf.keras.Sequential([
+        tf.keras.layers.Input(shape=(28, 28, 1)),
+        tf.keras.layers.Conv2D(32, 3, activation="relu"),  # -> 26x26x32
+        tf.keras.layers.MaxPooling2D(2),                   # -> 13x13x32
+        tf.keras.layers.Conv2D(64, 3, activation="relu"),  # -> 11x11x64
+        tf.keras.layers.MaxPooling2D(2),                   # -> 5x5x64
+        tf.keras.layers.Flatten(),                         # -> 1600
+        tf.keras.layers.Dropout(0.3),
+        tf.keras.layers.Dense(128, activation="relu"),     # -> 128
+        tf.keras.layers.Dense(10, activation="softmax")    # -> 10 probabilities
+    ])
+
+    model.compile(optimizer="adam",
+                  loss="sparse_categorical_crossentropy",  # labels are 0-9
+                  metrics=["accuracy"])
+
+    model.fit(x_train, y_train, epochs=5, batch_size=64,
+              validation_split=0.1)
+    print(model.evaluate(x_test, y_test))                 # ~0.99 accuracy
+
+Explanation of each layer:
+   Layer                 | Output    | Params  | What it does
+   ----------------------+-----------+---------+------------------------------
+   Input (28,28,1)       | 28x28x1   | 0       | One grayscale digit image
+   Conv2D(32, 3x3) ReLU  | 26x26x32  | 320     | 32 filters find edges/strokes
+   MaxPooling2D(2)       | 13x13x32  | 0       | Halves size, keeps strongest
+   Conv2D(64, 3x3) ReLU  | 11x11x64  | 18,496  | Combines strokes into shapes
+                         |           |         | (loops, corners)
+   MaxPooling2D(2)       | 5x5x64    | 0       | Halves size again
+   Flatten               | 1600      | 0       | 3D maps -> 1D vector
+   Dropout(0.3)          | 1600      | 0       | Randomly drops 30% (training
+                         |           |         | only) to prevent overfitting
+   Dense(128) ReLU       | 128       | 204,928 | Combines all features
+   Dense(10) softmax     | 10        | 1,290   | Probability for each digit
+
+   Param check: 3*3*1*32 + 32 = 320;  3*3*32*64 + 64 = 18,496;
+                1600*128 + 128 = 204,928;  128*10 + 10 = 1,290.
+   Compile: Adam optimizer, sparse categorical cross-entropy loss (integer
+   labels), accuracy metric.
+
+Same model in PyTorch (for comparison):
+
+    import torch.nn as nn
+    class Net(nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.features = nn.Sequential(
+                nn.Conv2d(1, 32, 3), nn.ReLU(), nn.MaxPool2d(2),
+                nn.Conv2d(32, 64, 3), nn.ReLU(), nn.MaxPool2d(2))
+            self.classifier = nn.Sequential(
+                nn.Flatten(), nn.Dropout(0.3),
+                nn.Linear(64 * 5 * 5, 128), nn.ReLU(),
+                nn.Linear(128, 10))      # no softmax: CrossEntropyLoss adds it
+        def forward(self, x):
+            return self.classifier(self.features(x))
+
+
+--------------------------------------------------------------------------------
+Q97. Teaching practice: How would you explain backpropagation to undergraduate
+     students using a two-layer network with numeric values? Include one
+     worked weight update and one assessment question.
+--------------------------------------------------------------------------------
+
+>> Backpropagation
+   Definition : The method to find how much each weight contributed to the
+                error, by applying the chain rule backwards from the output
+                to the input. Gradient descent then uses these gradients to
+                update the weights.
+   Example    : A cricket team lost by 20 runs - the coach works backwards to
+                see how much each player's performance caused the loss, and
+                each player improves in proportion to their share.
+
+>> Chain rule
+   Definition : If y depends on h and h depends on w, then
+                dy/dw = (dy/dh) * (dh/dw) - multiply the local effects.
+   Example    : Petrol price -> transport cost -> vegetable price; the effect
+                of petrol on vegetables is the product of the two effects.
+
+Lesson plan (about 15 minutes):
+   Learning objective: Students can compute one forward pass, the loss, the
+   gradients using the chain rule, and one weight update by hand.
+   1. Hook (2 min)       : cricket "blame" analogy above.
+   2. Forward pass (3)   : compute the output with numbers on the board.
+   3. Loss (1)           : how wrong are we?
+   4. Backward pass (6)  : chain rule, one layer at a time, from output back.
+   5. Update + check (2) : update weights, recompute -> loss decreased.
+   6. Assessment (1)     : question below.
+
+Network (two layers, one neuron each, to keep numbers simple):
+
+     x --(w1)--> [ h = sigmoid(w1 * x) ] --(w2)--> [ y = w2 * h ] --> Loss
+
+   Values: x = 1,  w1 = 0.5,  w2 = 0.5,  target t = 1,  learning rate = 0.1
+   Loss  : L = 1/2 * (y - t)^2
+
+Step 1 - Forward pass:
+   z  = w1 * x = 0.5 * 1 = 0.5
+   h  = sigmoid(0.5) = 0.6225
+   y  = w2 * h = 0.5 * 0.6225 = 0.3112
+   L  = 1/2 * (0.3112 - 1)^2 = 1/2 * 0.4744 = 0.2372
+
+Step 2 - Backward pass (chain rule):
+   dL/dy  = y - t = 0.3112 - 1 = -0.6888
+
+   Output weight w2:
+   dL/dw2 = dL/dy * dy/dw2 = -0.6888 * h = -0.6888 * 0.6225 = -0.4288
+
+   Hidden weight w1 (error flows back through w2 and the sigmoid):
+   dL/dh  = dL/dy * w2 = -0.6888 * 0.5 = -0.3444
+   dh/dz  = h * (1 - h) = 0.6225 * 0.3775 = 0.2350   (sigmoid derivative)
+   dL/dw1 = dL/dh * dh/dz * x = -0.3444 * 0.2350 * 1 = -0.0809
+
+Step 3 - Weight update (w_new = w - lr * gradient):
+   w2_new = 0.5 - 0.1 * (-0.4288) = 0.5 + 0.0429 = 0.5429
+   w1_new = 0.5 - 0.1 * (-0.0809) = 0.5 + 0.0081 = 0.5081
+
+Step 4 - Check (forward pass again):
+   h = sigmoid(0.5081) = 0.6244
+   y = 0.5429 * 0.6244 = 0.3390
+   L = 1/2 * (0.3390 - 1)^2 = 0.2185      -> loss fell from 0.2372 to 0.2185
+
+Points to highlight for students:
+   - Negative gradient -> increase the weight; positive -> decrease it.
+   - w1's gradient is much smaller than w2's because it is multiplied by the
+     sigmoid derivative (max 0.25) - this is the vanishing-gradient idea in
+     miniature.
+   - Repeating these steps thousands of times = training.
+
+Common student mistakes:
+   - Forgetting the activation derivative h(1 - h).
+   - Adding the gradient instead of subtracting (w - lr*g).
+   - Using the NEW w2 while computing w1's gradient (all gradients must use
+     the old weights).
+
+Assessment question:
+   Using the same network with x = 1, w1 = 0.5, w2 = 0.5, but target t = 0
+   and learning rate 0.1, compute the forward pass, loss, dL/dw2, and the new
+   value of w2.
+   (Answer: y = 0.3112, L = 0.0484, dL/dw2 = 0.3112 * 0.6225 = 0.1937,
+    w2_new = 0.5 - 0.01937 = 0.4806 -> w2 decreases because the output must
+    move towards 0.)

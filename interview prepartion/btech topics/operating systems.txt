@@ -1,0 +1,377 @@
+================================================================================
+SUBJECT 3: OPERATING SYSTEMS
+================================================================================
+
+How each answer is written:
+  Definition -> 1 to 3 simple lines (the line you can say directly in interview)
+  Example    -> a real-life example that connects to the definition
+  Then code / calculation / table wherever the question asks for it.
+
+
+--------------------------------------------------------------------------------
+Q12. Explain processes and threads. Draw a process-state diagram showing ready,
+     running, and waiting states, with the events that cause each transition.
+--------------------------------------------------------------------------------
+
+>> Operating System
+   Definition : System software that manages hardware (CPU, memory, disk,
+                devices) and gives programs a simple way to use it.
+   Example    : Windows, Linux, Android - like a hotel manager who assigns
+                rooms (memory) and staff (CPU) to guests (programs).
+
+>> Program
+   Definition : A passive set of instructions stored on disk.
+   Example    : chrome.exe sitting on your hard disk.
+
+>> Process
+   Definition : A program in execution - it has its own memory space, code,
+                data, open files, and a Process Control Block (PCB).
+   Example    : Opening Chrome twice creates two separate processes; if one
+                crashes the other keeps running.
+
+>> Thread
+   Definition : The smallest unit of execution inside a process. Threads of
+                the same process share its memory and files but each has its
+                own stack, registers, and program counter.
+   Example    : In MS Word, one thread takes your typing, another does spell
+                check, another auto-saves - all on the same document.
+
+   Feature            | Process                     | Thread
+   -------------------+-----------------------------+-------------------------
+   Memory             | Own separate memory         | Shares process memory
+   Creation cost      | Heavy (slow)                | Light (fast)
+   Communication      | IPC (pipes, sockets) - slow | Shared variables - fast
+   Crash effect       | Others not affected         | Can crash whole process
+   Context switch     | Slower                      | Faster
+
+>> Process states
+   Definition : The stages a process passes through during its life.
+   New        : process is being created.
+   Ready      : loaded in memory, waiting for the CPU.
+   Running    : instructions are executing on the CPU.
+   Waiting    : (blocked) waiting for an event such as I/O completion.
+   Terminated : finished execution.
+
+Process-state diagram:
+
+                  admitted                     exit
+     +-----+  ---------------> +-------+    +---------+ -----> +------------+
+     | NEW |                   | READY | -->| RUNNING |        | TERMINATED |
+     +-----+                   +-------+    +---------+        +------------+
+                                 ^  ^  scheduler  |  |
+                                 |  |  dispatch   |  |
+                                 |  +-------------+  |
+                                 |   interrupt /     |
+                                 |   time slice over |
+                                 |                   | I/O or event wait
+                                 |  I/O or event     v
+                                 |  completed   +---------+
+                                 +------------- | WAITING |
+                                                +---------+
+
+Transitions and the events that cause them:
+   New     -> Ready      : OS admits the process (memory allocated).
+   Ready   -> Running    : CPU scheduler dispatches it.
+   Running -> Ready      : time quantum expired / higher-priority process
+                           arrives (interrupt / preemption).
+   Running -> Waiting    : process requests I/O or waits for an event
+                           (e.g. reading a file, waiting for keyboard input).
+   Waiting -> Ready      : the I/O or event completes.
+                           (It goes to READY, not directly to Running.)
+   Running -> Terminated : process finishes or is killed.
+
+   Real-life analogy: patients in a clinic -
+     Ready = in the waiting hall, Running = with the doctor,
+     Waiting = sent for a blood test, comes back to the waiting hall (Ready),
+     Terminated = goes home.
+
+
+--------------------------------------------------------------------------------
+Q13. Explain the four necessary conditions for deadlock using two transactions
+     that acquire locks in opposite order. Compare prevention, avoidance, and
+     detection.
+--------------------------------------------------------------------------------
+
+>> Deadlock
+   Definition : A situation where two or more processes wait forever, because
+                each is holding a resource that the other one needs.
+   Example    : Two cars meet on a narrow one-lane bridge from opposite sides;
+                neither can move forward and neither backs up.
+
+Two transactions locking in opposite order (bank transfer):
+   T1: transfer Rs.100 from Account A to B  -> lock(A), then lock(B)
+   T2: transfer Rs.50  from Account B to A  -> lock(B), then lock(A)
+
+   Time | T1                      | T2
+   -----+-------------------------+-------------------------
+   t1   | lock(A)  - got it       |
+   t2   |                         | lock(B)  - got it
+   t3   | lock(B)  - WAIT (T2 has)|
+   t4   |                         | lock(A)  - WAIT (T1 has)
+        |  ----> both wait forever = DEADLOCK
+
+   Wait-for graph:   T1 ---waits for---> T2 ---waits for---> T1   (cycle)
+
+Four necessary conditions (Coffman) - ALL four must hold:
+>> 1. Mutual exclusion
+   Definition : A resource can be used by only one process at a time.
+   In example : Only one transaction can hold the lock on account A.
+
+>> 2. Hold and wait
+   Definition : A process holds at least one resource while waiting for
+                another.
+   In example : T1 holds A and waits for B.
+
+>> 3. No preemption
+   Definition : A resource cannot be forcibly taken away; it is released only
+                voluntarily.
+   In example : The OS/DBMS cannot snatch lock A from T1.
+
+>> 4. Circular wait
+   Definition : A closed chain of processes, each waiting for a resource held
+                by the next.
+   In example : T1 waits for T2, T2 waits for T1.
+
+Handling methods:
+>> Prevention
+   Definition : Design the system so that at least one of the four conditions
+                can NEVER happen.
+   Example    : Always lock accounts in a fixed order (lower account number
+                first) -> breaks circular wait. Or ask for all locks at once
+                -> breaks hold and wait.
+
+>> Avoidance
+   Definition : Before granting a resource, check whether the system will
+                stay in a SAFE state; if not, make the process wait.
+                (Banker's algorithm.)
+   Example    : A bank gives a loan only if it can still satisfy all other
+                customers' maximum needs afterwards.
+
+>> Detection and recovery
+   Definition : Allow deadlocks to happen, detect them periodically (cycle in
+                the wait-for graph), then recover by aborting or rolling back
+                a process.
+   Example    : MySQL / PostgreSQL detect the cycle and roll back one
+                transaction ("deadlock victim"), which then retries.
+
+   Method     | Idea                     | Pros               | Cons
+   -----------+--------------------------+--------------------+-------------------
+   Prevention | Break a condition by     | Deadlock never     | Low resource use,
+              | design                   | happens            | restrictive
+   Avoidance  | Grant only if safe       | Better utilisation | Needs max needs in
+              | (Banker's algorithm)     | than prevention    | advance, overhead
+   Detection  | Let it happen, detect,   | Max concurrency    | Detection cost,
+              | recover                  |                    | lost work on abort
+
+
+--------------------------------------------------------------------------------
+Q14. Compare FCFS, SJF, and Round Robin. For processes P1=5, P2=3, and P3=1
+     with arrival time 0, draw the Gantt charts and calculate average waiting
+     time. Use quantum 2 for Round Robin and initially queue processes in
+     P1, P2, P3 order.
+--------------------------------------------------------------------------------
+
+>> CPU scheduling
+   Definition : The OS deciding which ready process gets the CPU next.
+
+>> FCFS (First Come First Serve)
+   Definition : The process that arrives first runs first, until it finishes
+                (non-preemptive).
+   Example    : A railway ticket counter queue.
+
+>> SJF (Shortest Job First)
+   Definition : The process with the smallest burst (CPU) time runs first.
+                Gives the minimum average waiting time.
+   Example    : At a supermarket, letting the person with 1 item go before
+                the person with a full trolley.
+
+>> Round Robin (RR)
+   Definition : Each process gets the CPU for a fixed time slice (quantum);
+                if not finished it goes to the back of the queue (preemptive).
+   Example    : A teacher answering each student's doubt for 2 minutes in
+                turn, so nobody waits too long.
+
+Formulas:
+   Turnaround Time (TAT) = Completion Time - Arrival Time
+   Waiting Time (WT)     = Turnaround Time - Burst Time
+   (All arrival times are 0 here, so TAT = Completion Time.)
+
+Data: P1 = 5, P2 = 3, P3 = 1   (arrival time 0 for all)
+
+1) FCFS (order P1, P2, P3)
+     | P1            | P2      | P3 |
+     0               5         8    9
+
+     Process | Burst | Completion | TAT | Waiting
+     --------+-------+------------+-----+--------
+     P1      |   5   |     5      |  5  |   0
+     P2      |   3   |     8      |  8  |   5
+     P3      |   1   |     9      |  9  |   8
+     Average waiting time = (0 + 5 + 8) / 3 = 13/3 = 4.33
+     Average TAT          = (5 + 8 + 9) / 3 = 22/3 = 7.33
+
+2) SJF (non-preemptive, shortest first: P3, P2, P1)
+     | P3 | P2      | P1            |
+     0    1         4               9
+
+     Process | Burst | Completion | TAT | Waiting
+     --------+-------+------------+-----+--------
+     P3      |   1   |     1      |  1  |   0
+     P2      |   3   |     4      |  4  |   1
+     P1      |   5   |     9      |  9  |   4
+     Average waiting time = (0 + 1 + 4) / 3 = 5/3 = 1.67
+     Average TAT          = (1 + 4 + 9) / 3 = 14/3 = 4.67
+
+3) Round Robin (quantum = 2, queue order P1, P2, P3)
+     Step-by-step queue:
+       0-2 : P1 runs 2 (left 3)  -> queue: P2, P3, P1
+       2-4 : P2 runs 2 (left 1)  -> queue: P3, P1, P2
+       4-5 : P3 runs 1 (DONE at 5)        -> queue: P1, P2
+       5-7 : P1 runs 2 (left 1)  -> queue: P2, P1
+       7-8 : P2 runs 1 (DONE at 8)        -> queue: P1
+       8-9 : P1 runs 1 (DONE at 9)
+
+     | P1 | P2 | P3| P1 | P2| P1|
+     0    2    4   5    7   8   9
+
+     Process | Burst | Completion | TAT | Waiting
+     --------+-------+------------+-----+--------
+     P1      |   5   |     9      |  9  |   4
+     P2      |   3   |     8      |  8  |   5
+     P3      |   1   |     5      |  5  |   4
+     Average waiting time = (4 + 5 + 4) / 3 = 13/3 = 4.33
+     Average TAT          = (9 + 8 + 5) / 3 = 22/3 = 7.33
+
+Summary:
+   Algorithm | Avg waiting | Preemptive? | Strength            | Weakness
+   ----------+-------------+-------------+---------------------+-------------------
+   FCFS      |    4.33     | No          | Simple, fair order  | Convoy effect: short
+             |             |             |                     | jobs wait behind long
+   SJF       |    1.67     | No*         | Minimum avg waiting | Needs burst time in
+             |  (best)     |             |                     | advance; starvation
+   RR (q=2)  |    4.33     | Yes         | Good response time, | More context
+             |             |             | no starvation       | switches
+   (* the preemptive version of SJF is called SRTF.)
+   Real use: time-sharing systems and OS schedulers use RR-like methods so
+   every app stays responsive.
+
+
+--------------------------------------------------------------------------------
+Q15. Explain paging, virtual memory, page faults, and thrashing. What happens
+     from the moment a program accesses a page that is absent from RAM?
+--------------------------------------------------------------------------------
+
+>> Paging
+   Definition : Memory management where a program's logical memory is split
+                into fixed-size PAGES and physical RAM into same-size FRAMES;
+                any page can go into any free frame. A page table maps
+                pages to frames. Removes external fragmentation.
+   Example    : A book (program) whose chapters (pages) can be placed on any
+                empty shelf slot (frame); the index (page table) tells where
+                each chapter is.
+
+>> Virtual memory
+   Definition : A technique that lets a program use more memory than the
+                physical RAM, by keeping only the needed pages in RAM and the
+                rest on disk (swap space).
+   Example    : Running a 10 GB game on an 8 GB laptop - only the current
+                level's data is in RAM.
+
+>> Page fault
+   Definition : An interrupt raised when a program accesses a page that is
+                NOT currently in RAM.
+   Example    : Asking the librarian for a book that is in the store room,
+                not on the shelf - you must wait while it is fetched.
+
+>> Thrashing
+   Definition : When the system spends more time swapping pages between RAM
+                and disk than executing programs, because processes do not
+                have enough frames - CPU use drops sharply.
+   Example    : Opening 50 Chrome tabs on a 4 GB laptop - the disk light
+                stays on and everything freezes.
+   Fix        : Reduce the number of running programs, add RAM, use the
+                working-set model / page-fault-frequency control.
+
+What happens when a program accesses a page absent from RAM (page fault
+handling):
+   1. CPU generates the address; MMU checks the TLB, then the page table.
+   2. The page table entry has valid bit = 0 -> PAGE FAULT trap to the OS.
+   3. OS checks the access is legal (if invalid address -> segmentation
+      fault, process killed).
+   4. OS finds a free frame. If none is free, a page replacement algorithm
+      (LRU, FIFO, Optimal) picks a victim page; if the victim is dirty
+      (modified), it is written back to disk.
+   5. OS schedules a disk read to load the required page into the frame.
+      The process is moved to WAITING state meanwhile (CPU runs others).
+   6. When the disk read completes, the OS updates the page table (frame
+      number, valid bit = 1) and the TLB.
+   7. The process moves back to READY; the faulting instruction is RESTARTED
+      and now succeeds.
+
+   Effective access time increases a lot with page faults, because a disk
+   access (milliseconds) is ~100,000 times slower than RAM (nanoseconds).
+
+
+--------------------------------------------------------------------------------
+Q16. Solve the producer-consumer problem with a bounded buffer using
+     semaphores. Explain the roles of empty, full, and mutex.
+--------------------------------------------------------------------------------
+
+>> Producer-consumer (bounded buffer) problem
+   Definition : A producer puts items into a fixed-size buffer and a consumer
+                takes them out; we must stop the producer when the buffer is
+                full, stop the consumer when it is empty, and stop both from
+                using the buffer at the same time.
+   Example    : A restaurant kitchen (producer) puts dishes on a counter that
+                holds 10 plates; waiters (consumers) pick them up. The cook
+                waits if the counter is full; waiters wait if it is empty.
+
+>> Semaphore
+   Definition : An integer variable used for synchronisation, changed only by
+                two atomic operations:
+                  wait(S)   / P(S) : S = S - 1; if S < 0, block.
+                  signal(S) / V(S) : S = S + 1; wake a waiting process.
+   Example    : Parking-lot display board showing free slots; a car enters
+                only if count > 0.
+
+>> Critical section
+   Definition : The part of the code that uses shared data and must be
+                executed by only one process at a time.
+   Example    : Updating the shared buffer and its index.
+
+Semaphores used (buffer size N):
+   mutex = 1   -> binary semaphore; only one process touches the buffer at a
+                  time (mutual exclusion).
+   empty = N   -> counting semaphore; number of EMPTY slots. Producer waits on
+                  it, so it blocks when the buffer is full.
+   full  = 0   -> counting semaphore; number of FILLED slots. Consumer waits
+                  on it, so it blocks when the buffer is empty.
+
+Solution (pseudocode):
+
+    semaphore mutex = 1, empty = N, full = 0;
+
+    Producer:                         Consumer:
+    while (true) {                    while (true) {
+        item = produce();                 wait(full);    // any item?
+        wait(empty);   // free slot?      wait(mutex);   // lock buffer
+        wait(mutex);   // lock buffer     item = remove_from_buffer();
+        add_to_buffer(item);              signal(mutex); // unlock
+        signal(mutex); // unlock          signal(empty); // one more free slot
+        signal(full);  // one more item   consume(item);
+    }                                 }
+
+Walk-through with N = 2:
+   Start                 : empty = 2, full = 0
+   Producer adds item 1  : empty = 1, full = 1
+   Producer adds item 2  : empty = 0, full = 2
+   Producer tries item 3 : wait(empty) -> empty would go below 0 -> BLOCKS
+   Consumer removes one  : full = 1, signal(empty) -> producer wakes up
+
+Important point (order of wait matters):
+   If the producer does wait(mutex) BEFORE wait(empty) and the buffer is
+   full, it holds the lock while sleeping; the consumer can never get mutex to
+   remove an item -> DEADLOCK. Always wait on empty/full first, then mutex.
+
+   Real use: print spooler (apps produce jobs, printer consumes), message
+   queues like Kafka/RabbitMQ, and video streaming buffers.

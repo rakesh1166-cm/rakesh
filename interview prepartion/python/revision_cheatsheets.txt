@@ -1,4 +1,5 @@
-Python_04wrongcorrect.png
+Python_04wrongcorrect.png=https://github.com/rakesh1166-cm/rakesh/blob/master/interview%20prepartion/python/Python_04wrongcorrect.png
+path github--rakesh
 1.print a string and integer=runtime type error when balance is an int
 while concatenation + in print both are string or both integer otherwise convert int to string or string to int or float
 2.to display data with f"" or simply print or return
@@ -19,18 +20,28 @@ in string not use append =attribute error .only list can append
 (ii)wrong if u want  function need return a value
 
 
-Python Common Mistakes Reference-2.png
+========Python Common Mistakes Reference-2.png============
 1.missing return or print stmt in function block
 2.missing self in instance method parameter
-3.missing stored attribute==store data on self when other method need it
+3.missing stored attribute==store data on self when other method need it(inside init fun self.name=name) otherwise below error come
+error=expected an indented block after function definition on line 2 so use pass to avoid error
+solution use=pass or assgn stored attribute
 4.constructor argument   mismatch in init method and while create object
+TypeError=missing 1 required positional argument:
 5.keyword only parameter=parameters after *arg must supplied by name
+ElectricCar("honda", battery="75 kWh") where battery is parameter for def __init__(self, *args,battery):
 6.duplicate and misplaced argument in keyword parameter
+ElectricCar(battery="75 kWh","honda") for def __init__(self, *args,battery):
+SyntaxError: positional argument follows keyword argument
 7.reading parent attribute too early using super and self =not use self.brand inside super
+super().__init__(brand)
 8.text container names=print(b) rasises name error
 how to add element in existing list and dictionary using self in instance method block
+9.return expects a value or expression not an assignment operation
+SyntaxError: invalid syntax== return b=self.a + b 
+10.To give each object its own empty container, initialize it as an instance attribute inside __init__. For example, write self.history = []
+==========Python OOP syntax cheat sheet-1.png==================
 
-Python OOP syntax cheat sheet-1.png
 object and attribute
 how to create instance
 how to read instance attribute
@@ -48,7 +59,7 @@ in dictionary how to assign default value
 formula to update and return balance =balance-amount
 
 inheritance=========
-how to reuse parents regular constructor initialization by position
+how to reuse parents regular constructor initialization by position=here initialization use init after super
 how to reuse parents regular constructor initialization by keyword
 how to reuse parents regular constructor initialization by unpack forward arg and karg
 
@@ -57,22 +68,26 @@ how to reuse parent method and transform returned text like capital letter
 how to reuse parent class attribute  
 
 classmethod===============
-how classmethod creates and return instance
+how classmethod creates and use instance varible syntax=return cls(12, "red") or return cls(12)
+how to initilize class varible in class method=cls.school = name where school is global class varible
 how class method updates class attributes
 
 alternate constructor and regular method============
 alternate constructor=classmethod return instance from dictionary like name and age=syntax
 static method=checks utility=syntax
+how to check email validity using static method 
+How can you use split("@") to check whether the part after @ contains a dot (.)? ==>"." in email.split("@")[-1]
+How can you check multiple conditions to validate that an email contains @ and a dot (.) after @?
 
 formatting and polymorphism============
 format a string with f"string format how to print two instance varible
 How can you combine multiple variables into a list?=sku, name, price = line.split(",")=product = [sku, name, price]
 how to call same method on different object using for loop and list comprhension ==polymorphism , car and bike both have start method
 
-Python cheat sheet_ closures and pipelines.png============
+Python cheat sheet_ closures and pipelines.png=======================
 closure factory==remember multiply and multiplier
 inner fun remember outer fun varible
-return inner fun not instance varible
+return inner fun not instance varible while use closure concept
 syntax car("red") not a.7  ==no meed to call inner function just supply value
 
 replace closure============
@@ -124,5 +139,115 @@ formulla to find average, passed and failed .where given data is in list format 
 formulla use list comprhension to apply strip given data in list =2 way without str, with str
 formmaula use list comprhension to get data in lowecase,uppercase or replace data given data in list==2 way without str, with str
 
+=================TIPS=====================
+1.plan the class =lists data ,objects ,action perdorms on it
+list data =attribute initialization on regular constructor
+objects,then action what perform like animal has attribute color, leg, hand action bark ,run with 2 leg  or four leg animal type stay on earth stay on water
+bank account-owner,balnce,history{list]
+action=deposit,withdraw,methods
+2. write method signature first use pass
+3.store data needed later
+4.start container per object create empty container when init starts for listing  and dictionary
+5.what to return=decide wheather caller needs to return string,list dictionary or objects
+6.build on action at time update, append and return
+7 create call inspect =supply constructor required arguments in regular constructor what or instance method after creating object
+8 predict result expected output before running
+9.reuse = use inherited member and parnnt initialization and method
+======Python_01_Exception_Flow.png======================
+=====basic syntax exception handling= try--->except-->else---->finally
+try=handle operation
+except= handle exception
+else= give result if try successfully handle operation
+finally =control leaves statement
+note in finally =use print rather than return otherwise wrong sequence of output
+====validate inside try===================
+validation inside try use if inside try block,then raise custom exception inside if statement in wi
+in withdraw case balance is less than amount then use  insuffiecienbalance error custom exception
+==mcq=======
+where raise error in which block try-except-else--finally ==>all four
+inside else and finally use if and raise to use raise
+what finally does return==
+use print stmt in finally otherwise wrong reorder result if u use return
+return updated balance===
+if withdraw amount is less than balance then return balance -amount otherwise raise  custom exception
+ calculate discount======
+while calculating discount using formula avoid type  error we cannot divide or subtract str/int
+to convert string int use float(text) or int(text)
+calculate discount==
+price-price *discount/100
+
+handle invalid text and missing keys===========
+invalid text pass after object creation assign "five hundred"= raise value error =text is unsuitable for conversion
+missing key after object creation assign==dictionary lacks the key ==empty dictionary =={}
+eight common run time exception==
+value error,keyerror, type error, zero division error, attribute error,index error, filenotfound error, name error
+ calculate discount======
+while calculating discount using formula avoid type  error we cannot divide or subtract str/int
+to convert string int use float(text) or int(text)
+
+define  chain and raise=======
+how to define or syntax of custom error=== InvalidAgeError(value error) it is example of chain invalidage error is part of valueerror
+except ValueError as error
+       raise InvalidAgeError
+============================================
+cutom exception example
+invalidageerror,invalidpricetyperror,missingorderfielderror,invalidcartindexerror,zerocustomercounterror,missingreqdattributeerror
+
+how to catch several error or exception type inside one handler /inside one except
+====================
+======================================Python_03_Unpacking_and_Callables.png==========================
+unpack tuple and dictionary entries
+unpack tuple using for loop list of tuple == two or more tuple inside list
+how to print each one using for loop
+
+====================
+======================================Python_03_Unpacking_and_Callables.png==========================
+unpack tuple and dictionary entries
+unpack tuple using for loop list of tuple == two or more tuple inside list
+how to print each one using for loop while unpacking list of tuple
+how to unpack dictionary using  for loop
+how to unpack list of dictionary here access the fields by key after apply for loop
+
+call a function stored on varaible
+wheather varible stored while calling instance method or second lambda fun stored on variable
+
+stored named function and lambda function in tuples=========
+in dictionary key value pair , value may be list,tuple set any things
+named function(instance method and and  lambda fun use as tuple and put inside list of tuples as labels and operation
+then unpack list of tuples
+========inherit from parent custom exception
+insuufficienfundseror(paymenterror)==payemnterror(exception)
+Python_Cheat_Sheet_47-62.png
+replacement closure can handle by call dunder method
+readable text for one object--use str method ==print(book)
+readable object inside list==__repr__dunder method  or using for loop you can read object inside list
+sort tuples and dictionary by field
+sorting without key allowed for tuple but not allowed for dictionary
+how to convert list of tuples into list of dictionary using list comprehension ==>to find che 
+how to find chepest ,expensive items
+how to find topper and weakest student
+to compare product sorting ,min,max we use lt or gt dunder method
+how to declare list of tupple where each tuple is class objects
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+============IMPORTANT TOPIC==================
+how to building data processing pipeline for data enginnering
 
 

@@ -1,0 +1,446 @@
+================================================================================
+                  B.TECH CSE - SUBJECT-WISE INTERVIEW QUESTIONS
+================================================================================
+
+Subjects:
+  1. Programming, OOP & Data Structures ........ Q1  - Q6
+  2. Algorithms & Complexity ................... Q7  - Q11
+  3. Operating Systems ......................... Q12 - Q16
+  4. DBMS, SQL & Transactions .................. Q17 - Q22
+  5. Computer Networks & Security .............. Q23 - Q27
+  6. Theory of Computation, Compilers & COA .... Q28 - Q32
+  7. Software Engineering & System Design ...... Q33 - Q37
+  8. Mathematics, AI, ML & Data Science ........ Q38 - Q47
+  9. Allied Topics, Teaching & Research ........ Q48 - Q50
+ 10. Data Science .............................. Q51 - Q65
+ 11. Machine Learning .......................... Q66 - Q81
+ 12. Deep Learning ............................. Q82 - Q97
+
+
+================================================================================
+SUBJECT 1: PROGRAMMING, OOP AND DATA STRUCTURES
+================================================================================
+
+Q1. Explain encapsulation, abstraction, inheritance, and polymorphism using a
+    bank account or payment system. Show a short code example of runtime
+    polymorphism.
+
+Q2. Differentiate compile-time errors, runtime exceptions, and logical errors.
+    Give a code example of each and explain how you would diagnose it.
+
+Q3. Compare arrays and linked lists. Explain the time complexity of indexed
+    access, search, insertion, and deletion, including the case where you
+    already have a reference to the insertion point.
+
+Q4. Explain stacks and queues. Show how a stack checks balanced parentheses and
+    how a queue supports breadth-first search.
+
+Q5. Explain hashing. Insert 10, 17, 24, 31 into a hash table of size 7 using
+    h(k) = k % 7. Show how linear probing and separate chaining handle the
+    collisions.
+
+Q6. Construct a binary search tree by inserting 50, 30, 70, 20, 40, 60, 80.
+    Give its inorder, preorder, and postorder traversals, then show how to
+    delete 50.
+
+
+================================================================================
+SUBJECT 2: ALGORITHMS AND COMPLEXITY
+================================================================================
+
+Q7. Explain Big-O, Big-Omega, and Big-Theta. Derive the complexity of a nested
+    loop in which the inner loop doubles its counter on every iteration.
+
+Q8. Trace merge sort on [8, 3, 5, 1, 4]. Write its recurrence and derive its
+    time and auxiliary space complexity.
+
+Q9. Compare quicksort and merge sort with respect to worst-case time, memory,
+    and stability. State which you would choose for sorting a file larger than
+    RAM and explain why.
+
+Q10. Compare BFS and DFS using a graph. Explain which finds a shortest path in
+     an unweighted graph and how DFS can detect a cycle in a directed graph.
+
+Q11. Explain Dijkstra's algorithm. Trace it from A using edges A->B=4, A->C=1,
+     C->B=2, B->D=1, and C->D=5. Explain why negative edge weights can
+     invalidate the method.
+
+
+================================================================================
+SUBJECT 3: OPERATING SYSTEMS
+================================================================================
+
+Q12. Explain processes and threads. Draw a process-state diagram showing ready,
+     running, and waiting states, with the events that cause each transition.
+
+Q13. Explain the four necessary conditions for deadlock using two transactions
+     that acquire locks in opposite order. Compare prevention, avoidance, and
+     detection.
+
+Q14. Compare FCFS, SJF, and Round Robin. For processes P1=5, P2=3, and P3=1
+     with arrival time 0, draw the Gantt charts and calculate average waiting
+     time. Use quantum 2 for Round Robin and initially queue processes in
+     P1, P2, P3 order.
+
+Q15. Explain paging, virtual memory, page faults, and thrashing. What happens
+     from the moment a program accesses a page that is absent from RAM?
+
+Q16. Solve the producer-consumer problem with a bounded buffer using
+     semaphores. Explain the roles of empty, full, and mutex.
+
+
+================================================================================
+SUBJECT 4: DBMS, SQL AND TRANSACTIONS
+================================================================================
+
+Q17. Draw an ER diagram for a college course-registration system with
+     students, courses, and enrollments. Identify cardinalities and map the
+     relationships to relational tables.
+
+Q18. Explain 1NF, 2NF, and 3NF using an enrollment table that initially stores
+     student, course, and instructor details together. State the functional
+     dependencies you assume and show the decomposition.
+
+Q19. Given Booking(id, customer_id, city, amount, status), write SQL to show
+     each city's confirmed booking count and total confirmed revenue. Include
+     only cities with at least five confirmed bookings. Explain WHERE versus
+     HAVING.
+
+Q20. Explain ACID using a seat-booking transaction. Show how rollback and
+     concurrency control help when two customers attempt to book the same seat.
+
+Q21. Explain dirty reads, non-repeatable reads, and phantom reads using
+     transaction timelines. Discuss how isolation levels address them.
+
+Q22. Explain how a B-tree index can speed up a database lookup. For a composite
+     index on (city, booking_date), discuss which queries can benefit and what
+     the index costs on writes.
+
+
+================================================================================
+SUBJECT 5: COMPUTER NETWORKS AND SECURITY
+================================================================================
+
+Q23. Explain how DNS, IP, TCP, TLS, and HTTP work together when a browser opens
+     an HTTPS URL. Draw a sequence diagram for a fresh connection.
+
+Q24. Compare TCP and UDP. Explain the TCP three-way handshake and choose a
+     transport for file transfer and live voice traffic, with reasons.
+
+Q25. Divide 192.168.10.0/24 into four equal subnets. Give the subnet mask,
+     network address, usable host range, and broadcast address for each.
+
+Q26. Explain SQL injection in the context of a login form. Show how a
+     parameterized query handles user input safely and explain why string
+     concatenation is risky.
+
+Q27. Differentiate encryption, hashing, and digital signatures. Give one use
+     case for each and explain why passwords should be stored with a salted
+     password-hashing algorithm.
+
+
+================================================================================
+SUBJECT 6: THEORY OF COMPUTATION, COMPILERS AND COMPUTER ARCHITECTURE
+================================================================================
+
+Q28. Construct a DFA over {0,1} that accepts strings ending in 01. Give the
+     transition table and trace 1101 and 1010.
+
+Q29. Compare regular and context-free languages. Write a context-free grammar
+     for balanced parentheses and explain why recognizing arbitrarily nested
+     parentheses requires more than a finite number of states.
+
+Q30. Explain the phases of a compiler using x = a + b * c. Show the token
+     sequence, a syntax tree, and one possible three-address-code
+     representation.
+
+Q31. Explain instruction pipelining. Describe structural, data, and control
+     hazards, and illustrate how forwarding can resolve a data hazard.
+
+Q32. Explain cache memory, temporal locality, and spatial locality. Compare
+     sequential array traversal with pointer-based linked-list traversal from
+     a cache perspective.
+
+
+================================================================================
+SUBJECT 7: SOFTWARE ENGINEERING AND SYSTEM DESIGN
+================================================================================
+
+Q33. Compare Waterfall and Agile. Which would you choose when a client's
+     requirements change frequently? Explain how you would handle feedback,
+     testing, and releases.
+
+Q34. Differentiate unit, integration, system, and acceptance testing. Write one
+     example of each for a user-registration feature.
+
+Q35. Compare a monolithic application and microservices. For a small team
+     building a new booking platform, choose an initial architecture and
+     explain when you would reconsider it.
+
+Q36. Explain REST and HTTP idempotency. Design a booking endpoint that prevents
+     duplicate bookings when a client retries a POST after a timeout.
+
+Q37. Design a CSV-to-database ETL pipeline. Explain validation, rejected-row
+     handling, transaction boundaries, logging, and how reruns avoid duplicate
+     records.
+
+
+================================================================================
+SUBJECT 8: MATHEMATICS, AI, ML AND DATA SCIENCE
+================================================================================
+
+Q38. Explain conditional probability and Bayes' theorem. If 2% of transactions
+     are fraudulent, a detector flags 90% of frauds, and it falsely flags 5% of
+     genuine transactions, calculate the probability that a flagged
+     transaction is fraudulent.
+
+Q39. Explain BFS, uniform-cost search, and A* using route planning. What does
+     it mean for an A* heuristic to be admissible?
+
+Q40. Compare supervised, unsupervised, and reinforcement learning. Give one
+     application of each and identify what information the model learns from.
+
+Q41. Explain overfitting and underfitting using training and validation
+     results. Describe how regularization, cross-validation, and early
+     stopping can help.
+
+Q42. Given TP=40, FP=10, FN=20, and TN=130, calculate accuracy, precision,
+     recall, and F1-score. Explain which metric you would emphasize for fraud
+     screening and why.
+
+Q43. Compare linear regression, logistic regression, and decision trees. For
+     predicting whether a student will complete an online course, choose a
+     starting model and explain your choice.
+
+Q44. Explain K-means clustering using customer segmentation. Describe centroid
+     assignment and updates, and explain how feature scaling and the choice of
+     K affect results.
+
+Q45. Explain forward propagation, loss calculation, and backpropagation in a
+     neural network. Describe what happens if the learning rate is too high or
+     too low.
+
+Q46. Compare CNNs and Transformers. Explain convolution and self-attention at a
+     high level, and give an application where each is a sensible choice.
+
+Q47. Explain data leakage. A team scales the entire dataset before splitting it
+     into training and test sets. Describe what goes wrong and how to correct
+     the pipeline.
+
+
+================================================================================
+SUBJECT 9: ALLIED TOPICS, TEACHING AND RESEARCH
+================================================================================
+
+Q48. [IoT] Draw a simple IoT classroom-monitoring system with sensors, a
+     gateway, and a dashboard. Explain how it handles connectivity loss,
+     duplicate messages, and device authentication.
+
+Q49. [Teaching Practice] How would you teach recursion to first-year students
+     in 10 minutes? Include a learning objective, a call-stack trace, one
+     common mistake, and a short assessment question.
+
+Q50. [Research Practice] Design an experiment to compare two ML models on the
+     same dataset. Explain the baseline, data split, metric selection,
+     reproducibility, and how you would decide whether one model is
+     meaningfully better.
+
+
+================================================================================
+SUBJECT 10: DATA SCIENCE
+================================================================================
+
+Q51. What is data science? Explain the data science life cycle (problem
+     definition, data collection, cleaning, EDA, modelling, evaluation,
+     deployment) using a real example such as student result analysis.
+
+Q52. Differentiate structured, semi-structured, and unstructured data with
+     examples. How is each one stored and processed?
+
+Q53. Explain mean, median, mode, variance, and standard deviation. For a skewed
+     dataset such as employee salaries, which measure of central tendency
+     would you report and why?
+
+Q54. Explain the normal distribution, skewness, and kurtosis. State the
+     68-95-99.7 rule and the Central Limit Theorem, and explain why the CLT
+     matters in practice.
+
+Q55. Explain hypothesis testing: null and alternative hypotheses, p-value,
+     significance level, and Type I and Type II errors. When would you use a
+     t-test, a chi-square test, and ANOVA?
+
+Q56. Differentiate correlation and causation with an example. Compare Pearson
+     and Spearman correlation and say when each is appropriate.
+
+Q57. How do you handle missing values? Explain MCAR, MAR, and MNAR, and compare
+     deletion, mean/median/mode imputation, and model-based (KNN) imputation.
+
+Q58. How do you detect and treat outliers? Explain the IQR method, the z-score
+     method, and box plots. When should an outlier be kept rather than
+     removed?
+
+Q59. Explain feature engineering. Compare label encoding, one-hot encoding,
+     and target encoding, and compare min-max normalization with
+     standardization. Which algorithms need feature scaling and which do not?
+
+Q60. What is exploratory data analysis (EDA)? Given a new dataset, list the
+     steps you would follow and the plots you would use (histogram, box plot,
+     scatter plot, correlation heatmap, pair plot).
+
+Q61. Explain the curse of dimensionality. Describe the steps of PCA
+     (standardize, covariance matrix, eigenvectors, eigenvalues, projection)
+     and explain how you choose the number of components using explained
+     variance.
+
+Q62. How do you handle an imbalanced dataset? Compare random undersampling,
+     oversampling, SMOTE, and class weights, and explain why accuracy is
+     misleading on such data.
+
+Q63. Using pandas, write code to load a sales CSV, remove duplicates, fill
+     missing values, and find the average sales per region. Explain loc vs
+     iloc, and merge vs join vs concat.
+
+Q64. Explain the 5 V's of big data. Compare Hadoop MapReduce and Apache Spark,
+     and explain the word-count example in MapReduce.
+
+Q65. Teaching practice: Design a two-hour data science lab session for
+     third-year students on EDA. State the dataset, the tasks, the expected
+     outcomes, and how you would evaluate students.
+
+
+================================================================================
+SUBJECT 11: MACHINE LEARNING
+================================================================================
+
+Q66. Define machine learning using Tom Mitchell's definition (task T,
+     performance measure P, experience E). Identify T, P, and E for a spam
+     filter and for a checkers-playing program.
+
+Q67. Explain the Find-S and Candidate-Elimination algorithms using the
+     EnjoySport dataset. What are the version space, the general boundary,
+     and the specific boundary?
+
+Q68. Explain the bias-variance trade-off with a diagram of error versus model
+     complexity. Give an example of a high-bias model and a high-variance
+     model.
+
+Q69. Explain gradient descent. Derive the update rule for linear regression
+     with the MSE cost function, and compare batch, stochastic, and mini-batch
+     gradient descent.
+
+Q70. State the assumptions of linear regression. Explain R-squared and
+     adjusted R-squared, and explain why adjusted R-squared is preferred when
+     you add more features.
+
+Q71. Explain logistic regression: the sigmoid function, the decision boundary,
+     and log loss. Why is MSE not used as the cost function for logistic
+     regression?
+
+Q72. Explain how a decision tree is built using entropy, information gain, and
+     the Gini index. Compute the root node for the PlayTennis dataset. How do
+     pre-pruning and post-pruning prevent overfitting? Compare ID3, C4.5, and
+     CART.
+
+Q73. Explain the Naive Bayes classifier and its independence assumption.
+     Classify a new sample from a small weather dataset and explain why
+     Laplace smoothing is needed.
+
+Q74. Explain the Support Vector Machine: hyperplane, margin, and support
+     vectors. What are the kernel trick and the soft-margin parameter C?
+     Name common kernels and say when you would use each.
+
+Q75. Explain the K-Nearest Neighbours algorithm. How do you choose K? Compare
+     Euclidean, Manhattan, and Minkowski distance. Why is KNN called a lazy
+     learner, and what is its prediction cost?
+
+Q76. Compare bagging, boosting, and stacking. Explain how Random Forest,
+     AdaBoost, and Gradient Boosting (XGBoost) work, and say which one reduces
+     variance and which one reduces bias.
+
+Q77. Explain the ROC curve and AUC. How do you choose a classification
+     threshold, and when would you prefer a precision-recall curve instead?
+
+Q78. Explain k-fold and stratified k-fold cross-validation. Compare grid
+     search and random search for hyperparameter tuning.
+
+Q79. Compare K-means, hierarchical clustering, and DBSCAN. Explain how to read
+     a dendrogram and how the silhouette score and the elbow method evaluate
+     clustering.
+
+Q80. Compare L1 (Lasso) and L2 (Ridge) regularization. Explain geometrically
+     why L1 produces sparse weights, and say when you would use Elastic Net.
+
+Q81. Explain association rule mining with the Apriori algorithm. Define
+     support, confidence, and lift, and generate rules from a small market-
+     basket dataset.
+
+
+================================================================================
+SUBJECT 12: DEEP LEARNING
+================================================================================
+
+Q82. Explain the perceptron and its learning rule. Why can a single
+     perceptron not solve XOR, and how does a multilayer perceptron solve it?
+
+Q83. Compare the sigmoid, tanh, ReLU, Leaky ReLU, and softmax activation
+     functions. Why is ReLU preferred in hidden layers, and what is the dying
+     ReLU problem?
+
+Q84. Compare MSE, binary cross-entropy, and categorical cross-entropy. Which
+     loss and output activation would you use for regression, binary
+     classification, and multi-class classification?
+
+Q85. Compare the SGD, Momentum, RMSProp, and Adam optimizers. What problem
+     does each one solve, and why is Adam a common default?
+
+Q86. Explain vanishing and exploding gradients. How do ReLU, Xavier/He
+     initialization, batch normalization, residual connections, and gradient
+     clipping help?
+
+Q87. Explain dropout and batch normalization. How does each behave
+     differently during training and during testing?
+
+Q88. Explain the layers of a CNN: convolution, padding, stride, pooling, and
+     fully connected layers. For a 32x32x3 input with ten 5x5 filters, stride
+     1, and no padding, compute the output size and the number of parameters.
+     (Formula: output = (N - F + 2P) / S + 1.)
+
+Q89. Compare the LeNet, AlexNet, VGG, GoogLeNet (Inception), and ResNet
+     architectures. Explain how skip connections in ResNet allow very deep
+     networks to train.
+
+Q90. Explain transfer learning and fine-tuning. For a small medical-image
+     dataset, which layers of a pretrained model would you freeze and which
+     would you retrain? How does data augmentation help?
+
+Q91. Explain RNNs and backpropagation through time. Why do RNNs struggle with
+     long sequences? Explain the forget, input, and output gates of an LSTM,
+     and compare LSTM with GRU.
+
+Q92. Explain the encoder-decoder (seq2seq) model and the attention mechanism.
+     Describe the Transformer architecture: self-attention, multi-head
+     attention, and positional encoding. Compare BERT and GPT.
+
+Q93. Explain autoencoders. Compare undercomplete, denoising, and variational
+     autoencoders, and give applications such as anomaly detection and
+     dimensionality reduction.
+
+Q94. Explain Generative Adversarial Networks: the generator, the
+     discriminator, and the minimax loss. What is mode collapse, and where are
+     GANs used?
+
+Q95. How do you diagnose a deep learning model from its training and
+     validation loss curves? Explain the effect of learning rate, batch size,
+     number of epochs, and learning-rate schedules.
+
+Q96. Compare TensorFlow/Keras and PyTorch. Write a small model in either one
+     that classifies MNIST digits, and explain each layer you use.
+
+Q97. Teaching practice: How would you explain backpropagation to undergraduate
+     students using a two-layer network with numeric values? Include one
+     worked weight update and one assessment question.
+
+
+================================================================================
+                                END OF QUESTIONS
+================================================================================

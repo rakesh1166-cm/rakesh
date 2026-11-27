@@ -1,0 +1,962 @@
+================================================================================
+SUBJECT 11: MACHINE LEARNING
+================================================================================
+
+How each answer is written:
+  Definition -> 1 to 3 simple lines (the line you can say directly in interview)
+  Example    -> a real-life example that connects to the definition
+  Then code / calculation / table wherever the question asks for it.
+
+
+--------------------------------------------------------------------------------
+Q66. Define machine learning using Tom Mitchell's definition (task T,
+     performance measure P, experience E). Identify T, P, and E for a spam
+     filter and for a checkers-playing program.
+--------------------------------------------------------------------------------
+
+>> Machine Learning
+   Definition : Teaching computers to learn patterns from data and improve
+                with experience, instead of being explicitly programmed with
+                rules.
+   Example    : Gmail learns to detect spam from millions of emails that
+                users marked as spam.
+
+>> Tom Mitchell's definition (1997)
+   Definition : "A computer program is said to learn from experience E with
+                respect to some task T and performance measure P, if its
+                performance at T, as measured by P, improves with
+                experience E."
+   Simple way : T = what to do, P = how we measure it, E = what it learns
+                from.
+
+   Problem          | Task (T)               | Performance (P)    | Experience (E)
+   -----------------+------------------------+--------------------+-------------------------
+   Spam filter      | Classify emails as     | % of emails        | Emails already labelled
+                    | spam / not spam        | correctly          | spam / not spam by users
+                    |                        | classified         |
+   Checkers program | Playing checkers       | % of games won     | Playing practice games
+                    |                        | against opponents  | against itself
+
+   Extra example (handwriting recognition):
+     T = recognise handwritten words, P = % words correctly recognised,
+     E = a database of handwritten words with correct labels.
+
+
+--------------------------------------------------------------------------------
+Q67. Explain the Find-S and Candidate-Elimination algorithms using the
+     EnjoySport dataset. What are the version space, the general boundary,
+     and the specific boundary?
+--------------------------------------------------------------------------------
+
+>> Concept learning
+   Definition : Learning a general rule (hypothesis) that says which examples
+                belong to a category, from positive and negative examples.
+   Example    : Learning "on which days does Aldo enjoy sport?" from past
+                days.
+
+>> Hypothesis notation
+   ?  = any value is acceptable
+   0  = no value is acceptable (most specific, written as phi)
+   <Sunny, ?, ?, ?, ?, ?> means "enjoy sport whenever the sky is sunny".
+
+EnjoySport dataset:
+   No | Sky   | AirTemp | Humidity | Wind   | Water | Forecast | EnjoySport
+   ---+-------+---------+----------+--------+-------+----------+-----------
+   1  | Sunny | Warm    | Normal   | Strong | Warm  | Same     | Yes
+   2  | Sunny | Warm    | High     | Strong | Warm  | Same     | Yes
+   3  | Rainy | Cold    | High     | Strong | Warm  | Change   | No
+   4  | Sunny | Warm    | High     | Strong | Cool  | Change   | Yes
+
+>> Find-S algorithm
+   Definition : Finds the MOST SPECIFIC hypothesis that fits all positive
+                examples. Start from the most specific hypothesis and
+                generalise only when a positive example does not fit;
+                negative examples are ignored.
+   Example    : Like a shopkeeper noting a regular customer's habits - a
+                detail is dropped ("any") only when the customer breaks it.
+
+   Steps:
+     h0 = <0, 0, 0, 0, 0, 0>
+     Ex1 (+): h1 = <Sunny, Warm, Normal, Strong, Warm, Same>
+     Ex2 (+): h2 = <Sunny, Warm, ?,      Strong, Warm, Same>   (Humidity differs)
+     Ex3 (-): ignored -> h3 = h2
+     Ex4 (+): h4 = <Sunny, Warm, ?,      Strong, ?,    ?   >   (Water, Forecast differ)
+
+   Final: <Sunny, Warm, ?, Strong, ?, ?>
+   Limitations: ignores negative examples, cannot tell if it found the only
+   correct hypothesis, and fails with noisy data.
+
+>> Candidate-Elimination algorithm
+   Definition : Finds ALL hypotheses consistent with the training data by
+                keeping two boundaries: S (most specific) and G (most
+                general). Positive examples generalise S; negative examples
+                specialise G.
+   Example    : Like a detective - every clue either widens or narrows the
+                list of possible suspects.
+
+   Steps:
+     S0 = {<0, 0, 0, 0, 0, 0>}            G0 = {<?, ?, ?, ?, ?, ?>}
+
+     Ex1 (+): S1 = {<Sunny, Warm, Normal, Strong, Warm, Same>}
+              G1 = {<?, ?, ?, ?, ?, ?>}
+     Ex2 (+): S2 = {<Sunny, Warm, ?, Strong, Warm, Same>}
+              G2 = {<?, ?, ?, ?, ?, ?>}
+     Ex3 (-): S3 = S2  (S already rejects this negative)
+              G3 = {<Sunny, ?, ?, ?, ?, ?>,
+                    <?, Warm, ?, ?, ?, ?>,
+                    <?, ?, ?, ?, ?, Same>}
+              (minimal specialisations of G that reject Ex3 and are still
+               more general than S)
+     Ex4 (+): S4 = {<Sunny, Warm, ?, Strong, ?, ?>}
+              G4 = {<Sunny, ?, ?, ?, ?, ?>,
+                    <?, Warm, ?, ?, ?, ?>}
+              (<?, ?, ?, ?, ?, Same> removed - it rejects positive Ex4)
+
+>> Specific boundary (S)
+   Definition : The set of the most specific hypotheses consistent with the
+                data.  Here: <Sunny, Warm, ?, Strong, ?, ?>
+
+>> General boundary (G)
+   Definition : The set of the most general hypotheses consistent with the
+                data.  Here: <Sunny, ?, ?, ?, ?, ?>, <?, Warm, ?, ?, ?, ?>
+
+>> Version space
+   Definition : The set of ALL hypotheses that are consistent with the
+                training examples - everything between S and G.
+   Final version space (6 hypotheses):
+       S:      <Sunny, Warm, ?, Strong, ?, ?>
+       middle: <Sunny, ?, ?, Strong, ?, ?>
+               <Sunny, Warm, ?, ?, ?, ?>
+               <?, Warm, ?, Strong, ?, ?>
+       G:      <Sunny, ?, ?, ?, ?, ?>
+               <?, Warm, ?, ?, ?, ?>
+
+
+--------------------------------------------------------------------------------
+Q68. Explain the bias-variance trade-off with a diagram of error versus model
+     complexity. Give an example of a high-bias model and a high-variance
+     model.
+--------------------------------------------------------------------------------
+
+>> Bias
+   Definition : Error from wrong, over-simple assumptions - the model misses
+                the real pattern (underfitting).
+   Example    : A student who learned only one formula and uses it for every
+                problem - consistently wrong.
+
+>> Variance
+   Definition : Error from being too sensitive to the training data - the
+                model learns noise and changes a lot with new data
+                (overfitting).
+   Example    : A student who memorised last year's answer key - perfect on
+                those questions, fails on new ones.
+
+>> Bias-variance trade-off
+   Definition : Making a model more complex reduces bias but increases
+                variance. The goal is the middle point with the lowest total
+                error.
+                Total error = Bias^2 + Variance + Irreducible noise
+
+   Diagram:
+     Error
+       |\                                   /
+       | \  Bias^2 (falls)    Variance    /
+       |  \                   (rises) -> /
+       |   \__   Total error           _/
+       |      \__  (U-shape)        __/
+       |         \___    *     ___/
+       |             \_______/
+       +-----------------------------------------> Model complexity
+         Underfitting      * Sweet spot     Overfitting
+         (high bias)       (lowest total)   (high variance)
+
+     As complexity grows: Bias^2 keeps falling, Variance keeps rising, and
+     Total error first falls and then rises. Pick the bottom of the U (*).
+
+>> High-bias model example
+   Linear regression fitted to curved (non-linear) data, e.g. predicting
+   house prices that rise sharply near a metro station with a straight line.
+   Training and test error are BOTH high.
+
+>> High-variance model example
+   A fully grown (unpruned) decision tree or KNN with K = 1. Training error is
+   almost 0, but test error is high.
+
+   Fixes: high bias -> more features, more complex model.
+          high variance -> more data, regularization, pruning, bagging.
+
+
+--------------------------------------------------------------------------------
+Q69. Explain gradient descent. Derive the update rule for linear regression
+     with the MSE cost function, and compare batch, stochastic, and mini-batch
+     gradient descent.
+--------------------------------------------------------------------------------
+
+>> Gradient descent
+   Definition : An optimisation method that finds the minimum of a cost
+                function by repeatedly moving the parameters a small step in
+                the direction opposite to the gradient (slope).
+   Example    : Walking down a hill in fog - you feel the slope under your
+                feet and step downhill until you reach the lowest point.
+
+>> Learning rate (alpha)
+   Definition : The size of each step. Too large -> overshoots and diverges;
+                too small -> very slow.
+
+Derivation (linear regression):
+   Hypothesis : h(x) = theta0 + theta1 * x
+   Cost (MSE) : J(theta) = (1 / 2m) * sum_{i=1..m} (h(x_i) - y_i)^2
+                (the 1/2 is added only to cancel the 2 from differentiation)
+
+   Partial derivatives:
+     dJ/dtheta0 = (1/m) * sum (h(x_i) - y_i)
+     dJ/dtheta1 = (1/m) * sum (h(x_i) - y_i) * x_i
+
+   Update rule (repeat until convergence, update both together):
+     theta0 := theta0 - alpha * (1/m) * sum (h(x_i) - y_i)
+     theta1 := theta1 - alpha * (1/m) * sum (h(x_i) - y_i) * x_i
+
+   One numeric step: data (1, 2), (2, 4); theta0 = theta1 = 0; alpha = 0.1
+     predictions = 0, 0  -> errors (h - y) = -2, -4
+     dJ/dtheta0 = (-2 - 4) / 2         = -3
+     dJ/dtheta1 = (-2*1 + -4*2) / 2    = -5
+     theta0 = 0 - 0.1*(-3) = 0.3
+     theta1 = 0 - 0.1*(-5) = 0.5     (moving towards the true line y = 2x)
+
+Types:
+>> Batch gradient descent
+   Definition : Uses ALL training examples to compute each update.
+   Example    : Reading every customer review before changing the product.
+   + stable, smooth convergence   - slow and memory-heavy for big data
+
+>> Stochastic gradient descent (SGD)
+   Definition : Updates parameters after EACH single example.
+   Example    : Changing the product after every single review.
+   + fast, can escape shallow local minima   - noisy, zig-zag path
+
+>> Mini-batch gradient descent
+   Definition : Updates using a small batch of examples (e.g. 32 or 64).
+   Example    : Changing the product after every 50 reviews.
+   + balance of speed and stability, uses GPU well - the default in deep
+     learning.
+
+
+--------------------------------------------------------------------------------
+Q70. State the assumptions of linear regression. Explain R-squared and
+     adjusted R-squared, and explain why adjusted R-squared is preferred when
+     you add more features.
+--------------------------------------------------------------------------------
+
+>> Linear regression
+   Definition : A supervised algorithm that predicts a continuous value by
+                fitting a straight line (y = b0 + b1*x1 + ... + bn*xn) that
+                minimises the squared errors.
+   Example    : Predicting house price from area, number of rooms, and
+                location.
+
+Assumptions (remember "LINE" + no multicollinearity):
+   1. Linearity        - relationship between X and y is linear.
+                         Ex: price rises steadily with area.
+   2. Independence     - errors are independent of each other.
+                         Ex: today's sales error should not depend on
+                         yesterday's (often broken in time series).
+   3. Normality        - residuals are normally distributed.
+   4. Equal variance   - residual spread is constant (homoscedasticity).
+                         Broken ex: errors grow for expensive houses.
+   5. No multicollinearity - features are not strongly correlated.
+                         Broken ex: area in sq.ft and area in sq.m together.
+
+>> R-squared (coefficient of determination)
+   Definition : The fraction of the variation in y that the model explains.
+                R^2 = 1 - SS_res / SS_tot, ranges 0 to 1.
+   Example    : R^2 = 0.80 for house price means the features explain 80% of
+                the variation in prices.
+
+>> Adjusted R-squared
+   Definition : R-squared corrected for the number of features; it rises only
+                if a new feature improves the model more than chance would.
+                Adj R^2 = 1 - (1 - R^2) * (n - 1) / (n - p - 1)
+                (n = number of rows, p = number of features)
+
+Why adjusted R-squared is preferred:
+   Plain R^2 NEVER decreases when you add a feature - even a useless one like
+   "house owner's shoe size". Adjusted R^2 penalises extra features, so it
+   goes DOWN if the feature adds nothing.
+   Example: n = 50, R^2 = 0.80 with p = 5 -> Adj = 1 - 0.2*49/44 = 0.777
+            add 5 useless features, R^2 = 0.81, p = 10
+                                     -> Adj = 1 - 0.19*49/39 = 0.761 (drops)
+
+
+--------------------------------------------------------------------------------
+Q71. Explain logistic regression: the sigmoid function, the decision boundary,
+     and log loss. Why is MSE not used as the cost function for logistic
+     regression?
+--------------------------------------------------------------------------------
+
+>> Logistic regression
+   Definition : A classification algorithm that predicts the PROBABILITY that
+                an example belongs to a class (0 or 1), by passing a linear
+                equation through the sigmoid function.
+   Example    : Will this customer default on a loan? Is this email spam?
+
+>> Sigmoid function
+   Definition : sigma(z) = 1 / (1 + e^(-z)). It squeezes any number into the
+                range 0 to 1, so the output can be read as a probability.
+                z = 0 -> 0.5,  large positive z -> near 1,  large negative -> near 0.
+   Example    : z = 2 -> 0.88 -> "88% chance of default".
+
+>> Decision boundary
+   Definition : The line (or surface) where the predicted probability = 0.5,
+                i.e. z = w.x + b = 0. One side is class 1, the other class 0.
+   Example    : Admission: predict "admit" if 0.6*exam + 0.4*interview - 50 > 0.
+                The threshold can be moved (e.g. 0.3 for medical screening).
+
+>> Log loss (binary cross-entropy)
+   Definition : The cost function that heavily punishes confident wrong
+                predictions.
+                J = -(1/m) * sum [ y*log(p) + (1 - y)*log(1 - p) ]
+   Example    : Actual = 1, predicted p = 0.9 -> loss = -log(0.9) = 0.105
+                Actual = 1, predicted p = 0.1 -> loss = -log(0.1) = 2.303
+
+Why not MSE:
+   1. With the sigmoid inside, MSE becomes a NON-CONVEX function with many
+      local minima, so gradient descent may get stuck. Log loss is convex ->
+      one global minimum.
+   2. MSE gives very small gradients when the model is confidently wrong
+      (sigmoid is flat at the ends), so learning is slow. Log loss gives a
+      large penalty and a strong gradient in that case.
+   3. Log loss comes from maximum likelihood, which fits probabilities
+      correctly.
+
+
+--------------------------------------------------------------------------------
+Q72. Explain how a decision tree is built using entropy, information gain, and
+     the Gini index. Compute the root node for the PlayTennis dataset. How do
+     pre-pruning and post-pruning prevent overfitting? Compare ID3, C4.5, and
+     CART.
+--------------------------------------------------------------------------------
+
+>> Decision tree
+   Definition : A flowchart-like model that splits data with if-else
+                questions on features until each leaf gives a decision.
+   Example    : A bank's loan check - "Income > 5 lakh?" -> "Existing loan?"
+                -> Approve / Reject.
+
+>> Entropy
+   Definition : A measure of impurity (mixed-up-ness) of a set. 0 = all one
+                class, 1 = 50/50 mix (for two classes).
+                Entropy(S) = - sum p_i * log2(p_i)
+   Example    : A box with only red balls has entropy 0; half red, half blue
+                has entropy 1.
+
+>> Information gain
+   Definition : How much entropy decreases after splitting on a feature. The
+                feature with the HIGHEST gain is chosen for the split.
+                Gain(S, A) = Entropy(S) - sum (|Sv| / |S|) * Entropy(Sv)
+
+>> Gini index
+   Definition : Another impurity measure: Gini = 1 - sum p_i^2. 0 = pure. Used
+                by CART; faster because it has no logarithm.
+
+PlayTennis root node (14 days: 9 Yes, 5 No):
+   Entropy(S) = -(9/14)log2(9/14) - (5/14)log2(5/14) = 0.940
+   Gini(S)    = 1 - (9/14)^2 - (5/14)^2              = 0.459
+
+   Outlook:
+     Sunny    (2+, 3-) -> 0.971
+     Overcast (4+, 0-) -> 0.000
+     Rain     (3+, 2-) -> 0.971
+     Weighted = (5/14)*0.971 + (4/14)*0 + (5/14)*0.971 = 0.694
+     Gain(Outlook)     = 0.940 - 0.694 = 0.246
+
+   Humidity:
+     High   (3+, 4-) -> 0.985
+     Normal (6+, 1-) -> 0.592
+     Weighted = (7/14)*0.985 + (7/14)*0.592 = 0.789
+     Gain(Humidity)    = 0.151
+
+   Wind:
+     Weak   (6+, 2-) -> 0.811
+     Strong (3+, 3-) -> 1.000
+     Weighted = (8/14)*0.811 + (6/14)*1.000 = 0.892
+     Gain(Wind)        = 0.048
+
+   Temperature:
+     Hot  (2+, 2-) -> 1.000
+     Mild (4+, 2-) -> 0.918
+     Cool (3+, 1-) -> 0.811
+     Weighted = (4/14)*1 + (6/14)*0.918 + (4/14)*0.811 = 0.911
+     Gain(Temperature) = 0.029
+
+   Highest gain = Outlook (0.246) -> ROOT NODE = Outlook.
+   Overcast branch is pure (always Yes) -> leaf. Sunny then splits on
+   Humidity, Rain splits on Wind.
+
+                  Outlook
+               /     |      \
+           Sunny  Overcast   Rain
+             |       |         |
+         Humidity   Yes       Wind
+          /    \              /   \
+       High  Normal       Strong  Weak
+        No    Yes           No     Yes
+
+>> Pre-pruning (early stopping)
+   Definition : Stop growing the tree early using limits such as max_depth,
+                min_samples_split, or minimum gain.
+   Example    : "Don't ask more than 5 questions."
+
+>> Post-pruning
+   Definition : Grow the full tree, then cut back branches that do not
+                improve accuracy on validation data (e.g. reduced-error
+                pruning, cost-complexity pruning in CART).
+   Example    : Writing a long essay, then deleting paragraphs that add
+                nothing.
+
+   Both prevent overfitting: a full tree memorises noise (one leaf per
+   training row); a pruned tree keeps only general rules.
+
+   Algorithm | Split criterion   | Feature types           | Tree   | Extras
+   ----------+-------------------+-------------------------+--------+------------------
+   ID3       | Information gain  | Categorical only        | Multi- | No pruning, no
+             |                   |                         | way    | missing values
+   C4.5      | Gain ratio        | Categorical + numeric   | Multi- | Handles missing
+             | (fixes bias to    | (thresholds)            | way    | values, post-pruning
+             | many-valued attrs)|                         |        |
+   CART      | Gini (classif.),  | Categorical + numeric   | Binary | Classification AND
+             | MSE (regression)  |                         | only   | regression, cost-
+             |                   |                         |        | complexity pruning
+   (scikit-learn's DecisionTreeClassifier is CART-based.)
+
+
+--------------------------------------------------------------------------------
+Q73. Explain the Naive Bayes classifier and its independence assumption.
+     Classify a new sample from a small weather dataset and explain why
+     Laplace smoothing is needed.
+--------------------------------------------------------------------------------
+
+>> Naive Bayes classifier
+   Definition : A probabilistic classifier based on Bayes' theorem that picks
+                the class with the highest posterior probability.
+                P(class | features) is proportional to
+                P(class) * P(f1 | class) * P(f2 | class) * ...
+   Example    : Spam filter - words like "free", "lottery", "winner" raise
+                the probability of spam.
+
+>> Independence ("naive") assumption
+   Definition : It assumes all features are independent of each other given
+                the class - rarely true, but it still works well in practice.
+   Example    : It treats "free" and "offer" in an email as unrelated, even
+                though they often appear together.
+
+Classify X = <Outlook = Sunny, Temp = Cool, Humidity = High, Wind = Strong>
+using the 14-day PlayTennis data (9 Yes, 5 No):
+
+   P(Yes) = 9/14                 P(No) = 5/14
+   P(Sunny | Yes)  = 2/9         P(Sunny | No)  = 3/5
+   P(Cool | Yes)   = 3/9         P(Cool | No)   = 1/5
+   P(High | Yes)   = 3/9         P(High | No)   = 4/5
+   P(Strong | Yes) = 3/9         P(Strong | No) = 3/5
+
+   Yes: 9/14 * 2/9 * 3/9 * 3/9 * 3/9 = 0.0053
+   No : 5/14 * 3/5 * 1/5 * 4/5 * 3/5 = 0.0206
+
+   0.0206 > 0.0053 -> Prediction = NO (don't play tennis)
+   Normalised: P(No | X) = 0.0206 / (0.0206 + 0.0053) = 0.795 (about 80%)
+
+>> Laplace smoothing
+   Definition : Adding 1 to every count so that no probability becomes zero.
+                P(value | class) = (count + 1) / (class count + k)
+                (k = number of possible values of that feature)
+   Why needed : P(Overcast | No) = 0/5 = 0. Any new day with Overcast gets
+                P(No) = 0 because the whole product becomes zero, no matter
+                how strongly other features point to No.
+   With smoothing: P(Overcast | No) = (0 + 1) / (5 + 3) = 1/8 = 0.125
+   Example    : A spam filter seeing a brand-new word must not decide the
+                whole email from that single unseen word.
+
+
+--------------------------------------------------------------------------------
+Q74. Explain the Support Vector Machine: hyperplane, margin, and support
+     vectors. What are the kernel trick and the soft-margin parameter C?
+     Name common kernels and say when you would use each.
+--------------------------------------------------------------------------------
+
+>> Support Vector Machine (SVM)
+   Definition : A classifier that finds the boundary which separates the
+                classes with the WIDEST possible gap.
+   Example    : Drawing the widest possible road between two villages so no
+                house is too close to the road.
+
+>> Hyperplane
+   Definition : The decision boundary: w.x + b = 0. It is a line in 2D, a
+                plane in 3D, and a hyperplane in higher dimensions.
+
+>> Margin
+   Definition : The distance between the hyperplane and the nearest points of
+                each class. Margin width = 2 / ||w||. SVM maximises it, which
+                helps generalisation.
+
+>> Support vectors
+   Definition : The training points closest to the hyperplane. Only they
+                decide where the boundary goes; other points can be removed
+                without changing it.
+   Example    : The houses right at the edge of the road decide where the
+                road goes.
+
+>> Kernel trick
+   Definition : Computing similarity as if data were mapped to a higher
+                dimension, without actually computing the mapping, so a
+                non-linear boundary becomes linear there.
+   Example    : Red points in the centre and blue in a ring around them
+                cannot be split by a line in 2D; add z = x^2 + y^2 and a flat
+                plane separates them in 3D.
+
+>> Soft margin and C
+   Definition : Soft margin allows some points to be inside the margin or
+                misclassified. C controls the penalty for these errors.
+                Large C -> few errors allowed, narrow margin, risk of
+                overfitting.
+                Small C -> more errors allowed, wide margin, smoother model.
+   Example    : Large C = strict teacher (no mistakes accepted), small C =
+                lenient teacher who looks at the overall picture.
+
+Common kernels:
+   Kernel     | Formula idea               | Use when
+   -----------+----------------------------+----------------------------------
+   Linear     | x . y                      | Data is linearly separable or has
+              |                            | many features (text classification)
+   Polynomial | (x . y + c)^d              | Feature interactions matter
+              |                            | (some image tasks)
+   RBF /      | exp(-gamma*||x - y||^2)    | Default for non-linear data with
+   Gaussian   |                            | no prior knowledge
+   Sigmoid    | tanh(a x . y + c)          | Behaves like a neural network;
+              |                            | rarely used
+
+
+--------------------------------------------------------------------------------
+Q75. Explain the K-Nearest Neighbours algorithm. How do you choose K? Compare
+     Euclidean, Manhattan, and Minkowski distance. Why is KNN called a lazy
+     learner, and what is its prediction cost?
+--------------------------------------------------------------------------------
+
+>> K-Nearest Neighbours (KNN)
+   Definition : To classify a new point, find the K closest training points
+                and take a majority vote (or the average, for regression).
+   Example    : To guess a new student's hostel-food preference, ask the 5
+                students most similar to them.
+
+   Steps: 1. Choose K.  2. Compute distance to every training point.
+          3. Pick the K nearest.  4. Majority vote / average.
+
+>> Choosing K
+   - Small K (K = 1): very sensitive to noise -> overfitting (high variance).
+   - Large K: too smooth, ignores local patterns -> underfitting (high bias).
+   - Choose K by cross-validation (try K = 1, 3, 5, ... and plot the error).
+   - Use an ODD K for two classes to avoid ties. A common start: K ~ sqrt(n).
+
+Distances between A(1, 2) and B(4, 6):
+>> Euclidean distance
+   Definition : Straight-line ("as the crow flies") distance.
+                sqrt((4-1)^2 + (6-2)^2) = sqrt(9 + 16) = 5
+   Example    : Drone flying directly between two points.
+
+>> Manhattan distance
+   Definition : Sum of absolute differences - distance along a grid.
+                |4-1| + |6-2| = 3 + 4 = 7
+   Example    : Taxi driving through city blocks; works better in high
+                dimensions.
+
+>> Minkowski distance
+   Definition : The general formula (sum |xi - yi|^p)^(1/p).
+                p = 1 gives Manhattan, p = 2 gives Euclidean.
+
+>> Lazy learner
+   Definition : KNN does no training - it simply stores the data and does all
+                the work at prediction time.
+   Example    : A student who doesn't study beforehand but searches the
+                textbook during an open-book exam.
+
+>> Prediction cost
+   Training : O(1) (just store the data)
+   Predict  : O(n * d) per query - distance to all n points with d features.
+   So KNN is slow for large datasets; KD-trees, ball trees, or approximate
+   nearest-neighbour search speed it up. Features must be scaled first.
+
+
+--------------------------------------------------------------------------------
+Q76. Compare bagging, boosting, and stacking. Explain how Random Forest,
+     AdaBoost, and Gradient Boosting (XGBoost) work, and say which one reduces
+     variance and which one reduces bias.
+--------------------------------------------------------------------------------
+
+>> Ensemble learning
+   Definition : Combining many models to get a better prediction than any
+                single model.
+   Example    : Asking a panel of doctors instead of one doctor.
+
+>> Bagging (Bootstrap Aggregating)
+   Definition : Train many models in PARALLEL on random samples (with
+                replacement) of the data, then vote/average. Mainly REDUCES
+                VARIANCE.
+   Example    : 100 people each guess a jar's sweet count; the average is
+                close to the truth.
+
+>> Boosting
+   Definition : Train models one after another (SEQUENTIALLY); each new model
+                focuses on the mistakes of the previous ones. Mainly REDUCES
+                BIAS (and some variance).
+   Example    : A student revising only the questions they got wrong in the
+                last mock test.
+
+>> Stacking
+   Definition : Train different types of models (e.g. SVM, tree, KNN), then a
+                final "meta-model" learns how best to combine their
+                predictions.
+   Example    : A head chef tasting dishes from specialist cooks and deciding
+                the final menu.
+
+>> Random Forest (bagging)
+   Definition : Many decision trees, each trained on a bootstrap sample and
+                considering only a random subset of features at each split;
+                final answer by majority vote.
+   Example    : Loan approval - 500 trees vote; feature randomness keeps the
+                trees different from each other.
+
+>> AdaBoost (boosting)
+   Definition : Trains weak learners (usually depth-1 "stumps") one by one,
+                increasing the WEIGHT of misclassified examples each round.
+                Final model = weighted vote, with better learners getting more
+                say.
+   Example    : Face detection (Viola-Jones) used AdaBoost.
+
+>> Gradient Boosting / XGBoost (boosting)
+   Definition : Each new tree is trained to predict the RESIDUAL errors
+                (negative gradient of the loss) of the current model; its
+                predictions are added with a small learning rate. XGBoost adds
+                regularization, parallel processing, and missing-value
+                handling.
+   Example    : House price model predicts 50 L, actual 60 L; next tree
+                learns the remaining +10 L.
+
+   Method   | Training   | Reduces    | Overfitting risk  | Example
+   ---------+------------+------------+-------------------+---------------
+   Bagging  | Parallel   | Variance   | Low               | Random Forest
+   Boosting | Sequential | Bias       | Higher (needs     | AdaBoost, XGBoost
+            |            |            | tuning)           |
+   Stacking | Two levels | Both       | Medium            | Kaggle solutions
+
+
+--------------------------------------------------------------------------------
+Q77. Explain the ROC curve and AUC. How do you choose a classification
+     threshold, and when would you prefer a precision-recall curve instead?
+--------------------------------------------------------------------------------
+
+>> ROC curve (Receiver Operating Characteristic)
+   Definition : A graph of True Positive Rate (recall) against False Positive
+                Rate at every possible threshold.
+                TPR = TP / (TP + FN)        FPR = FP / (FP + TN)
+   Example    : For a COVID test, it shows how many sick people are caught
+                versus how many healthy people get false alarms as the cut-off
+                changes.
+
+>> AUC (Area Under the ROC Curve)
+   Definition : A single number from 0 to 1 summarising the ROC curve. It is
+                the probability that the model ranks a random positive higher
+                than a random negative.
+                1.0 = perfect, 0.5 = random guessing, below 0.5 = worse than
+                random.
+   Example    : AUC = 0.92 -> in 92% of fraud/genuine pairs, the fraud gets
+                the higher risk score.
+
+   TPR
+   1.0 |      .------------   <- good model (AUC ~ 0.9)
+       |    .'          .'
+       |   /          .'
+       |  /         .'   <- random (AUC = 0.5)
+       | /        .'
+       |/       .'
+   0.0 +-------------------- FPR
+       0                  1.0
+
+>> Choosing a threshold
+   Definition : The probability cut-off above which we predict "positive"
+                (default 0.5). Choose it based on the business cost of each
+                error type.
+   - Missing a positive is costly (cancer, fraud) -> LOWER the threshold to
+     raise recall.
+   - False alarms are costly (spam blocking important mail) -> RAISE the
+     threshold to raise precision.
+   - No clear costs -> the point closest to the top-left corner, or the
+     threshold that maximises Youden's J = TPR - FPR, or the best F1.
+
+>> Precision-Recall curve
+   Definition : A graph of precision against recall at every threshold.
+   Prefer it when: the data is highly IMBALANCED and the positive class
+   matters most.
+   Example    : Fraud = 0.1% of transactions. FPR stays tiny even with
+                thousands of false alarms (because TN is huge), so ROC looks
+                great; the PR curve reveals the low precision.
+
+
+--------------------------------------------------------------------------------
+Q78. Explain k-fold and stratified k-fold cross-validation. Compare grid
+     search and random search for hyperparameter tuning.
+--------------------------------------------------------------------------------
+
+>> Cross-validation
+   Definition : Testing a model on several different train/test splits of the
+                same data to get a reliable estimate of its performance.
+   Example    : Judging a student with 5 different mock tests instead of one.
+
+>> k-fold cross-validation
+   Definition : Split the data into k equal parts (folds). Train on k-1 folds,
+                test on the remaining one; repeat k times so every fold is the
+                test set once. Report the average score.
+   Example (k = 5):
+       Round 1: [Test][Train][Train][Train][Train]
+       Round 2: [Train][Test][Train][Train][Train]
+       ...
+       Round 5: [Train][Train][Train][Train][Test]
+       Final score = mean (and SD) of the 5 scores.
+
+>> Stratified k-fold
+   Definition : k-fold where every fold keeps the same class ratio as the full
+                dataset.
+   Example    : If 10% of patients have the disease, every fold also has 10%
+                - essential for imbalanced data (otherwise a fold may have no
+                positives at all).
+
+>> Hyperparameter
+   Definition : A setting chosen BEFORE training (not learned from the data).
+   Example    : K in KNN, max_depth of a tree, C in SVM, learning rate.
+
+>> Grid search
+   Definition : Try EVERY combination from a fixed list of values.
+   Example    : C in {0.1, 1, 10} x gamma in {0.01, 0.1, 1} = 9 models,
+                each cross-validated.
+   + thorough, guaranteed to try every combination
+   - cost explodes as parameters grow
+
+>> Random search
+   Definition : Try a fixed number of RANDOM combinations from ranges or
+                distributions.
+   Example    : 20 random (C, gamma) pairs from wide ranges.
+   + much faster, often finds equally good results, because only a few
+     hyperparameters really matter
+   - may miss the exact best point
+
+   Code:
+     from sklearn.model_selection import GridSearchCV, StratifiedKFold
+     grid = GridSearchCV(SVC(), {"C": [0.1, 1, 10], "gamma": [0.01, 0.1, 1]},
+                         cv=StratifiedKFold(5), scoring="f1")
+     grid.fit(X_train, y_train)
+     print(grid.best_params_)
+
+   (Bayesian optimisation, e.g. Optuna, is a smarter third option.)
+
+
+--------------------------------------------------------------------------------
+Q79. Compare K-means, hierarchical clustering, and DBSCAN. Explain how to read
+     a dendrogram and how the silhouette score and the elbow method evaluate
+     clustering.
+--------------------------------------------------------------------------------
+
+>> Clustering
+   Definition : Grouping similar data points together WITHOUT labels
+                (unsupervised learning).
+   Example    : Grouping customers by shopping behaviour for targeted offers.
+
+>> K-means
+   Definition : Splits data into K groups by repeatedly assigning each point
+                to the nearest centroid and moving each centroid to the mean
+                of its points.
+   Example    : Placing 3 delivery warehouses so that each customer is close
+                to one.
+   + fast, simple   - K must be given, finds only round (spherical) clusters,
+                      sensitive to outliers.
+
+>> Hierarchical clustering
+   Definition : Builds a tree of clusters. Agglomerative (bottom-up): start
+                with each point as its own cluster and repeatedly merge the
+                two closest clusters (single / complete / average / Ward
+                linkage).
+   Example    : A family tree, or the biological classification of animals.
+   + no need to choose K in advance, gives a dendrogram
+   - slow (O(n^2) memory or more), not suitable for very large data.
+
+>> DBSCAN (Density-Based Spatial Clustering of Applications with Noise)
+   Definition : Groups points that lie in dense regions; points in sparse
+                regions are marked as noise. Uses eps (neighbourhood radius)
+                and minPts (minimum neighbours for a core point).
+   Example    : Finding crowded areas on a city map from GPS points - any
+                shape, and isolated points are ignored.
+   + finds any shape, detects outliers, no K needed
+   - struggles when clusters have different densities; sensitive to eps.
+
+   Feature        | K-means      | Hierarchical   | DBSCAN
+   ---------------+--------------+----------------+-------------------
+   Need K?        | Yes          | No (cut tree)  | No (eps, minPts)
+   Cluster shape  | Spherical    | Depends on     | Any shape
+                  |              | linkage        |
+   Handles noise? | No           | No             | Yes (labels noise)
+   Large data     | Good         | Poor           | Good with indexing
+
+>> Dendrogram
+   Definition : The tree diagram from hierarchical clustering. The height
+                where two branches join = the distance at which they were
+                merged.
+   How to read: Draw a horizontal line across it. The number of vertical
+                lines it cuts = the number of clusters. Cut across the
+                tallest vertical gap (no merges) for natural clusters.
+
+           |      ____________
+           |     |            |       <- cut here -> 2 clusters
+           |   __|__        __|__
+           |  |     |      |     |
+           |  A     B      C     D
+
+>> Silhouette score
+   Definition : For each point, s = (b - a) / max(a, b), where a = average
+                distance to its own cluster and b = average distance to the
+                nearest other cluster. Range -1 to +1; near +1 = well
+                clustered, near 0 = on a border, negative = probably in the
+                wrong cluster.
+   Example    : Average silhouette 0.7 means customer groups are clearly
+                separated. Pick the K with the highest average.
+
+>> Elbow method
+   Definition : Plot WCSS (within-cluster sum of squares / inertia) against
+                K. WCSS always drops as K grows; choose the K where the drop
+                suddenly slows down - the "elbow".
+   Example    : WCSS for K = 1..6: 1000, 400, 180, 160, 150, 145 -> elbow at
+                K = 3.
+
+
+--------------------------------------------------------------------------------
+Q80. Compare L1 (Lasso) and L2 (Ridge) regularization. Explain geometrically
+     why L1 produces sparse weights, and say when you would use Elastic Net.
+--------------------------------------------------------------------------------
+
+>> Regularization
+   Definition : Adding a penalty for large weights to the loss function, so
+                the model stays simple and does not overfit.
+   Example    : A word limit on an essay forces you to keep only the
+                important points.
+
+>> L1 regularization (Lasso)
+   Definition : Penalty = lambda * sum |w|. It can push some weights to
+                EXACTLY zero, so it also does feature selection.
+   Example    : Of 100 features for predicting house price, Lasso keeps
+                about 10 (area, location, ...) and sets the rest to 0.
+
+>> L2 regularization (Ridge)
+   Definition : Penalty = lambda * sum w^2. It shrinks all weights towards zero
+                but rarely makes them exactly zero; handles correlated
+                features well.
+   Example    : All features stay, but none gets a huge weight.
+
+   lambda (alpha) controls the strength: 0 = no regularization; too large =
+   underfitting.
+
+Geometric reason L1 gives sparse weights (2 weights w1, w2):
+   - The loss contours are ellipses around the unregularised best point.
+   - The L1 constraint |w1| + |w2| <= t is a DIAMOND with corners on the axes.
+   - The L2 constraint w1^2 + w2^2 <= t is a CIRCLE.
+   - The solution is where the ellipse first touches the constraint shape.
+     The diamond's corners stick out, so the ellipse usually touches a
+     corner, where one weight = 0. The circle has no corners, so the touch
+     point usually has both weights non-zero.
+
+            w2                          w2
+             |  /\                       |  .--.
+          ---+-<  >--- w1  (L1)       ---+-(    )--- w1  (L2)
+             |  \/                       |  '--'
+       corners on the axes          smooth, no corners
+       -> weights become 0          -> weights small but non-zero
+
+   Feature                | L1 (Lasso)           | L2 (Ridge)
+   -----------------------+----------------------+-----------------------
+   Penalty                | sum |w|              | sum w^2
+   Sparse weights         | Yes (feature select) | No
+   Correlated features    | Picks one at random  | Shares weight among them
+   Use when               | Many useless features| Most features useful
+
+>> Elastic Net
+   Definition : Combines both penalties: lambda1*sum|w| + lambda2*sum w^2.
+   Use when   : There are many features AND groups of correlated features
+                (e.g. gene data, or many related marketing-spend columns).
+                It selects features like Lasso but keeps correlated groups
+                together like Ridge.
+
+
+--------------------------------------------------------------------------------
+Q81. Explain association rule mining with the Apriori algorithm. Define
+     support, confidence, and lift, and generate rules from a small market-
+     basket dataset.
+--------------------------------------------------------------------------------
+
+>> Association rule mining
+   Definition : Finding "if X is bought then Y is also bought" patterns
+                (X -> Y) in transaction data.
+   Example    : Supermarkets place bread and butter close together;
+                "Customers who bought this also bought..." on Amazon.
+
+>> Support
+   Definition : How often an itemset appears in all transactions.
+                support(X) = transactions containing X / total transactions
+   Example    : Bread in 4 of 5 bills -> support = 0.8.
+
+>> Confidence
+   Definition : How often the rule is true when X is bought.
+                confidence(X -> Y) = support(X and Y) / support(X)
+   Example    : Of the bills with butter, what fraction also have bread?
+
+>> Lift
+   Definition : How much more likely Y is bought with X than on its own.
+                lift(X -> Y) = confidence(X -> Y) / support(Y)
+                > 1 = positive link, = 1 = independent, < 1 = negative link.
+
+>> Apriori algorithm
+   Definition : Finds frequent itemsets level by level (1-item, 2-item, ...),
+                using the Apriori property: "every subset of a frequent
+                itemset must also be frequent", so any itemset with an
+                infrequent subset is pruned without counting.
+   Steps: 1. Count 1-itemsets, keep those >= min support.
+          2. Join them to form 2-item candidates, prune, count, keep.
+          3. Repeat for larger itemsets until none are frequent.
+          4. Generate rules from frequent itemsets, keep those >= min
+             confidence.
+
+Market-basket dataset (5 transactions):
+   T1: Bread, Milk, Butter
+   T2: Bread, Milk
+   T3: Bread, Butter
+   T4: Bread, Milk, Butter
+   T5: Milk, Jam
+   Minimum support = 40% (count >= 2), minimum confidence = 60%
+
+   Step 1 - 1-itemsets:
+     Bread 4 (0.8)  Milk 4 (0.8)  Butter 3 (0.6)  Jam 1 (0.2) -> Jam pruned
+
+   Step 2 - 2-itemsets:
+     {Bread, Milk}   3 (0.6)   (T1, T2, T4)
+     {Bread, Butter} 3 (0.6)   (T1, T3, T4)
+     {Milk, Butter}  2 (0.4)   (T1, T4)        -> all frequent
+
+   Step 3 - 3-itemsets:
+     {Bread, Milk, Butter} 2 (0.4)  (T1, T4)   -> frequent
+
+   Step 4 - rules:
+   Rule                    | Support | Confidence      | Lift              | Keep?
+   ------------------------+---------+-----------------+-------------------+------
+   Butter -> Bread         | 0.6     | 3/3 = 1.00      | 1.00/0.8 = 1.25   | Yes
+   Bread -> Butter         | 0.6     | 3/4 = 0.75      | 0.75/0.6 = 1.25   | Yes
+   {Milk, Butter} -> Bread | 0.4     | 2/2 = 1.00      | 1.00/0.8 = 1.25   | Yes
+   Milk -> Bread           | 0.6     | 3/4 = 0.75      | 0.75/0.8 = 0.94   | Weak (lift < 1)
+   {Bread, Butter} -> Milk | 0.4     | 2/3 = 0.67      | 0.67/0.8 = 0.83   | Weak (lift < 1)
+
+   Insight: "Butter -> Bread" is a strong rule (100% confidence, lift 1.25)
+   -> place butter near bread or offer a combo. "Milk -> Bread" has 75%
+   confidence but lift < 1 - bread is popular anyway, so the rule is
+   misleading. This is why lift is checked, not only confidence.
